@@ -5,6 +5,7 @@ import json
 import os
 import ssl
 import sys
+import time
 from collections import deque
 
 import certifi
@@ -14,6 +15,7 @@ import websockets
 API_URL = "https://api.meta.ai/v1"
 ASR_URL = "wss://api.meta.ai/v1/asr/realtime"
 ASR_MODEL = "muse-voice-transcribe-1.0"
+STALL_PAD_S = 0.2  # fill capture gaps longer than this with silence
 SPARK_MODEL = "muse-spark-1.1"  # ~0.8 s per sentence at minimal reasoning; 1.2 ~1.4 s, 1.3 ~2.8 s (measured 2026-09-25)
 
 # python.org's Python ships without CA certificates, so HTTPS fails unless we point it at certifi's bundle.
@@ -35,11 +37,13 @@ def api_key():
     return key
 
 
-async def transcribe(audio_q, lang, encoding="PCM_24KHZ"):
+async def transcribe(audio_q, lang, encoding="PCM_24KHZ", stalls=None):
     """Stream raw 16-bit mono PCM chunks from `audio_q` (None ends the stream) and yield Muse events.
 
     Events: speechStart / transcript (cumulative partials for the current turn) / speechEnd / speechComplete.
+    `stalls` (a list) collects the length of each capture gap that was filled with silence.
     """
+    stalls = stalls if stalls is not None else []
     handshake = {
         "mode": "ENDPOINTING",  # Muse decides where each utterance ends
         "authorization": {"accessToken": api_key()},
@@ -57,8 +61,32 @@ async def transcribe(audio_q, lang, encoding="PCM_24KHZ"):
             raise RuntimeError(f"Muse rejected the session: {ack.get('message')}")
 
         async def send_audio():
-            while (chunk := await audio_q.get()) is not None:
-                await ws.send(chunk)
+            # Muse drops the session if audio arrives slower than real time ("Ingress audio slower than
+            # real-time"). If capture stalls (device starting up, CPU busy generating the voice), send
+            # silence to stay on the clock. The late audio is still sent when it arrives (it may hold speech);
+            # Muse accepts that short catch-up burst. Freezes of ~3 s or a steady >10% shortfall drop the session.
+            bytes_per_s = (24000 if encoding == "PCM_24KHZ" else 16000) * 2
+            start, sent = None, 0.0
+            while True:
+                try:
+                    chunk = await asyncio.wait_for(audio_q.get(), timeout=0.04)
+                except asyncio.TimeoutError:
+                    chunk = b""
+                if chunk is None:
+                    break
+                if chunk:
+                    await ws.send(chunk)
+                    sent += len(chunk) / bytes_per_s
+                    start = start or time.monotonic() - len(chunk) / bytes_per_s
+                if start is not None:
+                    behind = time.monotonic() - start - sent
+                    if behind > STALL_PAD_S:
+                        pad = int(behind * bytes_per_s) // 2 * 2
+                        await ws.send(b"\0" * pad)
+                        sent += pad / bytes_per_s
+                        stalls.append(behind)
+                        if behind >= 1.0:
+                            print(f"Audio capture stalled for {behind:.1f} s; kept Muse connected with silence.", flush=True)
             await ws.send(json.dumps({"type": "endStream"}))
 
         sender = asyncio.create_task(send_audio())

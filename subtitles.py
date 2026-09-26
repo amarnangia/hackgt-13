@@ -260,6 +260,14 @@ async def listen(args, captioner):
         from dub import Dubber
         captioner.dubber = await loop.run_in_executor(None, Dubber, audio.voice)
     threading.Thread(target=audio.run, kwargs={"meter": False}, daemon=True).start()
+    # Connect to Muse only once audio is actually flowing; a silent gap right after connecting makes it hang up.
+    for _ in range(50):
+        if not target["q"].empty():
+            break
+        await asyncio.sleep(0.1)
+    else:
+        print("No audio is arriving from the input device after 5 s. Check that the terminal has microphone "
+              "permission (System Settings > Privacy & Security > Microphone).", flush=True)
     while True:
         audio_q = target["q"] = asyncio.Queue()
         target["fresh"] = True
@@ -275,7 +283,7 @@ async def listen(args, captioner):
             if args.file:
                 raise
             print(f"Muse connection dropped ({e}); reconnecting...", flush=True)
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.2)
             continue
         if args.file:
             await ender
