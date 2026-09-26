@@ -98,6 +98,7 @@ body[data-part="captions"] main { width: 100%; }
 .en.draft { color: var(--text-2); font-weight: 500; font-style: italic; opacity: .75; }
 .tag { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #1b1300;
   background: var(--warm); border-radius: 6px; padding: 2px 6px; margin-right: 6px; vertical-align: 3px; }
+.tag.you { background: var(--accent); color: #0b1020; }
 .kept { color: var(--accent); border-bottom: 1px dashed var(--accent); cursor: pointer; }
 .kept small { color: var(--text-3); font-weight: 400; font-size: .62em; margin-left: 3px; }
 .warning { background: rgba(245, 179, 92, .16); border: 1px solid rgba(245, 179, 92, .4); color: #ffd9a8; border-radius: 10px;

@@ -51,6 +51,11 @@ Times are rough estimates for one person.
 - **Record the demo video,** plus a backup recording.
 - **Write-up:** who it's for, how it strengthens connection, why AI is essential. Include the Laya table. Make sure the public repo README says how to run it.
 
+## Reverse direction ✅ first version
+`subtitles.py --to-telugu`: the grandkid's English → Muse Spark → Meta MMS Telugu voice → BlackHole 16ch (WhatsApp Web's
+mic). Tested from a recording: all lines voiced, ~3 s from the end of a sentence to her hearing it (max ~5 s when lines
+pile up). Next: IndicTrans2 en→indic (gated: accept it on Hugging Face) to cut ~1 s; show your side in the overlay.
+
 ## Order and parallel work
 - **Two people can start at once** once step 0 is done: one on the overlay (steps 1–2), one on the engine (steps 3–4).
 - **Steps 3 and 4** each need both the engine and the overlay. Build the engine side against the message format, then plug in the overlay.
@@ -58,7 +63,7 @@ Times are rough estimates for one person.
 - **If time is short,** cut Instagram, then the hear-it button, then the "How do I say" stem.
 
 ## To do (after the steps above)
-- **Tune how strongly each signal counts toward knowing a word** (`progress.py`). The priors, learning chances, evidence weights, the 7-day half-life and the 70% threshold are sensible guesses, not measured.
+- ✅ tooling built (`tools/quiz.py`, `tools/fit_progress.py --save`); needs real calls + a quiz to fit. **Tune how strongly each signal counts toward knowing a word** (`progress.py`). The priors, learning chances, evidence weights, the 7-day half-life and the 70% threshold are sensible guesses, not measured.
   - Record every signal with a timestamp during test calls.
   - Afterwards, quiz the grandkid on the words (knows / doesn't).
   - Fit the weights to those answers, e.g. with a small grid search that maximises log-likelihood.

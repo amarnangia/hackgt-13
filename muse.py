@@ -22,7 +22,7 @@ SPARK_MODEL = "muse-spark-1.1"  # ~0.8 s per sentence at minimal reasoning; 1.2 
 os.environ.setdefault("SSL_CERT_FILE", certifi.where())
 SSL_CONTEXT = ssl.create_default_context(cafile=certifi.where())
 
-LANGUAGES = {"te": "Telugu", "hi": "Hindi", "ta": "Tamil", "kn": "Kannada", "ml": "Malayalam", "bn": "Bengali", "mr": "Marathi"}
+LANGUAGES = {"en": "English", "te": "Telugu", "hi": "Hindi", "ta": "Tamil", "kn": "Kannada", "ml": "Malayalam", "bn": "Bengali", "mr": "Marathi"}
 
 
 def api_key():
@@ -139,6 +139,20 @@ class Translator:
         english = r.json()["choices"][0]["message"]["content"].strip()
         self.history.append((text, english))
         return english
+
+
+class ToTelugu(Translator):
+    """The other direction (--outgoing --to te): the grandkid's English to spoken Telugu for the grandparent."""
+
+    def __init__(self, lang):
+        super().__init__(lang)
+        self.system = (
+            f"You translate what a grandchild says on a live phone call to their grandparent into natural, warm, simple "
+            f"spoken {self.lang_name}, the way a grandchild talks to an elder: use the respectful form (meeru, mimmalni). "
+            f"The text comes from live speech recognition. Write everything in {self.lang_name} script, including English "
+            "words people use in Telugu (exam, college, WhatsApp), so a voice can read it aloud. Reply with only the "
+            "translation."
+        )
 
 
 def spark_json(system, user, model="muse-spark-1.3", effort="low", timeout=60):

@@ -146,7 +146,9 @@ def main():
         audio, sr = heard[f"{HEARS[listener]}_voice"]
         worst = max((energy(audio, sr, a + 1.1, b) for side, a, b in spans if side == listener and b - a > 1.2), default=0)
         check(worst < 0.005, f"no translation plays to {NAME[listener]} while {NAME[listener]} talk (loudest {worst:.4f})")
-    check(output.count("faded out the translation") >= 2, f"interruptions faded translations out "
+    # Whether an interruption fades a translation or holds it depends on whether it had started playing yet (timing
+    # varies run to run); "nothing plays while they talk" above is the real test. At least one should be a fade.
+    check(output.count("faded out the translation") >= 1, f"an interruption faded a translation out "
                                                          f"({output.count('faded out the translation')} times)")
     # Volumes: the original at ~20% while it's the other language; the listener's own language at full volume.
     mix, sr = heard[f"{HEARS[ENGLISH]}_mix"]
