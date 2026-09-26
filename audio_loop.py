@@ -70,14 +70,15 @@ class AudioLoop:
     out_dev=None runs on a timer with no sound device at all (for tests).
     """
 
-    def __init__(self, in_dev, out_dev, on_audio=None, source=None):
+    def __init__(self, in_dev, out_dev, on_audio=None, source=None, original=1.0):
         self.in_dev, self.out_dev = in_dev, out_dev
+        self.original = original  # volume of the input between English lines; 0 = only the English voice is heard
         self.on_audio = on_audio
         self.source, self.source_pos = source, 0
         self.source_done = threading.Event()  # set when `source` has played to the end
         self.stop = threading.Event()         # set to end run()
         self.voice = VoiceBuffer()
-        self.gain = 1.0
+        self.gain = original
         self.level = 0.0
 
     def _mix(self, mono, frames):
@@ -85,7 +86,7 @@ class AudioLoop:
         if self.on_audio:
             self.on_audio(mono.copy())
         # Move the call volume one step toward its target each block, fading within the block.
-        target = DUCK_LEVEL if self.voice.active() else 1.0
+        target = min(DUCK_LEVEL, self.original) if self.voice.active() else self.original
         step = (1.0 - DUCK_LEVEL) / RAMP_BLOCKS
         new_gain = max(target, self.gain - step) if target < self.gain else min(target, self.gain + step)
         ramp = np.linspace(self.gain, new_gain, frames, dtype=np.float32)
@@ -121,8 +122,9 @@ class AudioLoop:
             stream = sd.OutputStream(device=self.out_dev, samplerate=SR, blocksize=BLOCK, channels=2,
                                      dtype="float32", callback=self._output_callback)
         else:
+            in_channels = min(2, sd.query_devices(self.in_dev)["max_input_channels"])  # the MacBook mic is mono
             stream = sd.Stream(device=(self.in_dev, self.out_dev), samplerate=SR, blocksize=BLOCK,
-                               channels=(2, 2), dtype="float32", callback=self._duplex_callback)
+                               channels=(in_channels, 2), dtype="float32", callback=self._duplex_callback)
         with stream:
             if meter:
                 print("Passing call audio through. Ctrl+C to stop.")
