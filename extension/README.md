@@ -3,17 +3,17 @@
 Puts Weave on top of the call in your Chrome tab (WhatsApp Web, Instagram, or any page) when you turn it on. The layout and message format are in
 [../idea.md](../idea.md).
 
-Everything sits at the edges, so the faces in the middle of the call stay clear (design notes: [DESIGN.md](DESIGN.md)):
+Weave keeps the faces in the middle of the call clear (design notes: [DESIGN.md](DESIGN.md)):
 
-- **Dock (top left):** the orb shows what Weave is doing (idle, listening, translating, speaking). Click it to hide or
-  show everything. Next to it: **Questions and words**, **Pictures and meanings**, and **⋯** (the two-way
-  "I speak English / తెలుగు" switch, and Hide). Hover the dock to see its status.
-- **Questions and words (under the dock):** "Ask her" (opens by itself when there's a new one), "Curious?" questions
-  (click one for the answer) and words for what you're talking about.
-- **Pictures and meanings (top right):** pictures of what she mentions and what her sayings mean. Only there while
-  there are some; click one to keep it.
-- **Captions (bottom middle):** her words and the English, above the call's buttons. They fade away when nobody is
-  talking. Click a word shown in Telugu if you don't know it.
+- **Orb (bottom center, above the call's buttons):** shows what Weave is doing (idle, listening, translating,
+  speaking). Click it to hide or show everything. Hover it for the words and pictures buttons, **⋯** (the two-way
+  "I speak English / తెలుగు" switch, and Hide) and the status.
+- **Captions (right above the orb):** her words and the English in a glass bubble while someone talks. Click a word
+  shown in Telugu if you don't know it.
+- **Ask her (top center):** a question to ask her, when the talk pauses.
+- **Words (middle left):** words for what you're talking about (the ones she said first) and "Curious?" questions;
+  click one for the answer, or hover a word to hear it.
+- **Pictures and meanings:** small bubbles that pop up above the captions. Hover one to see it; click to keep it.
 - **Two-way calls** (`subtitles.py --two-way`): the language switch in the ⋯ menu tells the engine which language you
   speak, so it doesn't have to guess. It's remembered and sent again whenever the engine restarts.
 

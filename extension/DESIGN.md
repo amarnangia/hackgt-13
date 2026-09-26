@@ -5,18 +5,17 @@ widget (`garden/ios/Shared/Theme.swift`) and the call summary pages (`calls.py`,
 
 ## Layout over a call
 
-A video call puts the other person's face in the middle, your own camera in a bottom corner and the call's buttons
-along the bottom. Weave stays on the edges and only takes space while it has something to show.
+A video call puts the other person's face in the middle, your camera in a bottom corner and the call's buttons along the
+bottom. Weave uses the edges and the space just above the call's buttons. Every panel is its own frame, placed with
+`translate3d` once per size change and shown, hidden and moved only with transform and opacity.
 
 | Zone | Where | Size | When it's there |
 |---|---|---|---|
-| Dock | top left, 16px in | 48px tall capsule | always (just the orb while hidden) |
-| Questions and words | under the dock (top 78px) | up to 340 × 560, stops above where the caption words sit | opened from the dock |
-| "Ask her" + pictures and meanings | top right, 16px in | 260–340px wide (26% of the window); ends 230px above the bottom, leaving room for your camera tile | only while there's something; "Ask her" is on top and opens this side by itself; the bottom 28px fades out |
-| Captions | bottom middle, 104px above the bottom (clear of the call's buttons) | a fixed 820 × 230 box; the words move inside it, the box never moves | while someone talks; fades 9 s after the last words |
-
-Each panel is its own frame, so it only covers the call where it actually is. The captions frame lets clicks through
-while it's faded out.
+| Ask her (top) | top center, 16px down | the pill's own width, up to 620px | after a 2 s pause in the talk; stays at least 5 s; leaves once someone has talked for 1.5 s; the question lasts 45 s |
+| Dictionary (left) | middle left, 16px in, vertically centered | 260px wide, as tall as its rows (never past 72px from the top or bottom) | always; the words button hides it |
+| Word bubbles (float) | rising from just above the translation bubble's right end | 310px wide, as tall as its bubbles | while there are some; each holds 20 s (dims for the last 3) unless kept |
+| Translation bubble | bottom center, right above the orb | up to 700 × 148, fixed | while someone talks; fades 9 s after the last words |
+| Orb | bottom center, 92px up (clear of the call's buttons) | 56px | always; hover it for the words and pictures buttons, ⋯ (the "I speak" switch, Hide) and the status |
 
 ## Tokens
 
@@ -40,38 +39,34 @@ Color by meaning: cyan = connected and "Asked you"/"Request" tags; blue = select
 
 ## Components
 
-**Dock.** It's a glass capsule holding the orb, a divider, and three 36px icon buttons (questions, pictures, ⋯).
-- Hovering the dock opens its status label (max-width 0 → 240px). The label also shows for about 3 seconds when Weave connects or disconnects.
-- An open panel's button is blue: `rgba(79,140,255,.18)` fill with a `.38` inner ring.
-- New content in a closed panel shows a 7px gradient dot on its button.
-- Tooltips appear after 350ms.
+**Ask her (top pill).** This is a frosted glass pill (the blur is on its frame).
+- Its 1.5px conic gradient border turns once every 5 seconds, over violet and cyan light.
+- A gradient spark badge sits on the left.
+- Next to it: the label, then what to say (18px, 800), then the Telugu and the English.
+- A 2px line drains over the question's 45 seconds.
+- It comes down from 18px above with a spring (`--spring`, 560ms) and leaves upward with `--ease-in`.
 
-**Menu (⋯).** It's a glass popover under the dock. It holds the two-way "I speak" switch (a segmented control with a gradient for the chosen side) and "Hide Weave ⌥⇧W".
+**Dictionary (left).** This is a frosted rail. Each word shows romanized in bold white (15px, 800), with its Telugu small and faint beside it and the English muted underneath.
+- Words she said get a gradient bar and a "she said" tag.
+- The hear button appears on hover.
+- Rows keep their elements: new ones spring in, moved ones glide (FLIP with `translate3d`), and removed ones lift out.
+- "Curious?" questions sit underneath, and their answers slide open.
 
-**"Ask her" (top right, in focus).** It's the one thing on screen that asks for attention.
-- A 1.5px conic gradient border turns once every 5 seconds, with a blurred copy behind it as a glow.
-- Violet and cyan light pools in the corners, behind a sparkle badge.
-- Type goes from biggest to smallest: what to say (20px, 800), the Telugu, then the English.
-- A 2px gradient line drains over the 45 seconds before the card leaves.
-- It's drawn only when the question changes, so the border and timer never restart.
+**Word bubbles (float).** Pictures are pills with a round thumbnail and the name. Meanings are pills with a gradient kind tag.
+- They spring in from 60% scale (`--spring`) out of the bottom-right corner.
+- Hovering opens the picture and description. Clicking keeps a bubble (blue ring, no timeout).
 
-**Questions and words.** It's one glass panel, with its sections split by hairlines rather than boxed.
-- "Curious?" answers slide open (grid rows 0fr → 1fr).
-- Words she used get a cyan tint.
+**Translation bubble.** This is frosted glass with a fixed height, and its top edge fades out.
+- The words update in place: each line keeps its element, and the draft firms up in place.
+- A line that grows eases its height, and lines that come or go glide by their bottom edges.
+- A new line waits 180ms so the one above can start moving.
+- A thin line of the orb's gradient runs along the bottom, brighter while someone talks.
 
-**Pictures and meanings.** Pictures are cinematic: the image runs edge to edge with its name over a dark gradient. Meanings have a gradient bar down the left. A kept card gets a blue ring. They fade over their last 8 seconds, then leave.
-
-**Captions.** There's no box: a dark radial pool sits under the words, with the orb's colors drifting low and slow behind it (brighter while someone talks). Each line has a small speaker label (gradient dot + name), her words, then the English at 28px and weight 750.
-- **Drawn in place.** Each line keeps its element and only its text changes. What she's saying right now becomes that line's element when the sentence ends, so nothing flashes.
-- **The draft** (the English guessed so far) is gray and firms up to white in place.
-- **English with no draft** writes itself in from the left, once.
-- **Translating** shows three gradient dots.
-- **When the current line changes height,** it grows or shrinks over 340ms and pushes the line above along with it.
-- **When a line arrives or leaves,** the others glide to their new place (tracked by their bottom edges). The previous line shrinks to 74% at 40% opacity, and the line before that lifts away in 260ms.
+**Controls.** The status and all the buttons are 40px glass circles that spring out on either side of the orb on hover. The menu opens above the orb.
 
 ## The orb
 
-It's 28px: a turning conic gradient (cyan → blue → violet) under a highlight, with a soft glow behind it.
+It's 44px: a turning conic gradient (cyan → blue → violet) under a highlight, with a soft glow behind it.
 
 | State | When | Motion |
 |---|---|---|
@@ -88,7 +83,8 @@ The page can't hear Weave's audio, so the speaking level is a smoothed random en
 | Token | Curve | Use |
 |---|---|---|
 | ease-out | `cubic-bezier(.16, 1, .3, 1)` | arriving: cards, captions, tooltips |
-| ease-spring | `cubic-bezier(.32, .72, 0, 1)` | panels, menus, the dock label, the orb growing |
+| spring | `cubic-bezier(.34, 1.56, .64, 1)` | things popping in: bubbles, rows, the pill, the controls |
+| ease-sheet | `cubic-bezier(.32, .72, 0, 1)` | panels, gliding rows, the orb growing |
 | ease-in | `cubic-bezier(.7, 0, .84, 0)` | leaving |
 | fast / med / slow | 140 / 260 / 420ms | hovers / small changes / panels |
 

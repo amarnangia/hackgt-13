@@ -1,11 +1,14 @@
-// One Weave overlay panel (?part=left | right | captions). Each reads the engine's WebSocket (subtitles.py,
+// One Weave overlay panel (?part=top | left | float | captions). Each reads the engine's WebSocket (subtitles.py,
 // ws://localhost:8765 unless ?ws= says otherwise) and draws its share of the messages (see idea.md, "One standard"):
-//   captions  speaking, partial, original, english, details (intent), voice, warning
-//   left      prompt ("ask her"), curious + answer ("Curious?" questions), topic (words for the topic)
-//   right     picture, details (cards for sayings, slang, customs)
+//   top       prompt ("ask her"), shown when the talk pauses
+//   left      curious + answer ("Curious?" questions), topic (words for the topic), details (words she said)
+//   float     picture, details (cards for sayings, slang, customs), as bubbles above the captions
+//   captions  speaking, partial, draft, original, english, details (intent), voice, warning, roles
 // Until the engine sends curious/topic messages, the left panel builds simple questions from the word cards and
 // pictures (answered from their notes) and shows starter words, so it works with today's engine.
-// Clicks go back to the engine: forget (a kept word you don't know), ask (a question), practiced (hear a word).
+// Clicks go back to the engine: forget (a kept word you don't know), ask (a question), practiced (hear a word),
+// i_speak (two-way calls, from the dock's menu). Everything is drawn in place: rows keep their elements and only
+// transform and opacity animate, so nothing jumps or flickers over the call.
 const params = new URLSearchParams(location.search);
 const PART = params.get("part") || "captions";
 const WS_URL = params.get("ws") || "ws://localhost:8765";
@@ -145,7 +148,7 @@ function renderCaptions() {
   document.body.dataset.state = state;
 
   if (!view.built) {
-    root.innerHTML = `<div class="scrim"></div><div class="aurora"><i></i><i></i><i></i></div><div class="warning" hidden></div><div class="stage"></div>`;
+    root.innerHTML = `<div class="glow"></div><div class="warning" hidden></div><div class="stage"></div>`;
     view.built = true;
   }
   const warn = root.querySelector(".warning"), stage = root.querySelector(".stage");
@@ -223,7 +226,94 @@ root.addEventListener("click", (e) => {
   k.replaceWith(document.createTextNode(k.dataset.en));
 });
 
-// ---------- left: ask her, curious questions, topic words ----------
+
+// ---------- keyed lists: rows keep their elements, new rows spring in, rows that move glide (transform and opacity only) ----------
+const GLIDE = { duration: 420, easing: "cubic-bezier(.32,.72,0,1)" };
+function syncList(box, items, keyOf, make, update) {
+  const els = box._els || (box._els = new Map());
+  const live = () => [...box.children].filter((c) => !c.classList.contains("out"));
+  const before = new Map(live().map((el) => [el, el.getBoundingClientRect().top]));
+  const want = new Set(items.map(keyOf));
+  for (const [k, el] of els) if (!want.has(k)) { els.delete(k); leave(el); }
+  items.forEach((it, i) => {
+    const k = keyOf(it);
+    let el = els.get(k);
+    if (!el) {
+      el = make(it);
+      el.classList.add("in");
+      el.addEventListener("animationend", () => el.classList.remove("in"), { once: true });
+      els.set(k, el);
+    }
+    update(el, it);
+    const at = live()[i];
+    if (at !== el) box.insertBefore(el, at || null);
+  });
+  for (const [el, top] of before) {
+    if (!el.isConnected || el.classList.contains("out")) continue;
+    const d = top - el.getBoundingClientRect().top;
+    if (Math.abs(d) > 1) el.animate([{ transform: `translate3d(0, ${d}px, 0)` }, { transform: "translate3d(0, 0, 0)" }], GLIDE);
+  }
+}
+function leave(el) {   // lift out of the flow where it is, then fade away
+  if (!el.isConnected) return;
+  Object.assign(el.style, { position: "absolute", left: `${el.offsetLeft}px`, top: `${el.offsetTop}px`, width: `${el.offsetWidth}px` });
+  el.classList.add("out");
+  setTimeout(() => el.remove(), 320);
+}
+function html(tag, cls, inner = "") { const el = document.createElement(tag); el.className = cls; el.innerHTML = inner; return el; }
+const report = () => tellParent({ kind: "size", width: Math.ceil(root.scrollWidth), height: Math.ceil(root.scrollHeight) });
+
+// ---------- top: "Ask her", a frosted pill that comes down when the talk pauses ----------
+// It waits for a real pause (2 s) before coming in, stays at least 5 s, and leaves once someone has been talking for
+// 1.5 s, so a quick breath between sentences doesn't make it blink. The question itself lasts 45 s, as before.
+const SPARK = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5c.4 3.9 1.9 6.6 4.2 8 1.3.8 2.9 1.3 5.3 1.5-2.4.2-4 .7-5.3 1.5-2.3 1.4-3.8 4.1-4.2 8-.4-3.9-1.9-6.6-4.2-8C6.5 12.7 4.9 12.2 2.5 12c2.4-.2 4-.7 5.3-1.5 2.3-1.4 3.8-4.1 4.2-8z"/></svg>`;
+const ASK_MS = 45000, PAUSE_MS = 2000, TALK_MS = 1500, MIN_SHOWN_MS = 5000;
+const askState = { ask: null, drawn: null, expire: 0, lastTalk: 0, talkStart: 0, shown: false, shownAt: 0, tick: 0 };
+function heardTalk() {
+  const now = Date.now();
+  if (now - askState.lastTalk > 900) askState.talkStart = now;
+  askState.lastTalk = now;
+}
+function renderTop() {
+  const now = Date.now();
+  if (askState.ask && askState.ask !== askState.drawn) {
+    const a = askState.ask, who = a.caller || conn.name || "her";
+    const label = a.context ? `${a.context} · ask ${who}` : `Ask ${who}${a.about ? ` about ${a.about}` : ""}`;
+    root.innerHTML = `<div class="pill">
+        <span class="spark">${SPARK}</span>
+        <div class="pill-text">
+          <div class="pill-label">${esc(label)}</div>
+          <div class="q-roman">${esc(a.roman || a.english || "")}</div>
+          ${a.telugu || (a.english && a.roman) ? `<div class="q-sub">${a.telugu ? `<span class="te">${esc(a.telugu)}</span>` : ""}${a.telugu && a.english && a.roman ? `<i>·</i>` : ""}${a.english && a.roman ? `<span>${esc(a.english)}</span>` : ""}</div>` : ""}
+        </div>
+        <div class="timer"><i style="animation-duration:${ASK_MS}ms"></i></div>
+      </div>`;
+    askState.drawn = a;
+    report();
+  }
+  const talking = now - askState.lastTalk < 900;
+  let show = askState.shown;
+  if (!askState.ask) show = false;
+  else if (!askState.shown) show = !talking && (now - askState.lastTalk > PAUSE_MS || !askState.lastTalk);
+  else show = !(talking && now - askState.talkStart > TALK_MS && now - askState.shownAt > MIN_SHOWN_MS);
+  if (show !== askState.shown) {
+    askState.shown = show;
+    if (show) askState.shownAt = now;
+    tellParent({ kind: "shown", shown: show });
+  }
+  clearInterval(askState.tick);
+  if (askState.ask) askState.tick = setInterval(renderTop, 250);
+}
+function handleTop(m) {
+  if (["speaking", "original"].includes(m.type) || (m.type === "partial" && m.text)) heardTalk();
+  if (m.type === "prompt") {
+    askState.ask = m;
+    askState.expire = setTimeout(() => { askState.ask = null; renderTop(); }, ASK_MS);
+  }
+  renderTop();
+}
+
+// ---------- left: the dictionary feed (words for the topic, the ones she said first) and "Curious?" ----------
 const GREETINGS = [  // starter words until the engine picks a topic
   { telugu: "నమస్కారం", roman: "namaskaram", english: "hello (respectful)" },
   { telugu: "బాగున్నారా?", roman: "bagunnara?", english: "are you well? (to an elder)" },
@@ -235,8 +325,7 @@ const GREETINGS = [  // starter words until the engine picks a topic
   { telugu: "మళ్ళీ మాట్లాడదాం", roman: "malli matladadam", english: "let's talk again" },
 ];
 const SPEAKER = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>`;
-const left = { questions: [], engineQuestions: false, topic: "Greetings", words: GREETINGS, engineTopic: false,
-  said: [], open: null };
+const left = { questions: [], engineQuestions: false, topic: "Greetings", words: GREETINGS, engineTopic: false, said: [], open: null, built: false };
 const MAX_QUESTIONS = 4, QUESTION_TTL_MS = 90000;
 const QUESTION_KINDS = new Set(["idiom", "slang", "phrase", "culture", "festival", "food", "family", "clothing"]);
 
@@ -269,31 +358,42 @@ function rememberSaid(card) {  // words she used this call, pinned above the top
 let leftHeld = false, leftPending = false;
 document.addEventListener("mouseover", () => { leftHeld = true; });
 document.documentElement.addEventListener("mouseleave", () => { leftHeld = false; if (leftPending) { leftPending = false; renderLeft(); } });
+const norm = (r) => String(r).toLowerCase().replace(/\?$/, "");
 function renderLeft(force = false) {
   if (leftHeld && !force) { leftPending = true; return; }
+  if (!left.built) {
+    root.innerHTML = `<section class="dict"><div class="head"><span class="eyebrow">Words</span><span class="topic"></span></div><div class="rows"></div></section>
+      <section class="cur"><div class="head"><span class="eyebrow">Curious?</span></div><div class="qs"></div></section>`;
+    left.built = true;
+  }
   const now = Date.now();
   left.questions = left.questions.filter((q) => q.id === left.open || now - q.at < QUESTION_TTL_MS);
-  const questions = left.questions.length ? left.questions.map((q) => `
-      <button class="question ${q.id === left.open ? "open" : ""}" data-q="${esc(q.id)}">
-        <div class="q">${esc(q.text)}</div>
-        <div class="answer"><div>${q.answer ? formatAnswer(q.answer) : `<span class="loading">Looking it up</span>`}</div></div>
-      </button>`).join("") : `<div class="empty">Questions about what she says will show up here. Click one to find out.</div>`;
-  const wordRow = (w, said) => `<div class="word ${said ? "said" : ""}">
-      <div><span class="w-te te">${esc(w.telugu)}</span> · <span class="w-roman">${esc(w.roman)}</span>${said ? `<span class="tag-said">she said</span>` : w.learning ? `<span class="tag-said">learning</span>` : ""}</div>
-      <div class="w-en">${esc(w.english)}</div>
-      <button class="hear" title="Hear it" data-hear="${esc(w.telugu)}" data-roman="${esc(w.roman)}" data-id="${esc(w.id || "")}">${SPEAKER}</button>
-    </div>`;
-  const said = new Set(left.said.flatMap((w) => [w.id, w.roman.toLowerCase().replace(/\?$/, "")]));
-  const words = [...left.said.map((w) => wordRow(w, true)),
-    ...left.words.filter((w) => !said.has(w.id) && !said.has(String(w.roman).toLowerCase().replace(/\?$/, ""))).map((w) => wordRow(w, false))].join("");
-  root.innerHTML = `<section class="section">
-      <div class="head"><span class="eyebrow">Curious?</span></div>
-      <div class="questions scroll">${questions}</div>
-    </section>
-    <section class="section grow">
-      <div class="head"><span class="eyebrow">Words for</span><span class="topic">${esc(left.topic)}</span></div>
-      <div class="words scroll">${words}</div>
-    </section>`;
+  root.querySelector(".topic").textContent = left.topic;
+  const said = new Set(left.said.flatMap((w) => [w.id, norm(w.roman)]));
+  const words = [...left.said.map((w) => ({ ...w, said: true })),
+    ...left.words.filter((w) => !said.has(w.id) && !said.has(norm(w.roman)))];
+  syncList(root.querySelector(".rows"), words, (w) => w.id || norm(w.roman),
+    () => html("div", "w", `<div class="w-top"><b class="w-roman"></b><span class="w-te te"></span><span class="w-tag"></span></div><div class="w-en"></div>
+      <button class="hear" title="Hear it">${SPEAKER}</button>`),
+    (el, w) => {
+      el.classList.toggle("said", !!w.said);
+      el.querySelector(".w-roman").textContent = w.roman;
+      el.querySelector(".w-te").textContent = w.telugu;
+      el.querySelector(".w-tag").textContent = w.said ? "she said" : w.learning ? "learning" : "";
+      el.querySelector(".w-en").textContent = w.english;
+      Object.assign(el.querySelector(".hear").dataset, { hear: w.telugu, roman: w.roman, id: w.id || "" });
+    });
+  const cur = root.querySelector(".cur");
+  cur.hidden = !left.questions.length;
+  syncList(root.querySelector(".qs"), left.questions, (q) => q.id,
+    (q) => { const b = html("button", "question", `<div class="q"></div><div class="answer"><div></div></div>`); b.dataset.q = q.id; return b; },
+    (el, q) => {
+      el.classList.toggle("open", q.id === left.open);
+      el.querySelector(".q").textContent = q.text;
+      const a = el.querySelector(".answer > div"), inner = q.answer ? formatAnswer(q.answer) : `<span class="loading">Looking it up</span>`;
+      if (a._h !== inner) { a.innerHTML = inner; a._h = inner; }
+    });
+  report();
 }
 function formatAnswer(a) {
   const say = a.telugu || a.roman ? `<div class="say">${a.telugu ? `<span class="te">${esc(a.telugu)}</span>` : ""}${a.telugu && a.roman ? " · " : ""}${esc(a.roman || "")}</div>` : "";
@@ -330,71 +430,58 @@ function speak(telugu, roman) {
   speechSynthesis.speak(u);
 }
 
-// ---------- right: pictures and meanings ----------
-const right = { items: [], ask: null, askTimer: 0, built: false };
-const ASK_MS = 45000;
-const SPARK = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5c.4 3.9 1.9 6.6 4.2 8 1.3.8 2.9 1.3 5.3 1.5-2.4.2-4 .7-5.3 1.5-2.3 1.4-3.8 4.1-4.2 8-.4-3.9-1.9-6.6-4.2-8C6.5 12.7 4.9 12.2 2.5 12c2.4-.2 4-.7 5.3-1.5 2.3-1.4 3.8-4.1 4.2-8z"/></svg>`;
-// Drawn only when the question changes, so its moving border and timer never restart.
-function renderAsk() {
-  const slot = root.querySelector(".ask-slot");
-  const a = right.ask;
-  if (!a) { slot.innerHTML = ""; reportRight(); return; }
-  const who = a.caller || conn.name || "her";
-  const label = a.context ? `${a.context} · ask ${who}` : `Ask ${who}${a.about ? ` about ${a.about}` : ""}`;
-  slot.innerHTML = `<section class="hero enter">
-      <div class="hero-top"><span class="spark">${SPARK}</span><span class="hero-label">${esc(label)}</span></div>
-      <div class="q-roman">${esc(a.roman || a.english || "")}</div>
-      ${a.telugu ? `<div class="q-te te">${esc(a.telugu)}</div>` : ""}
-      ${a.english && a.roman ? `<div class="q-en">${esc(a.english)}</div>` : ""}
-      <div class="timer"><i style="animation-duration:${ASK_MS}ms"></i></div>
-    </section>`;
-  reportRight();
-}
-const MAX_ITEMS = 4, ITEM_TTL_MS = 45000;
+// ---------- float: pictures and meanings as small bubbles that spring up above the captions ----------
+// Each holds for a while and fades away; hover one to see it, click to keep it.
+const float = { items: [] };
+const MAX_ITEMS = 4, HOLD_MS = 20000;
 const MEANING_KINDS = new Set(["idiom", "slang", "phrase", "culture"]);
-function addRight(item) {
-  const words = item.words || [];
-  if (item.kind === "picture") right.items = right.items.filter((x) => !(x.kind === "meaning" && words.includes(x.word)));
-  if (item.kind === "meaning" && right.items.some((x) => x.kind === "picture" && (x.words || []).includes(item.word))) return;
-  const existing = right.items.find((x) => x.key === item.key);
-  if (existing) { existing.at = Date.now(); return; }
-  right.items.unshift({ ...item, at: Date.now(), fresh: true });
-  tellParent({ kind: "attention", what: "new" });
-  right.items = right.items.filter((x, i) => x.pinned || i < MAX_ITEMS);
-}
-function renderRight() {
-  if (!right.built) { root.innerHTML = `<div class="ask-slot"></div><div class="stack-slot"></div>`; right.built = true; }
-  const now = Date.now();
-  right.items = right.items.filter((x) => x.pinned || now - x.at < ITEM_TTL_MS);
-  root.querySelector(".stack-slot").innerHTML = right.items.length ? `<div class="stack">${right.items.map((x) => {
-    const fading = !x.pinned && now - x.at > ITEM_TTL_MS - 8000 ? "fading" : "";
-    const enter = x.fresh ? "enter" : "";  // animate only when it first appears, not on every redraw
-    x.fresh = false;
-    return x.kind === "picture"
-      ? `<div class="card pic ${enter} ${x.pinned ? "pinned" : ""} ${fading}" data-key="${esc(x.key)}" title="Click to keep it">
-           <div class="media"><img src="${esc(asset(x.image))}" alt=""><div class="name">${esc(x.name)}</div></div>${x.description ? `<div class="body"><div class="desc">${esc(x.description)}</div></div>` : ""}</div>`
-      : `<div class="card meaning ${enter} ${x.pinned ? "pinned" : ""} ${fading}" data-key="${esc(x.key)}" title="Click to keep it">
-           <div class="body"><div class="eyebrow kind">${esc(x.label)}</div><div class="title ${/[ఀ-౿]/.test(x.title) ? "te" : ""}">${esc(x.title)}</div>
-           <div class="desc">${esc(x.note)}</div></div></div>`;
-  }).join("")}</div>` : "";
-  reportRight();
-}
-function reportRight() { tellParent({ kind: "height", height: right.items.length || right.ask ? root.scrollHeight : 0 }); }
-root.addEventListener("click", (e) => {
-  if (PART !== "right") return;
-  const el = e.target.closest("[data-key]");
-  const item = el && right.items.find((x) => x.key === el.dataset.key);
-  if (item) { item.pinned = !item.pinned; item.at = Date.now(); renderRight(); }
-});
 const LABELS = { idiom: "Saying", slang: "Slang", phrase: "Phrase", culture: "Custom" };
+function addFloat(item) {
+  const words = item.words || [];
+  if (item.kind === "picture") float.items = float.items.filter((x) => !(x.kind === "meaning" && words.includes(x.word)));
+  if (item.kind === "meaning" && float.items.some((x) => x.kind === "picture" && (x.words || []).includes(item.word))) return;
+  const existing = float.items.find((x) => x.key === item.key);
+  if (existing) { existing.at = Date.now(); return; }
+  float.items.push({ ...item, at: Date.now() });
+  const loose = float.items.filter((x) => !x.pinned);
+  while (float.items.length > MAX_ITEMS && loose.length) float.items.splice(float.items.indexOf(loose.shift()), 1);
+  tellParent({ kind: "attention", what: "new" });
+}
+function renderFloat() {
+  const now = Date.now();
+  float.items = float.items.filter((x) => x.pinned || now - x.at < HOLD_MS);
+  syncList(root.querySelector(".bubs") || (root.innerHTML = `<div class="bubs"></div>`, root.querySelector(".bubs")), float.items, (x) => x.key,
+    (x) => {
+      const el = html("div", `bub ${x.kind}`, x.kind === "picture"
+        ? `<div class="bub-row"><img class="thumb" src="${esc(asset(x.image))}" alt=""><b>${esc(x.name)}</b></div>
+           <div class="more"><div><img class="big" src="${esc(asset(x.image))}" alt="">${x.description ? `<p>${esc(x.description)}</p>` : ""}</div></div>`
+        : `<div class="bub-row"><span class="kind">${esc(x.label)}</span><b class="${/[ఀ-౿]/.test(x.title) ? "te" : ""}">${esc(x.title)}</b></div>
+           <div class="more"><div><p>${esc(x.note)}</p></div></div>`);
+      el.dataset.key = x.key;
+      el.title = "Click to keep it";
+      return el;
+    },
+    (el, x) => { el.classList.toggle("pinned", !!x.pinned); el.classList.toggle("fading", !x.pinned && now - x.at > HOLD_MS - 3000); });
+  report();
+  clearTimeout(float.timer);
+  const next = float.items.filter((x) => !x.pinned).map((x) => Math.min(x.at + HOLD_MS - 3000 - now, x.at + HOLD_MS - now)).filter((t) => t > 0);
+  if (next.length) float.timer = setTimeout(renderFloat, Math.min(...next) + 30);
+}
+root.addEventListener("click", (e) => {
+  if (PART !== "float") return;
+  const el = e.target.closest("[data-key]");
+  const item = el && float.items.find((x) => x.key === el.dataset.key);
+  if (item) { item.pinned = !item.pinned; item.at = Date.now(); renderFloat(); }
+});
 
 // ---------- messages ----------
 function handle(m) {
   if (m.type === "call") { conn.name = m.caller || conn.name; conn.me = m.you && m.you !== "You" ? m.you : ""; status(); }
   else if (m.caller && m.caller !== conn.name) { conn.name = m.caller; status(); }
   if (PART === "captions") return handleCaptions(m);
+  if (PART === "top") return handleTop(m);
   if (PART === "left") return handleLeft(m);
-  if (PART === "right") return handleRight(m);
+  if (PART === "float") return handleFloat(m);
 }
 function handleCaptions(m) {
   cap.lastActivity = Date.now();
@@ -472,27 +559,21 @@ function handleLeft(m) {
   }
   renderLeft();
 }
-function handleRight(m) {
-  if (m.type === "prompt") {
-    right.ask = m;
-    clearTimeout(right.askTimer); right.askTimer = setTimeout(() => { right.ask = null; renderAsk(); }, ASK_MS);
-    renderRight(); renderAsk();
-    tellParent({ kind: "attention", what: "ask" });   // the dock opens this side for it
-    return;
-  }
+function handleFloat(m) {
   if (m.type === "picture" && m.image) {
-    addRight({ key: `pic:${m.id}`, kind: "picture", name: m.name, description: m.description, image: m.image, words: m.lexicon_ids || [] });
+    addFloat({ key: `pic:${m.id}`, kind: "picture", name: m.name, description: m.description, image: m.image, words: m.lexicon_ids || [] });
   } else if (m.type === "details") {
     for (const c of m.cards || []) {
       if (!c.note || !MEANING_KINDS.has(c.category)) continue;
-      addRight({ key: `card:${c.id || c.title}`, kind: "meaning", word: c.id, label: LABELS[c.category] || "Meaning", title: c.title, note: c.note });
+      addFloat({ key: `card:${c.id || c.title}`, kind: "meaning", word: c.id, label: LABELS[c.category] || "Meaning", title: c.title, note: c.note });
     }
   } else return;
-  renderRight();
+  renderFloat();
 }
 
 // ---------- start ----------
-if (PART === "captions") { renderCaptions(); connectYou(); new ResizeObserver(() => tellParent({ kind: "height", height: root.offsetHeight })).observe(root); }
-if (PART === "left") { renderLeft(); setInterval(renderLeft, 15000); }
-if (PART === "right") { renderRight(); setInterval(renderRight, 5000); addEventListener("load", reportRight, true); }
+if (PART === "captions") { renderCaptions(); connectYou(); }
+if (PART === "top") { renderTop(); new ResizeObserver(report).observe(root); }
+if (PART === "left") { renderLeft(); setInterval(renderLeft, 15000); new ResizeObserver(report).observe(root); }
+if (PART === "float") { renderFloat(); new ResizeObserver(report).observe(root); addEventListener("load", report, true); }
 connect();
