@@ -36,7 +36,7 @@
 
 **Both ways in one app: each person hears the call in their own language (`--two-way`)**
 
-14. Same setup as 11-12 (Mac output BlackHole 2ch at 100%; the call's microphone BlackHole 16ch), then one command: `python subtitles.py --two-way --out "<headphones or MacBook Pro Speakers>"`. Overlays: :8765 (them -> you) and :8767 (you -> them). The first run also loads English -> Telugu (accept https://huggingface.co/ai4bharat/indictrans2-en-indic-1B) and Meta's MMS Telugu voice.
+14. Same setup as 11-12 (Mac output BlackHole 2ch at 100%; the call's microphone BlackHole 16ch), then one command: `python subtitles.py --two-way --out "<headphones or MacBook Pro Speakers>"`. Pick **I speak English** in the Weave overlay (or add `--telugu-speaker them`) so it doesn't have to guess who speaks Telugu. Overlays: :8765 (them -> you) and :8767 (you -> them). The first run also loads English -> Telugu (accept https://huggingface.co/ai4bharat/indictrans2-en-indic-1B) and Meta's MMS Telugu voice.
     - One Telugu speaker, one English speaker. It assumes **you** speak Telugu, then goes by who actually speaks more Telugu (`roles.py`; `--telugu-speaker me|them` fixes it). Lines said before it's sure are translated again once it is.
     - Telugu -> English for the English speaker (in the speaker's cloned voice), English -> Telugu for the Telugu speaker (MMS voice, not cloned). A line already in the listener's language plays at full volume, untranslated. Words kept in Telugu follow your progress, so only in what you hear.
     - Turn-taking: a translation waits while its listener is talking, fades out within 0.3 s if they start talking, and is dropped after 10 s.

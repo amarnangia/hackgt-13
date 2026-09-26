@@ -175,7 +175,8 @@ grandkid actually clicks.
     - `topic` `{topic, words: [{id, telugu, roman, english, heard}]}`
     - `answer` `{id, text, telugu?, roman?}`
     - `draft` `{text}`: the English of what she's said so far, while she's mid-sentence
-  - **From the overlay back to the engine:** `ask` `{id}` (a click on a question) and the existing `forget` `{id}`.
+    - `roles` `{you, them, fixed}` (`--two-way`): who speaks which language (`te` / `en`), and whether it's settled or still a guess
+  - **From the overlay back to the engine:** `ask` `{id}` (a click on a question), `i_speak` `{lang}` (the language switch, `--two-way`) and the existing `forget` `{id}`.
 - **Same audio setup** for both apps. The call plays in Chrome, the Mac's output is BlackHole 2ch at 100%, and the engine listens to BlackHole. So Instagram web calls work the same way as WhatsApp Web.
 
 ## Both directions

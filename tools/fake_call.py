@@ -55,6 +55,7 @@ ASKS = {  # prompts at a few points: (after line index, question)
 }
 
 clients = set()
+current = {}  # like subtitles.py: the latest roles, sent to every page that connects
 lexicon = Lexicon()
 entries = {e["id"]: e for e in lexicon.entries["te"]}
 pictures = PictureFinder(None)
@@ -87,10 +88,16 @@ def cards(telugu):
 
 def handler(conn):
     clients.add(conn)
+    for msg in current.values():
+        conn.send(json.dumps(msg, ensure_ascii=False))
     try:
         for raw in conn:
             msg = json.loads(raw)
             e = entries.get(msg.get("id"))
+            if msg.get("type") == "i_speak":  # the overlay's language switch (two-way calls)
+                you = msg.get("lang")
+                current["roles"] = {"type": "roles", "you": you, "them": "te" if you == "en" else "en", "fixed": True}
+                broadcast(current["roles"])
             if msg.get("type") == "ask" and e:
                 broadcast({"type": "answer", "id": e["id"], "text": e.get("note") or e.get("translate_as", ""),
                            "telugu": e["forms"][0].strip(" ,.^"), "roman": (e.get("roman") or "").strip(" ,")})
@@ -113,11 +120,14 @@ def serve_files(conn, request):
                                                        ("Content-Length", str(len(body))), ("Connection", "close")]), body)
 
 
-def play(pause):
+def play(pause, two_way=False):
     time.sleep(2)
     n = 0
     while True:
         broadcast({"type": "topic", "topic": "Greetings", "words": []})
+        if two_way:
+            current.setdefault("roles", {"type": "roles", "you": "te", "them": "en", "fixed": False})  # --two-way's first guess
+            broadcast(current["roles"])
         curious = Curious(None, Unknown(), 0.7)  # no Laya here: keyword replies and least-known-first
         for i, (telugu, english, kept_ids, intent, pic, topic) in enumerate(SCRIPT):
             n += 1
@@ -162,9 +172,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--port", type=int, default=8765)
     ap.add_argument("--fast", action="store_true")
+    ap.add_argument("--two-way", action="store_true", help="also send roles, like subtitles.py --two-way (the overlay's language switch)")
     a = ap.parse_args()
     server = serve(handler, "localhost", a.port, process_request=serve_files)
-    threading.Thread(target=play, args=(2.5 if a.fast else 5.0,), daemon=True).start()
+    threading.Thread(target=play, args=(2.5 if a.fast else 5.0, a.two_way), daemon=True).start()
     print(f"Pretend call with {CALLER} on ws://localhost:{a.port} (Ctrl+C to stop)", flush=True)
     try:
         server.serve_forever()

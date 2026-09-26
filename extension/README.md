@@ -6,6 +6,9 @@ Puts Weave on top of the call in your Chrome tab (WhatsApp Web, Instagram, or an
 - **Left:** "Curious?" questions (click one for the answer) and words for what you're talking about.
 - **Right:** pictures of what she mentions, and what her sayings mean.
 - **Bottom:** her words and the English. Click a word shown in Telugu if you don't know it.
+- **Two-way calls** (`subtitles.py --two-way`): **I speak English / తెలుగు** at the top of the captions tells the engine
+  which language you speak, so it doesn't have to guess. The other person gets the other one. It's remembered and sent
+  again whenever the engine restarts.
 
 It connects to the Weave engine on this Mac at `ws://localhost:8765`: either `subtitles.py`, or `tools/fake_call.py`
 for a pretend call.

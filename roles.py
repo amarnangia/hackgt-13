@@ -1,6 +1,7 @@
 # --two-way: who is the Telugu speaker and who is the English speaker? One of each is on the call. We guess
 # (you speak Telugu until the call says otherwise) and then go by who actually speaks more Telugu, so each person
-# hears everything in their own language. `--telugu-speaker me|them` skips the guessing.
+# hears everything in their own language. `--telugu-speaker me|them`, or picking "I speak" in the Weave overlay,
+# skips the guessing.
 import re
 import threading
 from collections import deque
@@ -25,6 +26,14 @@ class Roles:
         self.on_change = on_change  # called with (telugu_side, reason) when the roles are decided or flip
         self.words = {"me": deque(maxlen=WINDOW), "them": deque(maxlen=WINDOW)}  # True per Telugu word
         self.lock = threading.Lock()
+
+    def set(self, telugu_side, why):
+        """Someone said who speaks what (the overlay's "I speak" switch): use it for the rest of the call."""
+        with self.lock:
+            changed = telugu_side != self.telugu or not self.decided
+            self.telugu, self.fixed, self.decided = telugu_side, True, True
+        if changed and self.on_change:
+            self.on_change(telugu_side, f"set: {why}")
 
     def lang_of(self, side):
         return "te" if side == self.telugu else "en"

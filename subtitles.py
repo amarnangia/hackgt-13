@@ -923,6 +923,16 @@ def side_args(args, side):
     return a
 
 
+def with_language_choice(on_message, roles):
+    """The overlay's "I speak English / Telugu" switch sets the roles; everything else goes to `on_message`."""
+    def handle(msg):
+        if msg.get("type") == "i_speak" and msg.get("lang") in ("en", "te"):
+            roles.set("them" if msg["lang"] == "en" else "me", f"you picked {'English' if msg['lang'] == 'en' else 'Telugu'} in Weave")
+        else:
+            on_message(msg)
+    return handle
+
+
 async def run_two_way(args):
     them_args, me_args = side_args(args, "them"), side_args(args, "me")
     hubs = {"them": HUB, "me": ME_HUB}
@@ -932,7 +942,9 @@ async def run_two_way(args):
         print(f"Roles {why} -> {'you' if telugu == 'me' else args.caller} speak{'s' if telugu == 'them' else ''} Telugu, "
               f"{'you' if english == 'me' else args.caller} English", flush=True)
         for hub in hubs.values():
-            hub.broadcast({"type": "roles", "you": roles.lang_of("me"), "them": roles.lang_of("them")})
+            hub.current["roles"] = msg = {"type": "roles", "you": roles.lang_of("me"), "them": roles.lang_of("them"),
+                                          "fixed": roles.fixed}
+            hub.broadcast(msg)
         for c in (them, me):
             c.catch_up()
     fixed = None if args.telugu_speaker == "auto" else args.telugu_speaker
@@ -945,7 +957,9 @@ async def run_two_way(args):
         c.original_volume = args.original_volume
         if args.no_drafts:
             c.drafts = None
-        c.hub.on_message = make_on_message(them, args, c.hub)  # your word progress, whichever page you click on
+        c.hub.on_message = with_language_choice(make_on_message(them, args, c.hub), roles)
+    for hub in hubs.values():  # pages that connect get the current roles, so the overlay's "I speak" switch shows it
+        hub.current["roles"] = {"type": "roles", "you": roles.lang_of("me"), "them": roles.lang_of("them"), "fixed": roles.fixed}
     print(f"Roles to start: {'you speak Telugu, they speak English' if roles.telugu == 'me' else 'they speak Telugu, you speak English'}"
           + (" (fixed by --telugu-speaker)" if fixed else " (until the call shows otherwise)"), flush=True)
     try:

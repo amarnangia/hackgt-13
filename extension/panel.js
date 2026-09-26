@@ -22,12 +22,23 @@ let ws = null;
 const conn = { on: false, name: "" };
 function connect() {
   try { ws = new WebSocket(WS_URL); } catch { setTimeout(connect, 2500); return; }
-  ws.onopen = () => { conn.on = true; status(); };
+  ws.onopen = () => {
+    conn.on = true; status();
+    const lang = savedLanguage();  // two-way calls: tell the engine who speaks what, so it never has to guess
+    if (lang && PART === "captions") send({ type: "i_speak", lang });
+  };
   ws.onclose = () => { conn.on = false; status(); setTimeout(connect, 2500); };
   ws.onerror = () => {};
   ws.onmessage = (e) => { let m; try { m = JSON.parse(e.data); } catch { return; } handle(m); };
 }
 function send(msg) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(msg)); }
+
+// "I speak English / Telugu" (two-way calls): remembered, and sent again whenever the engine (re)connects
+function savedLanguage() { try { return localStorage.getItem("weave-i-speak"); } catch { return null; } }
+function chooseLanguage(lang) {
+  try { localStorage.setItem("weave-i-speak", lang); } catch {}
+  send({ type: "i_speak", lang });
+}
 
 // Your side (subtitles.py --two-way's second page, two ports up): what you said and the Telugu she heard, in the captions
 const YOU_URL = (() => { try { const u = new URL(WS_URL); u.port = String(Number(u.port || 80) + 2); return u.href.replace(/\/$/, ""); } catch { return null; } })();
@@ -48,7 +59,7 @@ function status() {
 }
 
 // ---------- captions ----------
-const cap = { lines: [], byId: {}, partial: "", draft: "", speaking: false, warning: "", warnTimer: 0 };
+const cap = { lines: [], byId: {}, partial: "", draft: "", speaking: false, warning: "", warnTimer: 0, roles: null };
 function captionLine(id) {
   let l = cap.byId[id];
   if (!l) {
@@ -58,6 +69,13 @@ function captionLine(id) {
   }
   return l;
 }
+// Only in two-way calls (the engine sends "roles"): which language you speak; the other person gets the other one
+function languageSwitch() {
+  const mine = cap.roles.you, chosen = savedLanguage();
+  const button = (lang, label) => `<button class="lang ${mine === lang ? "on" : ""}" data-lang="${lang}">${label}</button>`;
+  return `<span class="speak">${chosen || cap.roles.fixed ? "I speak" : "I speak (guessing)"} ${button("en", "English")}${button("te", "తెలుగు")}</span>`;
+}
+
 function withKept(text, kept) {
   // Words kept in Telugu are underlined with their English; clicking one tells the engine you don't know it.
   let html = "", rest = text;
@@ -85,12 +103,14 @@ function renderCaptions() {
       ${cap.draft ? `<div class="en draft">${esc(cap.draft)}</div>` : ""}</div>` : "";
   root.innerHTML = `<div class="card captions">
       ${cap.warning ? `<div class="warning">⚠️ ${esc(cap.warning)}</div>` : ""}
-      <div class="status"><span class="dot ${dot}"></span>${statusText}</div>
+      <div class="status"><span class="dot ${dot}"></span>${statusText}${cap.roles ? languageSwitch() : ""}</div>
       ${lines || partial ? lines + partial : `<div class="faint">Her words and the English will appear here.</div>`}
     </div>`;
   tellParent({ kind: "height", height: root.offsetHeight });
 }
 root.addEventListener("click", (e) => {
+  const lang = e.target.closest(".lang");
+  if (lang && PART === "captions") { chooseLanguage(lang.dataset.lang); return; }
   const k = e.target.closest(".kept");
   if (!k || PART !== "captions") return;
   send({ type: "forget", id: k.dataset.id });
@@ -256,6 +276,7 @@ function handleCaptions(m) {
     case "speaking": cap.speaking = true; break;
     case "partial": cap.partial = m.text || ""; if (!m.text) cap.speaking = false; break;
     case "draft": cap.draft = m.text || ""; break;
+    case "roles": cap.roles = { you: m.you, them: m.them, fixed: m.fixed }; break;
     case "original": {
       const l = captionLine(m.id);
       l.orig = m.text; l.english = m.route === "english"; l.pending = !l.english; l.you = !!m.you;
