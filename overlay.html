@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Call Subtitles</title>
+<style>
+  :root { --bg: #111418; --card: #1b2027; --text: #f2f4f7; --muted: #8b95a3; --accent: #f5a524; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.4 -apple-system, "Noto Sans Telugu", system-ui, sans-serif; }
+  header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; color: var(--muted); font-size: 13px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #555; }
+  .dot.live { background: #3ecf8e; }
+  .dot.speaking { background: var(--accent); animation: pulse 0.8s infinite alternate; }
+  @keyframes pulse { to { opacity: 0.3; } }
+  #lines { display: flex; flex-direction: column; gap: 10px; padding: 0 16px 16px; }
+  .line { background: var(--card); border-radius: 12px; padding: 12px 14px; opacity: 0.55; }
+  .line:first-child { opacity: 1; }
+  .orig { color: var(--muted); font-size: 18px; }
+  .en { font-size: 26px; font-weight: 600; margin-top: 4px; min-height: 1.4em; }
+  .en.pending { color: var(--muted); font-weight: 400; font-size: 18px; }
+</style>
+</head>
+<body>
+<header><span class="dot" id="dot"></span><span id="status">connecting…</span></header>
+<div id="lines"></div>
+<script>
+const lines = document.getElementById("lines");
+const dot = document.getElementById("dot"), status = document.getElementById("status");
+const byId = {};
+
+function connect() {
+  const ws = new WebSocket(`ws://${location.host || "localhost:8765"}`);
+  ws.onopen = () => { dot.className = "dot live"; status.textContent = "listening"; };
+  ws.onclose = () => { dot.className = "dot"; status.textContent = "disconnected, retrying…"; setTimeout(connect, 1000); };
+  ws.onmessage = (e) => {
+    const m = JSON.parse(e.data);
+    if (m.type === "speaking") { dot.className = "dot speaking"; status.textContent = "someone is speaking…"; return; }
+    dot.className = "dot live"; status.textContent = "listening";
+    let el = byId[m.id];
+    if (!el) {
+      el = document.createElement("div");
+      el.className = "line";
+      el.innerHTML = '<div class="orig"></div><div class="en pending">translating…</div>';
+      lines.prepend(el);
+      byId[m.id] = el;
+      while (lines.children.length > 6) lines.lastChild.remove();
+    }
+    if (m.type === "original") el.querySelector(".orig").textContent = m.text;
+    if (m.type === "english") { const en = el.querySelector(".en"); en.textContent = m.text; en.classList.remove("pending"); }
+  };
+}
+connect();
+</script>
+</body>
+</html>
