@@ -1,5 +1,5 @@
 {
- "_about": "`roman` is the Telugu word (romanized) kept in the English sentence once the listener knows it; `start_known` words are kept from the start. Hard-coded words and phrases. `forms` are the spellings to match (put inflected forms like ఆటోలో too; a leading ^ means only at the start of what was said). `translate_as` replaces the match before translation so it always comes out the same (use plain English the grandkid understands; the card shows the Telugu name and picture); `translate_forms` overrides it per inflected form (ఆటోలో -> in an auto-rickshaw). `category` drives image cards (food, vehicle, place, clothing, festival) and explanation cards (family, idiom, slang). `note` is the one-line explanation shown on the card. `substitute: false` leaves a word for the translator (it already knows it) and `match_english` lists the English it may use.",
+ "_about": "`roman` is the Telugu word (romanized) kept in the English sentence once the listener knows it; `start_known` words are kept from the start. Hard-coded words and phrases. `forms` are the spellings to match (put inflected forms like ఆటోలో too; a leading ^ means only at the start of what was said). `translate_as` replaces the match before translation so it always comes out the same (use plain English the grandkid understands; the card shows the Telugu name and picture); `translate_forms` overrides it per inflected form (ఆటోలో -> in an auto-rickshaw). `category` drives image cards (food, vehicle, place, clothing, festival) and explanation cards (family, idiom, slang). `note` is the one-line explanation shown on the card. `substitute: false` leaves a word for the translator (it already knows it) and `match_english` lists the English it may use. `topic` is what a word says the conversation is about (for the overlay's topic words; see vocab.json).",
  "te": [
   {
    "id": "pulihora",
@@ -11,7 +11,8 @@
    "translate_as": "tamarind rice",
    "roman": "pulihora",
    "category": "food",
-   "note": "Tangy tamarind rice, a festival and temple favourite"
+   "note": "Tangy tamarind rice, a festival and temple favourite",
+   "topic": "food"
   },
   {
    "id": "pesarattu",
@@ -21,7 +22,8 @@
    "translate_as": "green gram dosa",
    "roman": "pesarattu",
    "category": "food",
-   "note": "Green moong dal dosa, often eaten with ginger chutney"
+   "note": "Green moong dal dosa, often eaten with ginger chutney",
+   "topic": "food"
   },
   {
    "id": "dosa",
@@ -32,7 +34,8 @@
    ],
    "translate_as": "dosa",
    "category": "food",
-   "note": "Thin crispy rice-and-lentil crepe"
+   "note": "Thin crispy rice-and-lentil crepe",
+   "topic": "food"
   },
   {
    "id": "idli",
@@ -42,7 +45,8 @@
    ],
    "translate_as": "idli",
    "category": "food",
-   "note": "Soft steamed rice cakes"
+   "note": "Soft steamed rice cakes",
+   "topic": "food"
   },
   {
    "id": "upma",
@@ -52,7 +56,8 @@
    "translate_as": "upma",
    "roman": "upma",
    "category": "food",
-   "note": "Savoury semolina breakfast"
+   "note": "Savoury semolina breakfast",
+   "topic": "food"
   },
   {
    "id": "pappu",
@@ -72,7 +77,8 @@
    },
    "roman": "pappu",
    "category": "food",
-   "note": "Everyday lentil dal"
+   "note": "Everyday lentil dal",
+   "topic": "food"
   },
   {
    "id": "sambar",
@@ -82,7 +88,8 @@
    ],
    "translate_as": "sambar",
    "category": "food",
-   "note": "Lentil and vegetable stew with tamarind"
+   "note": "Lentil and vegetable stew with tamarind",
+   "topic": "food"
   },
   {
    "id": "rasam",
@@ -91,7 +98,8 @@
    ],
    "translate_as": "rasam",
    "category": "food",
-   "note": "Thin peppery tamarind soup"
+   "note": "Thin peppery tamarind soup",
+   "topic": "food"
   },
   {
    "id": "perugu_annam",
@@ -103,7 +111,8 @@
    "translate_as": "curd rice",
    "roman": "perugu annam",
    "category": "food",
-   "note": "Rice mixed with yogurt, the comfort food that ends a meal"
+   "note": "Rice mixed with yogurt, the comfort food that ends a meal",
+   "topic": "food"
   },
   {
    "id": "avakaya",
@@ -129,7 +138,8 @@
     "ఆవకాయ పెట్టాము": "we made mango pickle",
     "ఆవకాయ పెట్టాను": "I made mango pickle",
     "ఆవకాయ పెట్టారు": "made mango pickle"
-   }
+   },
+   "topic": "food"
   },
   {
    "id": "gongura",
@@ -143,7 +153,8 @@
    "translate_as": "sorrel leaves",
    "roman": "gongura",
    "category": "food",
-   "note": "Sour sorrel leaves, famous in Andhra pickles and curries"
+   "note": "Sour sorrel leaves, famous in Andhra pickles and curries",
+   "topic": "food"
   },
   {
    "id": "biryani",
@@ -152,7 +163,8 @@
    ],
    "translate_as": "biryani",
    "category": "food",
-   "note": "Spiced layered rice with meat or vegetables"
+   "note": "Spiced layered rice with meat or vegetables",
+   "topic": "food"
   },
   {
    "id": "laddu",
@@ -165,7 +177,8 @@
    "translate_as": "laddus",
    "roman": "laddu",
    "category": "food",
-   "note": "Round sweet made for festivals and temples"
+   "note": "Round sweet made for festivals and temples",
+   "topic": "food"
   },
   {
    "id": "ariselu",
@@ -176,7 +189,8 @@
    "translate_as": "rice sweets",
    "roman": "ariselu",
    "category": "food",
-   "note": "Fried rice-flour and jaggery sweet made for Sankranti"
+   "note": "Fried rice-flour and jaggery sweet made for Sankranti",
+   "topic": "food"
   },
   {
    "id": "bobbatlu",
@@ -186,7 +200,8 @@
    "translate_as": "sweet flatbread",
    "roman": "bobbatlu",
    "category": "food",
-   "note": "Sweet flatbread stuffed with lentils and jaggery"
+   "note": "Sweet flatbread stuffed with lentils and jaggery",
+   "topic": "food"
   },
   {
    "id": "chapati",
@@ -196,7 +211,8 @@
    ],
    "translate_as": "chapati",
    "category": "food",
-   "note": "Soft whole-wheat flatbread"
+   "note": "Soft whole-wheat flatbread",
+   "topic": "food"
   },
   {
    "id": "auto",
@@ -214,7 +230,8 @@
    },
    "roman": "auto",
    "category": "vehicle",
-   "note": "Three-wheeled taxi, the usual way to get around town"
+   "note": "Three-wheeled taxi, the usual way to get around town",
+   "topic": "travel"
   },
   {
    "id": "rickshaw",
@@ -227,7 +244,8 @@
     "రిక్షాలో": "in a rickshaw"
    },
    "category": "vehicle",
-   "note": "Pedal or hand-pulled passenger cart"
+   "note": "Pedal or hand-pulled passenger cart",
+   "topic": "travel"
   },
   {
    "id": "temple",
@@ -247,7 +265,8 @@
    },
    "roman": "gudi",
    "category": "place",
-   "note": "Local Hindu temple"
+   "note": "Local Hindu temple",
+   "topic": "festivals"
   },
   {
    "id": "polam",
@@ -263,7 +282,8 @@
    },
    "roman": "polam",
    "category": "place",
-   "note": "The family's paddy or crop field"
+   "note": "The family's paddy or crop field",
+   "topic": "home"
   },
   {
    "id": "santa",
@@ -279,7 +299,8 @@
    },
    "roman": "santha",
    "category": "place",
-   "note": "Open-air market held on one day each week"
+   "note": "Open-air market held on one day each week",
+   "topic": "home"
   },
   {
    "id": "ooru",
@@ -289,7 +310,8 @@
     "ఊరు"
    ],
    "category": "place",
-   "note": "The family's native village or town"
+   "note": "The family's native village or town",
+   "topic": "home"
   },
   {
    "id": "saree",
@@ -307,7 +329,8 @@
    },
    "roman": "cheera",
    "category": "clothing",
-   "note": "Long draped cloth worn by women"
+   "note": "Long draped cloth worn by women",
+   "topic": "festivals"
   },
   {
    "id": "pancha",
@@ -318,7 +341,8 @@
    "translate_as": "pancha (dhoti)",
    "roman": "pancha",
    "category": "clothing",
-   "note": "White cloth wrapped at the waist, worn by men"
+   "note": "White cloth wrapped at the waist, worn by men",
+   "topic": "festivals"
   },
   {
    "id": "langa_voni",
@@ -332,7 +356,8 @@
    "translate_as": "langa voni (half-saree)",
    "roman": "langa voni",
    "category": "clothing",
-   "note": "Skirt, blouse and drape worn by girls"
+   "note": "Skirt, blouse and drape worn by girls",
+   "topic": "festivals"
   },
   {
    "id": "sankranti",
@@ -345,7 +370,8 @@
     "సంక్రాంతికి": "for Sankranti"
    },
    "category": "festival",
-   "note": "January harvest festival: kites, rangoli and ariselu"
+   "note": "January harvest festival: kites, rangoli and ariselu",
+   "topic": "festivals"
   },
   {
    "id": "ugadi",
@@ -358,7 +384,8 @@
     "ఉగాదికి": "for Ugadi"
    },
    "category": "festival",
-   "note": "Telugu New Year, celebrated with ugadi pachadi"
+   "note": "Telugu New Year, celebrated with ugadi pachadi",
+   "topic": "festivals"
   },
   {
    "id": "diwali",
@@ -373,7 +400,8 @@
     "దీపావళికి": "for Diwali"
    },
    "category": "festival",
-   "note": "Festival of lights with lamps, sweets and fireworks"
+   "note": "Festival of lights with lamps, sweets and fireworks",
+   "topic": "festivals"
   },
   {
    "id": "vinayaka_chavithi",
@@ -383,7 +411,8 @@
    ],
    "translate_as": "Vinayaka Chavithi",
    "category": "festival",
-   "note": "Ganesha's birthday, with clay idols and sweets"
+   "note": "Ganesha's birthday, with clay idols and sweets",
+   "topic": "festivals"
   },
   {
    "id": "bathukamma",
@@ -392,7 +421,8 @@
    ],
    "translate_as": "Bathukamma",
    "category": "festival",
-   "note": "Telangana flower festival celebrated by women"
+   "note": "Telangana flower festival celebrated by women",
+   "topic": "festivals"
   },
   {
    "id": "nanna_vocative",
@@ -440,7 +470,8 @@
    "roman": "Amma",
    "start_known": true,
    "category": "family",
-   "note": "Mother"
+   "note": "Mother",
+   "topic": "family"
   },
   {
    "id": "ammamma",
@@ -451,7 +482,8 @@
    "roman": "Ammamma",
    "start_known": true,
    "category": "family",
-   "note": "Mother's mother"
+   "note": "Mother's mother",
+   "topic": "family"
   },
   {
    "id": "nanamma",
@@ -463,7 +495,8 @@
    "roman": "Nanamma",
    "start_known": true,
    "category": "family",
-   "note": "Father's mother"
+   "note": "Father's mother",
+   "topic": "family"
   },
   {
    "id": "thatayya",
@@ -475,7 +508,8 @@
    "roman": "Thatayya",
    "start_known": true,
    "category": "family",
-   "note": "Grandfather"
+   "note": "Grandfather",
+   "topic": "family"
   },
   {
    "id": "mamayya",
@@ -485,7 +519,8 @@
    "translate_as": "uncle",
    "roman": "Mamayya",
    "category": "family",
-   "note": "Mother's brother"
+   "note": "Mother's brother",
+   "topic": "family"
   },
   {
    "id": "attayya",
@@ -495,7 +530,8 @@
    "translate_as": "aunt",
    "roman": "Attayya",
    "category": "family",
-   "note": "Father's sister"
+   "note": "Father's sister",
+   "topic": "family"
   },
   {
    "id": "bagunnava",
@@ -506,7 +542,8 @@
    "translate_as": "are you doing well",
    "roman": "bagunnava",
    "category": "phrase",
-   "note": "'Are you doing well?', the usual Telugu greeting"
+   "note": "'Are you doing well?', the usual Telugu greeting",
+   "topic": "greetings"
   },
   {
    "id": "annam_tinnava",
@@ -582,7 +619,8 @@
    "translate_as": "take care",
    "roman": "jagratta",
    "category": "phrase",
-   "note": "Take care; elders say it at the end of every call"
+   "note": "Take care; elders say it at the end of every call",
+   "topic": "greetings"
   },
   {
    "id": "baaga_chaduvuko",
@@ -593,7 +631,8 @@
    "translate_as": "study well",
    "roman": "baaga chaduvuko",
    "category": "phrase",
-   "note": "Study well"
+   "note": "Study well",
+   "topic": "school"
   },
   {
    "id": "eppudu_vastavu",
@@ -605,7 +644,8 @@
    "translate_as": "when will you come",
    "roman": "eppudu vastavu",
    "category": "phrase",
-   "note": "When will you come (home)?"
+   "note": "When will you come (home)?",
+   "topic": "plans"
   },
   {
    "id": "em_chestunnav",
@@ -617,7 +657,8 @@
    "translate_as": "what are you doing",
    "roman": "em chestunnav",
    "category": "phrase",
-   "note": "What are you doing?"
+   "note": "What are you doing?",
+   "topic": "greetings"
   },
   {
    "id": "illu",
@@ -638,7 +679,8 @@
    "match_english": [
     "home",
     "house"
-   ]
+   ],
+   "topic": "home"
   },
   {
    "id": "neellu",
@@ -659,7 +701,8 @@
    "substitute": false,
    "match_english": [
     "water"
-   ]
+   ],
+   "topic": "food"
   },
   {
    "id": "annam",
@@ -674,7 +717,8 @@
    "match_english": [
     "rice"
    ],
-   "start_known": true
+   "start_known": true,
+   "topic": "food"
   },
   {
    "id": "bhojanam",
@@ -689,7 +733,8 @@
    "match_english": [
     "meal",
     "food"
-   ]
+   ],
+   "topic": "food"
   },
   {
    "id": "kura",
@@ -705,7 +750,8 @@
    "match_english": [
     "curry",
     "curries"
-   ]
+   ],
+   "topic": "food"
   },
   {
    "id": "pachadi",
@@ -715,7 +761,8 @@
    "translate_as": "chutney",
    "roman": "pachadi",
    "category": "food",
-   "note": "Chutney or fresh pickle"
+   "note": "Chutney or fresh pickle",
+   "topic": "food"
   },
   {
    "id": "paalu",
@@ -729,7 +776,8 @@
    "substitute": false,
    "match_english": [
     "milk"
-   ]
+   ],
+   "topic": "food"
   },
   {
    "id": "perugu",
@@ -744,7 +792,8 @@
    "match_english": [
     "yogurt",
     "curd"
-   ]
+   ],
+   "topic": "food"
   },
   {
    "id": "neyyi",
@@ -758,7 +807,8 @@
    "substitute": false,
    "match_english": [
     "ghee"
-   ]
+   ],
+   "topic": "food"
   },
   {
    "id": "mamidi",
@@ -781,7 +831,8 @@
    "match_english": [
     "mangoes",
     "mango"
-   ]
+   ],
+   "topic": "food"
   },
   {
    "id": "arati",
@@ -802,7 +853,8 @@
    "match_english": [
     "bananas",
     "banana"
-   ]
+   ],
+   "topic": "food"
   },
   {
    "id": "kobbari",
@@ -820,7 +872,8 @@
    "substitute": false,
    "match_english": [
     "coconut"
-   ]
+   ],
+   "topic": "food"
   },
   {
    "id": "bellam",
@@ -830,7 +883,8 @@
    "translate_as": "jaggery",
    "roman": "bellam",
    "category": "food",
-   "note": "Unrefined cane sugar used in sweets"
+   "note": "Unrefined cane sugar used in sweets",
+   "topic": "food"
   },
   {
    "id": "payasam",
@@ -840,7 +894,8 @@
    "translate_as": "payasam",
    "roman": "payasam",
    "category": "food",
-   "note": "Sweet milk pudding made on festivals and birthdays"
+   "note": "Sweet milk pudding made on festivals and birthdays",
+   "topic": "food"
   },
   {
    "id": "boorelu",
@@ -850,7 +905,8 @@
    "translate_as": "boorelu",
    "roman": "boorelu",
    "category": "food",
-   "note": "Fried sweet dumplings stuffed with lentils and jaggery"
+   "note": "Fried sweet dumplings stuffed with lentils and jaggery",
+   "topic": "food"
   },
   {
    "id": "jantikalu",
@@ -860,7 +916,8 @@
    "translate_as": "murukku",
    "roman": "jantikalu",
    "category": "food",
-   "note": "Crunchy spiral snack"
+   "note": "Crunchy spiral snack",
+   "topic": "food"
   },
   {
    "id": "tiffin",
@@ -870,7 +927,8 @@
    "translate_as": "breakfast",
    "roman": "tiffin",
    "category": "food",
-   "note": "Breakfast or a light snack meal"
+   "note": "Breakfast or a light snack meal",
+   "topic": "food"
   },
   {
    "id": "prasadam",
@@ -880,7 +938,8 @@
    "translate_as": "prasadam",
    "roman": "prasadam",
    "category": "food",
-   "note": "Food blessed at the temple, shared with everyone"
+   "note": "Food blessed at the temple, shared with everyone",
+   "topic": "food"
   },
   {
    "id": "akka",
@@ -898,7 +957,8 @@
     "older sister",
     "elder sister",
     "sister"
-   ]
+   ],
+   "topic": "family"
   },
   {
    "id": "annayya",
@@ -916,7 +976,8 @@
     "older brother",
     "elder brother",
     "brother"
-   ]
+   ],
+   "topic": "family"
   },
   {
    "id": "tammudu",
@@ -935,7 +996,8 @@
    "match_english": [
     "younger brother",
     "brother"
-   ]
+   ],
+   "topic": "family"
   },
   {
    "id": "chelli",
@@ -951,7 +1013,8 @@
    "match_english": [
     "younger sister",
     "sister"
-   ]
+   ],
+   "topic": "family"
   },
   {
    "id": "babai",
@@ -962,7 +1025,8 @@
    "translate_as": "uncle",
    "roman": "babai",
    "category": "family",
-   "note": "Father's younger brother"
+   "note": "Father's younger brother",
+   "topic": "family"
   },
   {
    "id": "pinni",
@@ -972,7 +1036,8 @@
    "translate_as": "aunt",
    "roman": "pinni",
    "category": "family",
-   "note": "Mother's younger sister"
+   "note": "Mother's younger sister",
+   "topic": "family"
   },
   {
    "id": "bava",
@@ -982,7 +1047,8 @@
    "translate_as": "bava",
    "roman": "bava",
    "category": "family",
-   "note": "Brother-in-law, or a cross cousin"
+   "note": "Brother-in-law, or a cross cousin",
+   "topic": "family"
   },
   {
    "id": "manavadu",
@@ -997,7 +1063,8 @@
    "substitute": false,
    "match_english": [
     "grandson"
-   ]
+   ],
+   "topic": "family"
   },
   {
    "id": "manavaralu",
@@ -1020,7 +1087,8 @@
    "match_english": [
     "granddaughters",
     "granddaughter"
-   ]
+   ],
+   "topic": "family"
   },
   {
    "id": "badi",
@@ -1038,7 +1106,8 @@
    "substitute": false,
    "match_english": [
     "school"
-   ]
+   ],
+   "topic": "school"
   },
   {
    "id": "railu",
@@ -1056,7 +1125,8 @@
    "substitute": false,
    "match_english": [
     "train"
-   ]
+   ],
+   "topic": "travel"
   },
   {
    "id": "pelli",
@@ -1078,7 +1148,8 @@
    "match_english": [
     "wedding",
     "marriage"
-   ]
+   ],
+   "topic": "festivals"
   },
   {
    "id": "puja",
@@ -1088,7 +1159,8 @@
    "translate_as": "puja",
    "roman": "puja",
    "category": "festival",
-   "note": "Prayer ritual at home or at the temple"
+   "note": "Prayer ritual at home or at the temple",
+   "topic": "festivals"
   },
   {
    "id": "devudu",
@@ -1103,7 +1175,8 @@
    "substitute": false,
    "match_english": [
     "God"
-   ]
+   ],
+   "topic": "festivals"
   },
   {
    "id": "muggu",
@@ -1114,7 +1187,8 @@
    "translate_as": "rangoli",
    "roman": "muggu",
    "category": "festival",
-   "note": "Patterns drawn at the doorstep, big at Sankranti"
+   "note": "Patterns drawn at the doorstep, big at Sankranti",
+   "topic": "festivals"
   },
   {
    "id": "galipatam",
@@ -1135,7 +1209,8 @@
    "match_english": [
     "kites",
     "kite"
-   ]
+   ],
+   "topic": "festivals"
   },
   {
    "id": "pattu_cheera",
@@ -1146,7 +1221,8 @@
    "translate_as": "silk saree",
    "roman": "pattu cheera",
    "category": "clothing",
-   "note": "Silk saree for festivals and weddings"
+   "note": "Silk saree for festivals and weddings",
+   "topic": "festivals"
   },
   {
    "id": "gajulu",
@@ -1156,7 +1232,8 @@
    "translate_as": "bangles",
    "roman": "gajulu",
    "category": "clothing",
-   "note": "Glass or gold bangles"
+   "note": "Glass or gold bangles",
+   "topic": "festivals"
   },
   {
    "id": "bottu",
@@ -1166,7 +1243,8 @@
    "translate_as": "bindi",
    "roman": "bottu",
    "category": "clothing",
-   "note": "Dot on the forehead"
+   "note": "Dot on the forehead",
+   "topic": "festivals"
   },
   {
    "id": "vana",
@@ -1185,7 +1263,8 @@
    "match_english": [
     "rains",
     "rain"
-   ]
+   ],
+   "topic": "weather"
   },
   {
    "id": "enda",
@@ -1205,7 +1284,8 @@
     "heat",
     "sunshine",
     "sun"
-   ]
+   ],
+   "topic": "weather"
   },
   {
    "id": "chali",
@@ -1219,7 +1299,8 @@
    "substitute": false,
    "match_english": [
     "cold"
-   ]
+   ],
+   "topic": "weather"
   },
   {
    "id": "jwaram",
@@ -1233,7 +1314,8 @@
    "substitute": false,
    "match_english": [
     "fever"
-   ]
+   ],
+   "topic": "health"
   },
   {
    "id": "mandulu",
@@ -1250,7 +1332,8 @@
     "medicine",
     "medication",
     "tablets"
-   ]
+   ],
+   "topic": "health"
   },
   {
    "id": "aavu",
@@ -1269,7 +1352,8 @@
    "match_english": [
     "cows",
     "cow"
-   ]
+   ],
+   "topic": "home"
   },
   {
    "id": "koti_vidyalu",
@@ -1469,7 +1553,8 @@
     "work"
    ],
    "category": "word",
-   "note": "Work, chores"
+   "note": "Work, chores",
+   "topic": "school"
   },
   {
    "id": "udyogam",
@@ -1482,7 +1567,8 @@
     "job"
    ],
    "category": "word",
-   "note": "Job"
+   "note": "Job",
+   "topic": "school"
   },
   {
    "id": "dabbulu",
@@ -1511,7 +1597,8 @@
     "kids"
    ],
    "category": "word",
-   "note": "Children"
+   "note": "Children",
+   "topic": "family"
   },
   {
    "id": "snehitulu",
@@ -1539,7 +1626,8 @@
     "dog"
    ],
    "category": "word",
-   "note": "Dog"
+   "note": "Dog",
+   "topic": "home"
   },
   {
    "id": "pilli",
@@ -1552,7 +1640,8 @@
     "cat"
    ],
    "category": "word",
-   "note": "Cat"
+   "note": "Cat",
+   "topic": "home"
   },
   {
    "id": "puvvulu",
@@ -1566,7 +1655,8 @@
     "flowers"
    ],
    "category": "word",
-   "note": "Flowers"
+   "note": "Flowers",
+   "topic": "home"
   },
   {
    "id": "chettu",
@@ -1581,7 +1671,8 @@
     "tree"
    ],
    "category": "word",
-   "note": "Tree"
+   "note": "Tree",
+   "topic": "home"
   },
   {
    "id": "nidra",
@@ -1594,7 +1685,8 @@
     "sleep"
    ],
    "category": "word",
-   "note": "Sleep"
+   "note": "Sleep",
+   "topic": "health"
   },
   {
    "id": "aakali",
@@ -1610,7 +1702,8 @@
     "hunger"
    ],
    "category": "word",
-   "note": "Hungry"
+   "note": "Hungry",
+   "topic": "food"
   },
   {
    "id": "kaalu",
@@ -1625,7 +1718,8 @@
     "leg"
    ],
    "category": "word",
-   "note": "Leg"
+   "note": "Leg",
+   "topic": "health"
   },
   {
    "id": "tala",
@@ -1639,7 +1733,8 @@
     "head"
    ],
    "category": "word",
-   "note": "Head"
+   "note": "Head",
+   "topic": "health"
   },
   {
    "id": "kallu",
@@ -1653,7 +1748,8 @@
     "eyes"
    ],
    "category": "word",
-   "note": "Eyes"
+   "note": "Eyes",
+   "topic": "health"
   },
   {
    "id": "batalu",
@@ -1682,7 +1778,8 @@
     "scooter"
    ],
    "category": "word",
-   "note": "Vehicle (car, bike or scooter)"
+   "note": "Vehicle (car, bike or scooter)",
+   "topic": "travel"
   },
   {
    "id": "ooru_word",
@@ -1699,7 +1796,8 @@
     "town"
    ],
    "category": "word",
-   "note": "Hometown / village"
+   "note": "Hometown / village",
+   "topic": "home"
   },
   {
    "id": "vaaram",
@@ -1751,7 +1849,8 @@
     "love"
    ],
    "category": "word",
-   "note": "Love"
+   "note": "Love",
+   "topic": "feelings"
   },
   {
    "id": "bangaram",
@@ -1913,7 +2012,8 @@
    },
    "roman": "chaala santosham",
    "category": "phrase",
-   "note": "'I'm so happy', often said when you share good news with them"
+   "note": "'I'm so happy', often said when you share good news with them",
+   "topic": "feelings"
   },
   {
    "id": "baaga_tinu",
@@ -1924,7 +2024,8 @@
    "translate_as": "eat well",
    "roman": "baaga tinu",
    "category": "phrase",
-   "note": "'Eat well.' Grandparents show love by making sure you eat"
+   "note": "'Eat well.' Grandparents show love by making sure you eat",
+   "topic": "food"
   },
   {
    "id": "kadupu_ninda",
@@ -1935,7 +2036,8 @@
    "translate_as": "eat until you're full",
    "roman": "kadupu ninda",
    "category": "phrase",
-   "note": "'Eat until your stomach is full', a grandparent's favourite instruction"
+   "note": "'Eat until your stomach is full', a grandparent's favourite instruction",
+   "topic": "food"
   },
   {
    "id": "arogyam",
@@ -1949,7 +2051,8 @@
    },
    "roman": "aarogyam",
    "category": "phrase",
-   "note": "'Take care of your health.' Health is the first thing elders ask about"
+   "note": "'Take care of your health.' Health is the first thing elders ask about",
+   "topic": "health"
   },
   {
    "id": "ashirvadam",
@@ -1964,7 +2067,8 @@
     "blessing"
    ],
    "category": "culture",
-   "note": "Blessings. Kids touch elders' feet and the elder blesses them"
+   "note": "Blessings. Kids touch elders' feet and the elder blesses them",
+   "topic": "feelings"
   },
   {
    "id": "deerghayushman",
@@ -1976,7 +2080,8 @@
    "translate_as": "may you live a long life",
    "roman": "deerghayushman bhava",
    "category": "culture",
-   "note": "'May you live a long life', the blessing elders give when you touch their feet"
+   "note": "'May you live a long life', the blessing elders give when you touch their feet",
+   "topic": "feelings"
   },
   {
    "id": "dishti",
@@ -1992,7 +2097,8 @@
    },
    "roman": "dishti",
    "category": "culture",
-   "note": "The 'evil eye': jealous looks that can bring bad luck. Grandmas 'remove dishti' by circling salt or red chillies around you"
+   "note": "The 'evil eye': jealous looks that can bring bad luck. Grandmas 'remove dishti' by circling salt or red chillies around you",
+   "topic": "feelings"
   },
   {
    "id": "akshintalu",
@@ -2002,7 +2108,8 @@
    "translate_as": "blessed rice",
    "roman": "akshintalu",
    "category": "culture",
-   "note": "Rice grains with turmeric, sprinkled on your head as a blessing at weddings and festivals"
+   "note": "Rice grains with turmeric, sprinkled on your head as a blessing at weddings and festivals",
+   "topic": "festivals"
   },
   {
    "id": "namaskaram",
@@ -2014,7 +2121,8 @@
    "translate_as": "namaste",
    "roman": "namaskaram",
    "category": "culture",
-   "note": "Greeting with palms pressed together; respectful hello to elders"
+   "note": "Greeting with palms pressed together; respectful hello to elders",
+   "topic": "greetings"
   },
   {
    "id": "harathi",
@@ -2024,7 +2132,8 @@
    "translate_as": "aarti",
    "roman": "harathi",
    "category": "culture",
-   "note": "Waving a lit lamp in circles in front of God (or a person) as a blessing"
+   "note": "Waving a lit lamp in circles in front of God (or a person) as a blessing",
+   "topic": "festivals"
   },
   {
    "id": "upavasam",
@@ -2038,7 +2147,8 @@
     "fast"
    ],
    "category": "culture",
-   "note": "A religious fast; skipping food or eating only certain things on holy days"
+   "note": "A religious fast; skipping food or eating only certain things on holy days",
+   "topic": "festivals"
   },
   {
    "id": "mokku",
@@ -2054,7 +2164,8 @@
    },
    "roman": "mokku",
    "category": "culture",
-   "note": "A promise to God, e.g. to visit Tirupati if a wish comes true"
+   "note": "A promise to God, e.g. to visit Tirupati if a wish comes true",
+   "topic": "festivals"
   },
   {
    "id": "pandaga",
@@ -2071,7 +2182,8 @@
     "feast"
    ],
    "category": "festival",
-   "note": "Festival: family, new clothes, special food"
+   "note": "Festival: family, new clothes, special food",
+   "topic": "festivals"
   },
   {
    "id": "puttina_roju",
@@ -2085,7 +2197,8 @@
     "birthday"
    ],
    "category": "festival",
-   "note": "Birthday: often starts with a temple visit and a new outfit"
+   "note": "Birthday: often starts with a temple visit and a new outfit",
+   "topic": "festivals"
   },
   {
    "id": "bandhuvulu",
@@ -2101,7 +2214,8 @@
     "guests"
    ],
    "category": "family",
-   "note": "Relatives: the big extended family that visits during festivals"
+   "note": "Relatives: the big extended family that visits during festivals",
+   "topic": "family"
   },
   {
    "id": "subhakankshalu",
@@ -2116,7 +2230,8 @@
     "greetings"
    ],
    "category": "culture",
-   "note": "Best wishes, e.g. 'Sankranti subhakankshalu' = Happy Sankranti"
+   "note": "Best wishes, e.g. 'Sankranti subhakankshalu' = Happy Sankranti",
+   "topic": "festivals"
   },
   {
    "id": "peddavallu",
@@ -2132,7 +2247,8 @@
     "elders"
    ],
    "category": "family",
-   "note": "Elders. Respecting peddavallu is a core family value"
+   "note": "Elders. Respecting peddavallu is a core family value",
+   "topic": "family"
   },
   {
    "id": "pilli_kallu",
@@ -2203,7 +2319,8 @@
    "translate_as": "shell-shaped sweets",
    "roman": "gavvalu",
    "category": "food",
-   "note": "Little shell-shaped fried sweets coated in jaggery, made for festivals"
+   "note": "Little shell-shaped fried sweets coated in jaggery, made for festivals",
+   "topic": "food"
   },
   {
    "id": "sunnundalu",
@@ -2214,7 +2331,8 @@
    "translate_as": "urad dal laddus",
    "roman": "sunnundalu",
    "category": "food",
-   "note": "Laddus of roasted urad dal, jaggery and ghee; a classic Andhra sweet"
+   "note": "Laddus of roasted urad dal, jaggery and ghee; a classic Andhra sweet",
+   "topic": "food"
   },
   {
    "id": "punugulu",
@@ -2224,7 +2342,8 @@
    "translate_as": "punugulu fritters",
    "roman": "punugulu",
    "category": "food",
-   "note": "Crispy fried balls of dosa batter, a rainy-evening snack"
+   "note": "Crispy fried balls of dosa batter, a rainy-evening snack",
+   "topic": "food"
   },
   {
    "id": "pulusu",
@@ -2234,7 +2353,8 @@
    "translate_as": "tamarind stew",
    "roman": "pulusu",
    "category": "food",
-   "note": "Tangy tamarind stew with vegetables or fish"
+   "note": "Tangy tamarind stew with vegetables or fish",
+   "topic": "food"
   },
   {
    "id": "chepala_pulusu",
@@ -2244,7 +2364,8 @@
    "translate_as": "fish curry",
    "roman": "chepala pulusu",
    "category": "food",
-   "note": "Fish simmered in tangy tamarind gravy, a coastal Andhra favourite"
+   "note": "Fish simmered in tangy tamarind gravy, a coastal Andhra favourite",
+   "topic": "food"
   },
   {
    "id": "kodi_kura",
@@ -2255,7 +2376,8 @@
    "translate_as": "chicken curry",
    "roman": "kodi kura",
    "category": "food",
-   "note": "Spicy Andhra chicken curry"
+   "note": "Spicy Andhra chicken curry",
+   "topic": "food"
   },
   {
    "id": "gutti_vankaya",
@@ -2267,7 +2389,8 @@
    "translate_as": "stuffed brinjal curry",
    "roman": "gutti vankaya",
    "category": "food",
-   "note": "Baby eggplants stuffed with a peanut-sesame masala; a wedding-feast classic"
+   "note": "Baby eggplants stuffed with a peanut-sesame masala; a wedding-feast classic",
+   "topic": "food"
   },
   {
    "id": "bendakaya",
@@ -2279,7 +2402,8 @@
    "translate_as": "okra",
    "roman": "bendakaya",
    "category": "food",
-   "note": "Okra (ladies' finger), often fried crisp"
+   "note": "Okra (ladies' finger), often fried crisp",
+   "topic": "food"
   },
   {
    "id": "munagakaya",
@@ -2292,7 +2416,8 @@
    "translate_as": "drumsticks",
    "roman": "munagakaya",
    "category": "food",
-   "note": "Drumstick (moringa) pods; you suck the inside out of them in sambar and pulusu"
+   "note": "Drumstick (moringa) pods; you suck the inside out of them in sambar and pulusu",
+   "topic": "food"
   },
   {
    "id": "dondakaya",
@@ -2303,7 +2428,8 @@
    "translate_as": "ivy gourd",
    "roman": "dondakaya",
    "category": "food",
-   "note": "Ivy gourd, a crunchy little vegetable stir-fried Andhra style"
+   "note": "Ivy gourd, a crunchy little vegetable stir-fried Andhra style",
+   "topic": "food"
   },
   {
    "id": "ulavacharu",
@@ -2313,7 +2439,8 @@
    "translate_as": "horse gram soup",
    "roman": "ulavacharu",
    "category": "food",
-   "note": "Thick, smoky horse-gram soup, an Andhra delicacy"
+   "note": "Thick, smoky horse-gram soup, an Andhra delicacy",
+   "topic": "food"
   },
   {
    "id": "pongali",
@@ -2325,7 +2452,8 @@
    "translate_as": "pongal",
    "roman": "pongali",
    "category": "food",
-   "note": "Rice and lentils cooked with ghee; made sweet with jaggery for festivals"
+   "note": "Rice and lentils cooked with ghee; made sweet with jaggery for festivals",
+   "topic": "food"
   },
   {
    "id": "dibba_rotti",
@@ -2336,7 +2464,8 @@
    "translate_as": "thick rice pancake",
    "roman": "dibba rotti",
    "category": "food",
-   "note": "A thick, crusty pancake of urad dal and rice"
+   "note": "A thick, crusty pancake of urad dal and rice",
+   "topic": "food"
   },
   {
    "id": "kajjikayalu",
@@ -2347,7 +2476,8 @@
    "translate_as": "sweet dumplings",
    "roman": "kajjikayalu",
    "category": "food",
-   "note": "Fried half-moon pastries stuffed with coconut and jaggery"
+   "note": "Fried half-moon pastries stuffed with coconut and jaggery",
+   "topic": "food"
   },
   {
    "id": "palakova",
@@ -2358,7 +2488,8 @@
    "translate_as": "milk sweet",
    "roman": "palakova",
    "category": "food",
-   "note": "Soft fudge made by slowly cooking down milk"
+   "note": "Soft fudge made by slowly cooking down milk",
+   "topic": "food"
   },
   {
    "id": "bajji",
@@ -2371,7 +2502,8 @@
    "translate_as": "fritters",
    "roman": "bajji",
    "category": "food",
-   "note": "Chillies or vegetables dipped in gram-flour batter and fried; rainy-day snack"
+   "note": "Chillies or vegetables dipped in gram-flour batter and fried; rainy-day snack",
+   "topic": "food"
   },
   {
    "id": "garelu",
@@ -2382,7 +2514,8 @@
    "translate_as": "lentil doughnuts",
    "roman": "garelu",
    "category": "food",
-   "note": "Crispy urad-dal doughnuts, made for festivals and guests"
+   "note": "Crispy urad-dal doughnuts, made for festivals and guests",
+   "topic": "food"
   },
   {
    "id": "atukulu",
@@ -2392,7 +2525,8 @@
    "translate_as": "flattened rice",
    "roman": "atukulu",
    "category": "food",
-   "note": "Flattened rice (poha), cooked with peanuts and onions"
+   "note": "Flattened rice (poha), cooked with peanuts and onions",
+   "topic": "food"
   },
   {
    "id": "taati_munjalu",
@@ -2403,7 +2537,8 @@
    "translate_as": "ice apples",
    "roman": "taati munjalu",
    "category": "food",
-   "note": "Cool, jelly-like palm fruit eaten in the summer heat"
+   "note": "Cool, jelly-like palm fruit eaten in the summer heat",
+   "topic": "food"
   },
   {
    "id": "ugadi_pachadi",
@@ -2413,7 +2548,8 @@
    "translate_as": "Ugadi chutney",
    "roman": "ugadi pachadi",
    "category": "food",
-   "note": "Six tastes in one bite (sweet, sour, bitter, spicy, salty, tangy): life's joys and sorrows, eaten on Ugadi"
+   "note": "Six tastes in one bite (sweet, sour, bitter, spicy, salty, tangy): life's joys and sorrows, eaten on Ugadi",
+   "topic": "food"
   },
   {
    "id": "panakam",
@@ -2423,7 +2559,8 @@
    "translate_as": "jaggery drink",
    "roman": "panakam",
    "category": "food",
-   "note": "Cool jaggery, pepper and cardamom drink served on Sri Rama Navami"
+   "note": "Cool jaggery, pepper and cardamom drink served on Sri Rama Navami",
+   "topic": "food"
   },
   {
    "id": "majjiga",
@@ -2433,7 +2570,8 @@
    "translate_as": "buttermilk",
    "roman": "majjiga",
    "category": "food",
-   "note": "Spiced buttermilk, the summer drink in every Telugu home"
+   "note": "Spiced buttermilk, the summer drink in every Telugu home",
+   "topic": "food"
   },
   {
    "id": "karam_podi",
@@ -2444,7 +2582,8 @@
    "translate_as": "spice powder",
    "roman": "karam podi",
    "category": "food",
-   "note": "Spicy lentil powder mixed into hot rice with ghee (\"gunpowder\")"
+   "note": "Spicy lentil powder mixed into hot rice with ghee (\"gunpowder\")",
+   "topic": "food"
   },
   {
    "id": "tiffin_box",
@@ -2456,7 +2595,8 @@
    "translate_as": "lunch box",
    "roman": "carriage",
    "category": "culture",
-   "note": "Stacked steel lunch carrier sent to school and the office"
+   "note": "Stacked steel lunch carrier sent to school and the office",
+   "topic": "food"
   },
   {
    "id": "kattela_poyyi",
@@ -2467,7 +2607,8 @@
    "translate_as": "wood stove",
    "roman": "kattela poyyi",
    "category": "culture",
-   "note": "Wood-fire stove; grandmothers say food tasted better cooked on it"
+   "note": "Wood-fire stove; grandmothers say food tasted better cooked on it",
+   "topic": "home"
   },
   {
    "id": "bhogi",
@@ -2485,7 +2626,8 @@
     "భోగి మంటలు": "Bhogi bonfires",
     "భోగి మంట": "Bhogi bonfire",
     "భోగికి": "for Bhogi"
-   }
+   },
+   "topic": "festivals"
   },
   {
    "id": "bhogi_pallu",
@@ -2497,7 +2639,8 @@
    "translate_as": "Bhogi fruits",
    "roman": "bhogi pallu",
    "category": "culture",
-   "note": "Jujube fruits and coins showered on children's heads at Bhogi as a blessing"
+   "note": "Jujube fruits and coins showered on children's heads at Bhogi as a blessing",
+   "topic": "festivals"
   },
   {
    "id": "kanuma",
@@ -2508,7 +2651,8 @@
    "translate_as": "Kanuma",
    "roman": "Kanuma",
    "category": "festival",
-   "note": "Third day of Sankranti, when families thank and decorate their cattle"
+   "note": "Third day of Sankranti, when families thank and decorate their cattle",
+   "topic": "festivals"
   },
   {
    "id": "gangireddu",
@@ -2520,7 +2664,8 @@
    "translate_as": "decorated bulls",
    "roman": "gangireddu",
    "category": "culture",
-   "note": "Bulls decked in colourful cloth that go house to house at Sankranti, nodding and bowing to music"
+   "note": "Bulls decked in colourful cloth that go house to house at Sankranti, nodding and bowing to music",
+   "topic": "festivals"
   },
   {
    "id": "haridasu",
@@ -2531,7 +2676,8 @@
    "translate_as": "Haridasu singer",
    "roman": "haridasu",
    "category": "culture",
-   "note": "A singer with a copper pot on his head who walks the streets at dawn during Sankranti month"
+   "note": "A singer with a copper pot on his head who walks the streets at dawn during Sankranti month",
+   "topic": "festivals"
   },
   {
    "id": "gobbemmalu",
@@ -2542,7 +2688,8 @@
    "translate_as": "gobbemmalu",
    "roman": "gobbemmalu",
    "category": "culture",
-   "note": "Little cow-dung mounds topped with flowers, set on the muggulu at Sankranti"
+   "note": "Little cow-dung mounds topped with flowers, set on the muggulu at Sankranti",
+   "topic": "festivals"
   },
   {
    "id": "bonalu",
@@ -2552,7 +2699,8 @@
    "translate_as": "Bonalu",
    "roman": "Bonalu",
    "category": "festival",
-   "note": "Hyderabad's festival where women carry decorated pots of food to the goddess"
+   "note": "Hyderabad's festival where women carry decorated pots of food to the goddess",
+   "topic": "festivals"
   },
   {
    "id": "sri_rama_navami",
@@ -2565,7 +2713,8 @@
    "translate_as": "Sri Rama Navami",
    "roman": "Sri Rama Navami",
    "category": "festival",
-   "note": "Lord Rama's birthday, with panakam and vadapappu"
+   "note": "Lord Rama's birthday, with panakam and vadapappu",
+   "topic": "festivals"
   },
   {
    "id": "varalakshmi_vratam",
@@ -2577,7 +2726,8 @@
    "translate_as": "Varalakshmi Vratam",
    "roman": "Varalakshmi Vratam",
    "category": "festival",
-   "note": "A puja women do to the goddess Lakshmi for the family's well-being"
+   "note": "A puja women do to the goddess Lakshmi for the family's well-being",
+   "topic": "festivals"
   },
   {
    "id": "rakhi",
@@ -2589,7 +2739,8 @@
    "translate_as": "Rakhi",
    "roman": "Rakhi",
    "category": "festival",
-   "note": "Sisters tie a thread on their brothers' wrists; brothers promise to look after them"
+   "note": "Sisters tie a thread on their brothers' wrists; brothers promise to look after them",
+   "topic": "festivals"
   },
   {
    "id": "krishnashtami",
@@ -2600,7 +2751,8 @@
    "translate_as": "Krishnashtami",
    "roman": "Krishnashtami",
    "category": "festival",
-   "note": "Krishna's birthday; little footprints are drawn from the door to the puja room"
+   "note": "Krishna's birthday; little footprints are drawn from the door to the puja room",
+   "topic": "festivals"
   },
   {
    "id": "dasara",
@@ -2612,7 +2764,8 @@
    "translate_as": "Dasara",
    "roman": "Dasara",
    "category": "festival",
-   "note": "Ten-day festival of the goddess; kids get long school holidays"
+   "note": "Ten-day festival of the goddess; kids get long school holidays",
+   "topic": "festivals"
   },
   {
    "id": "holi",
@@ -2623,7 +2776,8 @@
    "translate_as": "Holi",
    "roman": "Holi",
    "category": "festival",
-   "note": "Festival of colours"
+   "note": "Festival of colours",
+   "topic": "festivals"
   },
   {
    "id": "karthika_masam",
@@ -2635,7 +2789,8 @@
    "translate_as": "the month of Karthikam",
    "roman": "Karthika masam",
    "category": "festival",
-   "note": "A holy month of lamps: lamps floated on water, fasting and temple visits"
+   "note": "A holy month of lamps: lamps floated on water, fasting and temple visits",
+   "topic": "festivals"
   },
   {
    "id": "atla_taddi",
@@ -2645,7 +2800,8 @@
    "translate_as": "Atla Taddi",
    "roman": "Atla Taddi",
    "category": "festival",
-   "note": "Girls' festival of swings, dosas (atlu) and fasting"
+   "note": "Girls' festival of swings, dosas (atlu) and fasting",
+   "topic": "festivals"
   },
   {
    "id": "deepam",
@@ -2660,7 +2816,8 @@
    "match_english": [
     "lamp",
     "lamps"
-   ]
+   ],
+   "topic": "home"
   },
   {
    "id": "tholu_bommalata",
@@ -2671,7 +2828,8 @@
    "translate_as": "leather puppet show",
    "roman": "tholu bommalata",
    "category": "culture",
-   "note": "Andhra's shadow-puppet theatre: leather puppets telling Ramayana stories"
+   "note": "Andhra's shadow-puppet theatre: leather puppets telling Ramayana stories",
+   "topic": "festivals"
   },
   {
    "id": "burrakatha",
@@ -2682,7 +2840,8 @@
    "translate_as": "Burrakatha",
    "roman": "burrakatha",
    "category": "culture",
-   "note": "Storytelling with songs and drums by a trio of performers"
+   "note": "Storytelling with songs and drums by a trio of performers",
+   "topic": "festivals"
   },
   {
    "id": "kolatam",
@@ -2692,7 +2851,8 @@
    "translate_as": "stick dance",
    "roman": "kolatam",
    "category": "culture",
-   "note": "Folk dance with pairs of sticks clicked together in rhythm"
+   "note": "Folk dance with pairs of sticks clicked together in rhythm",
+   "topic": "festivals"
   },
   {
    "id": "uyyala",
@@ -2704,7 +2864,8 @@
    "translate_as": "swing",
    "roman": "uyyala",
    "category": "culture",
-   "note": "The swing hung from a tree or in the hall; 'uyyala jampala' is a lullaby"
+   "note": "The swing hung from a tree or in the hall; 'uyyala jampala' is a lullaby",
+   "topic": "home"
   },
   {
    "id": "mallepoolu",
@@ -2716,7 +2877,8 @@
    "translate_as": "jasmine flowers",
    "roman": "mallepoolu",
    "category": "culture",
-   "note": "Jasmine strings worn in the hair every evening"
+   "note": "Jasmine strings worn in the hair every evening",
+   "topic": "home"
   },
   {
    "id": "banti_poolu",
@@ -2727,7 +2889,8 @@
    "translate_as": "marigolds",
    "roman": "banti poolu",
    "category": "culture",
-   "note": "Marigolds, strung into garlands for festivals and doorways"
+   "note": "Marigolds, strung into garlands for festivals and doorways",
+   "topic": "home"
   },
   {
    "id": "tamara",
@@ -2739,7 +2902,8 @@
    "translate_as": "lotus",
    "roman": "tamara puvvu",
    "category": "culture",
-   "note": "Lotus, the flower in temple ponds and in every goddess picture"
+   "note": "Lotus, the flower in temple ponds and in every goddess picture",
+   "topic": "home"
   },
   {
    "id": "pasupu",
@@ -2757,7 +2921,8 @@
    "substitute": false,
    "match_english": [
     "turmeric"
-   ]
+   ],
+   "topic": "home"
   },
   {
    "id": "kumkuma",
@@ -2768,7 +2933,8 @@
    "translate_as": "kumkum",
    "roman": "kumkuma",
    "category": "culture",
-   "note": "Red powder worn on the forehead; offered with turmeric as a blessing"
+   "note": "Red powder worn on the forehead; offered with turmeric as a blessing",
+   "topic": "home"
   },
   {
    "id": "thoranam",
@@ -2780,7 +2946,8 @@
    "translate_as": "mango-leaf garland",
    "roman": "thoranam",
    "category": "culture",
-   "note": "Mango leaves strung over the door for festivals and new beginnings"
+   "note": "Mango leaves strung over the door for festivals and new beginnings",
+   "topic": "festivals"
   },
   {
    "id": "vistari",
@@ -2793,7 +2960,8 @@
    "translate_as": "leaf plate",
    "roman": "vistari",
    "category": "culture",
-   "note": "Festival and wedding meals are served on a banana leaf or leaf plate"
+   "note": "Festival and wedding meals are served on a banana leaf or leaf plate",
+   "topic": "festivals"
   },
   {
    "id": "kondapalli_bommalu",
@@ -2803,7 +2971,8 @@
    "translate_as": "Kondapalli toys",
    "roman": "Kondapalli bommalu",
    "category": "culture",
-   "note": "Colourful wooden toys from Kondapalli village near Vijayawada"
+   "note": "Colourful wooden toys from Kondapalli village near Vijayawada",
+   "topic": "festivals"
   },
   {
    "id": "etikoppaka",
@@ -2814,7 +2983,8 @@
    "translate_as": "lacquer toys",
    "roman": "Etikoppaka bommalu",
    "category": "culture",
-   "note": "Smooth, bright lacquered wooden toys from Etikoppaka"
+   "note": "Smooth, bright lacquered wooden toys from Etikoppaka",
+   "topic": "festivals"
   },
   {
    "id": "panchangam",
@@ -2825,7 +2995,8 @@
    "translate_as": "almanac",
    "roman": "panchangam",
    "category": "culture",
-   "note": "The Telugu almanac, read aloud on Ugadi to foretell the year"
+   "note": "The Telugu almanac, read aloud on Ugadi to foretell the year",
+   "topic": "festivals"
   },
   {
    "id": "muhurtham",
@@ -2836,7 +3007,8 @@
    "translate_as": "auspicious time",
    "roman": "muhurtham",
    "category": "culture",
-   "note": "An auspicious time picked from the almanac for weddings, housewarmings and journeys"
+   "note": "An auspicious time picked from the almanac for weddings, housewarmings and journeys",
+   "topic": "festivals"
   },
   {
    "id": "gruhapravesham",
@@ -2847,7 +3019,8 @@
    "translate_as": "housewarming",
    "roman": "gruhapravesham",
    "category": "festival",
-   "note": "Housewarming: milk is boiled over for plenty, and the family enters at the auspicious time"
+   "note": "Housewarming: milk is boiled over for plenty, and the family enters at the auspicious time",
+   "topic": "festivals"
   },
   {
    "id": "seemantham",
@@ -2857,7 +3030,8 @@
    "translate_as": "baby shower",
    "roman": "seemantham",
    "category": "festival",
-   "note": "Traditional baby shower: glass bangles and blessings for the mother-to-be"
+   "note": "Traditional baby shower: glass bangles and blessings for the mother-to-be",
+   "topic": "festivals"
   },
   {
    "id": "upanayanam",
@@ -2868,7 +3042,8 @@
    "translate_as": "thread ceremony",
    "roman": "upanayanam",
    "category": "festival",
-   "note": "Sacred-thread ceremony for boys"
+   "note": "Sacred-thread ceremony for boys",
+   "topic": "festivals"
   },
   {
    "id": "barasala",
@@ -2878,7 +3053,8 @@
    "translate_as": "naming ceremony",
    "roman": "barasala",
    "category": "festival",
-   "note": "A baby's naming ceremony, around the 21st day, with the baby in a cradle"
+   "note": "A baby's naming ceremony, around the 21st day, with the baby in a cradle",
+   "topic": "festivals"
   },
   {
    "id": "annaprasana",
@@ -2888,7 +3064,8 @@
    "translate_as": "first rice ceremony",
    "roman": "annaprasana",
    "category": "festival",
-   "note": "A baby's first taste of rice, at about six months"
+   "note": "A baby's first taste of rice, at about six months",
+   "topic": "festivals"
   },
   {
    "id": "talambralu",
@@ -2898,7 +3075,8 @@
    "translate_as": "wedding rice shower",
    "roman": "talambralu",
    "category": "culture",
-   "note": "At the wedding, bride and groom pour turmeric rice over each other's heads, laughing"
+   "note": "At the wedding, bride and groom pour turmeric rice over each other's heads, laughing",
+   "topic": "festivals"
   },
   {
    "id": "jeelakarra_bellam",
@@ -2908,7 +3086,8 @@
    "translate_as": "cumin-jaggery blessing",
    "roman": "jeelakarra bellam",
    "category": "culture",
-   "note": "The wedding's key moment: cumin-jaggery paste placed on each other's heads"
+   "note": "The wedding's key moment: cumin-jaggery paste placed on each other's heads",
+   "topic": "festivals"
   },
   {
    "id": "mangalasutram",
@@ -2919,7 +3098,8 @@
    "translate_as": "mangalsutra",
    "roman": "mangalasutram",
    "category": "clothing",
-   "note": "The sacred necklace a groom ties at the wedding"
+   "note": "The sacred necklace a groom ties at the wedding",
+   "topic": "festivals"
   },
   {
    "id": "mettelu",
@@ -2929,7 +3109,8 @@
    "translate_as": "toe rings",
    "roman": "mettelu",
    "category": "clothing",
-   "note": "Silver toe rings worn by married women"
+   "note": "Silver toe rings worn by married women",
+   "topic": "festivals"
   },
   {
    "id": "pattilu",
@@ -2941,7 +3122,8 @@
    "translate_as": "anklets",
    "roman": "pattilu",
    "category": "clothing",
-   "note": "Silver anklets that jingle as you walk"
+   "note": "Silver anklets that jingle as you walk",
+   "topic": "festivals"
   },
   {
    "id": "pochampally",
@@ -2952,7 +3134,8 @@
    "translate_as": "Pochampally",
    "roman": "Pochampally",
    "category": "clothing",
-   "note": "Pochampally ikat: silk woven in geometric patterns near Hyderabad"
+   "note": "Pochampally ikat: silk woven in geometric patterns near Hyderabad",
+   "topic": "festivals"
   },
   {
    "id": "kalamkari",
@@ -2962,7 +3145,8 @@
    "translate_as": "Kalamkari",
    "roman": "Kalamkari",
    "category": "clothing",
-   "note": "Hand-painted or block-printed cloth telling stories from the epics"
+   "note": "Hand-painted or block-printed cloth telling stories from the epics",
+   "topic": "festivals"
   },
   {
    "id": "poola_jada",
@@ -2973,7 +3157,8 @@
    "translate_as": "flower braid",
    "roman": "poola jada",
    "category": "clothing",
-   "note": "A braid covered in flowers, made for brides and little girls on festivals"
+   "note": "A braid covered in flowers, made for brides and little girls on festivals",
+   "topic": "festivals"
   },
   {
    "id": "rolu",
@@ -2986,7 +3171,8 @@
    "translate_as": "grinding stone",
    "roman": "rolu",
    "category": "culture",
-   "note": "Stone mortar where chutneys were ground by hand"
+   "note": "Stone mortar where chutneys were ground by hand",
+   "topic": "home"
   },
   {
    "id": "nulaka_mancham",
@@ -2997,7 +3183,8 @@
    "translate_as": "rope cot",
    "roman": "nulaka mancham",
    "category": "culture",
-   "note": "Rope cot, carried outside to sleep under the stars in summer"
+   "note": "Rope cot, carried outside to sleep under the stars in summer",
+   "topic": "home"
   },
   {
    "id": "godavari",
@@ -3009,7 +3196,8 @@
    "translate_as": "Godavari",
    "roman": "Godavari",
    "category": "place",
-   "note": "The great river of the Telugu states; Rajahmundry sits on its banks"
+   "note": "The great river of the Telugu states; Rajahmundry sits on its banks",
+   "topic": "travel"
   },
   {
    "id": "krishna_nadi",
@@ -3020,7 +3208,8 @@
    "translate_as": "Krishna river",
    "roman": "Krishna nadi",
    "category": "place",
-   "note": "The river that flows past Vijayawada and Srisailam"
+   "note": "The river that flows past Vijayawada and Srisailam",
+   "topic": "travel"
   },
   {
    "id": "hyderabad",
@@ -3036,7 +3225,8 @@
    "substitute": false,
    "match_english": [
     "Hyderabad"
-   ]
+   ],
+   "topic": "travel"
   },
   {
    "id": "vijayawada",
@@ -3051,7 +3241,8 @@
    "substitute": false,
    "match_english": [
     "Vijayawada"
-   ]
+   ],
+   "topic": "travel"
   },
   {
    "id": "vizag",
@@ -3067,7 +3258,8 @@
    "match_english": [
     "Visakhapatnam",
     "Vizag"
-   ]
+   ],
+   "topic": "travel"
   },
   {
    "id": "araku",
@@ -3078,7 +3270,8 @@
    "translate_as": "Araku Valley",
    "roman": "Araku",
    "category": "place",
-   "note": "Misty coffee-growing valley in the Eastern Ghats"
+   "note": "Misty coffee-growing valley in the Eastern Ghats",
+   "topic": "travel"
   },
   {
    "id": "srisailam",
@@ -3088,7 +3281,8 @@
    "translate_as": "Srisailam",
    "roman": "Srisailam",
    "category": "place",
-   "note": "Hill temple of Lord Shiva above the Krishna river"
+   "note": "Hill temple of Lord Shiva above the Krishna river",
+   "topic": "travel"
   },
   {
    "id": "tirupati",
@@ -3101,7 +3295,8 @@
    "translate_as": "Tirupati",
    "roman": "Tirupati",
    "category": "place",
-   "note": "Hill temple of Lord Venkateswara; families go to offer their hair and bring back laddus"
+   "note": "Hill temple of Lord Venkateswara; families go to offer their hair and bring back laddus",
+   "topic": "travel"
   },
   {
    "id": "bhadrachalam",
@@ -3111,7 +3306,8 @@
    "translate_as": "Bhadrachalam",
    "roman": "Bhadrachalam",
    "category": "place",
-   "note": "Sri Rama temple town on the Godavari"
+   "note": "Sri Rama temple town on the Godavari",
+   "topic": "travel"
   },
   {
    "id": "golconda",
@@ -3122,7 +3318,8 @@
    "translate_as": "Golconda",
    "roman": "Golconda",
    "category": "place",
-   "note": "Hilltop fort near Hyderabad, once famous for diamonds"
+   "note": "Hilltop fort near Hyderabad, once famous for diamonds",
+   "topic": "travel"
   },
   {
    "id": "hussain_sagar",
@@ -3133,7 +3330,8 @@
    "translate_as": "Hussain Sagar",
    "roman": "Hussain Sagar",
    "category": "place",
-   "note": "Lake in the middle of Hyderabad with a giant Buddha statue"
+   "note": "Lake in the middle of Hyderabad with a giant Buddha statue",
+   "topic": "travel"
   },
   {
    "id": "rajahmundry",
@@ -3144,7 +3342,8 @@
    "translate_as": "Rajahmundry",
    "roman": "Rajahmundry",
    "category": "place",
-   "note": "Town on the Godavari, known for its long river bridges"
+   "note": "Town on the Godavari, known for its long river bridges",
+   "topic": "travel"
   },
   {
    "id": "warangal",
@@ -3155,7 +3354,8 @@
    "translate_as": "Warangal",
    "roman": "Warangal",
    "category": "place",
-   "note": "Old Kakatiya capital with a stone fort and the Thousand Pillar Temple"
+   "note": "Old Kakatiya capital with a stone fort and the Thousand Pillar Temple",
+   "topic": "travel"
   },
   {
    "id": "palle",
@@ -3167,7 +3367,8 @@
    "translate_as": "village",
    "roman": "palletooru",
    "category": "place",
-   "note": "A village; many grandparents grew up in one"
+   "note": "A village; many grandparents grew up in one",
+   "topic": "home"
   },
   {
    "id": "daaba",
@@ -3178,7 +3379,8 @@
    "translate_as": "rooftop terrace",
    "roman": "daaba",
    "category": "place",
-   "note": "Flat rooftop where families slept under the stars on summer nights"
+   "note": "Flat rooftop where families slept under the stars on summer nights",
+   "topic": "home"
   },
   {
    "id": "cheruvu",
@@ -3194,7 +3396,8 @@
    "match_english": [
     "pond",
     "lake"
-   ]
+   ],
+   "topic": "home"
   },
   {
    "id": "rtc_bus",
@@ -3205,7 +3408,8 @@
    "translate_as": "RTC bus",
    "roman": "RTC bus",
    "category": "vehicle",
-   "note": "The red state bus that goes to every village"
+   "note": "The red state bus that goes to every village",
+   "topic": "travel"
   },
   {
    "id": "mamidi_chettu",
@@ -3224,7 +3428,8 @@
     "మామిడి చెట్లు": "mango trees",
     "మామిడి తోట": "mango orchard",
     "మామిడి తోటలో": "in the mango orchard"
-   }
+   },
+   "topic": "home"
   },
   {
    "id": "vepa",
@@ -3237,7 +3442,8 @@
    "translate_as": "neem tree",
    "roman": "vepa",
    "category": "culture",
-   "note": "Neem: its twigs were toothbrushes and its flowers go in Ugadi pachadi"
+   "note": "Neem: its twigs were toothbrushes and its flowers go in Ugadi pachadi",
+   "topic": "home"
   },
   {
    "id": "tulasi",
@@ -3248,7 +3454,8 @@
    "translate_as": "holy basil",
    "roman": "tulasi",
    "category": "culture",
-   "note": "Holy basil, grown in a little altar in the courtyard and worshipped every morning"
+   "note": "Holy basil, grown in a little altar in the courtyard and worshipped every morning",
+   "topic": "home"
   },
   {
    "id": "chinta_chettu",
@@ -3260,7 +3467,8 @@
    "translate_as": "tamarind",
    "roman": "chinta",
    "category": "culture",
-   "note": "Tamarind: the sour heart of pulihora and pulusu"
+   "note": "Tamarind: the sour heart of pulihora and pulusu",
+   "topic": "home"
   },
   {
    "id": "vamana_guntalu",
@@ -3437,7 +3645,8 @@
    "translate_as": "aunt",
    "roman": "peddamma",
    "category": "family",
-   "note": "Mother's older sister (or father's older brother's wife)"
+   "note": "Mother's older sister (or father's older brother's wife)",
+   "topic": "family"
   },
   {
    "id": "pedananna",
@@ -3448,7 +3657,8 @@
    "translate_as": "uncle",
    "roman": "pedananna",
    "category": "family",
-   "note": "Father's older brother (or mother's older sister's husband)"
+   "note": "Father's older brother (or mother's older sister's husband)",
+   "topic": "family"
   },
   {
    "id": "atta",
@@ -3459,7 +3669,8 @@
    "translate_as": "aunt",
    "roman": "atta",
    "category": "family",
-   "note": "Father's sister; also a mother-in-law"
+   "note": "Father's sister; also a mother-in-law",
+   "topic": "family"
   },
   {
    "id": "vadina",
@@ -3471,7 +3682,8 @@
    "translate_as": "sister-in-law",
    "roman": "vadina",
    "category": "family",
-   "note": "Older brother's wife"
+   "note": "Older brother's wife",
+   "topic": "family"
   },
   {
    "id": "maradalu",
@@ -3481,7 +3693,8 @@
    "translate_as": "sister-in-law",
    "roman": "maradalu",
    "category": "family",
-   "note": "Younger brother's wife; also a cousin who's a girl"
+   "note": "Younger brother's wife; also a cousin who's a girl",
+   "topic": "family"
   },
   {
    "id": "kodalu",
@@ -3492,7 +3705,8 @@
    "translate_as": "daughter-in-law",
    "roman": "kodalu",
    "category": "family",
-   "note": "Daughter-in-law"
+   "note": "Daughter-in-law",
+   "topic": "family"
   },
   {
    "id": "alludu",
@@ -3504,7 +3718,8 @@
    "translate_as": "son-in-law",
    "roman": "alludu",
    "category": "family",
-   "note": "Son-in-law, treated like royalty at Sankranti"
+   "note": "Son-in-law, treated like royalty at Sankranti",
+   "topic": "family"
   },
   {
    "id": "muttata",
@@ -3515,7 +3730,8 @@
    "translate_as": "great-grandfather",
    "roman": "muttata",
    "category": "family",
-   "note": "Great-grandfather"
+   "note": "Great-grandfather",
+   "topic": "family"
   },
   {
    "id": "muttavva",
@@ -3527,7 +3743,8 @@
    "translate_as": "great-grandmother",
    "roman": "muttavva",
    "category": "family",
-   "note": "Great-grandmother"
+   "note": "Great-grandmother",
+   "topic": "family"
   },
   {
    "id": "chuttalu",
@@ -3539,7 +3756,8 @@
    "translate_as": "relatives",
    "roman": "chuttalu",
    "category": "family",
-   "note": "Relatives: the big extended family that turns up for every festival"
+   "note": "Relatives: the big extended family that turns up for every festival",
+   "topic": "family"
   },
   {
    "id": "chitti",
@@ -3685,7 +3903,8 @@
     "remember",
     "memory",
     "memories"
-   ]
+   ],
+   "topic": "feelings"
   },
   {
    "id": "chudalani_undi",
@@ -3704,7 +3923,8 @@
     "miss you",
     "thinking of you",
     "remembered you"
-   ]
+   ],
+   "topic": "feelings"
   },
   {
    "id": "chala_rojulaindi",
@@ -3723,7 +3943,8 @@
     "been a long time",
     "so many days",
     "after so long"
-   ]
+   ],
+   "topic": "feelings"
   },
   {
    "id": "challaga",
@@ -3741,7 +3962,8 @@
     "bless you",
     "god bless",
     "stay well"
-   ]
+   ],
+   "topic": "feelings"
   },
   {
    "id": "santoshanga_undu",
@@ -3752,7 +3974,8 @@
    "translate_as": "stay happy",
    "roman": "santoshanga undu",
    "category": "phrase",
-   "note": "'Stay happy': a blessing at the end of a call"
+   "note": "'Stay happy': a blessing at the end of a call",
+   "topic": "feelings"
   },
   {
    "id": "dhairyam",
@@ -3768,7 +3991,8 @@
     "be brave",
     "courage",
     "don't be afraid"
-   ]
+   ],
+   "topic": "feelings"
   },
   {
    "id": "bayati_tindi",
@@ -3786,7 +4010,8 @@
    "translate_forms": {
     "బయటి తిండి తినకు": "don't eat outside food",
     "బయట తిండి తినకు": "don't eat outside food"
-   }
+   },
+   "topic": "food"
   },
   {
    "id": "pelli_eppudu",
@@ -3801,7 +4026,8 @@
    "substitute": false,
    "match_english": [
     "when are you getting married"
-   ]
+   ],
+   "topic": "family"
   },
   {
    "id": "nerpistanu",

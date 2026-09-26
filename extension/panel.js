@@ -132,7 +132,7 @@ function renderLeft() {
         <div class="answer">${q.answer ? formatAnswer(q.answer) : `<span class="loading">Looking it up</span>`}</div>
       </button>`).join("") : `<div class="empty">Questions about what she says will show up here. Click one to find out.</div>`;
   const wordRow = (w, said) => `<div class="word ${said ? "said" : ""}">
-      <div><span class="w-te te">${esc(w.telugu)}</span> · <span class="w-roman">${esc(w.roman)}</span>${said ? `<span class="tag-said">she said</span>` : ""}</div>
+      <div><span class="w-te te">${esc(w.telugu)}</span> · <span class="w-roman">${esc(w.roman)}</span>${said ? `<span class="tag-said">she said</span>` : w.learning ? `<span class="tag-said">learning</span>` : ""}</div>
       <div class="w-en">${esc(w.english)}</div>
       <button class="hear" title="Hear it" data-hear="${esc(w.telugu)}" data-roman="${esc(w.roman)}" data-id="${esc(w.id || "")}">🔊</button>
     </div>`;

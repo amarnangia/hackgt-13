@@ -1,0 +1,405 @@
+{
+ "_about": "Words and phrases the grandkid can use, by conversation topic, for the overlay's left panel (build-plan step 3). subtitles.py sends a topic's list when the conversation moves to it (decide.topic_of), with words from lexicon.json that she used and they're still learning first. Respectful forms (meeru), since they're talking to an elder.",
+ "topics": {
+  "greetings": {
+   "name": "Saying hello",
+   "words": [
+    {
+     "telugu": "నమస్కారం",
+     "roman": "namaskaram",
+     "english": "hello (respectful)"
+    },
+    {
+     "telugu": "బాగున్నారా?",
+     "roman": "bagunnara?",
+     "english": "are you well? (to an elder)"
+    },
+    {
+     "telugu": "నేను బాగున్నాను",
+     "roman": "nenu bagunnanu",
+     "english": "I'm well"
+    },
+    {
+     "telugu": "మీరు ఎలా ఉన్నారు?",
+     "roman": "meeru ela unnaru?",
+     "english": "how are you?"
+    },
+    {
+     "telugu": "వినిపిస్తోందా?",
+     "roman": "vinipistonda?",
+     "english": "can you hear me?"
+    },
+    {
+     "telugu": "మళ్ళీ మాట్లాడదాం",
+     "roman": "malli matladadam",
+     "english": "let's talk again"
+    },
+    {
+     "telugu": "జాగ్రత్తగా ఉండండి",
+     "roman": "jagrattaga undandi",
+     "english": "take care"
+    }
+   ]
+  },
+  "food": {
+   "name": "Food and cooking",
+   "words": [
+    {
+     "telugu": "అన్నం తిన్నారా?",
+     "roman": "annam tinnara?",
+     "english": "have you eaten?"
+    },
+    {
+     "telugu": "తిన్నాను",
+     "roman": "tinnanu",
+     "english": "I ate"
+    },
+    {
+     "telugu": "చాలా బాగుంది",
+     "roman": "chala bagundi",
+     "english": "it's really good"
+    },
+    {
+     "telugu": "నాకు ఇష్టం",
+     "roman": "naaku ishtam",
+     "english": "I like it"
+    },
+    {
+     "telugu": "ఎలా చేస్తారు?",
+     "roman": "ela chestaru?",
+     "english": "how do you make it?"
+    },
+    {
+     "telugu": "కారంగా ఉంది",
+     "roman": "karamga undi",
+     "english": "it's spicy"
+    },
+    {
+     "telugu": "ఆకలిగా ఉంది",
+     "roman": "aakaliga undi",
+     "english": "I'm hungry"
+    }
+   ]
+  },
+  "family": {
+   "name": "Family",
+   "words": [
+    {
+     "telugu": "అందరూ ఎలా ఉన్నారు?",
+     "roman": "andaru ela unnaru?",
+     "english": "how is everyone?"
+    },
+    {
+     "telugu": "అమ్మ",
+     "roman": "amma",
+     "english": "mom"
+    },
+    {
+     "telugu": "నాన్న",
+     "roman": "nanna",
+     "english": "dad"
+    },
+    {
+     "telugu": "అక్క",
+     "roman": "akka",
+     "english": "older sister"
+    },
+    {
+     "telugu": "అన్నయ్య",
+     "roman": "annayya",
+     "english": "older brother"
+    },
+    {
+     "telugu": "తమ్ముడు",
+     "roman": "tammudu",
+     "english": "younger brother"
+    },
+    {
+     "telugu": "చెల్లి",
+     "roman": "chelli",
+     "english": "younger sister"
+    }
+   ]
+  },
+  "festivals": {
+   "name": "Festivals and temple",
+   "words": [
+    {
+     "telugu": "పండుగ",
+     "roman": "pandaga",
+     "english": "festival"
+    },
+    {
+     "telugu": "పండుగ శుభాకాంక్షలు",
+     "roman": "pandaga subhakankshalu",
+     "english": "happy festival"
+    },
+    {
+     "telugu": "గుడి",
+     "roman": "gudi",
+     "english": "temple"
+    },
+    {
+     "telugu": "పూజ",
+     "roman": "puja",
+     "english": "prayer"
+    },
+    {
+     "telugu": "ముగ్గు",
+     "roman": "muggu",
+     "english": "rangoli"
+    },
+    {
+     "telugu": "కొత్త బట్టలు",
+     "roman": "kotta battalu",
+     "english": "new clothes"
+    }
+   ]
+  },
+  "health": {
+   "name": "Health",
+   "words": [
+    {
+     "telugu": "ఒంట్లో బాగుందా?",
+     "roman": "ontlo bagunda?",
+     "english": "are you feeling well?"
+    },
+    {
+     "telugu": "నొప్పి",
+     "roman": "noppi",
+     "english": "pain"
+    },
+    {
+     "telugu": "జ్వరం",
+     "roman": "jwaram",
+     "english": "fever"
+    },
+    {
+     "telugu": "మందులు వేసుకున్నారా?",
+     "roman": "mandulu vesukunnara?",
+     "english": "did you take your medicine?"
+    },
+    {
+     "telugu": "విశ్రాంతి తీసుకోండి",
+     "roman": "vishranti teesukondi",
+     "english": "please rest"
+    },
+    {
+     "telugu": "డాక్టర్ దగ్గరికి వెళ్ళండి",
+     "roman": "doctor daggariki vellandi",
+     "english": "please see a doctor"
+    }
+   ]
+  },
+  "school": {
+   "name": "School and work",
+   "words": [
+    {
+     "telugu": "బడి",
+     "roman": "badi",
+     "english": "school"
+    },
+    {
+     "telugu": "పరీక్ష",
+     "roman": "pariksha",
+     "english": "exam"
+    },
+    {
+     "telugu": "బాగా చదువుతున్నాను",
+     "roman": "baaga chaduvutunnanu",
+     "english": "I'm studying hard"
+    },
+    {
+     "telugu": "మార్కులు బాగా వచ్చాయి",
+     "roman": "markulu baaga vachayi",
+     "english": "I got good marks"
+    },
+    {
+     "telugu": "ఉద్యోగం",
+     "roman": "udyogam",
+     "english": "job"
+    },
+    {
+     "telugu": "పని",
+     "roman": "pani",
+     "english": "work"
+    }
+   ]
+  },
+  "travel": {
+   "name": "Travel and places",
+   "words": [
+    {
+     "telugu": "ప్రయాణం",
+     "roman": "prayanam",
+     "english": "journey"
+    },
+    {
+     "telugu": "రైలు",
+     "roman": "railu",
+     "english": "train"
+    },
+    {
+     "telugu": "బస్సు",
+     "roman": "bassu",
+     "english": "bus"
+    },
+    {
+     "telugu": "విమానం",
+     "roman": "vimanam",
+     "english": "plane"
+    },
+    {
+     "telugu": "ఎంత సేపు పట్టింది?",
+     "roman": "enta sepu pattindi?",
+     "english": "how long did it take?"
+    },
+    {
+     "telugu": "ఊరికి వెళ్ళాం",
+     "roman": "ooriki vellam",
+     "english": "we went to our hometown"
+    }
+   ]
+  },
+  "home": {
+   "name": "Home and village",
+   "words": [
+    {
+     "telugu": "ఇల్లు",
+     "roman": "illu",
+     "english": "house"
+    },
+    {
+     "telugu": "ఊరు",
+     "roman": "ooru",
+     "english": "village, hometown"
+    },
+    {
+     "telugu": "పొలం",
+     "roman": "polam",
+     "english": "field, farm"
+    },
+    {
+     "telugu": "ఆవు",
+     "roman": "aavu",
+     "english": "cow"
+    },
+    {
+     "telugu": "చెట్టు",
+     "roman": "chettu",
+     "english": "tree"
+    },
+    {
+     "telugu": "డాబా",
+     "roman": "daaba",
+     "english": "rooftop terrace"
+    }
+   ]
+  },
+  "weather": {
+   "name": "Weather",
+   "words": [
+    {
+     "telugu": "వాన",
+     "roman": "vaana",
+     "english": "rain"
+    },
+    {
+     "telugu": "ఎండ",
+     "roman": "enda",
+     "english": "sunshine, heat"
+    },
+    {
+     "telugu": "చలి",
+     "roman": "chali",
+     "english": "cold"
+    },
+    {
+     "telugu": "ఇక్కడ చాలా చలిగా ఉంది",
+     "roman": "ikkada chala chaliga undi",
+     "english": "it's very cold here"
+    },
+    {
+     "telugu": "ఎండగా ఉంది",
+     "roman": "endaga undi",
+     "english": "it's hot and sunny"
+    },
+    {
+     "telugu": "మంచు",
+     "roman": "manchu",
+     "english": "snow"
+    }
+   ]
+  },
+  "feelings": {
+   "name": "Feelings",
+   "words": [
+    {
+     "telugu": "మిమ్మల్ని మిస్ అవుతున్నాను",
+     "roman": "mimmalni miss avutunnanu",
+     "english": "I miss you"
+    },
+    {
+     "telugu": "మీరంటే నాకు చాలా ఇష్టం",
+     "roman": "meerante naaku chala ishtam",
+     "english": "I love you so much"
+    },
+    {
+     "telugu": "నాకు సంతోషంగా ఉంది",
+     "roman": "naaku santoshanga undi",
+     "english": "I'm happy"
+    },
+    {
+     "telugu": "బాధపడకండి",
+     "roman": "badhapadakandi",
+     "english": "please don't be sad"
+    },
+    {
+     "telugu": "కంగారు పడకండి",
+     "roman": "kangaru padakandi",
+     "english": "please don't worry"
+    },
+    {
+     "telugu": "ఆశీర్వదించండి",
+     "roman": "aashirvadinchandi",
+     "english": "please bless me"
+    }
+   ]
+  },
+  "plans": {
+   "name": "Plans and visits",
+   "words": [
+    {
+     "telugu": "ఎప్పుడు వస్తారు?",
+     "roman": "eppudu vastaru?",
+     "english": "when will you come?"
+    },
+    {
+     "telugu": "నేను వస్తాను",
+     "roman": "nenu vastanu",
+     "english": "I'll come"
+    },
+    {
+     "telugu": "సెలవుల్లో వస్తాను",
+     "roman": "selavullo vastanu",
+     "english": "I'll come in the holidays"
+    },
+    {
+     "telugu": "ఆదివారం ఫోన్ చేస్తాను",
+     "roman": "aadivaram phone chestanu",
+     "english": "I'll call on Sunday"
+    },
+    {
+     "telugu": "ఫోటో పంపిస్తాను",
+     "roman": "photo pampistanu",
+     "english": "I'll send a photo"
+    },
+    {
+     "telugu": "త్వరలో కలుద్దాం",
+     "roman": "tvaralo kaluddam",
+     "english": "see you soon"
+    }
+   ]
+  }
+ }
+}

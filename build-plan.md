@@ -20,7 +20,7 @@ Times are rough estimates for one person.
 - **Newest on top,** at most 4, fading after about 30 s. Clicking a card keeps it.
 - **Done when** saying "gavvalu", "noru manchidaite ooru manchidi" and "NTR" brings up the right cards.
 
-## 3. Left, bottom: topic vocab (about 3 h)
+## 3. Left, bottom: topic vocab (about 3 h) ✅ built: 11 topics, vocab.json, her words' topics + keywords + Laya, tools/eval_laya.py
 - **Engine: topics.** Define the topics listed in idea.md. Tag every entry in `lexicon.json` with a topic, and write a starter set of about 8 words per topic (greetings first).
 - **Engine: Laya picks the topic** of each English line. It switches only when a topic wins 2 of the last 3 lines, then sends a `topic` message. Words she said in this call come first.
 - **Overlay: show the words** (Telugu script, how to say it, English), with a hear-it button using the browser's Telugu voice or the romanized word.

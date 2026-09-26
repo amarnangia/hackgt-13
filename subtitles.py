@@ -25,7 +25,7 @@ from websockets.datastructures import Headers
 from websockets.http11 import Response
 
 from muse import Translator, transcribe
-from decide import is_question
+from decide import is_question, topic_of
 from latency import LatencyTracker
 from lexicon import Lexicon, indic_share
 import origins
@@ -53,6 +53,7 @@ LOCAL_DEADLINE_S = 1.2  # after this, race Muse Spark against the local translat
 clients = set()
 on_client_message = None  # set by main(): handles clicks sent from the overlay
 welcome = []  # sent to each page that connects before she starts talking (the next-call starter)
+current = {}  # latest message of each kind every new page should get at once (the topic words)
 
 
 def broadcast(msg):
@@ -66,7 +67,7 @@ def broadcast(msg):
 
 def ws_handler(conn):
     clients.add(conn)
-    for msg in list(welcome):
+    for msg in list(welcome) + list(current.values()):
         conn.send(json.dumps(msg, ensure_ascii=False))
     try:
         for message in conn:
@@ -139,6 +140,9 @@ class Captioner:
         self.pictures = None                  # picture pop-ups (pictures.py), set by listen()
         self.recorder = None                  # the family story keeper (calls.py)
         self.prompter = None                  # live "ask her" prompts (prompts.py)
+        self.topic, self.topic_votes = None, collections.deque(maxlen=3)  # what the conversation is about now
+        self.topic_lock = threading.Lock()
+        self.vocab = json.load(open(os.path.join(HERE, "vocab.json"), encoding="utf-8"))["topics"]
         self.recent = collections.deque(maxlen=8)  # (Telugu, English) of her last lines, for answering questions
         self.answers = {}                      # question -> answer, so asking twice doesn't ask the LLM twice
         self.garden = self.garden_call = None  # Weave's garden (garden/garden.db): each Telugu word heard grows a plant
@@ -257,6 +261,8 @@ class Captioner:
                 decision = self.decider(full_english)
             broadcast({"type": "details", "id": seg_id,
                        "intent": decision["intent"] if decision else None, "cards": self._cards(sentence, decision)})
+            topic, _ = topic_of(full_english, hits, decision.get("topic") if decision else None)
+            self._follow_topic(topic)
             picture = self._picture(seg_id, hits, full_english, known_before)
             if self.prompter and route != "english":
                 import topics
@@ -335,6 +341,35 @@ class Captioner:
             return self.backup(sentence)
         except Exception as e:
             return f"(translation failed: {type(e).__name__})"
+
+    def _follow_topic(self, topic):
+        """Move the overlay's topic words once the same topic wins 2 of the last 3 lines (so they don't flicker)."""
+        if not topic:
+            return
+        with self.topic_lock:
+            self.topic_votes.append(topic)
+            if topic == self.topic or self.topic_votes.count(topic) < 2:
+                return
+        self.show_topic(topic)
+
+    def show_topic(self, topic):
+        """Send the words for `topic`: word-list words of this topic she has used that they're still learning
+        (progress.py), then phrases they can say (vocab.json)."""
+        self.topic = topic
+        learning = []
+        for e in self.lexicon.entries.get(self.lang, []):
+            p = self.progress.probability(e["id"])
+            if e.get("topic") == topic and e.get("roman") and self.progress.heard.get(e["id"]) and 0.2 <= p < KEEP_AT:
+                learning.append((p, {"id": e["id"], "telugu": e["forms"][0].strip(" ,.^"), "roman": e["roman"].strip(" ,"),
+                                     "english": e.get("translate_as") or (e.get("match_english") or [""])[0],
+                                     "p": round(p, 2), "learning": True}))
+        words = [w for _, w in sorted(learning, key=lambda x: -x[0])[:4]]
+        have = {w["roman"].lower().strip("?") for w in words}
+        words += [w for w in self.vocab[topic]["words"] if w["roman"].lower().strip("?") not in have]
+        msg = {"type": "topic", "topic": self.vocab[topic]["name"], "key": topic, "words": words}
+        current["topic"] = msg
+        broadcast(msg)
+        print(f"  [topic: {self.vocab[topic]['name']}]", flush=True)
 
     def answer(self, question, caller):
         """Answer a "Curious?" question the word list can't, with Muse Spark and her last few lines as context."""
@@ -617,6 +652,7 @@ async def listen(args, captioner):
             welcome.append(starter)
             broadcast(starter)
             print(f"  [to start: ask {args.caller}: {starter['roman']}  ({starter['english']})]", flush=True)
+    captioner.show_topic("greetings")  # calls start with hello; the words follow the conversation from there
     captioner.speak_all = args.speak == "all"
     captioner.questions_only = args.speak == "questions"
     if not args.no_voice:  # load before audio starts, or the first seconds of the call are lost
