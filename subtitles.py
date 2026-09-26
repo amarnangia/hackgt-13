@@ -370,8 +370,10 @@ def make_audio(args, loop, target):
             if not loop.is_closed():  # audio can still arrive for a moment after Ctrl+C
                 loop.call_soon_threadsafe(target["q"].put_nowait, pcm.tobytes())
 
-    # The original voice (theirs, or yours with --outgoing) stays quiet the whole time; the English voice leads.
-    return AudioLoop(in_dev, out_dev, on_audio=on_audio, source=source, original=args.original_volume)
+    # The original voice (theirs, or yours with --outgoing) stays low so the English leads, and drops further while
+    # an English line plays. Not silent in between: waiting for the end of a sentence in silence felt like lag.
+    return AudioLoop(in_dev, out_dev, on_audio=on_audio, source=source,
+                     original=args.original_volume, duck=args.duck_volume)
 
 
 async def run(args):
@@ -483,9 +485,10 @@ def main():
     p.add_argument("--outgoing", action="store_true",
                    help="translate what YOU say: your mic -> English voice -> BlackHole 16ch, which WhatsApp Web uses "
                         "as its microphone, so the other person hears only the English")
-    p.add_argument("--original-volume", type=float, default=0.05,
-                   help="how loud the original voice is under the English, 0-1 (0 = only the English voice; 1 = full "
-                        "volume, lowered only while the English plays). 0.05 sounds faint; 0.15 is still clearly audible")
+    p.add_argument("--original-volume", type=float, default=0.2,
+                   help="how loud the original voice is between English lines, 0-1 (0 = only the English voice)")
+    p.add_argument("--duck-volume", type=float, default=0.05,
+                   help="how loud the original voice is while an English line plays, 0-1")
     p.add_argument("--in", dest="inp", default=None, help="input device (default: BlackHole 2ch; with --outgoing, the Mac's mic)")
     p.add_argument("--out", default=None, help='output device (default: system default; with --outgoing, BlackHole 16ch); '
                                                '"none" = silent, with --file')

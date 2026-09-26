@@ -30,7 +30,7 @@
 12. In Chrome open `chrome://settings/content/microphone` and pick **BlackHole 16ch**. Leave the Mac's own input on the real mic, since the app listens to that.
 13. In a second terminal: `python subtitles.py --outgoing` (overlay on http://localhost:8767). It listens to the MacBook mic (`--in "<name>"` for another mic), translates what you say, and plays the English voice into BlackHole 16ch with your real voice faintly underneath. After ~10 s of your speech the English sounds like you (saved to `my_voice.wav`, gitignored).
     - Wear headphones, or the mic hears the call and the English voice and sends them back.
-    - Both directions keep the original voice at 5% the whole time (`--original-volume`; 0 = English only, 1 = the old full-volume-until-the-English-starts). Volume is signal strength, so 15% still sounds about a third as loud; 5% sounds faint. While it's low, every line is voiced, English too.
+    - Both directions play the original voice at 20% while the person talks and 5% while the English plays (`--original-volume`, `--duck-volume`; 0 = English only). Fully faint in between felt like dead air while waiting for a sentence to end. Volume is signal strength, so 20% still sounds about a third as loud. While it's low, every line is voiced, English too.
 
 What we learned the hard way:
 - **The WhatsApp Mac app plays straight to the speakers** and ignores the Mac's output setting. BlackHole stays silent and there's no BlackHole option in its menu. Chrome follows the Mac's output setting, so WhatsApp Web works.

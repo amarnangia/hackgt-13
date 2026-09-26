@@ -70,9 +70,10 @@ class AudioLoop:
     out_dev=None runs on a timer with no sound device at all (for tests).
     """
 
-    def __init__(self, in_dev, out_dev, on_audio=None, source=None, original=1.0):
+    def __init__(self, in_dev, out_dev, on_audio=None, source=None, original=1.0, duck=DUCK_LEVEL):
         self.in_dev, self.out_dev = in_dev, out_dev
         self.original = original  # volume of the input between English lines; 0 = only the English voice is heard
+        self.duck = min(duck, original)  # ...and while an English line plays
         self.on_audio = on_audio
         self.source, self.source_pos = source, 0
         self.source_done = threading.Event()  # set when `source` has played to the end
@@ -86,8 +87,8 @@ class AudioLoop:
         if self.on_audio:
             self.on_audio(mono.copy())
         # Move the call volume one step toward its target each block, fading within the block.
-        target = min(DUCK_LEVEL, self.original) if self.voice.active() else self.original
-        step = (1.0 - DUCK_LEVEL) / RAMP_BLOCKS
+        target = self.duck if self.voice.active() else self.original
+        step = max(self.original - self.duck, 0.01) / RAMP_BLOCKS
         new_gain = max(target, self.gain - step) if target < self.gain else min(target, self.gain + step)
         ramp = np.linspace(self.gain, new_gain, frames, dtype=np.float32)
         self.gain = new_gain
