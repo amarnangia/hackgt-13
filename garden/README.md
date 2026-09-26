@@ -53,7 +53,7 @@ and **her voice on every line**, the family dictionary (her voice saying each wo
 relays `subtitles.py` to the phone (`/api/live`), so `subtitles.py` doesn't need to change.
 
 - Simulator: works as is (`http://localhost:8770`).
-- Your iPhone: in the app, avatar → Settings → type the "phone widget URL" `python3 -m garden` prints; same Wi-Fi.
+- Your iPhone: start the server with `python3 -m garden --lan` (it only answers this laptop otherwise, so nobody on shared Wi-Fi can read your calls), then in the app, avatar → Settings → type the "phone widget URL" it prints; same Wi-Fi. Use `--lan` only on a network you trust.
 - With no Mac it shows the last calls and words it saw. **Demo mode** in Settings shows sample words and the
   scripted call instead, for presenting without the Mac.
 

@@ -57,6 +57,7 @@ def main():
     ap.add_argument("--demo", action="store_true", help="fake history + a live fake call, in garden/garden_demo.db")
     ap.add_argument("--still", action="store_true", help="with --demo: no live call, just the history")
     ap.add_argument("--port", type=int, default=8770)
+    ap.add_argument("--lan", action="store_true", help="let phones on this Wi-Fi connect (the iPhone app); off by default")
     a = ap.parse_args()
     if a.demo:
         db = HERE / "garden_demo.db"
@@ -72,7 +73,7 @@ def main():
         added = g.import_calls(CALLS_ROOT, Lexicon())  # calls saved before the translator fed the garden
         if added:
             print(f"planted the words from {added} saved call{'s' * (added != 1)}")
-    serve(g, a.port)
+    serve(g, a.port, lan=a.lan)
 
 
 if __name__ == "__main__":
