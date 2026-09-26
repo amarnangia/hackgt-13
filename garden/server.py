@@ -20,6 +20,7 @@ ROOT = HERE.parent
 sys.path.insert(0, str(ROOT))
 from lexicon import Lexicon  # noqa: E402  (the translator's own word list and progress rules, so the numbers match)
 from progress import Progress  # noqa: E402
+import origins  # noqa: E402  (who may read the call: our own pages only)
 # Team files the app reads. Anything else in the repo stays private.
 # calls/ is the story keeper's output (story pages, family dictionary, voice clips); it stays on this Mac.
 CALLS = re.compile(r"^/calls/[\w-]+(?:/[\w-]+){0,2}\.(?:html|m4a|json)$")
@@ -98,14 +99,21 @@ def make_handler(garden):
             for k, v in (extra or {}).items():
                 self.send_header(k, v)
             self.send_header("Content-Length", str(len(data)))
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self._allow_origin()
             self.send_header("Cache-Control", "no-store")
             self.end_headers()
             self.wfile.write(data)
 
+        def _allow_origin(self):
+            """Only our own pages may read answers from another origin (origins.py); other websites can't."""
+            origin = self.headers.get("Origin")
+            if origin and origins.allowed(origin):
+                self.send_header("Access-Control-Allow-Origin", origin)
+                self.send_header("Vary", "Origin")
+
         def do_OPTIONS(self):
             self.send_response(204)
-            self.send_header("Access-Control-Allow-Origin", "*")
+            self._allow_origin()
             self.send_header("Access-Control-Allow-Methods", "GET, POST")
             self.send_header("Access-Control-Allow-Headers", "Content-Type")
             self.end_headers()
@@ -147,8 +155,9 @@ def make_handler(garden):
         def _live(self):
             q = relay.subscribe()
             self.send_response(200)
-            for k, v in (("Content-Type", "text/event-stream"), ("Cache-Control", "no-cache"), ("Access-Control-Allow-Origin", "*"), ("Connection", "keep-alive")):
+            for k, v in (("Content-Type", "text/event-stream"), ("Cache-Control", "no-cache"), ("Connection", "keep-alive")):
                 self.send_header(k, v)
+            self._allow_origin()
             self.end_headers()
             try:
                 self.wfile.write(("data: " + json.dumps({"type": "status", **relay.status()}) + "\n\n").encode())
@@ -167,6 +176,8 @@ def make_handler(garden):
                 relay.unsubscribe(q)
 
         def do_POST(self):
+            if not origins.allowed(self.headers.get("Origin")):  # another website posting to this Mac
+                return self._send(403, {"error": "only Weave's own pages can do this"})
             if self.path == "/api/forget":
                 try:
                     word = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or "{}")["id"]

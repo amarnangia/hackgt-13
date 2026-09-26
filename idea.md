@@ -154,7 +154,7 @@ grandkid actually clicks.
 
 ## One standard for everything
 - **One engine.** `subtitles.py` hears the call, translates it, and makes every decision.
-- **One screen.** The Chrome extension draws the overlay on `web.whatsapp.com` and `instagram.com`. The subtitles page and the Weave app are only for debugging and backup.
+- **One screen.** The Chrome extension (`extension/`) draws the overlay on the call's tab when you turn it on, with the toolbar button or Alt+Shift+W. It works on WhatsApp Web, Instagram or any page. The subtitles page and the Weave app are only for debugging and backup.
 - **One message format** over the engine's WebSocket (`ws://localhost:8765`):
   - **Existing:** `speaking`, `partial`, `original`, `english`, `details` (cards), `picture`, `prompt`, `warning`, `voice`.
   - **New:**

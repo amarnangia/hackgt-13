@@ -7,15 +7,15 @@ Times are rough estimates for one person.
 - Answer the open questions at the end of idea.md: which side is which, whether answers are spoken, whether to keep "Ask her about it", panel sizes, and whether Instagram is in the demo.
 - Freeze the message format in idea.md so the engine and the overlay can be built at the same time.
 
-## 1. Overlay shell (about 2 h), in `garden/extension/`
+## 1. Overlay shell (about 2 h), in `extension/` ✅ built; still needs a test on a real WhatsApp and Instagram call
 - **Draw the layout** on the call page: left panel, right panel, and captions at the bottom middle. The call video isn't covered.
-- **Run on Instagram too.** Add `https://www.instagram.com/*` to `manifest.json` next to WhatsApp Web.
+- **Turned on by hand** on any tab (toolbar button or Alt+Shift+W), so it works on Instagram too.
 - **One button collapses** both panels.
 - **Show the connection state** ("Waiting for Weave engine" / "Listening to Ammamma").
-- **Reuse the current captions and ask-card code** from `captions.js`.
+- **Replaces Saanvi's caption extension** (`garden/extension`, removed).
 - **Done when** the three regions show on a live WhatsApp Web call and an Instagram web call, and existing captions still work.
 
-## 2. Right panel: pictures and meanings (about 1 h)
+## 2. Right panel: pictures and meanings (about 1 h) ✅ built
 - **Show the existing messages here:** `picture` messages as a picture card, and `details.cards` for idioms, proverbs, slang and customs as meaning cards.
 - **Newest on top,** at most 4, fading after about 30 s. Clicking a card keeps it.
 - **Done when** saying "gavvalu", "noru manchidaite ooru manchidi" and "NTR" brings up the right cards.

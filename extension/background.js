@@ -1,5 +1,5 @@
-// The toolbar button and Alt+Shift+W show or hide Weave on the current tab. On WhatsApp Web and Instagram the
-// overlay is already there (manifest content_scripts); anywhere else this adds it.
+// Weave only appears when you turn it on: the toolbar button or Alt+Shift+W adds it to the current tab, and
+// pressing again hides or shows it. It's gone after the page reloads.
 async function toggle(tab) {
   if (!tab?.id || !/^https?:/.test(tab.url || "")) return;
   await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });

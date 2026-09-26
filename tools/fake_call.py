@@ -20,6 +20,7 @@ from websockets.sync.server import serve
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
+import origins  # noqa: E402
 from lexicon import Lexicon  # noqa: E402
 from pictures import PictureFinder  # noqa: E402
 
@@ -94,6 +95,8 @@ def handler(conn):
 
 def serve_files(conn, request):
     if request.headers.get("Upgrade", "").lower() == "websocket":
+        if not origins.allowed(request.headers.get("Origin")):
+            return conn.respond(http.HTTPStatus.FORBIDDEN, "Only Weave's own pages can connect.\n")
         return None
     path = request.path.split("?")[0]
     file = os.path.realpath(os.path.join(ROOT, path.lstrip("/")))

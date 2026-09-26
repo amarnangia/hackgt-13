@@ -4,7 +4,7 @@
 //   captions  her words and the English, above the call controls
 // Each panel is panel.html (an extension page) in its own frame, so the call site's security rules can't block its
 // connection to the Weave engine on this Mac (ws://localhost:8765 by default; set "wsUrl" in chrome.storage.local
-// to change it). Running this script again shows or hides the overlay.
+// to change it). background.js runs this when you turn Weave on; running it again shows or hides the overlay.
 (() => {
   if (window.__weaveOverlay) {
     window.__weaveOverlay.toggle();

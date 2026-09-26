@@ -6,6 +6,7 @@
 import argparse
 import asyncio
 import atexit
+import collections
 import glob
 import http
 import json
@@ -27,6 +28,7 @@ from muse import Translator, transcribe
 from decide import is_question
 from latency import LatencyTracker
 from lexicon import Lexicon, indic_share
+import origins
 from progress import KEEP_AT, Progress
 from pronouns import PronounResolver
 from translate_server import LocalTranslator
@@ -76,6 +78,9 @@ def ws_handler(conn):
 
 def serve_overlay(conn, request):
     if request.headers.get("Upgrade", "").lower() == "websocket":
+        if not origins.allowed(request.headers.get("Origin")):  # another website trying to read the call
+            print(f"(refused a connection from {request.headers.get('Origin')})", flush=True)
+            return conn.respond(http.HTTPStatus.FORBIDDEN, "Only Weave's own pages can connect.\n")
         return None
     path = urllib.parse.unquote(request.path.split("?")[0])
     for folder in ("images", "calls"):  # pop-up pictures; call story pages, the family dictionary and voice clips
@@ -134,6 +139,8 @@ class Captioner:
         self.pictures = None                  # picture pop-ups (pictures.py), set by listen()
         self.recorder = None                  # the family story keeper (calls.py)
         self.prompter = None                  # live "ask her" prompts (prompts.py)
+        self.recent = collections.deque(maxlen=8)  # (Telugu, English) of her last lines, for answering questions
+        self.answers = {}                      # question -> answer, so asking twice doesn't ask the LLM twice
         self.garden = self.garden_call = None  # Weave's garden (garden/garden.db): each Telugu word heard grows a plant
         self.speak_all = False                # --speak all: also voice lines she said (mostly) in English
         self.questions_only = False           # --speak questions: voice only questions/requests to you
@@ -227,6 +234,7 @@ class Captioner:
             if self.garden and route != "english" and hits:
                 self._plant(hits)
             broadcast({"type": "english", "id": seg_id, "text": english, "route": route, "kept": kept})
+            self.recent.append((sentence, full_english))
             welcome.clear()  # the call is under way; pages opened from now on don't need the starter
             row = self.latency.finished(marks, sentence, english)
             row["route"] = route
@@ -327,6 +335,24 @@ class Captioner:
             return self.backup(sentence)
         except Exception as e:
             return f"(translation failed: {type(e).__name__})"
+
+    def answer(self, question, caller):
+        """Answer a "Curious?" question the word list can't, with Muse Spark and her last few lines as context."""
+        if question in self.answers:
+            return self.answers[question]
+        from muse import spark_json
+        said = "\n".join(f"{te}  =  {en}" for te, en in self.recent) or "(nothing yet)"
+        a = spark_json(
+            f"You help a grandchild raised in the US (beginner Telugu) understand their Telugu-speaking grandparent "
+            f"({caller}) during a live call. Answer the grandchild's question in 2-3 short, warm, simple sentences, using "
+            "what was said on the call for context. If the answer is about a Telugu word or phrase, include it; anything the "
+            "grandchild could say to the grandparent must use the respectful form (meeru, mimmalni). Keys: "
+            '"text" (the answer in English), "telugu" (the key Telugu word or phrase in Telugu script, or ""), '
+            '"roman" (how to say it in English letters, or "").',
+            f"The call so far:\n{said}\n\nQuestion: {question}", model="muse-spark-1.1", effort="minimal", timeout=10)
+        if a and a.get("text"):
+            self.answers[question] = a
+        return a
 
     def _cards(self, sentence, decision):
         """Word-list matches in what grandma said (exact), else Laya's category guess for the English line."""
@@ -456,14 +482,21 @@ async def run(args):
 
     def on_message(msg):
         kind, wid = msg.get("type"), msg.get("id")
-        entry = next((e for e in captioner.lexicon.entries.get(captioner.lang, []) if e["id"] == wid), None) if wid else None
+        words = {e["id"]: e for e in captioner.lexicon.entries.get(captioner.lang, [])}
+        entry = words.get(msg.get("word")) or words.get(wid) if wid else None
         if kind == "ask" and entry:
             # "What does ___ mean?" from the overlay: strong evidence they don't know it yet, then the answer teaches it.
-            # Word-list words are answered from the list's note; other questions wait for the LLM (build-plan step 4).
-            captioner.progress.observe(wid, "asked")
+            # Word-list words are answered at once from the list's note.
+            captioner.progress.observe(entry["id"], "asked")
             broadcast({"type": "answer", "id": wid, "text": entry.get("note") or entry.get("translate_as", ""),
                        "telugu": entry["forms"][0].strip(" ,.^"), "roman": (entry.get("roman") or "").strip(" ,")})
-            captioner.progress.observe(wid, "answer")
+            captioner.progress.observe(entry["id"], "answer")
+        elif kind == "ask" and wid and msg.get("text"):
+            def reply():  # anything else: Muse Spark, with the call so far (~1-2 s), off the WebSocket thread
+                a = captioner.answer(msg["text"], args.caller)
+                broadcast({"type": "answer", "id": wid, "text": (a or {}).get("text") or "Couldn't look that up right now.",
+                           "telugu": (a or {}).get("telugu", ""), "roman": (a or {}).get("roman", "")})
+            threading.Thread(target=reply, daemon=True).start()
         elif kind == "practiced" and entry:
             captioner.progress.observe(wid, "practiced")
         if kind == "forget" and wid:

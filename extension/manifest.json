@@ -2,18 +2,39 @@
   "manifest_version": 3,
   "name": "Weave overlay",
   "version": "0.1.0",
-  "description": "Live Telugu → English captions, questions, words and pictures on top of your WhatsApp or Instagram call.",
-  "permissions": ["activeTab", "scripting", "storage"],
-  "background": { "service_worker": "background.js" },
-  "action": { "default_title": "Show or hide Weave" },
-  "commands": {
-    "toggle-overlay": { "suggested_key": { "default": "Alt+Shift+W" }, "description": "Show or hide Weave" }
+  "description": "Live Telugu → English captions, questions, words and pictures on top of the call in this tab. Turn it on with the toolbar button or Alt+Shift+W.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
   },
-  "content_scripts": [
-    { "matches": ["https://web.whatsapp.com/*", "https://www.instagram.com/*"], "js": ["content.js"], "run_at": "document_idle" }
-  ],
+  "action": {
+    "default_title": "Show or hide Weave"
+  },
+  "commands": {
+    "toggle-overlay": {
+      "suggested_key": {
+        "default": "Alt+Shift+W"
+      },
+      "description": "Show or hide Weave"
+    }
+  },
   "web_accessible_resources": [
-    { "resources": ["panel.html", "panel.css", "panel.js"], "matches": ["<all_urls>"] }
+    {
+      "resources": [
+        "panel.html",
+        "panel.css",
+        "panel.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
   ],
-  "icons": { "128": "icon.png" }
+  "icons": {
+    "128": "icon.png"
+  }
 }
