@@ -203,10 +203,15 @@ def make_handler(garden):
     return Handler
 
 
-def serve(garden, port=8770):  # 8765 is subtitles.py's overlay
-    server = ThreadingHTTPServer(("0.0.0.0", port), make_handler(garden))
+def serve(garden, port=8770, lan=False):  # 8765 is subtitles.py's overlay
+    # Only this laptop by default: on shared Wi-Fi (a hackathon, a cafe) anyone could otherwise open the saved calls,
+    # her voice clips and the live call. --lan opens it to the network for the iPhone app, on a network you trust.
+    server = ThreadingHTTPServer(("0.0.0.0" if lan else "127.0.0.1", port), make_handler(garden))
     print(f"Weave:             http://localhost:{port}/app")
-    print(f"phone widget URL:  http://{lan_ip()}:{port}   (phone must be on the same Wi-Fi)")
+    if lan:
+        print(f"phone widget URL:  http://{lan_ip()}:{port}   (open to everyone on this Wi-Fi until you stop it)")
+    else:
+        print("(this laptop only; python -m garden --lan to let your iPhone connect over Wi-Fi)")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
