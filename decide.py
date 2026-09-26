@@ -22,6 +22,9 @@ class Decider:
     def __init__(self, device="mps"):
         import laya
 
+        import torch
+
+        self.torch = torch
         self.agent = laya.load("convaiinnovations/laya", device=device)
         self.lock = threading.Lock()  # one model on one GPU; translation runs on several threads
         self("Hello, how are you?")   # warm up
@@ -30,6 +33,7 @@ class Decider:
         start = time.monotonic()
         with self.lock:
             answers = self.agent.predict({"english": english}, QUESTIONS)["answers"]
+            self.torch.mps.empty_cache()  # don't let torch hold on to GPU memory between lines
         intent = answers["intent"]["choice"]
         category = answers["category"]["choice"]
         return {

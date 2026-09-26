@@ -11,7 +11,12 @@ import threading
 import time
 import wave
 
+import mlx.core as mx
 import numpy as np
+
+# MLX keeps freed GPU buffers for reuse; generating one sentence grew this cache to ~2 GB and it never shrank,
+# which pushed a 24 GB Mac into swap and made translation take ~10 s. 256 MB is plenty (same speed).
+mx.set_cache_limit(256 * 2**20)
 
 # Kokoro pronounces unknown words (pulihora, Sankranti) through espeak-ng: `brew install espeak-ng`.
 for lib in ("/opt/homebrew/lib/libespeak-ng.1.dylib", "/usr/local/lib/libespeak-ng.1.dylib"):
@@ -41,12 +46,14 @@ class Dubber:
 
         self.buffer = voice_buffer  # AudioLoop.voice
         self.voice = voice
-        self.kokoro = load_model(KOKORO_MODEL)
-        list(self._kokoro_clips("Hello, there.", BASE_SPEED))  # the first generation takes ~4 s; do it before the call
         self.pocket = load_model(CLONE_MODEL) if clone else None
         self.clone_state = None  # Pocket TTS conditioning for the caller's voice, once we have a sample
         if self.pocket and voice_sample and os.path.exists(voice_sample):
             self._use_sample(voice_sample)
+        self.kokoro = None
+        if not self.cloning:  # the stock voice is only needed until we have the caller's voice
+            self.kokoro = load_model(KOKORO_MODEL)
+            list(self._kokoro_clips("Hello, there.", BASE_SPEED))  # the first generation takes ~4 s; do it now
         self.jobs = queue.Queue()
         threading.Thread(target=self._worker, daemon=True).start()
 
@@ -92,6 +99,8 @@ class Dubber:
             try:
                 if kind == "sample":
                     self._use_sample(text)
+                    self.kokoro = None  # free the stock voice
+                    mx.clear_cache()
                     print("English voice now sounds like the caller.", flush=True)
                     continue
                 if self.cloning:

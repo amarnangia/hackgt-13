@@ -57,6 +57,8 @@
   {
    "id": "pappu",
    "forms": [
+    "పప్పుఅన్నం",
+    "పప్పున్నం",
     "పప్పు అన్నం",
     "పప్పన్నం",
     "పప్పు"
@@ -64,7 +66,9 @@
    "translate_as": "dal",
    "translate_forms": {
     "పప్పు అన్నం": "dal rice",
-    "పప్పన్నం": "dal rice"
+    "పప్పన్నం": "dal rice",
+    "పప్పున్నం": "dal rice",
+    "పప్పుఅన్నం": "dal rice"
    },
    "roman": "pappu",
    "category": "food",
