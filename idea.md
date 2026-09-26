@@ -174,6 +174,7 @@ grandkid actually clicks.
     - `curious` `{questions: [{id, stem, blank, text}]}`
     - `topic` `{topic, words: [{id, telugu, roman, english, heard}]}`
     - `answer` `{id, text, telugu?, roman?}`
+    - `draft` `{text}`: the English of what she's said so far, while she's mid-sentence
   - **From the overlay back to the engine:** `ask` `{id}` (a click on a question) and the existing `forget` `{id}`.
 - **Same audio setup** for both apps. The call plays in Chrome, the Mac's output is BlackHole 2ch at 100%, and the engine listens to BlackHole. So Instagram web calls work the same way as WhatsApp Web.
 

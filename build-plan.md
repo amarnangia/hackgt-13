@@ -63,7 +63,7 @@ Times are rough estimates for one person.
   - Afterwards, quiz the grandkid on the words (knows / doesn't).
   - Fit the weights to those answers, e.g. with a small grid search that maximises log-likelihood.
   - Report how well the model predicts the quiz (accuracy, calibration) next to the old "heard it once" rule.
-- **Live draft captions,** so the subtitles feel instant like Google's.
+- ✅ **Live draft captions,** so the subtitles feel instant like Google's (`draft` messages; `--no-drafts` turns them off). Measured: drafts show 2–3 s before she finishes a sentence; the final English is no slower.
   - Translate her in-progress sentence every ~0.5 s and show it faded; replace it with the final English when she finishes.
   - The voice still waits for the finished sentence.
   - Telugu puts the verb last, so the draft will change as she talks. That's expected; the final line is what counts.

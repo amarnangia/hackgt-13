@@ -123,8 +123,11 @@ def play(pause):
             n += 1
             broadcast({"type": "speaking"})
             words = telugu.split()
-            for k in range(1, len(words) + 1):  # her words appear as Muse hears them
+            en_words = english.split()
+            for k in range(1, len(words) + 1):  # her words appear as Muse hears them, with a draft of the English
                 broadcast({"type": "partial", "text": " ".join(words[:k])})
+                if k >= 3 and k < len(words):
+                    broadcast({"type": "draft", "text": " ".join(en_words[: max(1, len(en_words) * k // len(words) - 1)])})
                 time.sleep(0.25)
             broadcast({"type": "partial", "text": ""})
             broadcast({"type": "original", "id": n, "text": telugu, "route": "native"})

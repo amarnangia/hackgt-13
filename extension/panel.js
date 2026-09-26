@@ -33,7 +33,7 @@ function status() {
 }
 
 // ---------- captions ----------
-const cap = { lines: [], byId: {}, partial: "", speaking: false, warning: "", warnTimer: 0 };
+const cap = { lines: [], byId: {}, partial: "", draft: "", speaking: false, warning: "", warnTimer: 0 };
 function captionLine(id) {
   let l = cap.byId[id];
   if (!l) {
@@ -62,9 +62,11 @@ function renderCaptions() {
     <div class="line ${i < cap.lines.length - 1 || cap.partial ? "old" : ""}">
       <div class="orig ${l.english ? "faint" : "te"}">${l.english ? "said in English" : esc(l.orig)}</div>
       ${l.english ? `<div class="en">${l.tag ? `<span class="tag">${esc(l.tag)}</span>` : ""}${esc(l.orig)}</div>`
-        : `<div class="en ${l.pending ? "pending" : ""}">${l.tag ? `<span class="tag">${esc(l.tag)}</span>` : ""}${l.pending ? "translating…" : withKept(l.en, l.kept)}</div>`}
+        : `<div class="en ${l.pending ? (l.draft ? "draft" : "pending") : ""}">${l.tag ? `<span class="tag">${esc(l.tag)}</span>` : ""}${l.pending ? esc(l.draft || "translating…") : withKept(l.en, l.kept)}</div>`}
     </div>`).join("");
-  const partial = cap.partial ? `<div class="line partial"><div class="orig te">${esc(cap.partial)}</div></div>` : "";
+  // While she's mid-sentence: her words so far, and a faded draft of the English that firms up when she finishes
+  const partial = cap.partial || cap.draft ? `<div class="line partial"><div class="orig te">${esc(cap.partial)}</div>
+      ${cap.draft ? `<div class="en draft">${esc(cap.draft)}</div>` : ""}</div>` : "";
   root.innerHTML = `<div class="card captions">
       ${cap.warning ? `<div class="warning">⚠️ ${esc(cap.warning)}</div>` : ""}
       <div class="status"><span class="dot ${dot}"></span>${statusText}</div>
@@ -237,9 +239,11 @@ function handleCaptions(m) {
   switch (m.type) {
     case "speaking": cap.speaking = true; break;
     case "partial": cap.partial = m.text || ""; if (!m.text) cap.speaking = false; break;
+    case "draft": cap.draft = m.text || ""; break;
     case "original": {
       const l = captionLine(m.id);
       l.orig = m.text; l.english = m.route === "english"; l.pending = !l.english; cap.partial = ""; cap.speaking = false;
+      l.draft = cap.draft; cap.draft = "";  // keep showing the draft until the final English arrives
       break;
     }
     case "english": {
