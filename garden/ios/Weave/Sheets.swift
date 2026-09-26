@@ -99,7 +99,7 @@ struct WordSheet: View {
                             Image(systemName: added ? "checkmark" : "plus").font(.system(size: 14, weight: .semibold)).contentTransition(.symbolEffect(.replace))
                             Text(added ? "In your vocabulary" : "Add to vocabulary").font(Fonts.ui(15, .medium)).contentTransition(.opacity)
                         }
-                        .foregroundStyle(added ? Theme.accent : .white)
+                        .foregroundStyle(added ? Theme.accent : Theme.onAccent)
                         .frame(maxWidth: .infinity).frame(height: 50)
                         .background(added ? Theme.accent.opacity(0.14) : Theme.accent, in: .rect(cornerRadius: 14))
                         .shadow(color: Theme.accent.opacity(added ? 0 : 0.45), radius: 16, y: 8)

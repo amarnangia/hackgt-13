@@ -199,25 +199,33 @@ ICONS = {"food": "🍛", "vehicle": "🛺", "place": "🛕", "clothing": "🥻",
          "slang": "💬", "phrase": "💬", "culture": "🙏", "word": "🔤", "web": "🖼️"}
 
 STYLE = """
-:root { --bg:#fbf7f1; --card:#ffffff; --ink:#2a2420; --muted:#7a6f66; --accent:#c2410c; --soft:#fde8d7; --line:#eee4d8; }
-@media (prefers-color-scheme: dark) { :root { --bg:#17130f; --card:#221c17; --ink:#f3ece4; --muted:#a8998b; --accent:#fb923c; --soft:#3a2a1d; --line:#352c24; } }
-* { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 -apple-system, "Noto Sans Telugu", system-ui, sans-serif; }
-main { max-width:860px; margin:0 auto; padding:28px 16px 60px; }
-h1 { font-size:30px; line-height:1.2; margin:0 0 6px; } h2 { font-size:20px; margin:34px 0 12px; } h3 { margin:0 0 4px; font-size:18px; }
-.meta { color:var(--muted); font-size:14px; } .te { font-family:"Noto Sans Telugu", sans-serif; }
-.card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 18px; margin:12px 0; }
-.story { border-left:5px solid var(--accent); }
-.line { display:flex; gap:12px; align-items:flex-start; padding:8px 0; border-top:1px solid var(--line); }
-.line:first-of-type { border-top:0; } .line .text { flex:1; } .line .en { font-weight:600; } .line .orig { color:var(--muted); font-size:14px; }
-audio { height:32px; width:220px; min-width:170px; max-width:100%; }
-.pics { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; }
-.pic img { width:100%; height:110px; object-fit:cover; border-radius:10px; display:block; } .pic b { display:block; margin-top:4px; } .pic span { color:var(--muted); font-size:13px; }
-table { width:100%; border-collapse:collapse; } td, th { text-align:left; padding:8px 6px; border-top:1px solid var(--line); vertical-align:top; font-size:15px; }
-th { color:var(--muted); font-weight:500; font-size:13px; } .new { background:var(--soft); color:var(--accent); border-radius:999px; padding:1px 8px; font-size:12px; font-weight:600; white-space:nowrap; }
-.q { padding:10px 0; border-top:1px solid var(--line); } .q:first-child { border-top:0; } .q .roman { color:var(--accent); font-weight:600; }
-textarea { width:100%; min-height:110px; border-radius:10px; border:1px solid var(--line); padding:10px; font:16px "Noto Sans Telugu", sans-serif; background:var(--bg); color:var(--ink); }
-button { background:var(--accent); color:#fff; border:0; border-radius:10px; padding:8px 14px; font-size:15px; cursor:pointer; margin-top:8px; }
-details summary { cursor:pointer; color:var(--muted); } a { color:var(--accent); }
+:root { --bg:#0b0d11; --card:rgba(20,23,29,.92); --card-2:rgba(255,255,255,.06); --ink:#f1f3f5; --ink-2:#b4bac3; --muted:#7d8591;
+        --accent:#7aa2ff; --soft:rgba(122,162,255,.16); --warm:#f5b35c; --warm-soft:rgba(245,179,92,.16); --line:rgba(255,255,255,.10); color-scheme:dark; }
+* { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Telugu", system-ui, sans-serif; }
+main { max-width:860px; margin:0 auto; padding:32px 16px 64px; }
+h1 { font-size:30px; line-height:1.2; font-weight:700; letter-spacing:-.01em; margin:4px 0 8px; }
+h2 { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:36px 0 10px; }
+h3 { margin:0 0 4px; font-size:17px; }
+.meta { color:var(--muted); font-size:13px; } main > .meta:first-child { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+.te { font-family:"Noto Sans Telugu", sans-serif; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin:10px 0;
+        box-shadow:0 10px 30px -12px rgba(0,0,0,.6); }
+.card ul { margin:8px 0 0; padding-left:20px; } .card li { margin:4px 0; color:var(--ink-2); }
+.story { border-left:3px solid var(--accent); } .story p { color:var(--ink-2); }
+.line { display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-top:1px solid var(--line); }
+.line:first-of-type { border-top:0; } .line .text { flex:1; } .line .en { font-size:17px; font-weight:600; line-height:1.35; } .line .orig { color:var(--ink-2); font-size:14px; }
+audio { height:32px; width:220px; min-width:170px; max-width:100%; color-scheme:dark; }
+.pics { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:10px; }
+.pic { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:8px; }
+.pic img { width:100%; height:110px; object-fit:cover; border-radius:10px; display:block; } .pic b { display:block; margin-top:6px; font-size:14px; } .pic span { color:var(--muted); font-size:12px; }
+table { width:100%; border-collapse:collapse; } td, th { text-align:left; padding:9px 6px; border-top:1px solid var(--line); vertical-align:top; font-size:14px; }
+tr:first-child th { border-top:0; } th { color:var(--muted); font-weight:700; font-size:11px; letter-spacing:.06em; text-transform:uppercase; }
+td.te { font-size:17px; } .new { background:var(--soft); color:var(--accent); border-radius:999px; padding:2px 8px; font-size:11px; font-weight:700; white-space:nowrap; }
+.card:has(> .q) { border-color:rgba(245,179,92,.45); background:linear-gradient(180deg, rgba(245,179,92,.14), rgba(12,14,18,.82)); }
+.q { padding:10px 0; border-top:1px solid var(--line); } .q:first-child { border-top:0; } .q .te { font-size:17px; } .q .roman { color:var(--ink); font-weight:700; font-size:16px; } .q .meta { color:var(--ink-2); }
+textarea { width:100%; min-height:110px; border-radius:12px; border:1px solid var(--line); padding:10px 12px; font:16px "Noto Sans Telugu", sans-serif; background:var(--card-2); color:var(--ink); }
+button { background:var(--accent); color:#0b1020; border:0; border-radius:10px; padding:8px 14px; font-size:14px; font-weight:600; cursor:pointer; margin-top:8px; }
+details summary { cursor:pointer; color:var(--ink-2); } a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
 @media (max-width:600px) { .line { flex-direction:column; } audio { width:100%; } h1 { font-size:24px; } }
 """
 

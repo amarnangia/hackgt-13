@@ -3,17 +3,18 @@ import SwiftUI
 /// "For your next call": a question the story keeper wrote from her stories.
 struct AskCard: View {
     let q: Question
+    var label = "Ask"
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Eyebrow("Ask", color: Theme.accent)
-            if let te = q.telugu { Text(te).font(Fonts.telugu(22, .medium)).foregroundStyle(Theme.text).padding(.top, 2) }
-            if let r = q.roman { Text("“\(r)”").font(Fonts.serif(17, italic: true)).foregroundStyle(Theme.text2) }
-            if let en = q.english { Text(en).font(Fonts.ui(13)).foregroundStyle(Theme.text3) }
+            Eyebrow(label, color: Theme.warm)
+            if let te = q.telugu { Text(te).font(Fonts.telugu(19, .medium)).foregroundStyle(Theme.text).padding(.top, 2) }
+            if let r = q.roman { Text(r).font(Fonts.serif(16, italic: true)).foregroundStyle(Theme.text) }
+            if let en = q.english { Text(en).font(Fonts.ui(13)).foregroundStyle(Theme.text2) }
         }
-        .padding(16)
+        .padding(.horizontal, 14).padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(LinearGradient(colors: [Theme.accent.opacity(0.1), Theme.accent.opacity(0.03)], startPoint: .top, endPoint: .bottom), in: .rect(cornerRadius: Theme.radius))
-        .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.accent.opacity(0.3), lineWidth: 1))
+        .background(LinearGradient(colors: [Theme.warm.opacity(0.14), Theme.surface.opacity(0.9)], startPoint: .top, endPoint: .bottom), in: .rect(cornerRadius: Theme.radius))
+        .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.warm.opacity(0.45), lineWidth: 1))
     }
 }
 

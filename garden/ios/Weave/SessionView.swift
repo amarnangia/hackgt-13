@@ -24,6 +24,11 @@ struct SessionView: View {
                 .contentTransition(.opacity).animation(.easeOut(duration: 0.25), value: nowLine)
                 .padding(.top, 2).padding(.bottom, 8)
             LiveTranscript(convo: convo) { word, line in openWord = WordContext(word: word, line: line) }
+            if let ask = convo.ask {
+                AskCard(q: ask.q, label: ask.label)
+                    .padding(.horizontal, 20).padding(.bottom, 10)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
             SessionControls(mode: convo.mode, voiceOn: $voiceOn, saved: convo.savedThisCall, talk: convo.holdToTalk,
                             growth: { sheet = .growth }, end: { sheet = .summary })
                 .padding(.horizontal, 20)
@@ -94,8 +99,8 @@ struct ConnectionHeader: View {
         HStack(spacing: 12) {
             IconButton(symbol: "chevron.down", action: close)
             HStack(spacing: 8) {
-                Circle().fill(convo.connected ? Theme.accent : Theme.text3).frame(width: 6, height: 6)
-                    .overlay(Circle().stroke(Theme.accent.opacity(convo.connected ? 0.25 : 0), lineWidth: 3))
+                Circle().fill(convo.connected ? Theme.green : Theme.text3).frame(width: 6, height: 6)
+                    .overlay(Circle().stroke(Theme.green.opacity(convo.connected ? 0.25 : 0), lineWidth: 3))
                 Text(convo.mode == .waiting ? "Waiting" : "Connected").font(Fonts.ui(14, .medium)).foregroundStyle(Theme.text)
                     .contentTransition(.opacity)
                 TimelineView(.periodic(from: .now, by: 1)) { t in
@@ -320,8 +325,8 @@ struct TranslationMessage: View {
                 Text(line.who == .you ? "YOU" : partner.uppercased()).font(Fonts.mono(11)).tracking(0.9)
                     .foregroundStyle(line.who == .them ? Theme.accent : Theme.text)
                 if let tag = line.tag {
-                    Text(tag.uppercased()).font(Fonts.mono(9.5)).tracking(0.7).foregroundStyle(Theme.accent)
-                        .padding(.horizontal, 6).padding(.vertical, 3).background(Theme.accent.opacity(0.1), in: .rect(cornerRadius: 5))
+                    Text(tag.uppercased()).font(.system(size: 10, weight: .heavy)).tracking(0.6).foregroundStyle(Theme.onWarm)
+                        .padding(.horizontal, 6).padding(.vertical, 3).background(Theme.warm, in: .rect(cornerRadius: 6))
                 }
                 Text("·").foregroundStyle(Theme.text3)
                 Text(Language.name(line.lang)).font(Fonts.mono(11, .regular)).foregroundStyle(Theme.text3)
@@ -433,7 +438,7 @@ struct SessionControls: View {
             if mode != .demo {
                 // A real call: nothing to press, the captions come from the call itself.
                 HStack(spacing: 10) {
-                    Circle().fill(mode == .live ? Theme.accent : Theme.text3).frame(width: 7, height: 7)
+                    Circle().fill(mode == .live ? Theme.green : Theme.text3).frame(width: 7, height: 7)
                     Text(mode == .live ? "Captions from the call" : "Waiting for subtitles.py").font(Fonts.ui(15, .medium))
                 }
                 .foregroundStyle(mode == .live ? Theme.text : Theme.text3)
@@ -445,7 +450,7 @@ struct SessionControls: View {
                 Image(systemName: "mic").font(.system(size: 15, weight: .medium))
                 Text(holding ? "Listening to you…" : "Hold to talk").font(Fonts.ui(15, .medium)).contentTransition(.opacity)
             }
-            .foregroundStyle(holding ? .white : Theme.text)
+            .foregroundStyle(holding ? Theme.onAccent : Theme.text)
             .frame(maxWidth: .infinity).frame(height: 52)
             .background(holding ? Theme.accent : Theme.surface, in: .rect(cornerRadius: 16))
             .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(holding ? Theme.accent : Theme.border2, lineWidth: 1))
@@ -458,7 +463,7 @@ struct SessionControls: View {
             }
             DockButton(symbol: "book", selected: false, action: growth)
                 .overlay(alignment: .topTrailing) {
-                    Text("\(saved)").font(.system(size: 10, weight: .semibold)).foregroundStyle(.white)
+                    Text("\(saved)").font(.system(size: 10, weight: .semibold)).foregroundStyle(Theme.onAccent)
                         .padding(.horizontal, 5).frame(minWidth: 18, minHeight: 18).background(Theme.accent, in: .capsule)
                         .offset(x: 5, y: -5).scaleEffect(saved > 0 ? 1 : 0.01)
                         .animation(.spring(response: 0.35, dampingFraction: 0.55), value: saved)

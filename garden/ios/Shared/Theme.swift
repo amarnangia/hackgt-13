@@ -6,19 +6,24 @@ extension Color {
     }
 }
 
-/// Near-black neutrals and one electric-blue accent. The people are the colour; the interface stays quiet.
+/// The same system as the call overlay (extension/panel.css): dark glass, a soft blue accent,
+/// warm amber for "ask her" and sayings, green for connected.
 enum Theme {
-    static let bg = Color(hex: 0x08090b)
-    static let bg2 = Color(hex: 0x0c0d10)
-    static let surface = Color(hex: 0x111216)
-    static let surface2 = Color(hex: 0x16171c)
-    static let surface3 = Color(hex: 0x1c1d23)
-    static let border = Color.white.opacity(0.07)
+    static let bg = Color(hex: 0x0b0d11)
+    static let bg2 = Color(hex: 0x0e1015)
+    static let surface = Color(hex: 0x14171d)
+    static let surface2 = Color(hex: 0x1a1e25)
+    static let surface3 = Color(hex: 0x222730)
+    static let border = Color.white.opacity(0.08)
     static let border2 = Color.white.opacity(0.12)
-    static let text = Color(hex: 0xf3f3f1)
-    static let text2 = Color(hex: 0xa2a2a8)
-    static let text3 = Color(hex: 0x68686f)
-    static let accent = Color(hex: 0x5b8cff)
+    static let text = Color(hex: 0xf1f3f5)
+    static let text2 = Color(hex: 0xb4bac3)
+    static let text3 = Color(hex: 0x7d8591)
+    static let accent = Color(hex: 0x7aa2ff)
+    static let onAccent = Color(hex: 0x0b1020)
+    static let warm = Color(hex: 0xf5b35c)
+    static let onWarm = Color(hex: 0x1b1300)
+    static let green = Color(hex: 0x34d399)
     static let danger = Color(hex: 0xff8a8a)
 
     static let radius: CGFloat = 16
@@ -27,24 +32,22 @@ enum Theme {
 
 enum Fonts {
     static func ui(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font { .system(size: size, weight: weight) }
-    /// Translations read like editorial text (New York).
-    static func serif(_ size: CGFloat, italic: Bool = false) -> Font {
-        let f = Font.system(size: size, weight: .regular, design: .serif)
-        return italic ? f.italic() : f
-    }
-    static func mono(_ size: CGFloat, _ weight: Font.Weight = .medium) -> Font { .system(size: size, weight: weight, design: .monospaced) }
+    /// Captions and translations: semibold, like the overlay's English line. (The pronunciation, `italic`, is bold.)
+    static func serif(_ size: CGFloat, italic: Bool = false) -> Font { .system(size: size, weight: italic ? .bold : .semibold) }
+    /// Numbers and small labels: the system font with even-width digits.
+    static func mono(_ size: CGFloat, _ weight: Font.Weight = .semibold) -> Font { .system(size: size, weight: weight).monospacedDigit() }
     static func telugu(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font { .system(size: size, weight: weight) }
 }
 
 // MARK: shared pieces
 
-/// Small uppercase monospaced label.
+/// Small uppercase label, like the overlay's .eyebrow.
 struct Eyebrow: View {
     let text: String
     var color: Color = Theme.text3
     init(_ text: String, color: Color = Theme.text3) { self.text = text; self.color = color }
     var body: some View {
-        Text(text.uppercased()).font(Fonts.mono(10.5)).tracking(0.9).foregroundStyle(color)
+        Text(text.uppercased()).font(.system(size: 11, weight: .bold)).tracking(0.66).foregroundStyle(color)
     }
 }
 
@@ -98,7 +101,7 @@ struct Avatar: View {
                 .background(LinearGradient(colors: [Theme.surface3, Theme.surface], startPoint: .top, endPoint: .bottom), in: .circle)
                 .overlay(Circle().strokeBorder(Theme.border2, lineWidth: 1))
             if let presence {
-                Circle().fill(presence ? Theme.accent : Theme.text3).frame(width: 10, height: 10)
+                Circle().fill(presence ? Theme.green : Theme.text3).frame(width: 10, height: 10)
                     .overlay(Circle().strokeBorder(Theme.bg, lineWidth: 2)).offset(x: 1, y: 1)
             }
         }

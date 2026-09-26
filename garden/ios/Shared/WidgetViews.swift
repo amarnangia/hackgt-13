@@ -30,7 +30,7 @@ struct GardenWidgetView: View {
     private func askView(_ q: Question, size: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             if let te = q.telugu { Text(te).font(Fonts.telugu(size, .medium)).foregroundStyle(Theme.text).lineLimit(2).minimumScaleFactor(0.7) }
-            if let r = q.roman { Text("“\(r)”").font(Fonts.serif(size * 0.72, italic: true)).foregroundStyle(Theme.accent).lineLimit(2) }
+            if let r = q.roman { Text(r).font(Fonts.serif(size * 0.72, italic: true)).foregroundStyle(Theme.text).lineLimit(2) }
             if let en = q.english { Text(en).font(Fonts.ui(max(11, size * 0.55))).foregroundStyle(Theme.text2).lineLimit(2) }
         }
     }
@@ -179,8 +179,8 @@ struct GardenWidgetView: View {
 
     private var label: some View {
         HStack(spacing: 6) {
-            Circle().fill(Theme.accent).frame(width: 5, height: 5)
-            Text("NEXT CALL").font(Fonts.mono(10)).tracking(0.9).foregroundStyle(Theme.accent)
+            Circle().fill(Theme.warm).frame(width: 5, height: 5)
+            Text("NEXT CALL").font(.system(size: 10, weight: .bold)).tracking(0.6).foregroundStyle(Theme.warm)
         }
     }
 
@@ -211,7 +211,7 @@ struct WidgetBackdrop: View {
     var body: some View {
         ZStack {
             Theme.bg
-            RadialGradient(colors: [Theme.accent.opacity(0.12), .clear], center: .topLeading, startRadius: 0, endRadius: 260)
+            RadialGradient(colors: [Theme.warm.opacity(0.12), .clear], center: .topLeading, startRadius: 0, endRadius: 260)
         }
     }
 }

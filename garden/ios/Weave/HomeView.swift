@@ -37,7 +37,7 @@ struct HomeView: View {
                 if liveOnMac {
                     Button { cover = .session(people.partner) } label: {
                         HStack(spacing: 10) {
-                            Circle().fill(Theme.accent).frame(width: 7, height: 7).shadow(color: Theme.accent, radius: 4)
+                            Circle().fill(Theme.green).frame(width: 7, height: 7).shadow(color: Theme.green, radius: 4)
                             Text("\(people.partner.name) is on a call now").font(Fonts.ui(15, .medium)).foregroundStyle(Theme.text)
                             Spacer()
                             Text("Join").font(Fonts.ui(14, .semibold)).foregroundStyle(Theme.accent)
@@ -78,7 +78,7 @@ struct HomeView: View {
                 }
 
                 Button { cover = .newConnection } label: {
-                    Label("Start a connection", systemImage: "plus").font(Fonts.ui(16, .medium)).foregroundStyle(.white)
+                    Label("Start a connection", systemImage: "plus").font(Fonts.ui(16, .semibold)).foregroundStyle(Theme.onAccent)
                         .frame(maxWidth: .infinity).frame(height: 56)
                         .background(Theme.accent, in: .rect(cornerRadius: 16))
                         .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(.white.opacity(0.1), lineWidth: 1))
@@ -242,7 +242,7 @@ struct ConnectionCard: View {
             }
             Spacer(minLength: 8)
             HStack(spacing: 6) {
-                Circle().fill(connection.recent ? Theme.accent : Theme.text3).frame(width: 6, height: 6)
+                Circle().fill(connection.recent ? Theme.green : Theme.text3).frame(width: 6, height: 6)
                 Text(connection.lastLabel).font(Fonts.ui(12)).foregroundStyle(Theme.text3)
             }
         }
@@ -322,7 +322,7 @@ struct OnboardingView: View {
                         if step == 3 { Image(systemName: "arrow.right").font(.system(size: 14, weight: .semibold)) }
                     }
                     .font(Fonts.ui(16, .medium))
-                    .foregroundStyle(step == 3 ? .white : Theme.bg)
+                    .foregroundStyle(step == 3 ? Theme.onAccent : Theme.bg)
                     .frame(maxWidth: .infinity).frame(height: 52)
                     .background(step == 3 ? Theme.accent : Theme.text, in: .rect(cornerRadius: 14))
                     .shadow(color: Theme.accent.opacity(step == 3 ? 0.45 : 0), radius: 18, y: 8)
@@ -393,7 +393,7 @@ struct LanguageSelector: View {
                                 Circle().strokeBorder(selected == l.code ? Theme.accent : Theme.border2, lineWidth: 1.5)
                                 if selected == l.code {
                                     Circle().fill(Theme.accent)
-                                    Image(systemName: "checkmark").font(.system(size: 10, weight: .bold)).foregroundStyle(.white).transition(.scale.combined(with: .opacity))
+                                    Image(systemName: "checkmark").font(.system(size: 10, weight: .bold)).foregroundStyle(Theme.onAccent).transition(.scale.combined(with: .opacity))
                                 }
                             }
                             .frame(width: 20, height: 20)

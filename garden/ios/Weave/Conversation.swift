@@ -150,6 +150,9 @@ final class Conversation: ObservableObject {
     @Published private(set) var connected = false
     @Published private(set) var seen: [String: Word] = [:]
     @Published var savedThisCall = 0
+    /// The overlay's "Ask her": a question to keep the talk going, with what it's about. Clears itself after 25 s.
+    @Published private(set) var ask: (q: Question, label: String)?
+    private var askTimer: Task<Void, Never>?
 
     let partner: Connection
     let started = Date()
@@ -406,6 +409,17 @@ final class Conversation: ObservableObject {
             }
         case "voice":
             if let i = index(key(who, m["id"])) { lines[i].voiced = true }
+        case "prompt":
+            let q = Question(english: m["english"] as? String, telugu: m["telugu"] as? String, roman: m["roman"] as? String)
+            guard q.telugu != nil || q.english != nil else { return }
+            let label = (m["context"] as? String).map { "\($0) · ask" } ?? (m["about"] as? String).map { "Ask about \($0)" } ?? "Ask \(partner.name)"
+            withAnimation(.spring(response: 0.42, dampingFraction: 0.88)) { ask = (q, label) }
+            askTimer?.cancel()
+            askTimer = Task { [weak self] in
+                try? await Task.sleep(for: .seconds(25))
+                guard !Task.isCancelled else { return }
+                withAnimation(.easeOut(duration: 0.3)) { self?.ask = nil }
+            }
         default: break
         }
     }
