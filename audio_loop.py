@@ -147,7 +147,7 @@ def check_volume():
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--in", dest="inp", default="BlackHole")
+    p.add_argument("--in", dest="inp", default="BlackHole 2ch")
     p.add_argument("--out", default=None, help="output device name (default: system default, must not be BlackHole)")
     a = p.parse_args()
     in_dev = find_device(a.inp, "input")

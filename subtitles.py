@@ -484,7 +484,7 @@ def main():
                         "as its microphone, so the other person hears only the English")
     p.add_argument("--mine-volume", type=float, default=0.15,
                    help="with --outgoing: how loud your real voice is in the call, 0-1 (0 = only the English voice)")
-    p.add_argument("--in", dest="inp", default=None, help="input device (default: BlackHole; with --outgoing, the Mac's mic)")
+    p.add_argument("--in", dest="inp", default=None, help="input device (default: BlackHole 2ch; with --outgoing, the Mac's mic)")
     p.add_argument("--out", default=None, help='output device (default: system default; with --outgoing, BlackHole 16ch); '
                                                '"none" = silent, with --file')
     p.add_argument("--no-voice", action="store_true", help="subtitles only, no English voice")
@@ -503,7 +503,7 @@ def main():
         args.inp = args.inp or "MacBook"  # the built-in mic ("MacBook Pro Microphone"); pass --in for a headset mic
         args.out = args.out or "BlackHole 16ch"
         args.speak = "all"  # your English lines too: nothing of your own voice reaches the call
-    args.inp = args.inp or "BlackHole"
+    args.inp = args.inp or "BlackHole 2ch"  # not just "BlackHole": that also matches BlackHole 16ch, the --outgoing mic
     args.voice_file = MY_VOICE_SAMPLE if args.outgoing else VOICE_SAMPLE
     # Both directions can run at once (two terminals), so --outgoing gets its own overlay page.
     port = PORT + 2 if args.outgoing and "OVERLAY_PORT" not in os.environ else PORT
