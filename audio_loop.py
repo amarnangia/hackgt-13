@@ -102,7 +102,7 @@ class AudioLoop:
         return block
 
     def _duplex_callback(self, indata, outdata, frames, time_info, status):
-        outdata[:] = self._mix(indata.mean(axis=1), frames)[:, None]
+        outdata[:] = self._mix(indata.mean(axis=1), frames)[:, None]  # same signal on both channels
 
     def _output_callback(self, outdata, frames, time_info, status):
         outdata[:] = self._mix(self._next_source_block(frames), frames)[:, None]
@@ -117,11 +117,12 @@ class AudioLoop:
                 time.sleep(max(0.0, start + n * BLOCK / SR - time.monotonic()))
             return
         if self.source is not None:
-            stream = sd.OutputStream(device=self.out_dev, samplerate=SR, blocksize=BLOCK, channels=1,
+            # Stereo out: a 1-channel stream on a 2-channel device can play from the left side only.
+            stream = sd.OutputStream(device=self.out_dev, samplerate=SR, blocksize=BLOCK, channels=2,
                                      dtype="float32", callback=self._output_callback)
         else:
             stream = sd.Stream(device=(self.in_dev, self.out_dev), samplerate=SR, blocksize=BLOCK,
-                               channels=(2, 1), dtype="float32", callback=self._duplex_callback)
+                               channels=(2, 2), dtype="float32", callback=self._duplex_callback)
         with stream:
             if meter:
                 print("Passing call audio through. Ctrl+C to stop.")

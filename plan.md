@@ -42,7 +42,9 @@ What we learned the hard way:
 | English → voice starts (Kokoro, incl. waiting for the previous line to finish) | 0.43–0.46 s | 2.24 s | 2.48 s |
 | **spoken → English voice** | **~0.95 s** | 2.6 s | 2.8 s |
 
-"Spoken" is when the last word of the sentence was said: capture time of the first audio frame plus Muse's `audioProcessedMs` for the update that first contained that word (checked against the recording: last word at 9.2 s, Muse reported 9.28 s). A live call adds network jitter on top. With Muse Spark instead of the local translator, translate was ~0.8–1.5 s.
+"Spoken" in the log is when Muse had *heard* the sentence's last word (capture time of the first audio frame plus Muse's `audioProcessedMs`). **That hides Muse's recognition delay:** against true word timings for the recording, Muse emits each word ~0.65–0.7 s after it is spoken (the last word of an utterance only ~0.35 s, since speech has ended). So add ~0.7 s to every total below. A live call adds network jitter on top.
+
+Where the time really goes, end of sentence → English voice: Muse ~0.7 s, translate ~0.4 s, voice generation ~0.4 s, **waiting for the previous English line to finish 0–2.5 s**. English takes longer to say than the Telugu did, so lines queue up when grandma talks continuously. With Muse Spark instead of the local translator, translate was ~0.8–1.5 s.
 
 Splitting run-on speech every 7 words made translations worse ("My daddy's for"), so pieces now wait for punctuation, a pause, or 12 words.
 
