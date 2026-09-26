@@ -369,8 +369,8 @@ def make_audio(args, loop, target):
                 sampler.add_frame(pcm)  # same audio Muse hears, to clone the caller's voice
             loop.call_soon_threadsafe(target["q"].put_nowait, pcm.tobytes())
 
-    # --outgoing: the call must never hear your own Telugu, only the English voice.
-    return AudioLoop(in_dev, out_dev, on_audio=on_audio, source=source, original=0.0 if args.outgoing else 1.0)
+    # --outgoing: your own voice stays quiet (--mine-volume) under the English voice.
+    return AudioLoop(in_dev, out_dev, on_audio=on_audio, source=source, original=args.mine_volume if args.outgoing else 1.0)
 
 
 async def run(args):
@@ -482,6 +482,8 @@ def main():
     p.add_argument("--outgoing", action="store_true",
                    help="translate what YOU say: your mic -> English voice -> BlackHole 16ch, which WhatsApp Web uses "
                         "as its microphone, so the other person hears only the English")
+    p.add_argument("--mine-volume", type=float, default=0.15,
+                   help="with --outgoing: how loud your real voice is in the call, 0-1 (0 = only the English voice)")
     p.add_argument("--in", dest="inp", default=None, help="input device (default: BlackHole; with --outgoing, the Mac's mic)")
     p.add_argument("--out", default=None, help='output device (default: system default; with --outgoing, BlackHole 16ch); '
                                                '"none" = silent, with --file')
