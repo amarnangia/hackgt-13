@@ -225,6 +225,20 @@ svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-widt
 .nowline { display: flex; align-items: center; justify-content: center; gap: 8px; height: 22px; color: var(--text-3); font-size: 13px; transition: color .3s; }
 .nowline.act { color: var(--text-2); }
 
+/* a saved call */
+.cs-sum { font: 400 18px/1.45 var(--serif); color: var(--text); margin: 10px 0 0; }
+.cs-all { margin-top: var(--s4); }
+.cs-h { margin: var(--s6) 0 var(--s3); }
+.cs-story { padding: 10px 0; border-top: 1px solid var(--border); }
+.cs-story b { font-weight: 500; } .cs-story div { color: var(--text-2); font-size: 14px; margin-top: 2px; }
+.cl { display: flex; gap: var(--s3); align-items: flex-start; padding: 12px 0; border-top: 1px solid var(--border); }
+.cl-play { width: 34px; height: 34px; flex: none; }
+.cl-t { flex: 1; min-width: 0; }
+.cl-t .te { font-size: 16px; color: var(--text-2); line-height: 1.55; }
+.cl-t .en { font: 400 18px/1.4 var(--serif); color: var(--text); margin-top: 2px; }
+.cl-time { font-size: 11px; color: var(--text-3); }
+.cl-pic { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; color: var(--text-2); }
+.cl-pic img { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; }
 /* ask her */
 .ask { margin: var(--s2) 0 var(--s5); padding: var(--s4); border-radius: var(--r); border: 1px solid rgba(var(--accent-rgb),.3);
        background: linear-gradient(180deg, rgba(var(--accent-rgb),.08), rgba(var(--accent-rgb),.02)); animation: msg-in .42s var(--spring) both; }
@@ -239,6 +253,7 @@ svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-widt
 .livepill:hover { background: rgba(var(--accent-rgb),.14); border-color: rgba(var(--accent-rgb),.5); }
 .livepill:active { transform: scale(.98); }
 .livepill.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.livepill.wait { background: var(--surface); border-color: var(--border); color: var(--text-3); cursor: default; }
 .livepill[hidden], .talk[hidden], .icon-btn[hidden] { display: none; }
 /* float over call */
 .fl-body { margin: 0; height: 100vh; overflow: hidden; background: var(--bg); }
@@ -442,15 +457,25 @@ const state = {
   active: null,                                         // connection in the current session
   session: null,
 };
-const DEFAULT_CONNECTIONS = [
-  { id: "ammamma", name: "Ammamma", lang: "te", last: Date.now() - 2 * 3600e3, recent: true },
-];
-// Sample connections from earlier versions; dropped unless you added them yourself.
-const SAMPLE_CONNECTION_IDS = new Set(["thatayya", "pinni"]);
+/* Your people: whoever the translator has been run for (subtitles.py --caller), newest call first,
+   plus anyone you added yourself. Nothing built in. */
+const slug = (name) => (name || "").toLowerCase().replace(/\W+/g, "-");
+function peopleFromCalls(calls, added) {
+  const byId = new Map();
+  for (const c of calls || []) {
+    const id = slug(c.caller || "Grandma");
+    if (!byId.has(id)) byId.set(id, { id, name: c.caller || "Grandma", lang: "te", last: Date.parse(c.started) || Date.now() });
+  }
+  for (const c of added) if (!byId.has(c.id)) byId.set(c.id, c);
+  return [...byId.values()].sort((a, b) => b.last - a.last);
+}
+/* The person on a live call when we haven't met them yet: the translator's own default caller. */
+const partner = () => state.connections[0] || { id: "grandma", name: "Grandma", lang: "te", last: Date.now() };
 
 async function loadData() {
   const get = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
-  const [lex, lib, script, garden, progress, calls] = await Promise.all([get("/lexicon.json"), get("/images/library.json"), get("/samples/call_script.json"), get("/api/garden"), get("/api/progress"), get("/api/calls")]);
+  const [lex, lib, script, garden, progress, calls, dict] = await Promise.all([get("/lexicon.json"), get("/images/library.json"), get("/samples/call_script.json"), get("/api/garden"), get("/api/progress"), get("/api/calls"), get("/calls/family_dictionary.json")]);
+  state.dict = dict || {};    // family dictionary: each word with her voice saying it, from the call it first came up in
   state.progress = progress;
   state.calls = calls || [];  // real calls saved by the story keeper (calls/), newest first
   state.hasDictionary = await fetch("/calls/dictionary.html", { method: "HEAD" }).then((r) => r.ok).catch(() => false);
@@ -583,9 +608,11 @@ function renderHome(live = false) {
   $("#v-home").innerHTML = `<div class="scroll" style="height:100%"><div class="col" style="padding-bottom:48px">
     <div class="topbar rise" style="--d:0"><div class="brand">${Logo()}Weave</div>
       <button class="avatar" style="--size:34px" aria-label="Profile">${initialOf(name)}</button></div>
-    <div class="greet rise" style="--d:1"><h1>${greet}, ${esc(name)}</h1><p>${byId.ammamma ? "Ammamma usually calls around this time." : "Pick up where you left off."}</p></div>
+    <div class="greet rise" style="--d:1"><h1>${greet}, ${esc(name)}</h1><p>${state.calls?.[0] ? `Last call with ${esc(state.calls[0].caller)} · ${esc(whenLabel(state.calls[0].started))}` : "Start subtitles.py and call on WhatsApp Web. Weave opens the call by itself."}</p></div>
     <div class="section-h rise" style="--d:2"><span class="eyebrow">Your connections</span></div>
-    <div class="list rise" style="--d:3">${state.connections.map((c) => ConnectionCard(c, live)).join("")}</div>
+    ${state.connections.length ? `<div class="list rise" style="--d:3">${state.connections.map((c) => ConnectionCard(c, live)).join("")}</div>`
+      : `<div class="list rise" style="--d:3"><div class="row" style="cursor:default"><span class="t"><div>The people you call show up here after your first call.</div></span></div></div>`}
+    ${NextCall()}
     <button class="btn accent block start rise" style="--d:4" id="start">${icon("plus")} Start a connection</button>
     <div class="section-h rise" style="--d:5"><span class="eyebrow">Your language growth</span>${state.hasDictionary ? '<a class="eyebrow" href="/calls/dictionary.html" target="_blank" style="color:var(--text-2);text-decoration:none">Family dictionary ↗</a>' : '<button class="eyebrow" id="growth-more" style="color:var(--text-2)">Details</button>'}</div>
     <button class="growth-teaser rise" style="--d:6" id="growth">
@@ -598,7 +625,9 @@ function renderHome(live = false) {
       : `<div class="list rise" style="--d:8"><div class="row" style="cursor:default"><span class="t"><div>Your calls will appear here, each with its story, her voice and the words you heard.</div></span></div></div>`}
   </div></div>`;
   const root = $("#v-home");
-  root.querySelectorAll("[data-conn]").forEach((b) => b.onclick = () => startSession(state.connections.find((c) => c.id === b.dataset.conn) || state.connections[0]));
+  root.querySelectorAll("[data-conn]").forEach((b) => b.onclick = () => startSession(state.connections.find((c) => c.id === b.dataset.conn) || partner()));
+  root.querySelectorAll("[data-call]").forEach((b) => b.onclick = () => openCall(b.dataset.call));
+  root.querySelectorAll("[data-say]").forEach((b) => b.onclick = (e) => { e.stopPropagation(); speak(b.dataset.say, b); });
   $("#start").onclick = () => onboard(true);
   $("#growth").onclick = () => openSheet(LearningProgress());
   $("#growth-more") && ($("#growth-more").onclick = () => openSheet(LearningProgress()));
@@ -610,15 +639,65 @@ function whenLabel(iso) {
   const time = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   return days <= 0 ? `Today ${time}` : days === 1 ? "Yesterday" : days < 7 ? d.toLocaleDateString([], { weekday: "short" }) : d.toLocaleDateString([], { month: "short", day: "numeric" });
 }
+/* "For your next call": the questions the story keeper wrote from her stories last time. */
+function NextCall() {
+  const call = (state.calls || []).find((c) => c.questions?.length);
+  if (!call) return "";
+  return `<div class="section-h rise" style="--d:4"><span class="eyebrow">For your next call with ${esc(call.caller)}</span></div>
+    <div class="rise" style="--d:4">${call.questions.slice(0, 3).map((q) => `<div class="ask" style="margin:0 0 10px">
+      <div class="ask-h"><span class="eyebrow" style="color:var(--accent)">Ask</span>${q.roman ? `<button class="say" data-say="${esc(q.telugu || q.roman)}" aria-label="Hear it">${icon("vol")}</button>` : ""}</div>
+      ${q.telugu ? `<div class="ask-te te">${esc(q.telugu)}</div>` : ""}${q.roman ? `<div class="ask-roman">“${esc(q.roman)}”</div>` : ""}<div class="ask-en">${esc(q.english || "")}</div></div>`).join("")}</div>`;
+}
 function CallRow(call) {
   const c = state.connections.find((x) => x.name.toLowerCase() === (call.caller || "").toLowerCase()) || { name: call.caller, lang: "te" };
   const mins = Math.max(1, Math.round((call.duration_s || 0) / 60));
   const detail = call.stories?.length ? call.stories.join(" · ") : `${call.lines} lines · ${call.words} words${call.new_words ? ` (${call.new_words} new)` : ""}`;
   const pics = (call.pictures || []).slice(0, 3).map((p) => `<img src="/${esc(p)}" alt="" style="width:34px;height:34px;object-fit:cover;border-radius:8px;margin-left:4px">`).join("");
-  return `<a class="row" href="${esc(call.page || "#")}" target="_blank" style="text-decoration:none;color:inherit">
+  return `<button class="row" data-call="${esc(call.id)}">
     <span class="avatar ${c.lang === "te" ? "te" : ""}" style="--size:40px">${avatarText(c)}</span>
     <span class="t"><b>${esc(call.title)}</b><div>${esc(detail)}</div></span>
-    <span style="display:flex;align-items:center">${pics}<span class="when mono" style="margin-left:10px">${whenLabel(call.started)} · ${mins}m</span></span></a>`;
+    <span style="display:flex;align-items:center">${pics}<span class="when mono" style="margin-left:10px">${whenLabel(call.started)} · ${mins}m</span></span></button>`;
+}
+const player = new Audio();
+let playingBtn = null;
+function playClip(url, btn) {
+  if (playingBtn === btn && !player.paused) { player.pause(); btn?.classList.remove("playing"); playingBtn = null; return; }
+  playingBtn?.classList.remove("playing");
+  player.src = url; player.play().catch(() => toast("Couldn't play that recording", "x"));
+  playingBtn = btn; btn?.classList.add("playing");
+  player.onended = () => { btn?.classList.remove("playing"); playingBtn = null; };
+}
+/* Her voice if the family dictionary has it, otherwise the browser's voice as a stand-in. */
+function speak(text, btn, clip) {
+  if (clip) return playClip(`/calls/${clip}`, btn);
+  speechSynthesis.cancel();
+  const v = speechSynthesis.getVoices().find((x) => x.lang?.startsWith("te"));
+  const u = new SpeechSynthesisUtterance(text); if (v) u.voice = v; u.lang = v ? v.lang : "en-IN"; u.rate = 0.85;
+  btn?.classList.add("playing"); u.onend = () => btn?.classList.remove("playing");
+  speechSynthesis.speak(u);
+}
+async function openCall(id) {
+  const call = await fetch(`/calls/${encodeURIComponent(id)}/call.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  if (!call) { toast("That call isn't saved on this Mac any more", "x"); return; }
+  const meta = state.calls.find((c) => c.id === id) || {};
+  const story = call.story || {}, lines = call.lines || [], words = call.words || [];
+  const mins = Math.max(1, Math.round((call.duration_s || 0) / 60));
+  const base = `/calls/${encodeURIComponent(call.id)}/`;
+  openSheet(`<div class="eyebrow">${esc(call.caller)} · ${esc(whenLabel(call.started))} · ${mins} min</div>
+    <h2>${esc(story.title || `Call with ${call.caller}`)}</h2>
+    ${story.summary ? `<p class="cs-sum">${esc(story.summary)}</p>` : ""}
+    ${meta.has_audio ? `<button class="btn ghost block cs-all" data-clip="${esc(base)}call.m4a">${icon("vol")} Her side of the call · ${mins} min</button>` : ""}
+    ${(story.stories || []).length ? `<div class="eyebrow cs-h">Stories she told</div>${story.stories.map((st) => `<div class="cs-story"><b>${esc(st.title)}</b><div>${esc(st.summary || "")}</div></div>`).join("")}` : ""}
+    ${(story.questions || []).length ? `<div class="eyebrow cs-h">Ask next time</div>${story.questions.map((q) => `<div class="ask" style="margin:0 0 8px"><div class="ask-te te">${esc(q.telugu || "")}</div><div class="ask-roman">“${esc(q.roman || "")}”</div><div class="ask-en">${esc(q.english || "")}</div></div>`).join("")}` : ""}
+    <div class="eyebrow cs-h">The call · ${lines.length} lines</div>
+    ${lines.map((l) => `<div class="cl">
+      ${l.clip ? `<button class="say cl-play" data-clip="${esc(base + l.clip)}" aria-label="Play her voice">${icon("vol")}</button>` : '<span class="cl-play"></span>'}
+      <div class="cl-t">${l.route === "english" ? `<div class="en">${esc(l.telugu)}</div>` : `<div class="te">${esc(l.telugu)}</div><div class="en">${esc(l.english || "")}</div>`}
+        ${l.picture?.image ? `<div class="cl-pic"><img src="/${esc(l.picture.image)}" alt=""><span>${esc(l.picture.name || "")}</span></div>` : ""}</div>
+      <span class="mono cl-time">${esc((l.time || "").slice(0, 5))}</span></div>`).join("")}
+    ${words.length ? `<div class="eyebrow cs-h">Words from this call · ${words.length}</div>${words.slice(0, 12).map((w) => VocabularyCard({ telugu: w.telugu, roman: w.roman, english: `${w.english || ""}${w.status === "new" ? " · new" : ""}`, image: wordInfo(w.id).image })).join("")}` : ""}
+    ${meta.page ? `<a class="btn ghost block" style="margin-top:18px;text-decoration:none" href="${esc(meta.page)}" target="_blank">Open the story page ↗</a>` : ""}`,
+  { bind: (sh) => sh.querySelectorAll("[data-clip]").forEach((b) => b.onclick = () => playClip(b.dataset.clip, b)), onClose: () => { player.pause(); playingBtn?.classList.remove("playing"); } });
 }
 /* When the translator starts a call, open it here by itself: the home screen alone never shows a live call. */
 function watchForLiveCall() {
@@ -629,7 +708,7 @@ function watchForLiveCall() {
     if (!live) { state.leftLiveCall = false; return; }
     if (state.leftLiveCall || params.has("demo")) return;  // you went back home from this call: stay home
     clearInterval(state.homeWatch);
-    const c = state.connections[0];
+    const c = partner();
     toast(`Live call · opening ${c.name}'s call`, "arrow");
     startSession(c);
   }, 2500);
@@ -732,15 +811,18 @@ function startSession(c) {
   $("#v-session").innerHTML = SessionView(c);
   show("session");
   animateBars();
-  animateConnect("s-cv", "Connected").then(() => setState("Connected"));
+  animateConnect("s-cv", "Connected").then(() => {
+    if (state.session?.mode !== "waiting") return setState("Connected");
+    $("#s-cv .wire")?.classList.remove("live"); const mid = $("#s-cv .mid"); if (mid) mid.textContent = "Waiting";
+  });
   s.timer = setInterval(() => { const t = Math.floor((Date.now() - s.started) / 1000); $("#s-timer").textContent = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`; }, 1000);
   bindSession(c);
   renderRail();
   connectLive(s).then((live) => {
     if (state.session !== s) return;
-    setMode(live ? "live" : "demo");
+    setMode(live ? "live" : params.has("demo") ? "demo" : "waiting");
     if (live) { connectOutgoing(s); return; }
-    runDemo(s);
+    if (params.has("demo")) runDemo(s);
     if (!params.has("demo")) s.watch = setInterval(async () => {
       if (state.session !== s) return clearInterval(s.watch);
       if (await probeLive()) { clearInterval(s.watch); toast(`Live call found · switching to ${c.name}'s call`, "arrow"); startSession(c); }
@@ -749,8 +831,17 @@ function startSession(c) {
 }
 function setState(text) { const el = $("#s-state"); if (el) el.textContent = text; }
 function setMode(m) {
-  state.session.mode = m; const el = $("#s-mode"); el.textContent = m === "live" ? "Live" : "Demo"; el.classList.toggle("live", m === "live");
-  $("#s-talk").hidden = m === "live"; $("#s-livepill").hidden = m !== "live"; $("#s-float").hidden = m === "live";
+  state.session.mode = m; const el = $("#s-mode"); el.textContent = { live: "Live", demo: "Demo", waiting: "Waiting" }[m]; el.classList.toggle("live", m === "live");
+  if (m === "waiting") {
+    setState("Waiting"); $("#s-dot").classList.remove("on");
+    const e = $("#s-empty"); if (e) e.innerHTML = `Waiting for the call.<br><span style="color:var(--text-3)">Start <span class="mono">subtitles.py</span> and call ${esc(state.active.name)} on WhatsApp Web. Weave connects by itself.</span>`;
+  } else if (m === "live") {
+    setState("Connected"); $("#s-dot").classList.add("on");
+    $("#s-cv .wire")?.classList.add("live"); const mid = $("#s-cv .mid"); if (mid) mid.textContent = "Connected";
+  }
+  $("#s-talk").hidden = m !== "demo"; $("#s-livepill").hidden = m === "demo"; $("#s-float").hidden = m !== "demo";
+  const pill = $("#s-livepill"); pill.disabled = m === "waiting"; pill.classList.toggle("wait", m === "waiting");
+  if (!float.win) pill.querySelector("span").textContent = m === "waiting" ? "Waiting for subtitles.py" : "Float over call";
   floatUpdate();
 }
 function setNow(text, active = false) { const el = $("#s-now"); if (!el) return; el.textContent = text; el.classList.toggle("act", active); }
@@ -1221,15 +1312,7 @@ function openWord(key, line) {
     const f = sh.querySelector("#wx-forget");
     if (f) f.onclick = () => { state.session?.ws?.send(JSON.stringify({ type: "forget", id: key })); closeSheet(); toast("Weave will translate it again next time", "undo"); };
     const say = sh.querySelector("#wx-say");
-    if (say) say.onclick = () => {
-      speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(info.telugu || info.english);
-      const v = speechSynthesis.getVoices().find((x) => x.lang?.startsWith("te"));
-      if (v) u.voice = v; else u.text = info.roman || info.english;
-      u.lang = v ? v.lang : "en-IN"; u.rate = 0.85;
-      say.classList.add("playing"); u.onend = () => say.classList.remove("playing");
-      speechSynthesis.speak(u);
-    };
+    if (say) say.onclick = () => speak(info.telugu || info.roman || info.english, say, state.dict?.[key]?.clip);
   } });
 }
 function VocabularyCard(v) {
@@ -1307,14 +1390,12 @@ if (params.has("still")) document.head.insertAdjacentHTML("beforeend", "<style>*
 (async function boot() {
   await loadData();
   if (params.has("reset")) { localStorage.clear(); state.profile = null; state.vocab = []; state.connections = null; }
-  if (!state.connections) { state.connections = DEFAULT_CONNECTIONS; store.set("connections", state.connections); }
-  state.connections = state.connections.filter((c) => c.added || !SAMPLE_CONNECTION_IDS.has(c.id));
-  if (!state.connections.length) state.connections = DEFAULT_CONNECTIONS;
-  store.set("connections", state.connections);
+  state.connections = peopleFromCalls(state.calls, (state.connections || []).filter((c) => c.added));
+  store.set("connections", state.connections.filter((c) => c.added));
   if (!state.profile && params.get("view")) state.profile = { name: "Saanvi", lang: "en" };
   const start = params.get("view");
   if (!state.profile && start !== "home" && start !== "session") onboard(false);
-  else if (start === "session") startSession(state.connections[0]);
+  else if (start === "session") startSession(partner());
   else home();
   // For demos and screenshots: ?word=pulihora opens that word once it comes up; ?sheet=growth opens the growth sheet.
   if (params.get("word")) {
@@ -1322,6 +1403,7 @@ if (params.has("still")) document.head.insertAdjacentHTML("beforeend", "<style>*
     const wait = setInterval(() => { const w = state.session?.words.get(key); if (w) { clearInterval(wait); openWord(key, w.line); } }, 300);
   }
   if (params.get("sheet") === "growth") setTimeout(() => openSheet(LearningProgress()), 1200);
+  if (params.get("call")) setTimeout(() => openCall(params.get("call")), 1200);
   if (params.has("floatpreview") && state.session) setTimeout(toggleFloat, 1500);
 })();
 </script>

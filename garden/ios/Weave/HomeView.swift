@@ -4,17 +4,15 @@ struct HomeView: View {
     @EnvironmentObject var people: People
     @State private var cover: Cover?
     @State private var sheet: HomeSheet?
+    @State private var liveOnMac = false
 
     // One cover and one sheet per view: SwiftUI only honours one of each.
     enum Cover: Identifiable { case session(Connection), newConnection
         var id: String { if case .session(let c) = self { return "s-" + c.id }; return "new" } }
-    enum HomeSheet: String, Identifiable { case growth, settings; var id: String { rawValue } }
-
-    private let recent: [(who: String, topic: String, when: String, mins: Int)] = [
-        ("ammamma", "Sankranti plans, pulihora, your exam", "Yesterday", 18),
-        ("thatayya", "The paddy field, the new tractor", "Tue", 9),
-        ("ammamma", "Diwali sweets, cousins visiting", "Sun", 24),
-    ]
+    enum HomeSheet: Identifiable, Equatable {
+        case growth, settings, call(CallSummary)
+        var id: String { switch self { case .growth: "growth"; case .settings: "settings"; case .call(let c): "call-" + c.id } }
+    }
 
     var body: some View {
         let n = people.numbers
@@ -31,22 +29,53 @@ struct HomeView: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text("\(greeting), \(people.profileName ?? "Saanvi")").font(Fonts.ui(32, .medium)).tracking(-1.1).foregroundStyle(Theme.text)
-                    Text("Ammamma usually calls around this time.").font(Fonts.ui(15)).foregroundStyle(Theme.text2)
+                    Text(subtitle).font(Fonts.ui(15)).foregroundStyle(Theme.text2)
                 }
                 .padding(.top, 20)
                 .reveal(1)
 
-                section("Your connections").reveal(2)
-                VStack(spacing: 0) {
-                    ForEach(Array(people.connections.enumerated()), id: \.element.id) { i, c in
-                        if i > 0 { Rectangle().fill(Theme.border).frame(height: 1).padding(.leading, 76) }
-                        Button { cover = .session(c) } label: { ConnectionCard(connection: c, myLang: people.myLang) }.buttonStyle(RowStyle())
+                if liveOnMac {
+                    Button { cover = .session(people.partner) } label: {
+                        HStack(spacing: 10) {
+                            Circle().fill(Theme.accent).frame(width: 7, height: 7).shadow(color: Theme.accent, radius: 4)
+                            Text("\(people.partner.name) is on a call now").font(Fonts.ui(15, .medium)).foregroundStyle(Theme.text)
+                            Spacer()
+                            Text("Join").font(Fonts.ui(14, .semibold)).foregroundStyle(Theme.accent)
+                        }
+                        .padding(16)
+                        .background(Theme.accent.opacity(0.1), in: .rect(cornerRadius: Theme.radius))
+                        .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.accent.opacity(0.4), lineWidth: 1))
                     }
+                    .buttonStyle(Pressable())
+                    .padding(.top, 20)
+                    .transition(.opacity.combined(with: .offset(y: -6)))
                 }
-                .background(Theme.surface, in: .rect(cornerRadius: Theme.radius))
-                .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.border, lineWidth: 1))
-                .clipShape(.rect(cornerRadius: Theme.radius))
-                .reveal(3)
+
+                section("Your connections").reveal(2)
+                if people.connections.isEmpty {
+                    Panel { Text(people.source == .offline ? "Connect to Weave on your Mac in Settings to see the people you call." : "The people you call show up here after your first call.")
+                        .font(Fonts.ui(14)).foregroundStyle(Theme.text2) }
+                        .reveal(3)
+                } else {
+                    VStack(spacing: 0) {
+                        ForEach(Array(people.connections.enumerated()), id: \.element.id) { i, c in
+                            if i > 0 { Rectangle().fill(Theme.border).frame(height: 1).padding(.leading, 76) }
+                            Button { cover = .session(c) } label: { ConnectionCard(connection: c, myLang: people.myLang) }.buttonStyle(RowStyle())
+                        }
+                    }
+                    .background(Theme.surface, in: .rect(cornerRadius: Theme.radius))
+                    .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.border, lineWidth: 1))
+                    .clipShape(.rect(cornerRadius: Theme.radius))
+                    .reveal(3)
+                }
+
+                if let call = people.calls.first(where: { !($0.questions ?? []).isEmpty }) {
+                    section("For your next call with \(call.caller)").reveal(4)
+                    VStack(spacing: 10) {
+                        ForEach(Array((call.questions ?? []).prefix(3).enumerated()), id: \.offset) { _, q in AskCard(q: q) }
+                    }
+                    .reveal(4)
+                }
 
                 Button { cover = .newConnection } label: {
                     Label("Start a connection", systemImage: "plus").font(Fonts.ui(16, .medium)).foregroundStyle(.white)
@@ -57,13 +86,13 @@ struct HomeView: View {
                 }
                 .buttonStyle(Pressable())
                 .padding(.top, 20)
-                .reveal(4)
+                .reveal(5)
 
                 HStack { section("Your language growth"); Spacer(); Button("Details") { sheet = .growth }.font(Fonts.mono(10.5)).foregroundStyle(Theme.text2).padding(.top, 40) }
-                    .reveal(5)
+                    .reveal(6)
                 Button { sheet = .growth } label: {
                     HStack(spacing: 1) {
-                        teaser("This week", "+\(n.newWords)", "words")
+                        teaser("Words met", "\(n.total)", "")
                         teaser("Known", "\(n.known)", "/ \(n.total)")
                         teaser("Hearings", "\(n.hearings)", "")
                     }
@@ -72,38 +101,31 @@ struct HomeView: View {
                     .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.border, lineWidth: 1))
                 }
                 .buttonStyle(Pressable())
-                .reveal(6)
+                .reveal(7)
 
-                section("Recent conversations").reveal(7)
-                VStack(spacing: 0) {
-                    ForEach(Array(recent.enumerated()), id: \.offset) { i, r in
-                        let c = people.connections.first { $0.id == r.who } ?? people.connections[0]
-                        if i > 0 { Rectangle().fill(Theme.border).frame(height: 1).padding(.leading, 72) }
-                        Button { cover = .session(c) } label: {
-                            HStack(spacing: 16) {
-                                Avatar(text: c.monogram, size: 40)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(c.name).font(Fonts.ui(15, .medium)).foregroundStyle(Theme.text)
-                                    Text(r.topic).font(Fonts.ui(13)).foregroundStyle(Theme.text2).lineLimit(1)
-                                }
-                                Spacer(minLength: 8)
-                                Text("\(r.when) · \(r.mins)m").font(Fonts.mono(11, .regular)).foregroundStyle(Theme.text3)
-                            }
-                            .padding(.horizontal, 16).padding(.vertical, 14)
-                            .contentShape(Rectangle())
+                section("Your calls").reveal(8)
+                if people.calls.isEmpty {
+                    Panel { Text("Each call shows up here with its story, her voice and the words you heard.").font(Fonts.ui(14)).foregroundStyle(Theme.text2) }
+                        .reveal(9)
+                } else {
+                    VStack(spacing: 0) {
+                        ForEach(Array(people.calls.prefix(8).enumerated()), id: \.element.id) { i, call in
+                            if i > 0 { Rectangle().fill(Theme.border).frame(height: 1).padding(.leading, 72) }
+                            Button { sheet = .call(call) } label: { CallRow(call: call) }.buttonStyle(RowStyle())
                         }
-                        .buttonStyle(RowStyle())
                     }
+                    .background(Theme.surface, in: .rect(cornerRadius: Theme.radius))
+                    .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.border, lineWidth: 1))
+                    .clipShape(.rect(cornerRadius: Theme.radius))
+                    .reveal(9)
                 }
-                .background(Theme.surface, in: .rect(cornerRadius: Theme.radius))
-                .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.border, lineWidth: 1))
-                .clipShape(.rect(cornerRadius: Theme.radius))
-                .reveal(8)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 48)
+            .animation(.easeOut(duration: 0.3), value: liveOnMac)
         }
         .scrollIndicators(.hidden)
+        .refreshable { await people.loadGrowth() }
         .background(Backdrop())
         .fullScreenCover(item: $cover) { c in
             switch c {
@@ -119,7 +141,11 @@ struct HomeView: View {
         }
         .sheet(item: $sheet) { s in
             Group {
-                if s == .growth { GrowthSheet(partner: "Ammamma") } else { SettingsView() }
+                switch s {
+                case .growth: GrowthSheet(partner: people.partner.name)
+                case .settings: SettingsView()
+                case .call(let call): CallView(summary: call)
+                }
             }
             .environmentObject(people)
             .presentationDetents([.large]).presentationBackground(Theme.bg2).presentationCornerRadius(24)
@@ -128,9 +154,30 @@ struct HomeView: View {
         .task {
             if let c = people.pendingSession { people.pendingSession = nil; try? await Task.sleep(for: .milliseconds(500)); cover = .session(c) }
         }
-        .task {   // screenshots: -startSession 1
-            if UserDefaults.standard.bool(forKey: "startSession") { try? await Task.sleep(for: .milliseconds(1500)); cover = people.connections.first.map { .session($0) } }
-            if UserDefaults.standard.bool(forKey: "openGrowth") { try? await Task.sleep(for: .milliseconds(1500)); sheet = .growth }
+        .task { await watchForLiveCall() }
+        .task {   // screenshots: -startSession 1, -openGrowth 1, -openCall 1
+            try? await Task.sleep(for: .milliseconds(1500))
+            if UserDefaults.standard.bool(forKey: "startSession") { cover = .session(people.partner) }
+            if UserDefaults.standard.bool(forKey: "openGrowth") { sheet = .growth }
+            if UserDefaults.standard.bool(forKey: "openCall"), let c = people.calls.first { sheet = .call(c) }
+        }
+    }
+
+    private var subtitle: String {
+        if let c = people.calls.first { return "Last call with \(c.caller) · \(c.whenLabel)" }
+        return people.source == .offline ? "Connect to Weave on your Mac to see your calls." : "Your first call starts from WhatsApp Web on the Mac."
+    }
+
+    /// When subtitles.py starts a call on the Mac, offer to join it (and open it right away the first time).
+    private func watchForLiveCall() async {
+        struct Status: Decodable { let live: Bool }
+        var opened = false
+        while !Task.isCancelled {
+            let live = (try? await GardenClient.get("/api/live/status", as: Status.self, timeout: 3))?.live ?? false
+            withAnimation { liveOnMac = live }
+            if live, !opened, cover == nil { opened = true; cover = .session(people.partner) }
+            if !live { opened = false }
+            try? await Task.sleep(for: .seconds(3))
         }
     }
 

@@ -5,7 +5,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var url = GardenClient.serverURL
     @State private var status: String?
-    @AppStorage("demo") private var demo = false
+    @State private var demo = GardenClient.demoMode
     @FocusState private var editing: Bool
 
     var body: some View {
@@ -39,11 +39,12 @@ struct SettingsView: View {
             Panel {
                 Toggle(isOn: $demo) {
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Always use the demo call").font(Fonts.ui(15, .medium)).foregroundStyle(Theme.text)
-                        Text("Plays the team's scripted call even when a live one is available.").font(Fonts.ui(12)).foregroundStyle(Theme.text2)
+                        Text("Demo mode").font(Fonts.ui(15, .medium)).foregroundStyle(Theme.text)
+                        Text("Sample words and the team's scripted call, for showing Weave without the Mac. Off: everything comes from your real calls.").font(Fonts.ui(12)).foregroundStyle(Theme.text2)
                     }
                 }
                 .tint(Theme.accent)
+                .onChange(of: demo) { _, on in GardenClient.demoMode = on; Task { await people.loadGrowth() } }
             }
             Spacer()
         }

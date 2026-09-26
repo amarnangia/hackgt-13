@@ -6,7 +6,8 @@ enum GardenClient {
     static let appGroup = "group.com.weave.garden"
     static let defaults = UserDefaults(suiteName: appGroup) ?? .standard
 
-    enum Source: String { case live, saved, demo }
+    /// live: from the Mac just now; saved: the last garden we got; demo: the bundled sample (Settings); offline: nothing yet.
+    enum Source: String { case live, saved, demo, offline }
 
     static var serverURL: String {
         get { defaults.string(forKey: "serverURL") ?? "http://localhost:8770" }
@@ -33,7 +34,7 @@ enum GardenClient {
         return try GardenSnapshot.decode(data)
     }
 
-    /// Live if the server answers, else the last saved garden, else the demo.
+    /// From the Mac if it answers, else the last garden we got. The bundled sample only when demo mode is on.
     static func load() async -> (GardenSnapshot, Source) {
         if demoMode { return (.sample, .demo) }
         if let snap = try? await fetch() {
@@ -41,8 +42,36 @@ enum GardenClient {
             return (snap, .live)
         }
         if let snap = saved { return (snap, .saved) }
-        return (.sample, .demo)
+        return (.empty, .offline)
     }
+
+    static func get<T: Decodable>(_ path: String, as type: T.Type, timeout: TimeInterval = 5) async throws -> T {
+        guard let url = URL(string: serverURL + path) else { throw URLError(.badURL) }
+        let (data, resp) = try await URLSession.shared.data(for: URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout))
+        guard (resp as? HTTPURLResponse)?.statusCode == 200 else { throw URLError(.badServerResponse) }
+        return try JSONDecoder().decode(T.self, from: data)
+    }
+
+    /// Calls the story keeper saved on the Mac, newest first (cached for when the Mac is away).
+    static func calls() async -> [CallSummary] {
+        if demoMode { return [] }
+        if let c = try? await get("/api/calls", as: [CallSummary].self) {
+            defaults.set(try? JSONEncoder().encode(c), forKey: "lastCalls")
+            return c
+        }
+        return defaults.data(forKey: "lastCalls").flatMap { try? JSONDecoder().decode([CallSummary].self, from: $0) } ?? []
+    }
+
+    static func call(_ id: String) async -> CallDetail? {
+        try? await get("/calls/\(id)/call.json", as: CallDetail.self)
+    }
+
+    /// The family dictionary: every word from the calls, with her voice saying it.
+    static func dictionary() async -> [String: DictEntry] {
+        (try? await get("/calls/family_dictionary.json", as: [String: DictEntry].self)) ?? [:]
+    }
+
+    static func url(_ path: String) -> URL? { URL(string: serverURL + "/" + path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))) }
 
     /// The "I didn't catch that" button: moves the phrase back a stage on the server.
     static func asked(_ phrase: String) async throws {

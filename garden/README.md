@@ -43,9 +43,22 @@ What it shows, from the pipeline's WebSocket messages:
 
 overlay.html at http://localhost:8765 still works; both can be open at once.
 
-Try it without the translator: `python3 -m garden --demo`, then http://localhost:8770/app
+Try it without the translator: `python3 -m garden --demo`, then http://localhost:8770/app?demo=1
+(without `?demo=1` the app waits for a real call instead of playing the scripted one)
 (`?demo=1` forces the demo call, `?reset=1` shows onboarding again, `?floatpreview=1` draws the
 floating window inside the page, for browsers without Picture-in-Picture).
+
+## On the phone (iPhone app)
+
+Everything comes from the Mac running `python3 -m garden`: the people you've called, each saved call with its story
+and **her voice on every line**, the family dictionary (her voice saying each word), your progress, and the
+"ask next time" questions (also on the home-screen widget). During a call the app shows it live: the Weave server
+relays `subtitles.py` to the phone (`/api/live`), so `subtitles.py` doesn't need to change.
+
+- Simulator: works as is (`http://localhost:8770`).
+- Your iPhone: in the app, avatar → Settings → type the "phone widget URL" `python3 -m garden` prints; same Wi-Fi.
+- With no Mac it shows the last calls and words it saw. **Demo mode** in Settings shows sample words and the
+  scripted call instead, for presenting without the Mac.
 
 ## Between calls (the phone)
 

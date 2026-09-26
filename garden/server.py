@@ -5,11 +5,13 @@ GET  /app           the Weave connection app (live call + demo)
 GET  /api/garden    snapshot JSON
 GET  /api/progress   which words the translator keeps in Telugu (from the team's progress.json)
 GET  /api/calls      the calls saved by the story keeper (calls/*/call.json), newest first
+GET  /api/live       the live call for phones: subtitles.py's messages as Server-Sent Events (relay.py)
+POST /api/forget     {"id"}: "Didn't know it" from a phone, passed on to subtitles.py
 GET  /images/..., /lexicon.json, /samples/call_script.json, /calls/...   the team's files, read only
 POST /api/heard     {"phrase", "english"?, "category"?, "note"?, "roman"?}  -> {"mode"}
 POST /api/asked     {"phrase"}
 """
-import json, mimetypes, os, re, socket, sys
+import json, mimetypes, os, queue, re, socket, sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -74,6 +76,8 @@ def calls():
             "id": c["id"], "caller": c.get("caller", "Grandma"), "started": c.get("started"),
             "duration_s": c.get("duration_s", 0), "title": story.get("title") or f"Call with {c.get('caller', 'Grandma')}",
             "summary": story.get("summary", ""), "stories": [s.get("title") for s in story.get("stories") or []],
+            "questions": story.get("questions") or [],   # what to ask next call (Muse Spark, from this call's stories)
+            "has_audio": (f.parent / "call.m4a").exists(),
             "lines": len(c.get("lines") or []), "words": len(words),
             "new_words": sum(1 for w in words if w.get("status") == "new"),
             "pictures": [p["image"] for p in (l.get("picture") for l in c.get("lines") or []) if p and p.get("image")][:6],
@@ -83,11 +87,16 @@ def calls():
 
 
 def make_handler(garden):
+    from .relay import Relay
+    relay = Relay()
+
     class Handler(BaseHTTPRequestHandler):
-        def _send(self, code, body, ctype="application/json"):
+        def _send(self, code, body, ctype="application/json", extra=None):
             data = body if isinstance(body, bytes) else json.dumps(body).encode()
             self.send_response(code)
             self.send_header("Content-Type", ctype)
+            for k, v in (extra or {}).items():
+                self.send_header(k, v)
             self.send_header("Content-Length", str(len(data)))
             self.send_header("Access-Control-Allow-Origin", "*")
             self.send_header("Cache-Control", "no-store")
@@ -113,16 +122,55 @@ def make_handler(garden):
                 self._send(200, progress() or {"met": 0})
             elif path == "/api/calls":
                 self._send(200, calls())
+            elif path == "/api/live":
+                self._live()
+            elif path == "/api/live/status":
+                self._send(200, relay.status())
             elif (SHARED.match(path) and (ROOT / path[1:]).is_file()) or (CALLS.match(path) and (CALLS_ROOT / path[len("/calls/"):]).is_file()):
                 file = ROOT / path[1:] if SHARED.match(path) else CALLS_ROOT / path[len("/calls/"):]
                 ctype = "audio/mp4" if path.endswith(".m4a") else mimetypes.guess_type(path)[0] or "application/octet-stream"
                 if ctype == "text/html":
                     ctype = "text/html; charset=utf-8"
-                self._send(200, file.read_bytes(), ctype + ("; charset=utf-8" if ctype.endswith("json") else ""))
+                data = file.read_bytes()
+                rng = re.match(r"bytes=(\d*)-(\d*)", self.headers.get("Range", ""))
+                if rng and path.endswith(".m4a"):  # Safari and iOS only play audio from servers that answer byte ranges
+                    start = int(rng[1] or 0)
+                    end = min(int(rng[2]) if rng[2] else len(data) - 1, len(data) - 1)
+                    return self._send(206, data[start:end + 1], ctype, extra={"Content-Range": f"bytes {start}-{end}/{len(data)}", "Accept-Ranges": "bytes"})
+                self._send(200, data, ctype + ("; charset=utf-8" if ctype.endswith("json") else ""),
+                           extra={"Accept-Ranges": "bytes"} if path.endswith(".m4a") else None)
             else:
                 self._send(404, {"error": "not found"})
 
+        def _live(self):
+            q = relay.subscribe()
+            self.send_response(200)
+            for k, v in (("Content-Type", "text/event-stream"), ("Cache-Control", "no-cache"), ("Access-Control-Allow-Origin", "*"), ("Connection", "keep-alive")):
+                self.send_header(k, v)
+            self.end_headers()
+            try:
+                self.wfile.write(("data: " + json.dumps({"type": "status", **relay.status()}) + "\n\n").encode())
+                self.wfile.flush()
+                while True:
+                    try:
+                        msg = q.get(timeout=15)
+                    except queue.Empty:
+                        self.wfile.write(b": still here\n\n")  # keeps phones and proxies from closing an idle stream
+                    else:
+                        self.wfile.write(("data: " + json.dumps(msg, ensure_ascii=False) + "\n\n").encode())
+                    self.wfile.flush()
+            except OSError:
+                pass
+            finally:
+                relay.unsubscribe(q)
+
         def do_POST(self):
+            if self.path == "/api/forget":
+                try:
+                    word = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or "{}")["id"]
+                except (ValueError, KeyError):
+                    return self._send(400, {"error": "expected JSON with an 'id'"})
+                return self._send(200, {"ok": relay.forget(word)})
             try:
                 body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or "{}")
                 phrase = body["phrase"]
