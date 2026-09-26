@@ -33,6 +33,7 @@ PORT = int(os.environ.get("OVERLAY_PORT", 8765))
 HERE = os.path.dirname(os.path.abspath(__file__))
 CHUNK_MS = 80
 VOICE_SAMPLE = "caller_voice.wav"  # the caller's voice, saved locally (gitignored) and reused next call
+MY_VOICE_SAMPLE = "my_voice.wav"    # --outgoing: your own voice, so the English you send sounds like you
 SAMPLE_RATE = 48000  # AudioLoop's rate
 SENTENCE_END = re.compile(r"[.?!।]+")
 CLAUSE_END = re.compile(r"[,;]")
@@ -100,7 +101,7 @@ class Captioner:
     by id, so they still show in order.
     """
 
-    def __init__(self, lang, translator="local", learn_after=1):
+    def __init__(self, lang, translator="local", learn_after=1, keep_known=True):
         self.translate = None
         if translator == "local":
             local = LocalTranslator(lang)
@@ -136,6 +137,7 @@ class Captioner:
         self.progress = Progress(self.lexicon, lang, learn_after=learn_after)  # words kept in Telugu
         self.known_at_start = {i for i in self.progress.entries if self.progress.known(i)}  # for the story page
         self.heard_at_start = dict(self.progress.heard)
+        self.keep_known = keep_known  # off for --outgoing: the person you're calling doesn't know Telugu
         self.order_lock = threading.Lock()    # translations finish out of order; the voice must not
         self.next_to_voice, self.finished_lines = 1, {}
 
@@ -203,7 +205,7 @@ class Captioner:
             full_english, kept = english, []
             hits = self.lexicon.find(sentence, self.lang)
             known_before = {h["id"] for h in hits if self.progress.known(h["id"])}  # before counting this hearing
-            if route != "english" and not english.startswith("("):
+            if self.keep_known and route != "english" and not english.startswith("("):
                 # Words the listener knows stay in Telugu ("Today, Ammamma made pulihora"); the rest is English.
                 english, kept = self.progress.keep_known_words(english, hits)
                 self.progress.heard_words(hits)
@@ -339,11 +341,11 @@ def prepare_voice_sample(args):
         # Trim silences and even out the volume; 30 s matched the speaker's pitch better than 15 s at the same speed.
         subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", args.voice_sample, "-af",
                         "silenceremove=start_periods=1:start_threshold=-40dB:stop_periods=-1:stop_duration=0.6:"
-                        "stop_threshold=-40dB,loudnorm", "-ac", "1", "-ar", "24000", "-t", "30", VOICE_SAMPLE], check=True)
-        return VOICE_SAMPLE
-    if args.new_voice and os.path.exists(VOICE_SAMPLE):
-        os.remove(VOICE_SAMPLE)
-    return VOICE_SAMPLE if os.path.exists(VOICE_SAMPLE) else None
+                        "stop_threshold=-40dB,loudnorm", "-ac", "1", "-ar", "24000", "-t", "30", args.voice_file], check=True)
+        return args.voice_file
+    if args.new_voice and os.path.exists(args.voice_file):
+        os.remove(args.voice_file)
+    return args.voice_file if os.path.exists(args.voice_file) else None
 
 
 def make_audio(args, loop, target):
@@ -361,10 +363,18 @@ def make_audio(args, loop, target):
         out_dev = None  # silent, for tests; only works with --file
     else:
         out_dev = find_device(args.out, "output") if args.out else sd.default.device[1]
-        if "BlackHole" in sd.query_devices(out_dev)["name"]:
+        out_name = sd.query_devices(out_dev)["name"]
+        if args.outgoing and "BlackHole" not in out_name:
+            raise SystemExit(f"--outgoing sends the English to {out_name!r}, but it should go to a virtual mic. "
+                             "Install one with: brew install --cask blackhole-16ch")
+        if args.outgoing and out_name == sd.query_devices(sd.default.device[1])["name"]:
+            raise SystemExit(f"The Mac's sound output is {out_name}, the device the English goes into, so the call would "
+                             "hear itself. Set System Settings > Sound > Output to BlackHole 2ch (or your speakers/headphones); "
+                             f"pick {out_name} only as Chrome's microphone (chrome://settings/content/microphone).")
+        if not args.outgoing and "BlackHole" in out_name:
             raise SystemExit("Output is BlackHole, so you'd hear nothing (and a live call would feed back into itself). "
                              'Pass --out "MacBook Air Speakers" or your headphones.')
-    if not args.file:
+    if not args.file and not args.outgoing:
         check_volume()
     buf = []
 
@@ -392,13 +402,16 @@ def make_audio(args, loop, target):
             except RuntimeError:
                 pass  # the app is shutting down (event loop closed) but the audio device is still delivering
 
-    return AudioLoop(in_dev, out_dev, on_audio=on_audio, source=source)
+    # The original voice (theirs, or yours with --outgoing) stays low so the English leads, and drops further while
+    # an English line plays. Not silent in between: waiting for the end of a sentence in silence felt like lag.
+    return AudioLoop(in_dev, out_dev, on_audio=on_audio, source=source,
+                     original=args.original_volume, duck=args.duck_volume)
 
 
 async def run(args):
     if args.reset_progress and os.path.exists("progress.json"):
         os.remove("progress.json")
-    captioner = Captioner(args.lang, args.translator, args.learn_after)
+    captioner = Captioner(args.lang, args.translator, args.learn_after, keep_known=not args.outgoing)
 
     def on_message(msg):
         if msg.get("type") == "forget" and msg.get("id"):
@@ -459,14 +472,15 @@ async def listen(args, captioner):
         print("Loading the English voice (Kokoro)...", flush=True)
         from dub import Dubber, VoiceSampler
         sample = prepare_voice_sample(args)
+        who = "your " if args.outgoing else "the caller's "
         clone = args.voice == "clone"
         captioner.dubber = await loop.run_in_executor(
             None, lambda: Dubber(audio.voice, clone=clone, voice_sample=sample))
         if clone and captioner.dubber.cloning:
-            print(f"English voice: the caller's voice from {sample}. (--new-voice to relearn it on this call)", flush=True)
+            print(f"English voice: {who}voice from {sample}. (--new-voice to relearn it on this call)", flush=True)
         elif clone:
-            print("English voice: stock voice until the caller has spoken ~10 s, then their own voice.", flush=True)
-            target["sampler"] = captioner.sampler = VoiceSampler(VOICE_SAMPLE, captioner.dubber.use_voice_sample)
+            print(f"English voice: stock voice until {who}voice is learned (~10 s of speech).", flush=True)
+            target["sampler"] = captioner.sampler = VoiceSampler(args.voice_file, captioner.dubber.use_voice_sample)
     threading.Thread(target=audio.run, kwargs={"meter": False}, daemon=True).start()
     # Connect to Muse only once audio is actually flowing; a silent gap right after connecting makes it hang up.
     for _ in range(50):
@@ -531,8 +545,16 @@ def main():
     p.add_argument("--translator", choices=["local", "muse"], default="local",
                    help="local = IndicTrans2 via translate_server.py (fast, same output every time); muse = Muse Spark")
     p.add_argument("--file", help="replay a 16/24 kHz mono wav instead of listening to the call")
-    p.add_argument("--in", dest="inp", default="BlackHole")
-    p.add_argument("--out", default=None, help='output device (default: system default); "none" = silent, with --file')
+    p.add_argument("--outgoing", action="store_true",
+                   help="translate what YOU say: your mic -> English voice -> BlackHole 16ch, which WhatsApp Web uses "
+                        "as its microphone, so the other person hears only the English")
+    p.add_argument("--original-volume", type=float, default=0.2,
+                   help="how loud the original voice is between English lines, 0-1 (0 = only the English voice)")
+    p.add_argument("--duck-volume", type=float, default=0.05,
+                   help="how loud the original voice is while an English line plays, 0-1")
+    p.add_argument("--in", dest="inp", default=None, help="input device (default: BlackHole 2ch; with --outgoing, the Mac's mic)")
+    p.add_argument("--out", default=None, help='output device (default: system default; with --outgoing, BlackHole 16ch); '
+                                               '"none" = silent, with --file')
     p.add_argument("--no-voice", action="store_true", help="subtitles only, no English voice")
     p.add_argument("--voice", choices=["clone", "stock"], default="clone",
                    help="clone = the English sounds like the caller (learned from ~10 s of their speech); stock = Kokoro")
@@ -546,18 +568,27 @@ def main():
     p.add_argument("--learn-after", type=int, default=1,
                    help="keep a word in Telugu after hearing it this many times (0 = keep every known word from the start)")
     p.add_argument("--reset-progress", action="store_true", help="forget which words you know (deletes progress.json)")
-    p.add_argument("--speak", choices=["telugu", "questions", "all"], default="telugu",
-                   help="telugu = voice what she says in Telugu, never her English (default); "
-                        "questions = only Telugu questions/requests to you (Laya decides); all = every line")
+    p.add_argument("--speak", choices=["telugu", "questions", "all"], default=None,
+                   help="telugu = voice what she says in Telugu, never her English; questions = only Telugu "
+                        "questions/requests to you (Laya decides); all = every line (default while --original-volume "
+                        "is low, since her own English would be too quiet to follow)")
     args = p.parse_args()
+    if args.outgoing:
+        args.inp = args.inp or "MacBook"  # the built-in mic ("MacBook Pro Microphone"); pass --in for a headset mic
+        args.out = args.out or "BlackHole 16ch"
+    args.speak = args.speak or ("all" if args.original_volume < 0.5 else "telugu")
+    args.inp = args.inp or "BlackHole 2ch"  # not just "BlackHole": that also matches BlackHole 16ch, the --outgoing mic
+    args.voice_file = MY_VOICE_SAMPLE if args.outgoing else VOICE_SAMPLE
+    # Both directions can run at once (two terminals), so --outgoing gets its own overlay page.
+    port = PORT + 2 if args.outgoing and "OVERLAY_PORT" not in os.environ else PORT
 
     if args.translator == "local":
         start_translator(args.lang)
 
     from websockets.sync.server import serve
-    server = serve(ws_handler, "localhost", PORT, process_request=serve_overlay)
+    server = serve(ws_handler, "localhost", port, process_request=serve_overlay)
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    print(f"Overlay: http://localhost:{PORT}", flush=True)
+    print(f"Overlay: http://localhost:{port}", flush=True)
     try:
         asyncio.run(run(args))
     except KeyboardInterrupt:

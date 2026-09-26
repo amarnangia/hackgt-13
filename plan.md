@@ -26,6 +26,14 @@
     - Add `--caller "Ammamma"` so the story page and prompts use her name. When you press Ctrl+C the call's story page opens.
     - No call handy for the story features? `python subtitles.py --file samples/grandma_story.wav --out "MacBook Air Speakers" --caller Ammamma`
 
+**Your side too: the other person hears only English (`--outgoing`)**
+
+11. `brew install --cask blackhole-16ch`, then `sudo killall coreaudiod`. This second virtual device carries the English you send; BlackHole 2ch keeps carrying the call to you.
+12. In Chrome open `chrome://settings/content/microphone` and pick **BlackHole 16ch**. Leave the Mac's own input on the real mic, since the app listens to that.
+13. In a second terminal: `python subtitles.py --outgoing` (overlay on http://localhost:8767). It listens to the MacBook mic (`--in "<name>"` for another mic), translates what you say, and plays the English voice into BlackHole 16ch with your real voice faintly underneath. After ~10 s of your speech the English sounds like you (saved to `my_voice.wav`, gitignored).
+    - Wear headphones, or the mic hears the call and the English voice and sends them back.
+    - Both directions play the original voice at 20% while the person talks and 5% while the English plays (`--original-volume`, `--duck-volume`; 0 = English only). Fully faint in between felt like dead air while waiting for a sentence to end. Volume is signal strength, so 20% still sounds about a third as loud. While it's low, every line is voiced, English too.
+
 What we learned the hard way:
 - **The WhatsApp Mac app plays straight to the speakers** and ignores the Mac's output setting. BlackHole stays silent and there's no BlackHole option in its menu. Chrome follows the Mac's output setting, so WhatsApp Web works.
 - **When BlackHole is the output, the Mac volume slider controls what goes into BlackHole.** At 29% the call arrived at about 1% strength. Keep it at 100% and control loudness on the speaker side. `audio_loop.py` warns you if it's lower.
