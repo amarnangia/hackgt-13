@@ -19,7 +19,7 @@ Everything runs on one MacBook (tested on an M4 MacBook Air, 24 GB). Grandma nee
 |---|---|---|
 | Hear her Telugu (and the grandkid's English) | Meta Muse Voice Transcribe | cloud, streaming |
 | Telugu → English | IndicTrans2 1B, raced against Meta Muse Spark after 1.2 s | laptop / cloud |
-| English → Telugu | Meta Muse Spark | cloud |
+| English → Telugu (`--two-way`) | IndicTrans2 English → Telugu 1B (gated model) | laptop |
 | English in her voice | Pocket TTS (voice clone); Kokoro until the clone is ready | laptop |
 | Telugu voice for her | Meta MMS Telugu (`facebook/mms-tts-tel`) | laptop |
 | Split-second decisions | Laya: question?, topic, which picture, what to ask, which reply | laptop |
@@ -37,7 +37,7 @@ Everything runs on one MacBook (tested on an M4 MacBook Air, 24 GB). Grandma nee
 | Live draft captions | shown 2–3 s *before* she finishes | the draft test; final English 0.05 s after with drafts vs 0.14 s without (no slowdown) |
 | Laya's decisions per line | ~0.25 s (intent + category + topic in one pass); ~0.1 s per extra choice | `tools/eval_laya.py`; runs after the voice starts, so it adds nothing to what she hears |
 | "Curious?" answer | instant for word-list words; ~1.5 s from Muse Spark, then cached | the answer test |
-| Grandkid's English → Telugu speech for her | ~3 s median (Muse Spark ~1.5 s + Telugu voice ~0.6 s for 4 s of speech), max ~5 s when lines pile up | a recorded English clip, all 5 lines voiced |
+| Grandkid's English → Telugu speech for her (`--two-way`) | not timed on this Mac yet; the Telugu voice makes ~4 s of speech in ~0.6 s | `tools/check_two_way.py` passes 13/13 checks each way on Hasini's machine; ours needs the gated model |
 | Story page after the call | ~30 s | real calls |
 
 **What made it faster** (each measured before and after):
@@ -50,13 +50,13 @@ Everything runs on one MacBook (tested on an M4 MacBook Air, 24 GB). Grandma nee
 ## Cost
 - **On the laptop, no per-use cost:** Telugu → English translation, both voices, Laya, draft captions, pictures from our library, and the knowledge model.
 - **Meta Model API use per call:**
-  - **Muse Voice Transcribe** for the call's audio (her side, plus the grandkid's side with `--to-telugu`).
+  - **Muse Voice Transcribe** for the call's audio (her side, plus the grandkid's side with `--two-way`).
   - **Muse Spark:**
     - backup translation only when the laptop is slower than 1.2 s (rare);
     - at most one "ask her" question every 25 s, only at pauses after she shares something;
     - one answer per "Curious?" click on something outside the word list;
-    - one story page per call;
-    - one translation per grandkid sentence with `--to-telugu`.
+    - one story page per call.
+  - With `--two-way`, the grandkid's English → Telugu translation and voice run on the laptop (no API cost).
 - **Wikipedia:** only for things not in our 213-picture library, cached after the first look-up.
 - **Evaluation:** comparing against Muse Spark (`tools/eval_laya.py --muse`) costs about 90 API calls per run.
 - **Dollars:** we don't have Meta's per-call pricing in hand. The design keeps cloud calls to what needs a big model: the speech service and the writing. Every per-sentence decision stays on the laptop.
@@ -118,7 +118,7 @@ Earlier Laya tests that shaped the design:
 
 **Not tested yet**
 - The extension on a real WhatsApp or Instagram call (only the preview page).
-- `--to-telugu` on a real call (needs BlackHole 16ch).
+- `--two-way` on a real call on this Mac (needs BlackHole 16ch and the gated English → Telugu model).
 - Instagram calls.
 - The iPhone app with `--lan`.
 - The knowledge model fitted to a real quiz.
@@ -138,7 +138,7 @@ Earlier Laya tests that shaped the design:
 - Test runs use temporary folders for calls and the Weave database, and back up and restore word progress. We added this after a test run deleted early call reports.
 
 **The call experience**
-- **The voice never falls far behind:** a line is skipped rather than spoken more than 3 s late (5 s for questions to you, 8 s for the Telugu voice, since dropping a line there means she misses it).
+- **The voice never falls far behind:** a line is skipped rather than spoken more than 3 s late (5 s for questions to you). With `--two-way`, a translation waits while its listener talks, fades out if they interrupt, and is dropped after 10 s; a line matching what just played on the speakers is dropped as echo.
 - **Warnings:** if no sound reaches the app for 15 s, or the Mac volume is below 100%.
 - **The connection stays up:** the speech service connection is kept alive with silence when audio capture stalls.
 - **Pictures:**
@@ -155,9 +155,7 @@ Earlier Laya tests that shaped the design:
 
 ## Open items
 - **Consent:** she should agree to her voice being recorded for story pages and cloned. There's no consent step yet.
-- **Two faster options for the Telugu direction:**
-  - IndicTrans2's English → Telugu model is gated: accepting it on Hugging Face would let it run on the laptop, about 1 s faster;
-  - her voice is only cloned for English, so she hears the grandkid in a stock Telugu voice.
+- **The Telugu direction (`--two-way`)** needs the gated IndicTrans2 English → Telugu model (accept it on Hugging Face), and she hears the grandkid in a stock Telugu voice, not a clone of their voice.
 - **Full-screen calls** hide the overlay, and the panels can't be moved yet.
 - **The knowledge weights are hand-set** until they're fitted to real quizzes.
 - **Only Telugu has a word list and pictures;** other languages would need their own.
@@ -167,6 +165,6 @@ Earlier Laya tests that shaped the design:
 python tools/eval_laya.py --muse --wrong    # Laya vs rules vs Muse Spark
 python tools/fake_call.py                   # a pretend call for the overlay (preview: extension/dev.html)
 python subtitles.py --file samples/grandma_story.wav --out none --no-open   # the pipeline on a recording, with latency
-python subtitles.py --to-telugu --file <english.wav> --out none             # the Telugu direction on a recording
+python tools/check_two_way.py              # both directions on a scripted call (needs the English -> Telugu model)
 python tools/fit_progress.py                # fit the knowledge model once there are quiz answers
 ```

@@ -10,7 +10,7 @@ Telugu on her phone as usual. On your laptop you hear her in English, in her own
 - the Telugu words for what you're talking about.
 
 Once you've learned a word, Weave stops translating it, and every call becomes a family story page with her voice.
-It also works the other way (`--to-telugu`): she hears your English in Telugu.
+It also works both ways (`--two-way`): she hears your English in Telugu.
 
 Built at HackGT 13 for Meta's "Bringing People Closer Together with AI" challenge. [idea.md](idea.md) has the full idea;
 [demo.md](demo.md) has the demo call; [writeup.md](writeup.md) has the submission write-up.
@@ -38,7 +38,7 @@ her phone ──WhatsApp──▶ Chrome on your laptop ──sound──▶ Bla
 | `garden/` | Weave's app and iPhone app: past calls, words learned |
 | `tools/eval_laya.py` | Laya's accuracy and speed, next to Muse Spark |
 | `tools/fake_call.py` | A pretend call for building the overlay without audio or models |
-| `subtitles.py --to-telugu` | The other direction: your English → Telugu speech into WhatsApp Web's mic (Muse Spark + Meta's MMS voice) |
+| `subtitles.py --two-way`, `roles.py` | Both directions in one app: works out who speaks Telugu; your English → Telugu (IndicTrans2 en→indic + Meta's MMS voice) into WhatsApp Web's mic; waits while the listener talks; drops echo |
 
 ## Run it
 Setup (audio, keys, models) is in [plan.md](plan.md). Then:

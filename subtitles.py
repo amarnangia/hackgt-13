@@ -149,12 +149,7 @@ class Captioner:
         if share_with:
             translator = None
             self.translate = share_with.translate
-        self.reverse = translator == "to-telugu"  # --to-telugu: the grandkid's English -> Telugu for the grandparent
-        if self.reverse:
-            from muse import ToTelugu
-            self.translate = ToTelugu(lang)
-            print("Translating your English to Telugu with Muse Spark", flush=True)
-        elif translator == "local":
+        if translator == "local":
             local = LocalTranslator(lang)
             if local.available():
                 self.translate = local
@@ -330,8 +325,6 @@ class Captioner:
         # mixed:   mostly English with a Telugu word or two -> translated subtitle, no voice
         # native:  Telugu (or mostly) -> translated subtitle + English voice
         route = "english" if share == 0 else "mixed" if share < NATIVE_MIN_SHARE else "native"
-        if self.reverse:  # the other way round: their English is translated and voiced; Telugu passes through as is
-            route = "english" if share >= NATIVE_MIN_SHARE else "native"
         # `to`: the language this line is translated into for its listener, or None if they understand it as said.
         # --two-way goes by who is listening: Telugu lines to the English speaker, English lines to the Telugu speaker.
         if self.roles:
@@ -344,7 +337,7 @@ class Captioner:
                 return
             self.redo_lines.append((time.monotonic(), sentence, to, marks))
         else:
-            to = None if route == "english" else "en"  # (--to-telugu: self.translate makes it Telugu)
+            to = None if route == "english" else "en"
         self.hub.broadcast({"type": "original", "id": seg_id, "text": sentence, "route": route, "to": to})
         to_translate = self.pronouns(sentence) if to == "en" else sentence  # in order said, so not in work()
         if to:
@@ -677,7 +670,7 @@ async def run(args):
         os.remove("progress.json")
     if args.two_way:
         return await run_two_way(args)
-    captioner = Captioner(args.lang, "to-telugu" if args.to_telugu else args.translator, args.keep_at, keep_known=not args.outgoing)
+    captioner = Captioner(args.lang, args.translator, args.keep_at, keep_known=not args.outgoing)
     if args.no_drafts:
         captioner.drafts = None
     HUB.on_message = make_on_message(captioner, args, HUB)
@@ -793,13 +786,12 @@ def finish_call(captioner, args):
 
 async def load_helpers(loop, args, captioner, target):
     """Laya, pictures, the story keeper, Weave's garden and 'ask her' prompts, attached to `captioner`."""
-    if not args.to_telugu:  # Laya and pictures are for her side of the call
-        print("Loading Laya...", flush=True)
-        from decide import Decider
-        captioner.decider = await loop.run_in_executor(None, Decider)
-        from pictures import PictureFinder
-        captioner.pictures = PictureFinder(captioner.decider)
-        await loop.run_in_executor(None, captioner.pictures._nouns, "warm up the noun finder")
+    print("Loading Laya...", flush=True)
+    from decide import Decider
+    captioner.decider = await loop.run_in_executor(None, Decider)
+    from pictures import PictureFinder
+    captioner.pictures = PictureFinder(captioner.decider)
+    await loop.run_in_executor(None, captioner.pictures._nouns, "warm up the noun finder")
     if not args.no_story:
         from calls import CallRecorder
         target["recorder"] = captioner.recorder = CallRecorder(args.caller, record_audio=not args.no_record)
@@ -868,7 +860,7 @@ async def stream(loop, args, captioner, audio, target):
                 audio_q.put_nowait(None)
             ender = asyncio.create_task(end_of_file())
         try:
-            async for ev in transcribe(audio_q, "en" if args.to_telugu else args.lang, "PCM_24KHZ"):
+            async for ev in transcribe(audio_q, args.lang, "PCM_24KHZ"):
                 if failures:
                     print("Reconnected to Muse.", flush=True)
                     failures = 0
@@ -902,11 +894,7 @@ async def listen(args, captioner):
     await load_helpers(loop, args, captioner, target)
     captioner.speak_all = args.speak == "all"
     captioner.questions_only = args.speak == "questions"
-    if args.to_telugu and not args.no_voice:
-        print("Loading the Telugu voice (Meta MMS)...", flush=True)
-        from dub import TeluguVoice
-        captioner.dubber = await loop.run_in_executor(None, lambda: TeluguVoice(audio.voice))
-    elif not args.no_voice:  # load before audio starts, or the first seconds of the call are lost
+    if not args.no_voice:  # load before audio starts, or the first seconds of the call are lost
         print("Loading the English voice (Kokoro)...", flush=True)
         await load_voice(loop, args, captioner, audio, target, "your " if args.outgoing else "the caller's ")
     threading.Thread(target=audio.run, kwargs={"meter": False}, daemon=True).start()
@@ -1093,9 +1081,6 @@ def main():
     p.add_argument("--translator", choices=["local", "muse"], default="local",
                    help="local = IndicTrans2 via translate_server.py (fast, same output every time); muse = Muse Spark")
     p.add_argument("--file", help="replay a 16/24 kHz mono wav instead of listening to the call")
-    p.add_argument("--to-telugu", action="store_true",
-                   help="the other direction: YOUR English -> Telugu voice for them (Muse Spark + Meta MMS voice), into "
-                        "BlackHole 16ch, which WhatsApp Web uses as its microphone. Run it next to the normal subtitles.py")
     p.add_argument("--outgoing", action="store_true",
                    help="translate what YOU say: your mic -> English voice -> BlackHole 16ch, which WhatsApp Web uses "
                         "as its microphone, so the other person hears only the English")
@@ -1138,20 +1123,18 @@ def main():
                         "questions/requests to you (Laya decides); all = every line (default while --original-volume "
                         "is low, since her own English would be too quiet to follow)")
     args = p.parse_args()
-    if args.to_telugu:  # your side of the call: no story page or prompts (the normal subtitles.py keeps those)
-        args.outgoing = args.no_story = args.no_prompts = True
     if args.outgoing:
         args.inp = args.inp or "MacBook"  # the built-in mic ("MacBook Pro Microphone"); pass --in for a headset mic
         args.out = args.out or "BlackHole 16ch"
     args.speak = args.speak or ("all" if args.original_volume < 0.5 else "telugu")
     args.inp = args.inp or "BlackHole 2ch"  # not just "BlackHole": that also matches BlackHole 16ch, the --outgoing mic
     args.voice_file = MY_VOICE_SAMPLE if args.outgoing else VOICE_SAMPLE
-    if args.two_way and (args.outgoing or args.to_telugu):
-        p.error("--two-way already includes your side (--outgoing / --to-telugu)")
+    if args.two_way and args.outgoing:
+        p.error("--two-way already includes your side (--outgoing)")
     # Both directions can run at once (two terminals), so --outgoing gets its own overlay page.
     port = PORT + 2 if args.outgoing and "OVERLAY_PORT" not in os.environ else PORT
 
-    if args.translator == "local" and not args.to_telugu:
+    if args.translator == "local":
         start_translator(args.lang)
 
     from websockets.sync.server import serve

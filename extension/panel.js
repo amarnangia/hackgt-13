@@ -29,7 +29,7 @@ function connect() {
 }
 function send(msg) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(msg)); }
 
-// Your side (subtitles.py --to-telugu, two ports up): what you said and the Telugu she heard, in the captions
+// Your side (subtitles.py --two-way's second page, two ports up): what you said and the Telugu she heard, in the captions
 const YOU_URL = (() => { try { const u = new URL(WS_URL); u.port = String(Number(u.port || 80) + 2); return u.href.replace(/\/$/, ""); } catch { return null; } })();
 function connectYou() {
   if (!YOU_URL) return;

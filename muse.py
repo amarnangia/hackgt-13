@@ -141,20 +141,6 @@ class Translator:
         return english
 
 
-class ToTelugu(Translator):
-    """The other direction (--outgoing --to te): the grandkid's English to spoken Telugu for the grandparent."""
-
-    def __init__(self, lang):
-        super().__init__(lang)
-        self.system = (
-            f"You translate what a grandchild says on a live phone call to their grandparent into natural, warm, simple "
-            f"spoken {self.lang_name}, the way a grandchild talks to an elder: use the respectful form (meeru, mimmalni). "
-            f"The text comes from live speech recognition. Write everything in {self.lang_name} script, including English "
-            "words people use in Telugu (exam, college, WhatsApp), so a voice can read it aloud. Reply with only the "
-            "translation."
-        )
-
-
 def spark_json(system, user, model="muse-spark-1.3", effort="low", timeout=60):
     """Ask Muse Spark for a JSON object (story summaries, question suggestions). Returns a dict, or None."""
     try:
