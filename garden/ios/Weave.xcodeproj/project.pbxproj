@@ -1,0 +1,616 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		100801F404358041FF508128 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A2CFF37231C6B3F01E8B6B /* WidgetViews.swift */; };
+		1865F70CDC909CB5A2E93E57 /* GardenClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA49E9E63150F76191F55B2E /* GardenClient.swift */; };
+		24F04E9B59E44F183F598748 /* sample.json in Resources */ = {isa = PBXBuildFile; fileRef = C4F2997DAF5168400429633D /* sample.json */; };
+		3458F1CBD09AB15D9670A5DC /* WordDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55E46919140FA05450F1135F /* WordDetail.swift */; };
+		40A2585CC84434804EDA4B20 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE2F89990A6D40DC02179E3 /* Models.swift */; };
+		555A260D10302DF8A1E90F90 /* GardenClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA49E9E63150F76191F55B2E /* GardenClient.swift */; };
+		6E43BD44B6179A7011385FC9 /* WeaveWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CE707959FBBB1B39AABC7C /* WeaveWidget.swift */; };
+		70640A5ECA2120A27B4BC257 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A2CFF37231C6B3F01E8B6B /* WidgetViews.swift */; };
+		7BD8917337D00D8CB5E47F3D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FF31E4BA926D699E444FA671 /* Assets.xcassets */; };
+		7D211E718FDA1749AB6CB200 /* GardenPainter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF58A7BD7EEFAF22D0F3501C /* GardenPainter.swift */; };
+		894DD4CF4DA58913F1B20008 /* GardenTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 381C1994583B2024B92252E8 /* GardenTab.swift */; };
+		8E533B26B4DA0102C00490FB /* WidgetGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C41142AB362B5CC3AE2606 /* WidgetGallery.swift */; };
+		8FAFD0767B530BAD38B8B582 /* ProgressTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA09A50381E34BF17C73603 /* ProgressTab.swift */; };
+		93ABD8F146F9E4B013C496A1 /* sample.json in Resources */ = {isa = PBXBuildFile; fileRef = C4F2997DAF5168400429633D /* sample.json */; };
+		AEA434A867EBA8CBAAACB941 /* WeaveWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1DEE5E944411384A95F20313 /* WeaveWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C6E1C67FF1B41ED9B2AB4493 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6265F4E61DEC63A2D3490E48 /* Theme.swift */; };
+		CA37E64AEB5C4B36B2A55870 /* WordsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74C01A95A16A7AFF840DE43E /* WordsTab.swift */; };
+		CE6015C3C12AF0CF15A21999 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE2F89990A6D40DC02179E3 /* Models.swift */; };
+		CF8941687C5B5B63CE4BF990 /* GardenPainter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF58A7BD7EEFAF22D0F3501C /* GardenPainter.swift */; };
+		DBAB1F7FC2C66D6B92F1CEE5 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6265F4E61DEC63A2D3490E48 /* Theme.swift */; };
+		DCAD173593896CE073393027 /* GardenModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2CFCFE8EFB0111925827FFE /* GardenModel.swift */; };
+		EDDA4825BA7D70C23331097C /* AddWidgetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8639B12146483969622FD4DD /* AddWidgetTests.swift */; };
+		F4514ED754A76F7D724D692B /* WeaveApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23D82F8D87E320B4DCC5A459 /* WeaveApp.swift */; };
+		FB5BC11F6127A4556B980964 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2456D6508AC6B52E4F48356E /* SettingsView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		031C2B01903179AFF024CFAE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 47A32A8B085F929D0C504AD7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C9A7AEDF6785F3826D435D8A;
+			remoteInfo = WeaveWidget;
+		};
+		155CEF8619BAE1D388EC6232 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 47A32A8B085F929D0C504AD7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 792EEE757F8D8272CD94E633;
+			remoteInfo = Weave;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		759AB1D463CE989E32273DF9 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				AEA434A867EBA8CBAAACB941 /* WeaveWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0EE2F89990A6D40DC02179E3 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		16A2CFF37231C6B3F01E8B6B /* WidgetViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetViews.swift; sourceTree = "<group>"; };
+		16BB7E3510DC13AC51A5EAF7 /* WeaveWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WeaveWidget.entitlements; sourceTree = "<group>"; };
+		1DA09A50381E34BF17C73603 /* ProgressTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressTab.swift; sourceTree = "<group>"; };
+		1DEE5E944411384A95F20313 /* WeaveWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = WeaveWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		23D82F8D87E320B4DCC5A459 /* WeaveApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaveApp.swift; sourceTree = "<group>"; };
+		2456D6508AC6B52E4F48356E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		381C1994583B2024B92252E8 /* GardenTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenTab.swift; sourceTree = "<group>"; };
+		55E46919140FA05450F1135F /* WordDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordDetail.swift; sourceTree = "<group>"; };
+		6265F4E61DEC63A2D3490E48 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		684E6470AC706B79CD69A77D /* Weave.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Weave.entitlements; sourceTree = "<group>"; };
+		74C01A95A16A7AFF840DE43E /* WordsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordsTab.swift; sourceTree = "<group>"; };
+		777A0BC4EEA3784608A5BC2E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		7C22A8E33AB1D594A711B386 /* WeaveUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = WeaveUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		85C41142AB362B5CC3AE2606 /* WidgetGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetGallery.swift; sourceTree = "<group>"; };
+		8639B12146483969622FD4DD /* AddWidgetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddWidgetTests.swift; sourceTree = "<group>"; };
+		907DB5FC148FBBFE686B1216 /* Weave.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Weave.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2CFCFE8EFB0111925827FFE /* GardenModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenModel.swift; sourceTree = "<group>"; };
+		A5A64500F6375BA3CEC5B21B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		B1CE707959FBBB1B39AABC7C /* WeaveWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaveWidget.swift; sourceTree = "<group>"; };
+		C4F2997DAF5168400429633D /* sample.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sample.json; sourceTree = "<group>"; };
+		CA49E9E63150F76191F55B2E /* GardenClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenClient.swift; sourceTree = "<group>"; };
+		EF58A7BD7EEFAF22D0F3501C /* GardenPainter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenPainter.swift; sourceTree = "<group>"; };
+		FF31E4BA926D699E444FA671 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		19F9C243DD5F7A88028EF262 /* WeaveWidget */ = {
+			isa = PBXGroup;
+			children = (
+				777A0BC4EEA3784608A5BC2E /* Info.plist */,
+				16BB7E3510DC13AC51A5EAF7 /* WeaveWidget.entitlements */,
+				B1CE707959FBBB1B39AABC7C /* WeaveWidget.swift */,
+			);
+			path = WeaveWidget;
+			sourceTree = "<group>";
+		};
+		24DC0AB0FB8EF8F03F340D8E = {
+			isa = PBXGroup;
+			children = (
+				623888A265E4E6EF8DAFBBBE /* Shared */,
+				EA0135A23D111815198F83EE /* Weave */,
+				5142891431676226D310FF43 /* WeaveUITests */,
+				19F9C243DD5F7A88028EF262 /* WeaveWidget */,
+				D9C70DCC9623745D89F1B6D5 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5142891431676226D310FF43 /* WeaveUITests */ = {
+			isa = PBXGroup;
+			children = (
+				8639B12146483969622FD4DD /* AddWidgetTests.swift */,
+			);
+			path = WeaveUITests;
+			sourceTree = "<group>";
+		};
+		623888A265E4E6EF8DAFBBBE /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				CA49E9E63150F76191F55B2E /* GardenClient.swift */,
+				EF58A7BD7EEFAF22D0F3501C /* GardenPainter.swift */,
+				0EE2F89990A6D40DC02179E3 /* Models.swift */,
+				C4F2997DAF5168400429633D /* sample.json */,
+				6265F4E61DEC63A2D3490E48 /* Theme.swift */,
+				16A2CFF37231C6B3F01E8B6B /* WidgetViews.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		D9C70DCC9623745D89F1B6D5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				907DB5FC148FBBFE686B1216 /* Weave.app */,
+				7C22A8E33AB1D594A711B386 /* WeaveUITests.xctest */,
+				1DEE5E944411384A95F20313 /* WeaveWidget.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EA0135A23D111815198F83EE /* Weave */ = {
+			isa = PBXGroup;
+			children = (
+				FF31E4BA926D699E444FA671 /* Assets.xcassets */,
+				A2CFCFE8EFB0111925827FFE /* GardenModel.swift */,
+				381C1994583B2024B92252E8 /* GardenTab.swift */,
+				A5A64500F6375BA3CEC5B21B /* Info.plist */,
+				1DA09A50381E34BF17C73603 /* ProgressTab.swift */,
+				2456D6508AC6B52E4F48356E /* SettingsView.swift */,
+				684E6470AC706B79CD69A77D /* Weave.entitlements */,
+				23D82F8D87E320B4DCC5A459 /* WeaveApp.swift */,
+				85C41142AB362B5CC3AE2606 /* WidgetGallery.swift */,
+				55E46919140FA05450F1135F /* WordDetail.swift */,
+				74C01A95A16A7AFF840DE43E /* WordsTab.swift */,
+			);
+			path = Weave;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6397FEF34A915D4226268FED /* WeaveUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D9429048AD0514396CB04327 /* Build configuration list for PBXNativeTarget "WeaveUITests" */;
+			buildPhases = (
+				AD5E21A7F48E52230A835811 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C81BC8B04A1C825A02CEF7AF /* PBXTargetDependency */,
+			);
+			name = WeaveUITests;
+			packageProductDependencies = (
+			);
+			productName = WeaveUITests;
+			productReference = 7C22A8E33AB1D594A711B386 /* WeaveUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		792EEE757F8D8272CD94E633 /* Weave */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0A33ABAEC3608D32225D37C7 /* Build configuration list for PBXNativeTarget "Weave" */;
+			buildPhases = (
+				37DD7839884718DBB6D7E01E /* Sources */,
+				6DE3B9AC8EEF3C2C3CF4FB3A /* Resources */,
+				759AB1D463CE989E32273DF9 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A8E034258737E750D0842B21 /* PBXTargetDependency */,
+			);
+			name = Weave;
+			packageProductDependencies = (
+			);
+			productName = Weave;
+			productReference = 907DB5FC148FBBFE686B1216 /* Weave.app */;
+			productType = "com.apple.product-type.application";
+		};
+		C9A7AEDF6785F3826D435D8A /* WeaveWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 132781DA7C476CC0AB8FA000 /* Build configuration list for PBXNativeTarget "WeaveWidget" */;
+			buildPhases = (
+				67B8DC3181D88183F9D7FC9B /* Sources */,
+				CA50B430826EE51046F1E51C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WeaveWidget;
+			packageProductDependencies = (
+			);
+			productName = WeaveWidget;
+			productReference = 1DEE5E944411384A95F20313 /* WeaveWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		47A32A8B085F929D0C504AD7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					6397FEF34A915D4226268FED = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+						TestTargetID = 792EEE757F8D8272CD94E633;
+					};
+					792EEE757F8D8272CD94E633 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+					C9A7AEDF6785F3826D435D8A = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = FE709B8EF498FA4385D1785E /* Build configuration list for PBXProject "Weave" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 24DC0AB0FB8EF8F03F340D8E;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = D9C70DCC9623745D89F1B6D5 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				792EEE757F8D8272CD94E633 /* Weave */,
+				C9A7AEDF6785F3826D435D8A /* WeaveWidget */,
+				6397FEF34A915D4226268FED /* WeaveUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6DE3B9AC8EEF3C2C3CF4FB3A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7BD8917337D00D8CB5E47F3D /* Assets.xcassets in Resources */,
+				24F04E9B59E44F183F598748 /* sample.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA50B430826EE51046F1E51C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				93ABD8F146F9E4B013C496A1 /* sample.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		37DD7839884718DBB6D7E01E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				555A260D10302DF8A1E90F90 /* GardenClient.swift in Sources */,
+				DCAD173593896CE073393027 /* GardenModel.swift in Sources */,
+				CF8941687C5B5B63CE4BF990 /* GardenPainter.swift in Sources */,
+				894DD4CF4DA58913F1B20008 /* GardenTab.swift in Sources */,
+				40A2585CC84434804EDA4B20 /* Models.swift in Sources */,
+				8FAFD0767B530BAD38B8B582 /* ProgressTab.swift in Sources */,
+				FB5BC11F6127A4556B980964 /* SettingsView.swift in Sources */,
+				DBAB1F7FC2C66D6B92F1CEE5 /* Theme.swift in Sources */,
+				F4514ED754A76F7D724D692B /* WeaveApp.swift in Sources */,
+				8E533B26B4DA0102C00490FB /* WidgetGallery.swift in Sources */,
+				70640A5ECA2120A27B4BC257 /* WidgetViews.swift in Sources */,
+				3458F1CBD09AB15D9670A5DC /* WordDetail.swift in Sources */,
+				CA37E64AEB5C4B36B2A55870 /* WordsTab.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		67B8DC3181D88183F9D7FC9B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1865F70CDC909CB5A2E93E57 /* GardenClient.swift in Sources */,
+				7D211E718FDA1749AB6CB200 /* GardenPainter.swift in Sources */,
+				CE6015C3C12AF0CF15A21999 /* Models.swift in Sources */,
+				C6E1C67FF1B41ED9B2AB4493 /* Theme.swift in Sources */,
+				6E43BD44B6179A7011385FC9 /* WeaveWidget.swift in Sources */,
+				100801F404358041FF508128 /* WidgetViews.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AD5E21A7F48E52230A835811 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EDDA4825BA7D70C23331097C /* AddWidgetTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A8E034258737E750D0842B21 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C9A7AEDF6785F3826D435D8A /* WeaveWidget */;
+			targetProxy = 031C2B01903179AFF024CFAE /* PBXContainerItemProxy */;
+		};
+		C81BC8B04A1C825A02CEF7AF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 792EEE757F8D8272CD94E633 /* Weave */;
+			targetProxy = 155CEF8619BAE1D388EC6232 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0B9E0915EA5663DECA527A6B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.weave.garden.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Weave;
+			};
+			name = Debug;
+		};
+		1DD1B576BC4E94A14C76960D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Weave/Weave.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Weave/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.weave.garden;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		6860444FB892A0ECF8F650A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Weave/Weave.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Weave/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.weave.garden;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		73BE6F0E75F769471E917290 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = WeaveWidget/WeaveWidget.entitlements;
+				INFOPLIST_FILE = WeaveWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.weave.garden.widget;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		8777FF7C9E93B6C976BF1865 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		A457647A3021384FD94E713E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = WeaveWidget/WeaveWidget.entitlements;
+				INFOPLIST_FILE = WeaveWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.weave.garden.widget;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		C55D069A55210EE2B3624E6B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.weave.garden.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Weave;
+			};
+			name = Release;
+		};
+		CFF2C4F1D5F1C76D0BC99B2B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0A33ABAEC3608D32225D37C7 /* Build configuration list for PBXNativeTarget "Weave" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DD1B576BC4E94A14C76960D /* Debug */,
+				6860444FB892A0ECF8F650A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		132781DA7C476CC0AB8FA000 /* Build configuration list for PBXNativeTarget "WeaveWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				73BE6F0E75F769471E917290 /* Debug */,
+				A457647A3021384FD94E713E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D9429048AD0514396CB04327 /* Build configuration list for PBXNativeTarget "WeaveUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0B9E0915EA5663DECA527A6B /* Debug */,
+				C55D069A55210EE2B3624E6B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FE709B8EF498FA4385D1785E /* Build configuration list for PBXProject "Weave" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CFF2C4F1D5F1C76D0BC99B2B /* Debug */,
+				8777FF7C9E93B6C976BF1865 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 47A32A8B085F929D0C504AD7 /* Project object */;
+}
