@@ -24,7 +24,7 @@ We tested it on an M4 MacBook Air with the English checkpoint on the Apple GPU, 
 The multilingual checkpoint was faster (~45 ms) but much less accurate, so we use the English one. Laya can't write text, so an LLM writes the explanations and a word list picks the actual image.
 
 ## Scope for HackGT
-- **In scope:** relative → you direction (Hindi/Hinglish → English), running on a Mac with WhatsApp Web and headphones.
+- **In scope:** relative → you direction (Telugu → English first; Hindi and others via `--lang`), running on a Mac with WhatsApp Web and headphones.
 - **Stretch:** you → relative direction (a translated Hindi voice sent through a virtual mic), more languages (Punjabi, Gujarati, Tamil), and sharing the image cards over WhatsApp screen share.
 
 See [plan.md](plan.md) for the architecture and build order.

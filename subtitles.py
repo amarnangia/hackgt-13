@@ -1,30 +1,27 @@
-# Steps 2-3 of plan.md: live call audio -> speech segments -> Telugu text + English translation -> overlay.
+# Steps 2-3 of plan.md: live call audio -> Muse Voice Transcribe -> Muse Spark translation -> overlay.
 #   python subtitles.py --out "MacBook Air Speakers"         # live call (see Audio setup in plan.md)
 #   python subtitles.py --file samples/telugu_grandma.wav    # no call needed, replays a recording
 # Then open http://localhost:8765 for the subtitle overlay.
+# The offline Whisper version of this file is in git history (commit d111471).
 import argparse
+import asyncio
 import http
 import json
-import queue
+import re
 import threading
 import time
 import wave
+from concurrent.futures import ThreadPoolExecutor
 
-import mlx_whisper
 import numpy as np
-import torch
-from silero_vad import VADIterator, load_silero_vad
-from websockets.sync.server import serve
 
-SR = 16000
-VAD_CHUNK = 512  # silero needs 512 samples at 16 kHz
-MAX_SEGMENT_S = 8  # cut long monologues so subtitles keep flowing
-TRANSCRIBE_MODEL = "mlx-community/whisper-large-v3-turbo"  # fast, but can't translate
-TRANSLATE_MODEL = "mlx-community/whisper-large-v3-mlx"     # fallback translator when Claude isn't configured
-CLAUDE_MODEL = "claude-opus-5"
-MERGE_BELOW_S = 1.5  # phrases shorter than this wait for the next one...
-MERGE_WAIT_S = 1.0   # ...for up to this long, so "nanna," isn't translated on its own
+from muse import Translator, transcribe
+
 PORT = 8765
+CHUNK_MS = 80
+SENTENCE_END = re.compile(r"[.?!।]+")
+CLAUSE_END = re.compile(r"[,;]")
+MIN_CLAUSE_WORDS = 5  # Muse often joins sentences with commas; cut there once a clause is long enough to translate well
 
 clients = set()
 
@@ -58,175 +55,146 @@ def serve_overlay(conn, request):
         return resp
 
 
-class Segmenter:
-    """Feeds 16 kHz audio through silero VAD and emits one numpy array per spoken phrase."""
+class Captioner:
+    """Turns Muse's live partials into sentences and translates each one as soon as it ends.
 
-    def __init__(self, out_q):
-        self.vad = VADIterator(load_silero_vad(), sampling_rate=SR, min_silence_duration_ms=500, speech_pad_ms=200)
-        self.out_q = out_q
-        self.pending = np.zeros(0, dtype=np.float32)
-        self.speech = None  # list of chunks while someone is talking
-        self.holding = 0    # chunks of silence waited after a too-short phrase ended
-
-    def feed(self, audio16k):
-        self.pending = np.concatenate([self.pending, audio16k])
-        while len(self.pending) >= VAD_CHUNK:
-            chunk, self.pending = self.pending[:VAD_CHUNK], self.pending[VAD_CHUNK:]
-            ev = self.vad(torch.from_numpy(chunk))
-            if ev and "start" in ev:
-                if self.speech is None:
-                    self.speech = []
-                    broadcast({"type": "speaking"})
-                self.holding = 0  # speech resumed, so a held fragment joins this phrase
-            if self.speech is None:
-                continue
-            self.speech.append(chunk)
-            n = len(self.speech) * VAD_CHUNK
-            if self.holding:
-                self.holding += 1
-                if self.holding * VAD_CHUNK >= MERGE_WAIT_S * SR:  # nobody continued; send the fragment alone
-                    self._emit()
-            elif n >= MAX_SEGMENT_S * SR:
-                self._emit()
-                self.vad.reset_states()
-            elif ev and "end" in ev:
-                if n < MERGE_BELOW_S * SR:
-                    self.holding = 1  # e.g. a lone "nanna," — wait to see if the sentence continues
-                else:
-                    self._emit()
-
-    def _emit(self):
-        self.out_q.put(np.concatenate(self.speech))
-        self.speech = None
-        self.holding = 0
-
-
-LANG_NAMES = {"te": "Telugu", "hi": "Hindi", "ta": "Tamil", "kn": "Kannada", "ml": "Malayalam", "mr": "Marathi", "gu": "Gujarati", "pa": "Punjabi", "bn": "Bengali"}
-
-
-class Translator:
-    """Claude when credentials are configured (much better Telugu -> English), otherwise Whisper's own translate task."""
+    Translation runs on a single worker thread so sentences finish in order and each one gets the
+    previous lines as context.
+    """
 
     def __init__(self, lang):
-        self.lang = lang
-        self.history = []  # recent (original, english) pairs so pronouns and topics carry over
-        self.client = None
-        try:
-            import anthropic
-            self.client = anthropic.Anthropic()
-            self.client.models.retrieve(CLAUDE_MODEL)  # fail fast if there are no usable credentials
-            print(f"Translating with {CLAUDE_MODEL}", flush=True)
-        except Exception as e:
-            self.client = None
-            print(f"Translating with Whisper; Claude unavailable ({str(e)[:80]}). Set ANTHROPIC_API_KEY for better translations.", flush=True)
+        self.translate = Translator(lang)
+        self.pool = ThreadPoolExecutor(max_workers=1)
+        self.pool.submit(self.translate.warm_up)  # the first request pays for TLS setup (~3 s)
+        self.next_id = 0
+        self.partial = ""  # latest cumulative transcript for the current turn
+        self.done = 0      # how many characters of it have been sent for translation
 
-    def __call__(self, audio, original):
-        english = self._claude(original) if self.client else None
-        if english is None:
-            # Whisper's fallback temperatures matter: at temperature=0 it often stops after a few words.
-            english = mlx_whisper.transcribe(audio, path_or_hf_repo=TRANSLATE_MODEL, language=self.lang, task="translate")["text"].strip()
-        self.history = (self.history + [(original, english)])[-4:]
-        return english
+    def on_event(self, ev):
+        kind = ev.get("type")
+        if kind == "speechStart":
+            self.partial, self.done = "", 0
+            broadcast({"type": "speaking"})
+        elif kind == "transcript" and not ev.get("final"):
+            self.partial = ev["transcript"]
+            self._cut(final=False)
+            broadcast({"type": "partial", "text": self.partial[self.done:].strip()})
+        elif kind == "speechEnd":
+            self._cut(final=True)
+            broadcast({"type": "partial", "text": ""})
 
-    def _claude(self, original):
-        lang_name = LANG_NAMES.get(self.lang, self.lang)
-        context = "\n".join(f"{o} => {e}" for o, e in self.history)
-        try:
-            response = self.client.beta.messages.create(
-                model=CLAUDE_MODEL,
-                max_tokens=512,
-                output_config={"effort": "low"},
-                betas=["server-side-fallback-2026-07-01"],
-                fallbacks="default",
-                system=(f"You translate a live {lang_name} phone call between grandparents and their grandchild into natural, "
-                        "warm English subtitles. The text comes from speech recognition and may have small errors; translate "
-                        "what the speaker most likely said. Keep names of foods, places, festivals and objects in romanized "
-                        f"{lang_name} (e.g. pulihora, auto) so the app can show a picture of them. Reply with only the translation."),
-                messages=[{"role": "user", "content": (f"Earlier in the call:\n{context}\n\n" if context else "") + f"Translate:\n{original}"}],
-            )
-        except Exception as e:
-            print(f"Claude translation failed ({type(e).__name__}); using Whisper for this line.", flush=True)
-            return None
-        if response.stop_reason == "refusal":
-            return None
-        return "".join(b.text for b in response.content if b.type == "text").strip() or None
+    def _cut(self, final):
+        rest = self.partial[self.done:]
+        ends = sorted({m.end() for m in SENTENCE_END.finditer(rest)} | {m.end() for m in CLAUSE_END.finditer(rest)})
+        if final and rest.strip():
+            ends.append(len(rest))
+        start = 0
+        for end in ends:
+            piece = rest[start:end].strip()
+            is_sentence = bool(SENTENCE_END.search(piece[-1:])) or end == len(rest) and final
+            if not piece or (not is_sentence and len(piece.split()) < MIN_CLAUSE_WORDS):
+                continue  # short clause: keep it and send it together with what follows
+            self._submit(piece)
+            start = end
+        self.done += start
 
+    def _submit(self, sentence):
+        self.next_id += 1
+        seg_id, ended_at = self.next_id, time.monotonic()
+        broadcast({"type": "original", "id": seg_id, "text": sentence})
 
-def recognizer(seg_q, lang, idle):
-    translate = Translator(lang)
-    opts = dict(language=lang, temperature=0.0, condition_on_previous_text=False)
-    seg_id = 0
-    while True:
-        idle.set()
-        audio = seg_q.get()
-        idle.clear()
-        if len(audio) < SR * 0.4:
-            continue
-        seg_id += 1
-        t0 = time.time()
-        original = mlx_whisper.transcribe(audio, path_or_hf_repo=TRANSCRIBE_MODEL, task="transcribe", **opts)["text"].strip()
-        if not original:
-            continue
-        t1 = time.time()
-        broadcast({"type": "original", "id": seg_id, "text": original})
-        english = translate(audio, original)
-        t2 = time.time()
-        broadcast({"type": "english", "id": seg_id, "text": english})
-        print(f"[{len(audio)/SR:4.1f}s audio | text {t1-t0:.2f}s, english {t2-t1:.2f}s] {original}  ->  {english}", flush=True)
+        def work():
+            try:
+                english = self.translate(sentence)
+            except Exception as e:
+                english = f"(translation failed: {type(e).__name__})"
+            broadcast({"type": "english", "id": seg_id, "text": english})
+            print(f"[+{time.monotonic() - ended_at:.1f}s] {sentence}  ->  {english}", flush=True)
+
+        self.pool.submit(work)
 
 
-def warm_up(lang):
-    print("Loading Whisper models (first run downloads ~4.5 GB)...", flush=True)
-    silence = np.zeros(SR, dtype=np.float32)
-    mlx_whisper.transcribe(silence, path_or_hf_repo=TRANSCRIBE_MODEL, language=lang)
-    mlx_whisper.transcribe(silence, path_or_hf_repo=TRANSLATE_MODEL, language=lang, task="translate")
-
-
-def feed_file(path, seg):
+async def file_audio(path, audio_q):
+    """Send a recording at real-time pace, like a live call (Muse rejects audio sent much faster)."""
     with wave.open(path) as w:
-        assert w.getframerate() == SR and w.getnchannels() == 1, "file must be 16 kHz mono wav"
-        audio = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16).astype(np.float32) / 32768
-    audio = np.concatenate([audio, np.zeros(SR, dtype=np.float32)])  # trailing silence closes the last phrase
-    step = SR // 10
-    for i in range(0, len(audio), step):  # real-time pace, like a call
-        seg.feed(audio[i:i + step])
-        time.sleep(0.1)
+        rate, pcm = w.getframerate(), w.readframes(w.getnframes())
+    assert rate in (16000, 24000), "file must be 16 or 24 kHz mono 16-bit wav"
+    pcm += b"\0" * (rate * 2 * 2)  # 2 s of trailing silence lets Muse close the last utterance
+    size = rate * 2 * CHUNK_MS // 1000
+    start = time.monotonic()
+    for i in range(0, len(pcm), size):
+        await audio_q.put(pcm[i:i + size])
+        await asyncio.sleep(max(0, start + (i + size) / (rate * 2) - time.monotonic()))
+    await audio_q.put(None)
+
+
+def start_live_audio(args, loop, target):
+    """Pass call audio through to the speakers (audio_loop.py) and copy it to Muse as 24 kHz 16-bit PCM.
+
+    `target["q"]` is the queue of the current Muse session; it is swapped on reconnect.
+    """
+    import sounddevice as sd
+    from audio_loop import AudioLoop, find_device
+
+    in_dev = find_device(args.inp, "input")
+    out_dev = find_device(args.out, "output") if args.out else sd.default.device[1]
+    buf = []
+
+    def on_audio(mono48k):
+        # 48 kHz -> 24 kHz by averaging pairs; batch 10 ms blocks into 80 ms frames.
+        buf.append((mono48k.reshape(-1, 2).mean(axis=1) * 32767).clip(-32768, 32767).astype(np.int16))
+        if len(buf) * 10 >= CHUNK_MS:
+            frame = np.concatenate(buf).tobytes()
+            buf.clear()
+            loop.call_soon_threadsafe(target["q"].put_nowait, frame)
+
+    audio = AudioLoop(in_dev, out_dev, on_audio=on_audio)
+    threading.Thread(target=audio.run, daemon=True).start()
+
+
+async def run(args):
+    captioner = Captioner(args.lang)
+    loop = asyncio.get_running_loop()
+    target = {"q": asyncio.Queue()}
+    if not args.file:
+        start_live_audio(args, loop, target)
+    while True:
+        audio_q = target["q"] = asyncio.Queue()
+        if args.file:
+            encoding = "PCM_24KHZ" if wave.open(args.file).getframerate() == 24000 else "PCM_16KHZ"
+            feeder = asyncio.create_task(file_audio(args.file, audio_q))
+        else:
+            encoding = "PCM_24KHZ"
+        try:
+            async for ev in transcribe(audio_q, args.lang, encoding):
+                captioner.on_event(ev)
+        except Exception as e:
+            if args.file:
+                raise
+            print(f"Muse connection dropped ({e}); reconnecting...", flush=True)
+            await asyncio.sleep(1)
+            continue
+        if args.file:
+            await feeder
+            await loop.run_in_executor(None, lambda: captioner.pool.shutdown(wait=True))  # let the last translations finish
+            await asyncio.sleep(0.5)
+            return
 
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--lang", default="te", help="Whisper language code: te (Telugu), hi (Hindi), ta, kn, ...")
-    p.add_argument("--file", help="replay a 16 kHz mono wav instead of listening to the call")
+    p.add_argument("--lang", default="te", help="language code: te (Telugu), hi (Hindi), ta, kn, ml, bn, mr")
+    p.add_argument("--file", help="replay a 16/24 kHz mono wav instead of listening to the call")
     p.add_argument("--in", dest="inp", default="BlackHole")
     p.add_argument("--out", default=None)
-    a = p.parse_args()
+    args = p.parse_args()
 
-    warm_up(a.lang)
-    seg_q = queue.Queue()
-    seg = Segmenter(seg_q)
-    idle = threading.Event()
-    threading.Thread(target=recognizer, args=(seg_q, a.lang, idle), daemon=True).start()
+    from websockets.sync.server import serve
     server = serve(ws_handler, "localhost", PORT, process_request=serve_overlay)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     print(f"Overlay: http://localhost:{PORT}", flush=True)
-
-    if a.file:
-        feed_file(a.file, seg)
-        while not (seg_q.empty() and idle.wait(timeout=60)):  # let the last phrases finish
-            time.sleep(0.5)
-        time.sleep(1)
-        return
-
-    from audio_loop import AudioLoop, find_device
-    import sounddevice as sd
-    in_dev = find_device(a.inp, "input")
-    out_dev = find_device(a.out, "output") if a.out else sd.default.device[1]
-    # Keep VAD out of the realtime audio callback; 48 kHz -> 16 kHz by averaging groups of 3 samples.
-    audio_q = queue.Queue()
-    threading.Thread(target=lambda: [seg.feed(audio_q.get()) for _ in iter(int, 1)], daemon=True).start()
-    loop = AudioLoop(in_dev, out_dev, on_audio=lambda x: audio_q.put(x.reshape(-1, 3).mean(axis=1)))
     try:
-        loop.run()
+        asyncio.run(run(args))
     except KeyboardInterrupt:
         print()
 

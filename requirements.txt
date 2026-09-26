@@ -1,3 +1,12 @@
 laya>=0.3.3
 sounddevice>=0.5
 numpy
+websockets>=14
+certifi
+requests
+mlx-audio
+misaki
+num2words
+spacy
+phonemizer
+soundfile

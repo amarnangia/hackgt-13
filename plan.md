@@ -5,7 +5,10 @@
 2. System Settings → Sound → Output → **BlackHole 2ch**, with the Mac volume at **100%**.
 3. Make the call from **WhatsApp Web in Chrome** (web.whatsapp.com), not the WhatsApp Mac app.
 4. `python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
-5. `python audio_loop.py --out "MacBook Air Speakers"` (or your headphones' name).
+5. `brew install espeak-ng` (the local voice uses it for words like *pulihora*).
+6. Put `MODEL_API_KEY=<Meta Model API key>` in `.env` (gitignored; a pre-commit hook also blocks keys).
+7. `python subtitles.py --out "MacBook Air Speakers"` (or your headphones' name), then open http://localhost:8765.
+   No call handy? `python subtitles.py --file samples/telugu_grandma.wav`
 
 What we learned the hard way:
 - **The WhatsApp Mac app plays straight to the speakers** and ignores the Mac's output setting. BlackHole stays silent and there's no BlackHole option in its menu. Chrome follows the Mac's output setting, so WhatsApp Web works.
@@ -45,12 +48,11 @@ WhatsApp Web in Chrome (Mac output = BlackHole 2ch)
 |---|---|---|
 | Capturing call audio | [BlackHole 2ch](https://github.com/ExistentialAudio/BlackHole) (`brew install --cask blackhole-2ch`) | Set the Mac's output to BlackHole and call from WhatsApp Web in Chrome. The WhatsApp Mac app skips BlackHole. |
 | Audio input/output | `sounddevice` (Python) | Reads BlackHole and writes to the headphones. |
-| Voice activity detection | `silero-vad` or `webrtcvad` | Cuts audio into chunks at pauses in speech. |
-| Speech-to-text | Deepgram Nova-3 (multi) or Sarvam | Has to handle Hindi mixed with English. Compare both on real audio. |
-| Translation | Claude Haiku 4.5, streaming | The same call also writes the slang explanations. |
+| Speech-to-text | **Muse Voice Transcribe** (Meta Model API, streaming, `languageBias: telugu`) | Words appear ~1–2 s after she starts talking; ends of utterances are detected by Muse. Much more accurate on Telugu than local Whisper. |
+| Translation | **Muse Spark** `muse-spark-1.2`, `reasoning_effort: minimal` | Each sentence (or long clause) is translated as soon as it ends: ~1.0–1.5 s. 1.3 translated just as well but took ~2.8 s. |
 | Decisions | **Laya** `convaiinnovations/laya` (English checkpoint, `device="mps"`) | Load at startup; the first load takes ~35 s. |
 | Images | a local `images/` folder plus `lexicon.json` | Maps Hindi, romanized and English words to image files. ~100 items to start. |
-| Text-to-speech | ElevenLabs Flash (or similar low-latency voice) | Only for dubbed phrases. |
+| Text-to-speech | **Kokoro-82M, local** (`mlx-audio`, voice `af_heart`) | 7 s of speech in ~0.6 s on the M4 after a ~4 s warm-up. Needs `brew install espeak-ng`. |
 | On-screen overlay | an always-on-top window (Electron or a web page) fed over WebSocket | Shows subtitles, image cards and slang cards. |
 
 ### Laya questions (checked on this Mac)
@@ -89,8 +91,8 @@ What we learned from testing (script: `tools/laya_bench.py`):
 
 ## Build order
 1. ✅ **Audio loop:** WhatsApp → BlackHole → Python → headphones, with no processing, during a real call (`audio_loop.py`).
-2. **Live subtitles:** voice activity detection plus speech-to-text, with Hindi text showing in the overlay.
-3. **Translation:** English subtitles.
+2. ✅ **Live subtitles:** Muse streams Telugu text into the overlay (`subtitles.py`, `muse.py`, `overlay.html`).
+3. ✅ **Translation:** Muse Spark, sentence by sentence while she is still talking.
 4. **Laya:** image cards (word list plus images) and slang cards (LLM explanation).
 5. **Dubbing:** text-to-speech, with the original lowered underneath.
 6. **Known-words list:** show the translation fading out over a demo call.
