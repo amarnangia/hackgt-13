@@ -29,6 +29,7 @@ What we learned the hard way:
 - **When BlackHole is the output, the Mac volume slider controls what goes into BlackHole.** At 29% the call arrived at about 1% strength. Keep it at 100% and control loudness on the speaker side. `audio_loop.py` warns you if it's lower.
 - The terminal app running the script needs microphone permission. The VS Code terminal worked for us.
 - **Raw translation models mangle cultural words** ("My mother was a widow" for *grandma made pulihora*, "car" for *auto*). `lexicon.json` swaps known words for fixed plain English *before* translating, which fixed every case we tried. Add words there; the translator reloads it on save. Use plain English in `translate_as` ("tamarind rice", not "pulihora"): an English name right before a Telugu verb gets read as a person's name.
+- **IndicTrans2 turns తను (he *or* she) into "he" every time**, even with a feminine verb (తను వెళ్ళింది -> "He went"). It gets ఆమె/అతను right, so `pronouns.py` swaps తను for one of those before translating, using the verb, then the last person mentioned ("my friend got a job. తను..." -> she). Check with `python tools/check_pronouns.py`.
 
 ## Latency (measured)
 `subtitles.py` prints each sentence's delay by stage, a p50/p90/max table when you quit, and appends every sentence to `latency_log.jsonl` (gitignored). Measured on the M4 with `--file samples/telugu_two_turns.wav`, local translator, 12 sentences over two runs:
