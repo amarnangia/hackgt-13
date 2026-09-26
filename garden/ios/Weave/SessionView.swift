@@ -325,8 +325,8 @@ struct TranslationMessage: View {
                 Text(line.who == .you ? "YOU" : partner.uppercased()).font(Fonts.mono(11)).tracking(0.9)
                     .foregroundStyle(line.who == .them ? Theme.accent : Theme.text)
                 if let tag = line.tag {
-                    Text(tag.uppercased()).font(.system(size: 10, weight: .heavy)).tracking(0.6).foregroundStyle(Theme.onWarm)
-                        .padding(.horizontal, 6).padding(.vertical, 3).background(Theme.warm, in: .rect(cornerRadius: 6))
+                    Text(tag.uppercased()).font(.system(size: 10, weight: .heavy)).tracking(0.6).foregroundStyle(Color(hex: 0x06121a))
+                        .padding(.horizontal, 6).padding(.vertical, 3).background(Theme.cyan, in: .rect(cornerRadius: 6))
                 }
                 Text("·").foregroundStyle(Theme.text3)
                 Text(Language.name(line.lang)).font(Fonts.mono(11, .regular)).foregroundStyle(Theme.text3)

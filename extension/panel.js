@@ -55,15 +55,21 @@ function connectYou() {
   };
 }
 function status() {
-  if (PART === "captions") {
-    const who = conn.me && conn.name ? `${conn.me} ↔ ${conn.name}` : conn.name ? `listening to ${conn.name}` : "";
-    tellParent({ kind: "status", connected: conn.on, name: who });
-    renderCaptions();
-  }
+  if (PART === "captions") renderCaptions();
 }
 
 // ---------- captions ----------
-const cap = { lines: [], byId: {}, partial: "", draft: "", speaking: false, warning: "", warnTimer: 0, roles: null };
+const cap = { lines: [], byId: {}, partial: "", draft: "", speaking: false, warning: "", warnTimer: 0, roles: null,
+  voiceUntil: 0, lastActivity: 0, idleTimer: 0 };
+const IDLE_AFTER_MS = 9000;   // captions fade away this long after the last words
+// The dock's orb: off (no engine), idle, listening (someone is talking), thinking (translating), speaking (Weave's voice is playing)
+function orbState() {
+  if (!conn.on) return "off";
+  if (Date.now() < cap.voiceUntil) return "speaking";
+  if (cap.lines.some((l) => l.pending && !l.you)) return "thinking";
+  if (cap.speaking || cap.partial) return "listening";
+  return "idle";
+}
 function captionLine(id) {
   let l = cap.byId[id];
   if (!l) {
@@ -73,12 +79,10 @@ function captionLine(id) {
   }
   return l;
 }
-// Only in two-way calls (the engine sends "roles"): which language you speak; the other person gets the other one
-function languageSwitch() {
-  const mine = cap.roles.you, chosen = savedLanguage();
-  const button = (lang, label) => `<button class="lang ${mine === lang ? "on" : ""}" data-lang="${lang}">${label}</button>`;
-  return `<span class="speak">${chosen || cap.roles.fixed ? "I speak" : "I speak (guessing)"} ${button("en", "English")}${button("te", "తెలుగు")}</span>`;
-}
+// The dock sends back the language you picked (two-way calls)
+addEventListener("message", (e) => {
+  if (PART === "captions" && e.data?.source === "weave-dock" && e.data.kind === "i_speak") { chooseLanguage(e.data.lang); cap.roles && (cap.roles.you = e.data.lang); renderCaptions(); }
+});
 
 function withKept(text, kept) {
   // Words kept in Telugu are underlined with their English; clicking one tells the engine you don't know it.
@@ -92,9 +96,11 @@ function withKept(text, kept) {
   return html + esc(rest);
 }
 function renderCaptions() {
-  const dot = !conn.on ? "" : cap.speaking ? "speaking" : "on";
   const who = conn.name || "her";
-  const statusText = !conn.on ? `Waiting for the Weave engine (${esc(WS_URL)})` : cap.speaking ? `${esc(who)} is speaking…` : `Listening to ${esc(who)}`;
+  const state = orbState();
+  const statusText = !conn.on ? "Waiting for the Weave engine" : { speaking: "Speaking for you", thinking: "Translating",
+    listening: `${who[0].toUpperCase() + who.slice(1)} is speaking`, idle: conn.me && conn.name ? `${conn.me} ↔ ${conn.name}` : `Listening to ${who}` }[state];
+  tellParent({ kind: "status", connected: conn.on, state, text: statusText });
   const lines = cap.lines.map((l, i) => `
     <div class="line ${i < cap.lines.length - 1 || cap.partial ? "old" : ""}">
       <div class="orig ${l.english && !l.you ? "faint" : l.you ? "" : "te"}">${l.you ? `<span class="tag you">${esc(conn.me || "You")}</span>${esc(l.orig)}` : l.english ? "said in English" : esc(l.orig)}</div>
@@ -105,16 +111,18 @@ function renderCaptions() {
   // While she's mid-sentence: her words so far, and a faded draft of the English that firms up when she finishes
   const partial = cap.partial || cap.draft ? `<div class="line partial"><div class="orig te">${esc(cap.partial)}</div>
       ${cap.draft ? `<div class="en draft">${esc(cap.draft)}</div>` : ""}</div>` : "";
-  root.innerHTML = `<div class="card captions">
-      ${cap.warning ? `<div class="warning">⚠️ ${esc(cap.warning)}</div>` : ""}
-      <div class="status"><span class="dot ${dot}"></span>${statusText}${cap.roles ? languageSwitch() : ""}</div>
-      ${lines || partial ? lines + partial : `<div class="faint">Her words and the English will appear here.</div>`}
-    </div>`;
+  root.innerHTML = `${cap.warning ? `<div class="warning">${esc(cap.warning)}</div>` : ""}${lines + partial}`;
+  // Two-way calls: the "I speak" switch lives in the dock's menu
+  tellParent({ kind: "roles", roles: cap.roles ? { you: cap.roles.you, sure: !!(savedLanguage() || cap.roles.fixed) } : null });
+  // Subtitles only while there's something to read: they fade out after a quiet moment and come back with the next words.
+  const idle = !cap.warning && (!(lines || partial) || (state === "idle" && Date.now() - cap.lastActivity > IDLE_AFTER_MS));
+  document.body.classList.toggle("idle", idle);
+  tellParent({ kind: "idle", idle });
   tellParent({ kind: "height", height: root.offsetHeight });
+  clearTimeout(cap.idleTimer);
+  if (!idle) cap.idleTimer = setTimeout(renderCaptions, Math.max(500, Math.min(IDLE_AFTER_MS, cap.voiceUntil - Date.now()) + 50));
 }
 root.addEventListener("click", (e) => {
-  const lang = e.target.closest(".lang");
-  if (lang && PART === "captions") { chooseLanguage(lang.dataset.lang); return; }
   const k = e.target.closest(".kept");
   if (!k || PART !== "captions") return;
   send({ type: "forget", id: k.dataset.id });
@@ -132,6 +140,7 @@ const GREETINGS = [  // starter words until the engine picks a topic
   { telugu: "సరే", roman: "sare", english: "okay" },
   { telugu: "మళ్ళీ మాట్లాడదాం", roman: "malli matladadam", english: "let's talk again" },
 ];
+const SPEAKER = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>`;
 const left = { ask: null, askTimer: 0, questions: [], engineQuestions: false, topic: "Greetings", words: GREETINGS, engineTopic: false,
   said: [], open: null };
 const MAX_QUESTIONS = 4, QUESTION_TTL_MS = 90000;
@@ -153,6 +162,7 @@ function addLocalQuestion(q) {
   if (old && !q.replace) return;
   if (old) { left.questions = left.questions.filter((x) => !same(x)); q.answer = old.answer || q.answer; }
   left.questions.unshift({ ...q, at: Date.now() });
+  tellParent({ kind: "attention", what: "new" });
   left.questions = left.questions.slice(0, MAX_QUESTIONS);
 }
 function rememberSaid(card) {  // words she used this call, pinned above the topic words (not whole proverbs)
@@ -177,22 +187,22 @@ function renderLeft(force = false) {
   const questions = left.questions.length ? left.questions.map((q) => `
       <button class="question ${q.id === left.open ? "open" : ""}" data-q="${esc(q.id)}">
         <div class="q">${esc(q.text)}</div>
-        <div class="answer">${q.answer ? formatAnswer(q.answer) : `<span class="loading">Looking it up</span>`}</div>
+        <div class="answer"><div>${q.answer ? formatAnswer(q.answer) : `<span class="loading">Looking it up</span>`}</div></div>
       </button>`).join("") : `<div class="empty">Questions about what she says will show up here. Click one to find out.</div>`;
   const wordRow = (w, said) => `<div class="word ${said ? "said" : ""}">
       <div><span class="w-te te">${esc(w.telugu)}</span> · <span class="w-roman">${esc(w.roman)}</span>${said ? `<span class="tag-said">she said</span>` : w.learning ? `<span class="tag-said">learning</span>` : ""}</div>
       <div class="w-en">${esc(w.english)}</div>
-      <button class="hear" title="Hear it" data-hear="${esc(w.telugu)}" data-roman="${esc(w.roman)}" data-id="${esc(w.id || "")}">🔊</button>
+      <button class="hear" title="Hear it" data-hear="${esc(w.telugu)}" data-roman="${esc(w.roman)}" data-id="${esc(w.id || "")}">${SPEAKER}</button>
     </div>`;
   const said = new Set(left.said.flatMap((w) => [w.id, w.roman.toLowerCase().replace(/\?$/, "")]));
   const words = [...left.said.map((w) => wordRow(w, true)),
     ...left.words.filter((w) => !said.has(w.id) && !said.has(String(w.roman).toLowerCase().replace(/\?$/, ""))).map((w) => wordRow(w, false))].join("");
   root.innerHTML = `${ask}
-    <section class="card section">
+    <section class="section">
       <div class="head"><span class="eyebrow">Curious?</span></div>
       <div class="questions scroll">${questions}</div>
     </section>
-    <section class="card section grow">
+    <section class="section grow">
       <div class="head"><span class="eyebrow">Words for</span><span class="topic">${esc(left.topic)}</span></div>
       <div class="words scroll">${words}</div>
     </section>`;
@@ -243,6 +253,7 @@ function addRight(item) {
   const existing = right.items.find((x) => x.key === item.key);
   if (existing) { existing.at = Date.now(); return; }
   right.items.unshift({ ...item, at: Date.now(), fresh: true });
+  tellParent({ kind: "attention", what: "new" });
   right.items = right.items.filter((x, i) => x.pinned || i < MAX_ITEMS);
 }
 function renderRight() {
@@ -258,8 +269,10 @@ function renderRight() {
       : `<div class="card meaning ${enter} ${x.pinned ? "pinned" : ""} ${fading}" data-key="${esc(x.key)}" title="Click to keep it">
            <div class="body"><div class="eyebrow kind">${esc(x.label)}</div><div class="title ${/[ఀ-౿]/.test(x.title) ? "te" : ""}">${esc(x.title)}</div>
            <div class="desc">${esc(x.note)}</div></div></div>`;
-  }).join("")}</div>` : `<div class="card"><div class="empty">Pictures of what she mentions, and what her sayings mean, will show up here.</div></div>`;
+  }).join("")}</div>` : "";
+  reportRight();
 }
+function reportRight() { tellParent({ kind: "height", height: right.items.length ? root.scrollHeight : 0 }); }
 root.addEventListener("click", (e) => {
   if (PART !== "right") return;
   const el = e.target.closest("[data-key]");
@@ -277,7 +290,9 @@ function handle(m) {
   if (PART === "right") return handleRight(m);
 }
 function handleCaptions(m) {
+  cap.lastActivity = Date.now();
   switch (m.type) {
+    case "voice": cap.voiceUntil = Date.now() + 2600; break;
     case "speaking": cap.speaking = true; break;
     case "partial": cap.partial = m.text || ""; if (!m.text) cap.speaking = false; break;
     case "draft": cap.draft = m.text || ""; break;
@@ -312,6 +327,7 @@ function handleLeft(m) {
   switch (m.type) {
     case "prompt":
       left.ask = { ...m, fresh: true };
+      tellParent({ kind: "attention", what: "ask" });   // the dock opens this panel for it
       clearTimeout(left.askTimer); left.askTimer = setTimeout(() => { left.ask = null; renderLeft(); }, 45000);
       break;
     case "curious":  // the engine's questions (Laya-picked), newest first
@@ -321,6 +337,7 @@ function handleLeft(m) {
         left.questions.unshift({ id: q.id, text: q.text, word: q.word || null, kind: q.kind, answer: q.answer || null, at: Date.now() });
       }
       left.questions = left.questions.slice(0, MAX_QUESTIONS);
+      tellParent({ kind: "attention", what: "new" });
       break;
     case "answer": {
       const q = left.questions.find((x) => x.id === m.id);
@@ -368,5 +385,5 @@ function handleRight(m) {
 // ---------- start ----------
 if (PART === "captions") { renderCaptions(); connectYou(); new ResizeObserver(() => tellParent({ kind: "height", height: root.offsetHeight })).observe(root); }
 if (PART === "left") { renderLeft(); setInterval(renderLeft, 15000); }
-if (PART === "right") { renderRight(); setInterval(renderRight, 5000); }
+if (PART === "right") { renderRight(); setInterval(renderRight, 5000); addEventListener("load", reportRight, true); }
 connect();

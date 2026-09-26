@@ -27,7 +27,8 @@
       "resources": [
         "panel.html",
         "panel.css",
-        "panel.js"
+        "panel.js",
+        "fonts/manrope.woff2"
       ],
       "matches": [
         "<all_urls>"

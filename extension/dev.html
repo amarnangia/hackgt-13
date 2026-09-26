@@ -8,18 +8,21 @@
   /* A stand-in for the call page, so the overlay can be worked on without installing the extension:
      python3 -m http.server 8799 --directory extension   then open http://localhost:8799/dev.html
      (with python tools/fake_call.py or subtitles.py running). */
-  html, body { margin: 0; height: 100%; background: #0b141a; font-family: system-ui, sans-serif; color: #e9edef; }
+  html, body { margin: 0; height: 100%; background: #0b141a; font-family: system-ui, sans-serif; color: #e9edef; overflow: hidden; }
+  /* like a WhatsApp Web video call: her video fills the window, yours is a tile in the corner, the buttons sit along the bottom */
   .call { position: fixed; inset: 0; display: grid; place-items: center;
-          background: radial-gradient(ellipse at 50% 40%, #3b4a54 0%, #111b21 70%); }
-  .face { width: 180px; height: 180px; border-radius: 50%; background: #6b7c85; display: grid; place-items: center; font-size: 64px; }
-  .name { margin-top: 14px; text-align: center; font-size: 22px; }
+          background: radial-gradient(ellipse 60% 70% at 50% 38%, #8a6b58 0%, #4a3a33 38%, #1d1a1a 75%); }
+  .face { font-size: 190px; filter: saturate(.9); transform: translateY(-40px); }
+  .name { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); font-size: 15px; opacity: .85; text-shadow: 0 1px 3px #000; }
+  .self { position: fixed; right: 20px; bottom: 110px; width: 150px; height: 200px; border-radius: 14px; overflow: hidden;
+          background: linear-gradient(160deg, #3d5a6b, #1b2a33); display: grid; place-items: center; font-size: 70px; box-shadow: 0 8px 24px rgba(0,0,0,.5); }
   .controls { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 16px; }
-  .controls span { width: 52px; height: 52px; border-radius: 50%; background: #2a3942; display: grid; place-items: center; }
+  .controls span { width: 52px; height: 52px; border-radius: 50%; background: rgba(42,57,66,.9); display: grid; place-items: center; }
   .controls span.end { background: #ea0038; }
 </style>
 </head>
 <body>
-<div class="call"><div><div class="face">👵</div><div class="name">Ammamma · 04:12</div></div></div>
+<div class="call"><div class="face">👵</div></div><div class="name">Ammamma · 04:12</div><div class="self">🧑🏽</div>
 <div class="controls"><span>🎤</span><span>📷</span><span class="end">📞</span></div>
 <script>
   // What content.js needs from the extension APIs, when the page is served from the extension folder.

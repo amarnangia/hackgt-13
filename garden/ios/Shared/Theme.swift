@@ -6,24 +6,27 @@ extension Color {
     }
 }
 
-/// The same system as the call overlay (extension/panel.css): dark glass, a soft blue accent,
-/// warm amber for "ask her" and sayings, green for connected.
+/// The same system as the call overlay (extension/panel.css): deep grays and glass, with cool accents
+/// (cyan, electric blue, violet) only for what's active. "Ask her" is violet; connected is cyan.
 enum Theme {
-    static let bg = Color(hex: 0x0b0d11)
-    static let bg2 = Color(hex: 0x0e1015)
-    static let surface = Color(hex: 0x14171d)
-    static let surface2 = Color(hex: 0x1a1e25)
-    static let surface3 = Color(hex: 0x222730)
-    static let border = Color.white.opacity(0.08)
-    static let border2 = Color.white.opacity(0.12)
-    static let text = Color(hex: 0xf1f3f5)
-    static let text2 = Color(hex: 0xb4bac3)
-    static let text3 = Color(hex: 0x7d8591)
-    static let accent = Color(hex: 0x7aa2ff)
-    static let onAccent = Color(hex: 0x0b1020)
-    static let warm = Color(hex: 0xf5b35c)
-    static let onWarm = Color(hex: 0x1b1300)
-    static let green = Color(hex: 0x34d399)
+    static let bg = Color(hex: 0x121212)
+    static let bg2 = Color(hex: 0x161616)
+    static let surface = Color(hex: 0x1a1a1a)
+    static let surface2 = Color(hex: 0x1f1f21)
+    static let surface3 = Color(hex: 0x26262a)
+    static let border = Color.white.opacity(0.05)
+    static let border2 = Color.white.opacity(0.09)
+    static let text = Color(hex: 0xf4f5f7)
+    static let text2 = Color(hex: 0xa1a1aa)
+    static let text3 = Color(hex: 0x6b6b74)
+    static let accent = Color(hex: 0x4f8cff)
+    static let onAccent = Color.white
+    static let cyan = Color(hex: 0x22d3ee)
+    static let violet = Color(hex: 0x8b5cf6)
+    static let gradient = LinearGradient(colors: [cyan, accent, violet], startPoint: .topLeading, endPoint: .bottomTrailing)
+    static let warm = Color(hex: 0xa78bfa)      // "Ask her"
+    static let onWarm = Color.white
+    static let green = cyan                     // connected
     static let danger = Color(hex: 0xff8a8a)
 
     static let radius: CGFloat = 16

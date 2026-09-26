@@ -199,19 +199,20 @@ ICONS = {"food": "🍛", "vehicle": "🛺", "place": "🛕", "clothing": "🥻",
          "slang": "💬", "phrase": "💬", "culture": "🙏", "word": "🔤", "web": "🖼️"}
 
 STYLE = """
-:root { --bg:#0b0d11; --card:rgba(20,23,29,.92); --card-2:rgba(255,255,255,.06); --ink:#f1f3f5; --ink-2:#b4bac3; --muted:#7d8591;
-        --accent:#7aa2ff; --soft:rgba(122,162,255,.16); --warm:#f5b35c; --warm-soft:rgba(245,179,92,.16); --line:rgba(255,255,255,.10); color-scheme:dark; }
-* { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Telugu", system-ui, sans-serif; }
+:root { --bg:#121212; --card:rgba(26,26,26,.92); --card-2:rgba(255,255,255,.04); --ink:#f4f5f7; --ink-2:#a1a1aa; --muted:#6b6b74;
+        --accent:#4f8cff; --soft:rgba(79,140,255,.14); --violet:#8b5cf6; --cyan:#22d3ee; --line:rgba(255,255,255,.06);
+        --grad:linear-gradient(135deg,#22d3ee 0%,#4f8cff 52%,#8b5cf6 100%); color-scheme:dark; }
+* { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--ink); font:500 15px/1.55 "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Telugu", system-ui, sans-serif; }
 main { max-width:860px; margin:0 auto; padding:32px 16px 64px; }
 h1 { font-size:30px; line-height:1.2; font-weight:700; letter-spacing:-.01em; margin:4px 0 8px; }
 h2 { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:36px 0 10px; }
 h3 { margin:0 0 4px; font-size:17px; }
 .meta { color:var(--muted); font-size:13px; } main > .meta:first-child { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
 .te { font-family:"Noto Sans Telugu", sans-serif; }
-.card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin:10px 0;
-        box-shadow:0 10px 30px -12px rgba(0,0,0,.6); }
+.card { background:var(--card); border-radius:18px; padding:14px 16px; margin:10px 0;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,255,255,.05), 0 24px 48px -16px rgba(0,0,0,.6); }
 .card ul { margin:8px 0 0; padding-left:20px; } .card li { margin:4px 0; color:var(--ink-2); }
-.story { border-left:3px solid var(--accent); } .story p { color:var(--ink-2); }
+.story { border-left:3px solid; border-image:var(--grad) 1; } .story p { color:var(--ink-2); }
 .line { display:flex; gap:12px; align-items:flex-start; padding:10px 0; border-top:1px solid var(--line); }
 .line:first-of-type { border-top:0; } .line .text { flex:1; } .line .en { font-size:17px; font-weight:600; line-height:1.35; } .line .orig { color:var(--ink-2); font-size:14px; }
 audio { height:32px; width:220px; min-width:170px; max-width:100%; color-scheme:dark; }
@@ -221,10 +222,11 @@ audio { height:32px; width:220px; min-width:170px; max-width:100%; color-scheme:
 table { width:100%; border-collapse:collapse; } td, th { text-align:left; padding:9px 6px; border-top:1px solid var(--line); vertical-align:top; font-size:14px; }
 tr:first-child th { border-top:0; } th { color:var(--muted); font-weight:700; font-size:11px; letter-spacing:.06em; text-transform:uppercase; }
 td.te { font-size:17px; } .new { background:var(--soft); color:var(--accent); border-radius:999px; padding:2px 8px; font-size:11px; font-weight:700; white-space:nowrap; }
-.card:has(> .q) { border-color:rgba(245,179,92,.45); background:linear-gradient(180deg, rgba(245,179,92,.14), rgba(12,14,18,.82)); }
+.card:has(> .q) { background:linear-gradient(160deg, rgba(139,92,246,.20), rgba(79,140,255,.10) 55%, rgba(34,211,238,.06));
+                   box-shadow:inset 0 0 0 1px rgba(139,92,246,.45), 0 24px 48px -16px rgba(0,0,0,.6); }
 .q { padding:10px 0; border-top:1px solid var(--line); } .q:first-child { border-top:0; } .q .te { font-size:17px; } .q .roman { color:var(--ink); font-weight:700; font-size:16px; } .q .meta { color:var(--ink-2); }
 textarea { width:100%; min-height:110px; border-radius:12px; border:1px solid var(--line); padding:10px 12px; font:16px "Noto Sans Telugu", sans-serif; background:var(--card-2); color:var(--ink); }
-button { background:var(--accent); color:#0b1020; border:0; border-radius:10px; padding:8px 14px; font-size:14px; font-weight:600; cursor:pointer; margin-top:8px; }
+button { background:var(--grad); color:#fff; border:0; border-radius:10px; padding:8px 14px; font-size:14px; font-weight:600; cursor:pointer; margin-top:8px; }
 details summary { cursor:pointer; color:var(--ink-2); } a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
 @media (max-width:600px) { .line { flex-direction:column; } audio { width:100%; } h1 { font-size:24px; } }
 """
@@ -253,7 +255,7 @@ def story_page(call):
     when = datetime.datetime.fromisoformat(call["started"])
     mins = max(1, round(call["duration_s"] / 60))
     title = story.get("title") or f"Call with {call['caller']}"
-    parts = [f"<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>"
+    parts = [f"<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><link href='https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap' rel='stylesheet'>"
              f"<title>{_esc(title)}</title><style>{STYLE}</style></head><body><main>",
              f"<div class='meta'>{_esc(call['caller'])} · {when:%A, %B %-d, %Y · %-I:%M %p} · {mins} min</div><h1>{_esc(title)}</h1>"]
     if story.get("summary"):
@@ -341,7 +343,7 @@ def update_dictionary(call, lexicon, lang, progress):
         for _, e in rows)
     calls = sorted((d for d in os.listdir(CALLS_DIR) if os.path.exists(os.path.join(CALLS_DIR, d, "index.html"))), reverse=True)
     links = "".join(f"<li><a href='{d}/index.html'>{_esc(_call_title(d))}</a></li>" for d in calls)
-    page = (f"<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>"
+    page = (f"<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><link href='https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap' rel='stylesheet'>"
             f"<title>Family Dictionary</title><style>{STYLE}</style></head><body><main>"
             f"<div class='meta'>Every Telugu word heard on calls, in her voice</div><h1>Our family dictionary</h1>"
             f"<p>{len(rows)} words · {known} known · {len(calls)} call{'s' if len(calls) != 1 else ''}</p>"
