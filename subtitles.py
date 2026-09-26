@@ -6,6 +6,8 @@
 import argparse
 import asyncio
 import atexit
+import copy
+import difflib
 import http
 import json
 import mimetypes
@@ -16,6 +18,7 @@ import threading
 import time
 import urllib.parse
 import wave
+from collections import deque
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, TimeoutError, wait
 
 import numpy as np
@@ -27,6 +30,7 @@ from latency import LatencyTracker
 from lexicon import Lexicon, indic_share
 from progress import Progress
 from pronouns import PronounResolver
+from roles import Roles
 from translate_server import LocalTranslator
 
 PORT = int(os.environ.get("OVERLAY_PORT", 8765))
@@ -44,28 +48,38 @@ MAX_WAIT_WORDS = 20   # run-on speech with no punctuation: translate once this m
 HOLD_BACK_WORDS = 3   # ...except the newest few, which Muse may still correct
 TRANSLATE_WORKERS = 3
 LOCAL_DEADLINE_S = 1.2  # after this, race Muse Spark against the local translator
+ECHO_WINDOW_S = 20      # --two-way: a line from your mic matching something played to you this recently is echo
+ECHO_MATCH = 0.6
+CATCH_UP_S = 12         # --two-way: when the roles are decided or change, translate lines from this long ago again
 
-clients = set()
-on_client_message = None  # set by main(): handles clicks sent from the overlay
+class Hub:
+    """One overlay page's WebSocket clients. --two-way has two: their side on PORT, yours on PORT + 2."""
 
+    def __init__(self):
+        self.clients = set()
+        self.on_message = None  # handles clicks sent from the overlay
 
-def broadcast(msg):
-    data = json.dumps(msg, ensure_ascii=False)
-    for c in list(clients):
+    def broadcast(self, msg):
+        data = json.dumps(msg, ensure_ascii=False)
+        for c in list(self.clients):
+            try:
+                c.send(data)
+            except Exception:
+                self.clients.discard(c)
+
+    def handler(self, conn):
+        self.clients.add(conn)
         try:
-            c.send(data)
-        except Exception:
-            clients.discard(c)
+            for message in conn:
+                if self.on_message:
+                    self.on_message(json.loads(message))
+        finally:
+            self.clients.discard(conn)
 
 
-def ws_handler(conn):
-    clients.add(conn)
-    try:
-        for message in conn:
-            if on_client_message:
-                on_client_message(json.loads(message))
-    finally:
-        clients.discard(conn)
+HUB = Hub()     # the one-way app's page; with --two-way, their side (the call -> you)
+ME_HUB = Hub()  # --two-way: your side (you -> the call), on PORT + 2 like --outgoing
+broadcast = HUB.broadcast
 
 
 def serve_overlay(conn, request):
@@ -101,8 +115,24 @@ class Captioner:
     by id, so they still show in order.
     """
 
-    def __init__(self, lang, translator="local", learn_after=1, keep_known=True):
+    def __init__(self, lang, translator="local", learn_after=1, keep_known=True, hub=None, share_with=None, side=None,
+                 roles=None):
+        """--two-way makes two: side "them" (their voice, to you) and side "me" (yours, to them), sharing the
+        translator and word progress (`share_with`), each with its own overlay page (`hub`). `roles` says which
+        language each person understands, and so which way each line is translated."""
+        self.hub = hub or HUB
+        self.side, self.roles = side, roles
+        self.audio = None             # the AudioLoop this side plays through (set by listen_two_way)
+        self.original_volume = 0.2    # its between-lines volume for a language the listener doesn't know
+        self.speaking = False         # between Muse's speechStart and speechEnd
+        self.on_speech_start = None   # --two-way: cut the translation playing to this person (they interrupted)
+        self.echo_filter = None       # --two-way: callable(text) -> True if it's our speakers, not you
+        self.shown = deque(maxlen=30)  # (time, text) of what this side showed/played, for the other side's echo check
+        self.recent = deque(maxlen=12)  # (time, sentence, to, marks): lines to redo if the roles turn out different
         self.translate = None
+        if share_with:
+            translator = None
+            self.translate = share_with.translate
         if translator == "local":
             local = LocalTranslator(lang)
             if local.available():
@@ -116,8 +146,9 @@ class Captioner:
             print("Translating with Muse Spark", flush=True)
         self.pool = ThreadPoolExecutor(max_workers=TRANSLATE_WORKERS)
         self.race_pool = ThreadPoolExecutor(max_workers=TRANSLATE_WORKERS * 2)  # local vs Muse Spark when slow
-        for _ in range(TRANSLATE_WORKERS):
-            self.pool.submit(self.translate.warm_up)  # the first request pays for TLS setup (~3 s)
+        if not share_with:
+            for _ in range(TRANSLATE_WORKERS):
+                self.pool.submit(self.translate.warm_up)  # the first request pays for TLS setup (~3 s)
         self.next_id = 0
         self.partial = ""  # latest cumulative transcript for the current turn
         self.done = 0      # how many characters of it have been sent for translation
@@ -130,13 +161,17 @@ class Captioner:
         self.prompter = None                  # live "ask her" prompts (prompts.py)
         self.speak_all = False                # --speak all: also voice lines she said (mostly) in English
         self.questions_only = False           # --speak questions: voice only questions/requests to you
-        self.lexicon = Lexicon()
+        self.lexicon = share_with.lexicon if share_with else Lexicon()
         self.lang = lang
         self.pronouns = PronounResolver(lang)  # తను -> she or he, from who was mentioned before
         self.backup = None  # Muse Spark, created if the local translator fails mid-call
-        self.progress = Progress(self.lexicon, lang, learn_after=learn_after)  # words kept in Telugu
-        self.known_at_start = {i for i in self.progress.entries if self.progress.known(i)}  # for the story page
-        self.heard_at_start = dict(self.progress.heard)
+        if share_with:  # one progress file: the English speaker's known words, whichever side they're on
+            self.progress = share_with.progress
+            self.known_at_start, self.heard_at_start = share_with.known_at_start, share_with.heard_at_start
+        else:
+            self.progress = Progress(self.lexicon, lang, learn_after=learn_after)  # words kept in Telugu
+            self.known_at_start = {i for i in self.progress.entries if self.progress.known(i)}  # for the story page
+            self.heard_at_start = dict(self.progress.heard)
         self.keep_known = keep_known  # off for --outgoing: the person you're calling doesn't know Telugu
         self.order_lock = threading.Lock()    # translations finish out of order; the voice must not
         self.next_to_voice, self.finished_lines = 1, {}
@@ -151,16 +186,41 @@ class Captioner:
         kind = ev.get("type")
         if kind == "speechStart":
             self.partial, self.done = "", 0
+            self.speaking = True
+            if self.on_speech_start:
+                self.on_speech_start()
             self.latency.new_turn()
-            broadcast({"type": "speaking"})
+            self.hub.broadcast({"type": "speaking"})
         elif kind == "transcript" and not ev.get("final"):
             self.partial = ev["transcript"]
             self.latency.on_partial(self.partial, ev.get("audioProcessedMs"))
+            self._pass_through_if_understood()
             self._cut(final=False)
-            broadcast({"type": "partial", "text": self.partial[self.done:].strip()})
+            self.hub.broadcast({"type": "partial", "text": self.partial[self.done:].strip()})
         elif kind == "speechEnd":
+            self.speaking = False
             self._cut(final=True)
-            broadcast({"type": "partial", "text": ""})
+            self.hub.broadcast({"type": "partial", "text": ""})
+
+    def _pass_through_if_understood(self):
+        """--two-way: while someone speaks the listener's own language, play their real voice at full volume
+        (nothing to translate); in the other language keep it low under the translation."""
+        if not (self.roles and self.audio):
+            return
+        text = self.partial[self.done:] or self.partial
+        if len(text.split()) < 2:
+            return  # too little to tell yet; keep the last setting (people tend to stay in one language)
+        lang = "te" if indic_share(text) >= NATIVE_MIN_SHARE else "en"
+        self.audio.set_original(1.0 if lang == self.roles.listener_lang(self.side) else self.original_volume)
+
+    def is_echo(self, text):
+        """Called on the *other* side's line: does it match something this side just played to its listener?"""
+        norm = lambda t: "".join(ch for ch in t.lower() if ch.isalnum())
+        if len(text.split()) < 3:
+            return False
+        now = time.monotonic()
+        return any(now - t < ECHO_WINDOW_S and difflib.SequenceMatcher(None, norm(text), norm(shown)).ratio() >= ECHO_MATCH
+                   for t, shown in list(self.shown))
 
     def _cut(self, final):
         rest = self.partial[self.done:]
@@ -184,39 +244,70 @@ class Captioner:
             self._submit(self.partial[self.done:cut].strip(), cut)
             self.done = cut
 
-    def _submit(self, sentence, end_offset):
+    def catch_up(self):
+        """The roles were just decided or changed: lines from the last few seconds that went through untranslated
+        (the guess was wrong) get translated now, so nothing said early in the call is lost."""
+        now = time.monotonic()
+        for t, sentence, to, marks in list(self.recent):
+            if to is None and now - t < CATCH_UP_S:
+                self._submit(sentence, None, marks=marks, redo=True)
+
+    def _submit(self, sentence, end_offset, marks=None, redo=False):
+        if not redo and self.echo_filter and self.echo_filter(sentence):
+            print(f"  [ignored, it was our own speakers: {sentence}]", flush=True)
+            return
         self.next_id += 1
         seg_id = self.next_id
-        marks = self.latency.piece_cut(end_offset)
+        marks = marks or self.latency.piece_cut(end_offset)
         start_s, end_s = self.recorder.span(marks["audio_ms"]) if self.recorder else (None, None)
         share = indic_share(sentence)
         # english: grandma said it in English, you understood it -> show as-is, no translation, no voice
         # mixed:   mostly English with a Telugu word or two -> translated subtitle, no voice
         # native:  Telugu (or mostly) -> translated subtitle + English voice
         route = "english" if share == 0 else "mixed" if share < NATIVE_MIN_SHARE else "native"
-        broadcast({"type": "original", "id": seg_id, "text": sentence, "route": route})
-        to_translate = self.pronouns(sentence)  # here, not in work(): it must see sentences in the order said
+        # `to`: the language this line is translated into for its listener, or None if they understand it as said.
+        # --two-way goes by who is listening: Telugu lines to the English speaker, English lines to the Telugu speaker.
+        if self.roles:
+            if not redo:
+                self.roles.heard(self.side, sentence)  # this line may itself settle who speaks what
+            to = "en" if self.roles.listener_lang(self.side) == "en" else "te"
+            if (to == "en" and route == "english") or (to == "te" and route == "native"):
+                to = None
+            if redo and to is None:
+                return
+            self.recent.append((time.monotonic(), sentence, to, marks))
+        else:
+            to = None if route == "english" else "en"
+        self.hub.broadcast({"type": "original", "id": seg_id, "text": sentence, "route": route, "to": to})
+        to_translate = self.pronouns(sentence) if to == "en" else sentence  # in order said, so not in work()
 
         def work():
-            if route == "english":
+            if to is None:
                 english = sentence
-            else:
+            elif to == "en":
                 english = self._translate_in_time(to_translate)
-            full_english, kept = english, []
+            else:
+                english = self._to_indic(sentence)  # (Telugu text, despite the name)
+            full_english, kept = (sentence if to == "te" else english), []  # Laya and pictures read English
             hits = self.lexicon.find(sentence, self.lang)
             known_before = {h["id"] for h in hits if self.progress.known(h["id"])}  # before counting this hearing
-            if self.keep_known and route != "english" and not english.startswith("("):
+            if self.keep_known and to == "en" and not english.startswith("("):
                 # Words the listener knows stay in Telugu ("Today, Ammamma made pulihora"); the rest is English.
                 english, kept = self.progress.keep_known_words(english, hits)
                 self.progress.heard_words(hits)
-            broadcast({"type": "english", "id": seg_id, "text": english, "route": route, "kept": kept})
+            self.shown.append((time.monotonic(), sentence))
+            self.shown.append((time.monotonic(), full_english))
+            self.hub.broadcast({"type": "english", "id": seg_id, "text": english, "route": route, "kept": kept, "to": to})
             row = self.latency.finished(marks, sentence, english)
             row["route"] = route
+            if self.roles:
+                row["side"], row["to"] = self.side, to
             # Laya reads the all-English version; cards follow the text by ~0.15 s
             decision = self.decider(full_english) if self.decider and not english.startswith("(") else None
-            broadcast({"type": "details", "id": seg_id,
-                       "intent": decision["intent"] if decision else None, "cards": self._cards(sentence, decision)})
-            picture = self._picture(seg_id, hits, full_english, known_before)
+            self.hub.broadcast({"type": "details", "id": seg_id,
+                                "intent": decision["intent"] if decision else None, "cards": self._cards(sentence, decision)})
+            # Pictures explain Telugu things to the English speaker, so not on lines going to the Telugu speaker.
+            picture = self._picture(seg_id, hits, full_english, known_before) if to != "te" else None
             row["laya"] = decision["seconds"] if decision else None
             intent = decision["intent"] if decision else None
             if self.recorder:
@@ -225,7 +316,7 @@ class Captioner:
             if self.prompter and route != "english":
                 self.prompter.on_line(sentence, full_english, intent, route)
             with self.order_lock:
-                self.finished_lines[seg_id] = (english, marks, row, decision, route)
+                self.finished_lines[seg_id] = (english, marks, row, decision, route, to)
                 while self.next_to_voice in self.finished_lines:
                     self._voice(self.next_to_voice, *self.finished_lines.pop(self.next_to_voice))
                     self.next_to_voice += 1
@@ -265,6 +356,13 @@ class Captioner:
         except Exception as e:
             return f"(translation failed: {type(e).__name__})"
 
+    def _to_indic(self, sentence):
+        """English -> Telugu for the Telugu speaker (--two-way; local translator only)."""
+        try:
+            return self.translate.to_indic(sentence)
+        except Exception as e:
+            return f"(translation failed: {type(e).__name__})"
+
     def _picture(self, seg_id, hits, english, known_before):
         """Pop up a picture of the thing in this line the grandkid most likely doesn't know (Laya picks).
         Words they knew before this line don't need one (so: a picture on first mention, the Telugu word after)."""
@@ -277,7 +375,7 @@ class Captioner:
             print(f"Picture lookup failed: {type(e).__name__}: {e}", flush=True)
             return None
         if card:
-            broadcast({"type": "picture", "id": seg_id, **card})
+            self.hub.broadcast({"type": "picture", "id": seg_id, **card})
             print(f"  [picture: {card['name']}]", flush=True)
         return card
 
@@ -303,13 +401,21 @@ class Captioner:
             cards.append({"id": None, "title": decision["category"].title(), "category": decision["category"], "note": ""})
         return cards
 
-    def _voice(self, seg_id, english, marks, row, decision, route):
+    def _voice(self, seg_id, english, marks, row, decision, route, to):
         """Voice Telugu lines (in order). Questions/requests to you keep their place when the voice is behind."""
         def on_start():
             self.latency.voice_started(row, marks)
-            broadcast({"type": "voice", "id": seg_id})
+            self.hub.broadcast({"type": "voice", "id": seg_id})
         asks = bool(decision and decision["needs_attention"])
-        if route != "native" and not self.speak_all:
+        if self.roles:  # --two-way: say the translation; a line the listener already understood plays as it was
+            if not to:
+                voiced, why = False, "they understand it as said"
+            elif not self.dubber:
+                voiced, why = False, ""
+            else:
+                voiced = self.dubber.say(english, spoken_at=marks["spoken"], on_start=on_start, priority=asks, lang=to)
+                why = "" if voiced else "voice was behind"
+        elif route != "native" and not self.speak_all:
             voiced, why = False, "she said it in English" if route == "english" else "mostly English"
         elif self.questions_only and not asks:
             voiced, why = False, "statement (--speak questions)"
@@ -321,7 +427,8 @@ class Captioner:
         if not voiced:
             self.latency.log_row(row)
         tag = f"  [voice{': ' + decision['intent'] if asks else ''}]" if voiced else (f"  [no voice: {why}]" if why else "")
-        print(f"{LatencyTracker.line(row)} {row['text']}  ->  {english}{tag}", flush=True)
+        who = {"them": "them -> you ", "me": "you -> them "}.get(self.side, "")
+        print(f"{who}{LatencyTracker.line(row)} {row['text']}  ->  {english}{tag}", flush=True)
 
 
 def load_recording(path):
@@ -411,19 +518,23 @@ def make_audio(args, loop, target):
 async def run(args):
     if args.reset_progress and os.path.exists("progress.json"):
         os.remove("progress.json")
+    if args.two_way:
+        return await run_two_way(args)
     captioner = Captioner(args.lang, args.translator, args.learn_after, keep_known=not args.outgoing)
-
-    def on_message(msg):
-        if msg.get("type") == "forget" and msg.get("id"):
-            captioner.progress.forget(msg["id"])
-            print(f"Marked '{msg['id']}' as not known; it will be translated again.", flush=True)
-    global on_client_message
-    on_client_message = on_message
+    HUB.on_message = forget_handler(captioner)
     try:
         await listen(args, captioner)
     finally:  # also on Ctrl+C
         print("\n" + captioner.latency.summary() + "\n(per-sentence log: latency_log.jsonl)", flush=True)
         finish_call(captioner, args)
+
+
+def forget_handler(captioner):
+    def on_message(msg):
+        if msg.get("type") == "forget" and msg.get("id"):
+            captioner.progress.forget(msg["id"])
+            print(f"Marked '{msg['id']}' as not known; it will be translated again.", flush=True)
+    return on_message
 
 
 def finish_call(captioner, args):
@@ -442,10 +553,8 @@ def finish_call(captioner, args):
         subprocess.run(["open", page], check=False)
 
 
-async def listen(args, captioner):
-    loop = asyncio.get_running_loop()
-    target = {"q": asyncio.Queue(), "latency": captioner.latency}
-    audio = make_audio(args, loop, target)
+async def load_helpers(loop, args, captioner, target):
+    """Laya, pictures, the story keeper and 'ask her' prompts, attached to `captioner`."""
     print("Loading Laya...", flush=True)
     from decide import Decider
     captioner.decider = await loop.run_in_executor(None, Decider)
@@ -461,35 +570,41 @@ async def listen(args, captioner):
         from prompts import StoryPrompter
 
         def on_prompt(q):
-            broadcast({"type": "prompt", "caller": args.caller, **q})
+            captioner.hub.broadcast({"type": "prompt", "caller": args.caller, **q})
             if captioner.recorder:
                 captioner.recorder.add_prompt(q)
             print(f"  [ask {args.caller}: {q['roman']}  ({q['english']})]", flush=True)
         captioner.prompter = StoryPrompter(captioner.decider, args.caller, on_prompt, cooldown_s=args.prompt_every)
-    captioner.speak_all = args.speak == "all"
-    captioner.questions_only = args.speak == "questions"
-    if not args.no_voice:  # load before audio starts, or the first seconds of the call are lost
-        print("Loading the English voice (Kokoro)...", flush=True)
-        from dub import Dubber, VoiceSampler
-        sample = prepare_voice_sample(args)
-        who = "your " if args.outgoing else "the caller's "
-        clone = args.voice == "clone"
-        captioner.dubber = await loop.run_in_executor(
-            None, lambda: Dubber(audio.voice, clone=clone, voice_sample=sample))
-        if clone and captioner.dubber.cloning:
-            print(f"English voice: {who}voice from {sample}. (--new-voice to relearn it on this call)", flush=True)
-        elif clone:
-            print(f"English voice: stock voice until {who}voice is learned (~10 s of speech).", flush=True)
-            target["sampler"] = captioner.sampler = VoiceSampler(args.voice_file, captioner.dubber.use_voice_sample)
-    threading.Thread(target=audio.run, kwargs={"meter": False}, daemon=True).start()
+
+
+async def load_voice(loop, args, captioner, audio, target, who, indic_voice=None):
+    """The English voice for this side (cloned from `who` once we have their speech), plus Telugu if given."""
+    from dub import Dubber, VoiceSampler
+    sample = prepare_voice_sample(args)
+    clone = args.voice == "clone"
+    captioner.dubber = await loop.run_in_executor(
+        None, lambda: Dubber(audio.voice, clone=clone, voice_sample=sample, indic_voice=indic_voice))
+    if clone and captioner.dubber.cloning:
+        print(f"English voice: {who}voice from {sample}. (--new-voice to relearn it on this call)", flush=True)
+    elif clone:
+        print(f"English voice: stock voice until {who}voice is learned (~10 s of speech).", flush=True)
+        target["sampler"] = captioner.sampler = VoiceSampler(args.voice_file, captioner.dubber.use_voice_sample)
+
+
+async def wait_for_audio(target, what="the input device"):
     # Connect to Muse only once audio is actually flowing; a silent gap right after connecting makes it hang up.
     for _ in range(50):
         if not target["q"].empty():
-            break
+            return
         await asyncio.sleep(0.1)
-    else:
-        print("No audio is arriving from the input device after 5 s. Check that the terminal has microphone "
-              "permission (System Settings > Privacy & Security > Microphone).", flush=True)
+    print(f"No audio is arriving from {what} after 5 s. Check that the terminal has microphone "
+          "permission (System Settings > Privacy & Security > Microphone).", flush=True)
+
+
+async def stream(loop, args, captioner, audio, target):
+    """Feed the audio to Muse and its events to `captioner`, reconnecting if the connection drops.
+    With --file, returns once the recording has been transcribed and translated."""
+    failures = 0
     while True:
         audio_q = target["q"] = asyncio.Queue()
         target["fresh"] = True
@@ -500,21 +615,189 @@ async def listen(args, captioner):
             ender = asyncio.create_task(end_of_file())
         try:
             async for ev in transcribe(audio_q, args.lang, "PCM_24KHZ"):
+                if failures:
+                    print("Reconnected to Muse.", flush=True)
+                    failures = 0
                 captioner.on_event(ev)
         except Exception as e:
             if args.file:
                 raise
-            print(f"Muse connection dropped ({e}); reconnecting...", flush=True)
-            await asyncio.sleep(0.2)
+            failures += 1
+            offline = "nodename nor servname" in str(e) or "Temporary failure in name resolution" in str(e)
+            if failures == 1:
+                print(f"Muse connection dropped ({e}); reconnecting...", flush=True)
+            elif offline and failures == 2:
+                print("No internet (can't reach Muse). Waiting for the Wi-Fi to come back...", flush=True)
+            await asyncio.sleep(min(0.2 * 2 ** (failures - 1), 3.0))  # 0.2, 0.4, ... up to 3 s between tries
             continue
         if args.file:
             await ender
             await loop.run_in_executor(None, lambda: captioner.pool.shutdown(wait=True))  # last translations
-            while captioner.dubber and (captioner.dubber.behind() > 0 or audio.voice.active()):
-                await asyncio.sleep(0.2)  # let the last English line finish speaking
-            await asyncio.sleep(0.3)
-            audio.stop.set()
             return
+
+
+async def finish_voice(captioner, audio):
+    while captioner.dubber and (captioner.dubber.behind() > 0 or audio.voice.active()):
+        await asyncio.sleep(0.2)  # let the last line finish speaking
+
+
+async def listen(args, captioner):
+    loop = asyncio.get_running_loop()
+    target = {"q": asyncio.Queue(), "latency": captioner.latency}
+    audio = make_audio(args, loop, target)
+    await load_helpers(loop, args, captioner, target)
+    captioner.speak_all = args.speak == "all"
+    captioner.questions_only = args.speak == "questions"
+    if not args.no_voice:  # load before audio starts, or the first seconds of the call are lost
+        print("Loading the English voice (Kokoro)...", flush=True)
+        await load_voice(loop, args, captioner, audio, target, "your " if args.outgoing else "the caller's ")
+    threading.Thread(target=audio.run, kwargs={"meter": False}, daemon=True).start()
+    await wait_for_audio(target)
+    await stream(loop, args, captioner, audio, target)
+    if args.file:
+        await finish_voice(captioner, audio)
+        await asyncio.sleep(0.3)
+        audio.stop.set()
+
+
+def side_args(args, side):
+    """--two-way runs the one-way app twice in one process: "them" is the normal direction (the call -> you), "me"
+    is --outgoing (your mic -> the call)."""
+    a = copy.copy(args)
+    if side == "them":
+        a.outgoing, a.voice_file = False, VOICE_SAMPLE
+        a.inp = args.inp or "BlackHole 2ch"
+    else:
+        a.outgoing, a.voice_file, a.voice_sample = True, MY_VOICE_SAMPLE, None
+        a.inp, a.file = args.my_in or "MacBook", args.my_file
+        a.out = "none" if args.out == "none" else (args.my_out or "BlackHole 16ch")
+        a.new_voice = False
+    return a
+
+
+async def run_two_way(args):
+    them_args, me_args = side_args(args, "them"), side_args(args, "me")
+    hubs = {"them": HUB, "me": ME_HUB}
+
+    def on_roles(telugu, why):
+        english = "them" if telugu == "me" else "me"
+        print(f"Roles {why} -> {'you' if telugu == 'me' else args.caller} speak{'s' if telugu == 'them' else ''} Telugu, "
+              f"{'you' if english == 'me' else args.caller} English", flush=True)
+        for hub in hubs.values():
+            hub.broadcast({"type": "roles", "you": roles.lang_of("me"), "them": roles.lang_of("them")})
+        for c in (them, me):
+            c.catch_up()
+    fixed = None if args.telugu_speaker == "auto" else args.telugu_speaker
+    roles = Roles(fixed=fixed, default="me", on_change=on_roles)
+    them = Captioner(args.lang, args.translator, args.learn_after, hub=HUB, side="them", roles=roles)
+    # Words kept in Telugu follow *your* progress, so only for what you hear, never in what goes to them.
+    me = Captioner(args.lang, args.translator, args.learn_after, keep_known=False, hub=ME_HUB, share_with=them,
+                   side="me", roles=roles)
+    for c in (them, me):
+        c.original_volume = args.original_volume
+        c.hub.on_message = forget_handler(them)
+    print(f"Roles to start: {'you speak Telugu, they speak English' if roles.telugu == 'me' else 'they speak Telugu, you speak English'}"
+          + (" (fixed by --telugu-speaker)" if fixed else " (until the call shows otherwise)"), flush=True)
+    try:
+        await listen_two_way(args, them_args, me_args, them, me)
+    finally:  # also on Ctrl+C
+        for c, name in ((them, "them -> you"), (me, "you -> them")):
+            print(f"\n{name}:\n" + c.latency.summary(), flush=True)
+        print("(per-sentence log: latency_log.jsonl)", flush=True)
+        finish_call(them, args)
+
+
+async def listen_two_way(args, them_args, me_args, them, me):
+    loop = asyncio.get_running_loop()
+    import sounddevice as sd
+    them_target = {"q": asyncio.Queue(), "latency": them.latency}
+    me_target = {"q": asyncio.Queue(), "latency": me.latency}
+    them_audio = make_audio(them_args, loop, them_target)  # the call -> your headphones/speakers
+    me_audio = make_audio(me_args, loop, me_target)        # your mic -> BlackHole 16ch -> the call
+    them.audio, me.audio = them_audio, me_audio
+
+    # Walkie-talkie: on the laptop speakers your mic hears everything we play you, so while they're making sound
+    # your mic counts as silent. With headphones you can talk over anything.
+    out_name = sd.query_devices(them_audio.out_dev)["name"] if them_audio.out_dev is not None else ""
+    walkie = args.walkie == "on" or (args.walkie == "auto" and "speaker" in out_name.lower())
+    if walkie:
+        me_audio.gate = lambda: them_audio.sounding(0.4)
+        print(f"Walkie-talkie mode ({out_name}): your mic is ignored while anything plays to you, so wait for it to "
+              "finish before you talk. Headphones let you talk freely.", flush=True)
+    me.echo_filter = them.is_echo  # a line from your mic that matches what just played to you is our speakers
+
+    # Turn-taking: never play a translation to someone while they're talking, and if they start talking while one
+    # is playing to them, fade it out (the subtitle stays).
+    them_audio.hold = lambda: me.speaking   # to you: wait while you talk
+    me_audio.hold = lambda: them.speaking   # to them: wait while they talk
+
+    def interrupted(audio, captioner, who, whom):
+        def cut():
+            if audio.voice.playing():
+                audio.voice.fade_out()
+                if captioner.dubber:
+                    captioner.dubber.cancel()
+                print(f"  [{who} started talking: faded out the translation playing to {whom}]", flush=True)
+        return cut
+    me.on_speech_start = interrupted(them_audio, them, "you", "you")
+    them.on_speech_start = interrupted(me_audio, me, "they", "them")
+
+    if args.record_out:
+        record_outputs(args.record_out, them_audio, me_audio)
+
+    print("Loading English -> Telugu and the Telugu voice...", flush=True)
+    error = await loop.run_in_executor(None, them.translate.load_two_way) if hasattr(them.translate, "load_two_way") \
+        else "the local translator isn't running"
+    if error:
+        print(f"English -> Telugu isn't available ({error}); English lines to the Telugu speaker will be subtitles "
+              "only.", flush=True)
+    indic_voice = None if error else them.translate.speak
+    await load_helpers(loop, args, them, them_target)  # story page, prompts: about the person you called
+    me.decider, me.pictures = them.decider, them.pictures
+    if not args.no_voice:
+        print("Loading the voices...", flush=True)
+        await load_voice(loop, them_args, them, them_audio, them_target, "the caller's ", indic_voice)
+        await load_voice(loop, me_args, me, me_audio, me_target, "your ", indic_voice)
+    for audio in (them_audio, me_audio):
+        threading.Thread(target=audio.run, kwargs={"meter": False}, daemon=True).start()
+    await wait_for_audio(them_target, "the call (BlackHole 2ch)")
+    await wait_for_audio(me_target, "your mic")
+    print("Two-way translation is live. Ctrl+C to stop.", flush=True)
+    await asyncio.gather(stream(loop, them_args, them, them_audio, them_target),
+                         stream(loop, me_args, me, me_audio, me_target))
+    if args.file:  # tests: both recordings done
+        await finish_voice(them, them_audio)
+        await finish_voice(me, me_audio)
+        await asyncio.sleep(0.3)
+        them_audio.stop.set()
+        me_audio.stop.set()
+        await asyncio.sleep(0.2)
+        if args.record_out:
+            write_recordings(args.record_out)
+
+
+RECORDINGS = {}
+
+
+def record_outputs(folder, them_audio, me_audio):
+    """Tests: keep what each person hears (mix) and the translation alone (voice), plus when it was, to check timing."""
+    for name, audio in (("to_you", them_audio), ("to_them", me_audio)):
+        RECORDINGS[name] = {"mix": [], "voice": []}
+
+        def tap(mix, voice, rec=RECORDINGS[name]):
+            rec["mix"].append(mix.copy())
+            rec["voice"].append(voice.copy())
+        audio.on_output = tap
+
+
+def write_recordings(folder):
+    import soundfile as sf
+    os.makedirs(folder, exist_ok=True)
+    for name, rec in RECORDINGS.items():
+        for kind, blocks in rec.items():
+            if blocks:
+                sf.write(os.path.join(folder, f"{name}_{kind}.wav"), np.concatenate(blocks), SAMPLE_RATE)
+    print(f"Recorded what each side heard in {folder}/", flush=True)
 
 
 def start_translator(lang):
@@ -548,6 +831,17 @@ def main():
     p.add_argument("--outgoing", action="store_true",
                    help="translate what YOU say: your mic -> English voice -> BlackHole 16ch, which WhatsApp Web uses "
                         "as its microphone, so the other person hears only the English")
+    p.add_argument("--two-way", action="store_true",
+                   help="translate both ways in one call: the Telugu speaker hears everything in Telugu and the English "
+                        "speaker in English (needs Mac output = BlackHole 2ch and WhatsApp's mic = BlackHole 16ch)")
+    p.add_argument("--telugu-speaker", choices=["auto", "me", "them"], default="auto",
+                   help="--two-way: who speaks Telugu (auto: assume you, then go by who speaks more Telugu)")
+    p.add_argument("--walkie", choices=["auto", "on", "off"], default="auto",
+                   help="--two-way: ignore your mic while anything plays to you (auto: when --out is the laptop speakers)")
+    p.add_argument("--my-in", help="--two-way: your microphone (default: the MacBook's)")
+    p.add_argument("--my-out", help="--two-way: where your side goes (default: BlackHole 16ch)")
+    p.add_argument("--my-file", help="--two-way tests: a recording to use as your mic (with --file as their side)")
+    p.add_argument("--record-out", help=argparse.SUPPRESS)  # tests: folder for what each side heard
     p.add_argument("--original-volume", type=float, default=0.2,
                    help="how loud the original voice is between English lines, 0-1 (0 = only the English voice)")
     p.add_argument("--duck-volume", type=float, default=0.05,
@@ -580,6 +874,8 @@ def main():
     args.speak = args.speak or ("all" if args.original_volume < 0.5 else "telugu")
     args.inp = args.inp or "BlackHole 2ch"  # not just "BlackHole": that also matches BlackHole 16ch, the --outgoing mic
     args.voice_file = MY_VOICE_SAMPLE if args.outgoing else VOICE_SAMPLE
+    if args.two_way and args.outgoing:
+        p.error("--two-way already includes --outgoing")
     # Both directions can run at once (two terminals), so --outgoing gets its own overlay page.
     port = PORT + 2 if args.outgoing and "OVERLAY_PORT" not in os.environ else PORT
 
@@ -587,9 +883,14 @@ def main():
         start_translator(args.lang)
 
     from websockets.sync.server import serve
-    server = serve(ws_handler, "localhost", port, process_request=serve_overlay)
-    threading.Thread(target=server.serve_forever, daemon=True).start()
-    print(f"Overlay: http://localhost:{port}", flush=True)
+    pages = [(HUB, port)] + ([(ME_HUB, port + 2)] if args.two_way else [])
+    for hub, hub_port in pages:
+        server = serve(hub.handler, "localhost", hub_port, process_request=serve_overlay)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+    if args.two_way:
+        print(f"Overlay: http://localhost:{port} (them -> you), http://localhost:{port + 2} (you -> them)", flush=True)
+    else:
+        print(f"Overlay: http://localhost:{port}", flush=True)
     try:
         asyncio.run(run(args))
     except KeyboardInterrupt:

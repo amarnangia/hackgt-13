@@ -29,6 +29,8 @@ CLONE_MODEL = "mlx-community/pocket-tts"  # ~0.5 s to first audio, like Kokoro; 
 OUT_SR = 48000
 MAX_BEHIND_S = 3.0           # skip the voice (subtitle only) rather than fall further behind; one sentence is ~2-3 s
 MAX_BEHIND_PRIORITY_S = 5.0  # questions/requests to you are still spoken up to this far behind
+MAX_STALE_S = 10.0           # a line held back (the listener was talking) is dropped if it can't start by then
+GEN_LOCK = threading.Lock()  # --two-way runs two Dubbers; MLX generation isn't safe from two threads at once
 BASE_SPEED, MAX_SPEED = 1.0, 1.3  # Kokoro: natural pace, speeding up smoothly as lines pile up
 CATCH_UP_S = 2.0                  # queued speech at which we reach MAX_SPEED
 CLAUSE_SPLIT = r"(?<=[,;:.!?])\s+"  # generate and start playing clause by clause
@@ -50,11 +52,12 @@ def to_48k(audio, sr):
 
 
 class Dubber:
-    def __init__(self, voice_buffer, voice="af_heart", clone=True, voice_sample=None):
+    def __init__(self, voice_buffer, voice="af_heart", clone=True, voice_sample=None, indic_voice=None):
         from mlx_audio.tts.utils import load_model
 
         self.buffer = voice_buffer  # AudioLoop.voice
         self.voice = voice
+        self.indic_voice = indic_voice  # --two-way: callable(text) -> (int16 samples, rate) speaking Telugu
         self.pocket = load_model(CLONE_MODEL) if clone else None
         self.clone_state = None  # Pocket TTS conditioning for the caller's voice, once we have a sample
         if self.pocket and voice_sample and os.path.exists(voice_sample):
@@ -74,20 +77,30 @@ class Dubber:
         """Seconds of English speech queued but not yet played."""
         return self.buffer.pending_seconds() + self.jobs.qsize() * 1.5
 
-    def say(self, text, spoken_at=None, on_start=None, priority=False):
-        """Queue `text` to be spoken. Returns False (and says nothing) if the voice is too far behind."""
+    def say(self, text, spoken_at=None, on_start=None, priority=False, lang="en"):
+        """Queue `text` to be spoken (lang "en", or "te" with indic_voice). Returns False (and says nothing) if the
+        voice is too far behind."""
         if not text or not text.strip() or text.startswith("("):
             return False
         late = time.monotonic() - spoken_at if spoken_at else 0.0
         if self.behind() + late > (MAX_BEHIND_PRIORITY_S if priority else MAX_BEHIND_S):
             return False
-        self.jobs.put(("say", text, on_start))
+        deadline = (spoken_at or time.monotonic()) + MAX_STALE_S + (2.0 if priority else 0.0)
+        self.jobs.put(("say" if lang == "en" else "say_indic", text, (on_start, deadline)))
         return True
+
+    def cancel(self):
+        """Drop lines not yet generated (the listener interrupted; what's queued is stale)."""
+        try:
+            while True:
+                self.jobs.get_nowait()
+        except queue.Empty:
+            pass
 
     def use_voice_sample(self, path):
         """Switch to the caller's voice (runs on the voice thread, between lines)."""
         if self.pocket:
-            self.jobs.put(("sample", path, None))
+            self.jobs.put(("sample", path, (None, None)))
 
     def _use_sample(self, path):
         self.clone_state = self.pocket.get_state_for_audio_prompt(path)  # encode the voice once, reuse per line
@@ -95,6 +108,16 @@ class Dubber:
         # sentence, the model "remembers" earlier sentences and stops almost immediately (0.2 s clips).
         self.voice_frames = self.pocket._get_flow_cache_num_frames(self.clone_state)
         list(self._clone_clips("Okay."))  # warm up
+
+    @staticmethod
+    def _locked(clips):
+        """Generate each clip while holding GEN_LOCK, releasing it between clauses so the other side can go."""
+        while True:
+            with GEN_LOCK:
+                clip = next(clips, None)
+            if clip is None:
+                return
+            yield clip
 
     def _kokoro_clips(self, text, speed):
         for r in self.kokoro.generate(text, voice=self.voice, speed=speed, lang_code="a", split_pattern=CLAUSE_SPLIT):
@@ -109,21 +132,28 @@ class Dubber:
 
     def _worker(self):
         while True:
-            kind, text, on_start = self.jobs.get()
+            kind, text, (on_start, deadline) = self.jobs.get()
             try:
                 if kind == "sample":
-                    self._use_sample(text)
+                    with GEN_LOCK:
+                        self._use_sample(text)
                     self.kokoro = None  # free the stock voice
                     mx.clear_cache()
                     print("English voice now sounds like the caller.", flush=True)
                     continue
-                if self.cloning:
-                    clips = self._clone_clips(text)
+                if deadline is not None and time.monotonic() > deadline:
+                    continue  # waited too long (the listener was talking); the subtitle showed it
+                if kind == "say_indic":
+                    samples, rate = self.indic_voice(text)  # the translate server's CPU voice, no GPU lock needed
+                    clips = iter([to_48k(normalize(samples.astype(np.float32) / 32768), rate)])
+                elif self.cloning:
+                    clips = self._locked(self._clone_clips(text))
                 else:
                     behind = self.buffer.pending_seconds()
-                    clips = self._kokoro_clips(text, BASE_SPEED + (MAX_SPEED - BASE_SPEED) * min(1.0, behind / CATCH_UP_S))
+                    clips = self._locked(self._kokoro_clips(
+                        text, BASE_SPEED + (MAX_SPEED - BASE_SPEED) * min(1.0, behind / CATCH_UP_S)))
                 for clip in clips:
-                    self.buffer.push(clip, on_start)
+                    self.buffer.push(clip, on_start, deadline if on_start else None)  # only a line's start can expire
                     on_start = None  # only the first clause marks "voice started"
             except Exception as e:
                 print(f"Voice failed for {text!r}: {type(e).__name__}: {e}", flush=True)
