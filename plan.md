@@ -34,6 +34,15 @@
     - Wear headphones, or the mic hears the call and the English voice and sends them back.
     - Both directions play the original voice at 20% while the person talks and 5% while the English plays (`--original-volume`, `--duck-volume`; 0 = English only). Fully faint in between felt like dead air while waiting for a sentence to end. Volume is signal strength, so 20% still sounds about a third as loud. While it's low, every line is voiced, English too.
 
+**Both ways in one app: each person hears the call in their own language (`--two-way`)**
+
+14. Same setup as 11-12 (Mac output BlackHole 2ch at 100%; the call's microphone BlackHole 16ch), then one command: `python subtitles.py --two-way --out "<headphones or MacBook Pro Speakers>"`. Overlays: :8765 (them -> you) and :8767 (you -> them). The first run also loads English -> Telugu (accept https://huggingface.co/ai4bharat/indictrans2-en-indic-1B) and Meta's MMS Telugu voice.
+    - One Telugu speaker, one English speaker. It assumes **you** speak Telugu, then goes by who actually speaks more Telugu (`roles.py`; `--telugu-speaker me|them` fixes it). Lines said before it's sure are translated again once it is.
+    - Telugu -> English for the English speaker (in the speaker's cloned voice), English -> Telugu for the Telugu speaker (MMS voice, not cloned). A line already in the listener's language plays at full volume, untranslated. Words kept in Telugu follow your progress, so only in what you hear.
+    - Turn-taking: a translation waits while its listener is talking, fades out within 0.3 s if they start talking, and is dropped after 10 s.
+    - On the laptop speakers (`--walkie auto`), your mic is ignored while anything plays to you, so wait for it to finish before talking; headphones let you talk freely. A line from your mic matching what just played to you is dropped as echo.
+    - Check: `python tools/check_two_way.py` (and `--swap`, with them as the Telugu speaker) runs a scripted call with interruptions and checks all of the above (13 checks each).
+
 What we learned the hard way:
 - **The WhatsApp Mac app plays straight to the speakers** and ignores the Mac's output setting. BlackHole stays silent and there's no BlackHole option in its menu. Chrome follows the Mac's output setting, so WhatsApp Web works.
 - **When BlackHole is the output, the Mac volume slider controls what goes into BlackHole.** At 29% the call arrived at about 1% strength. Keep it at 100% and control loudness on the speaker side. `audio_loop.py` warns you if it's lower.

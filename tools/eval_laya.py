@@ -1,6 +1,7 @@
 # How well Laya makes its per-line decisions, and how fast (build-plan steps 3 and 5): the numbers for the judges.
 #   python tools/eval_laya.py            # topic + intent accuracy and time per line
 #   python tools/eval_laya.py --wrong    # also print every line it got wrong
+#   python tools/eval_laya.py --muse     # also ask Muse Spark the same questions (a cloud LLM), for comparison
 # The lines are English the way the translator gives her Telugu. We wrote and labelled them (6 per topic, plus
 # questions and requests); a few are from our real calls. They're not a random sample of calls, so read the numbers
 # as "does this work", not a benchmark.
@@ -108,10 +109,25 @@ HELD_OUT = [
     ("ఎప్పుడు వస్తావు నాన్నా?", "When will you come, Nanna?", "plans"),
 ]
 
+# Her questions to the grandkid, by what she's asking (curious.py offers the matching reply in Telugu); "other" = no reply
+REPLY_LINES = [
+    ("Have you eaten?", "ate"), ("Did you eat dinner, dear?", "ate"), ("Have you had lunch yet?", "ate"),
+    ("Are you doing well?", "wellbeing"), ("How are you, Nanna?", "wellbeing"), ("Is everything okay there?", "wellbeing"),
+    ("How are your exams going?", "studies"), ("Are you studying well?", "studies"), ("When is your exam?", "studies"),
+    ("When will you come home?", "coming"), ("Will you come for Sankranti?", "coming"), ("Are you coming this summer?", "coming"),
+    ("What are you doing?", "doing"), ("What are you doing now?", "doing"),
+    ("Did you catch a cold?", "health"), ("Are you sleeping well?", "health"), ("Is your fever gone?", "health"),
+    ("Can you hear me?", "hear"), ("Can you hear me now?", "hear"),
+    ("Do you like pulihora?", "like"), ("Did you like the sweets I sent?", "like"),
+    ("Take care.", "okay"), ("Study well.", "okay"), ("Call me on Sunday.", "okay"),
+    ("Did you see the photos?", "other"), ("What is the weather there?", "other"), ("Your uncle bought a new car, did you know?", "other"),
+]
+
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--wrong", action="store_true", help="print the lines it got wrong")
+    ap.add_argument("--muse", action="store_true", help="compare with Muse Spark (about 90 API calls)")
     a = ap.parse_args()
     from decide import Decider, topic_of
     from lexicon import Lexicon
@@ -135,17 +151,62 @@ def main():
         held_ok += got == topic
         if got != topic:
             held_wrong.append((english, topic, f"{got} ({why})", "", ""))
-    n, h = len(LINES), len(HELD_OUT)
+    from curious import REPLY_KIND, Curious
+    curious = Curious(decider, None, 1.0)
+    laya_reply_ok = reply_ok = 0
+    for line, want in REPLY_LINES:
+        laya_reply_ok += decider.choose(line, REPLY_KIND) == want
+        curious.asked.clear()
+        got = curious.reply(line, "question")
+        got = got["id"].split(":")[1] if got else "other"
+        reply_ok += got == want
+        if got != want:
+            wrong.append((line, want, got, "", ""))
+    n, h, r = len(LINES), len(HELD_OUT), len(REPLY_LINES)
     times.sort()
     print(f"\n{n} lines, one Laya pass each (intent, category and topic together), on this Mac")
     print(f"  topic, Laya alone       {laya_ok}/{n} = {laya_ok / n:.0%}   (11 topics; chance is ~9%)")
     print(f"  topic, keywords + Laya  {topic_ok}/{n} = {topic_ok / n:.0%}   (decided by {how}; keywords written with these lines in view)")
     print(f"  topic, held-out call    {held_ok}/{h} = {held_ok / h:.0%}   (her words' topics + keywords + Laya, on lines not used to write the rules)")
+    print(f"  reply kind, Laya alone  {laya_reply_ok}/{r} = {laya_reply_ok / r:.0%}   (what she's asking, to offer the reply in Telugu)")
+    print(f"  reply kind, keywords + Laya >= {0.5}  {reply_ok}/{r} = {reply_ok / r:.0%}   (no reply offered when unsure)")
     print(f"  intent                  {intent_ok}/{n} = {intent_ok / n:.0%}   (question / request / statement, with decide.is_question)")
     print(f"  time                    median {times[n // 2] * 1000:.0f} ms, slowest {times[-1] * 1000:.0f} ms per line")
+    if a.muse:
+        muse_compare(decider)
     if a.wrong:
         for line, topic, got_topic, intent, got_intent in wrong + held_wrong:
             print(f"  {line!r}: topic {topic} -> {got_topic}" + (f", intent {intent} -> {got_intent}" if intent != got_intent else ""))
+
+
+def muse_compare(decider):
+    """The same topic and reply-kind questions to Muse Spark (the cloud LLM we use for stories), one line at a time
+    like during a call: accuracy and time per line, next to Laya alone."""
+    from curious import REPLY_KIND
+    from decide import QUESTIONS
+    from muse import spark_json
+
+    def ask(question, line):
+        options = "; ".join(f'"{k}" = {v}' for k, v in question["criteria"].items())
+        start = time.monotonic()
+        got = spark_json(f"{question['instructions']} Options: {options}. Key: \"choice\" (one option key).", line,
+                         model="muse-spark-1.1", effort="minimal", timeout=15)
+        return (got or {}).get("choice"), time.monotonic() - start
+
+    for name, question, lines in (("topic", QUESTIONS["topic"], [(l, t) for l, t, _ in LINES]), ("reply kind", REPLY_KIND, REPLY_LINES)):
+        ok_muse = ok_laya = 0
+        t_muse, t_laya = [], []
+        for line, want in lines:
+            got, secs = ask(question, line)
+            ok_muse += got == want
+            t_muse.append(secs)
+            start = time.monotonic()
+            ok_laya += decider.choose(line, question) == want
+            t_laya.append(time.monotonic() - start)
+        n = len(lines)
+        t_muse.sort(), t_laya.sort()
+        print(f"  {name:11} Muse Spark {ok_muse}/{n} = {ok_muse / n:.0%}, median {t_muse[n // 2]:.2f} s  |  "
+              f"Laya {ok_laya}/{n} = {ok_laya / n:.0%}, median {t_laya[n // 2]:.2f} s (both alone, no rules)")
 
 
 if __name__ == "__main__":

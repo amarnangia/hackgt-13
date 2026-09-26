@@ -95,6 +95,7 @@ body[data-part="captions"] main { width: 100%; }
 .line .en { font-size: 20px; font-weight: 600; line-height: 1.35; }
 .line .en.pending { color: var(--text-3); font-weight: 400; font-size: 15px; }
 .line.partial .orig { color: var(--text-3); font-style: italic; }
+.en.draft { color: var(--text-2); font-weight: 500; font-style: italic; opacity: .75; }
 .tag { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #1b1300;
   background: var(--warm); border-radius: 6px; padding: 2px 6px; margin-right: 6px; vertical-align: 3px; }
 .kept { color: var(--accent); border-bottom: 1px dashed var(--accent); cursor: pointer; }

@@ -51,6 +51,11 @@ MAX_WAIT_WORDS = 20   # run-on speech with no punctuation: translate once this m
                       # mid-sentence when Muse left out punctuation and mistranslated; the translator handles long runs fine
 HOLD_BACK_WORDS = 3   # ...except the newest few, which Muse may still correct
 TRANSLATE_WORKERS = 3
+# Live draft captions: while she's still mid-sentence, translate what she's said so far (faded on the overlay), like
+# Google's live translation. Telugu puts the verb last, so a draft can change as she goes; the final line replaces
+# it. Drafts only run when no real translation is waiting, so they never slow the final English or the voice.
+DRAFT_EVERY_S = 0.6
+DRAFT_MIN_WORDS = 3
 LOCAL_DEADLINE_S = 1.2  # after this, race Muse Spark against the local translator
 ECHO_WINDOW_S = 20      # --two-way: a line from your mic matching something played to you this recently is echo
 ECHO_MATCH = 0.6
@@ -155,6 +160,12 @@ class Captioner:
         if self.translate is None:
             self.translate = Translator(lang)
             print("Translating with Muse Spark", flush=True)
+        # drafts: their own connection to the local translator, one at a time (off with --no-drafts or on Muse Spark)
+        self.drafts = LocalTranslator(lang) if isinstance(self.translate, LocalTranslator) else None
+        self.draft_pool = ThreadPoolExecutor(max_workers=1)
+        self.draft_busy, self.draft_at, self.draft_src = False, 0.0, ""
+        self.finals_waiting = 0  # sentences sent for translation that haven't come back yet
+        self.draft_lock = threading.Lock()
         self.pool = ThreadPoolExecutor(max_workers=TRANSLATE_WORKERS)
         self.race_pool = ThreadPoolExecutor(max_workers=TRANSLATE_WORKERS * 2)  # local vs Muse Spark when slow
         if not share_with:
@@ -170,6 +181,7 @@ class Captioner:
         self.pictures = None                  # picture pop-ups (pictures.py), set by listen()
         self.recorder = None                  # the family story keeper (calls.py)
         self.prompter = None                  # live "ask her" prompts (prompts.py)
+        self.curious = None                   # the overlay's "Curious?" questions (curious.py), set by listen()
         self.topic, self.topic_votes = None, collections.deque(maxlen=3)  # what the conversation is about now
         self.topic_lock = threading.Lock()
         self.vocab = json.load(open(os.path.join(HERE, "vocab.json"), encoding="utf-8"))["topics"]
@@ -222,6 +234,7 @@ class Captioner:
             self._pass_through_if_understood()
             self._cut(final=False)
             self.hub.broadcast({"type": "partial", "text": self.partial[self.done:].strip()})
+            self._draft()
         elif kind == "speechEnd":
             self.speaking = False
             self._cut(final=True)
@@ -254,6 +267,28 @@ class Captioner:
         for t, sentence, to, marks in list(self.redo_lines):
             if to is None and now - t < CATCH_UP_S:
                 self._submit(sentence, None, marks=marks, redo=True)
+
+    def _draft(self):
+        """Translate what she's said of the current sentence so far, if the translator is free."""
+        if self.roles and self.roles.listener_lang(self.side) != "en":
+            return  # --two-way: drafts are Telugu -> English, only for the English speaker
+        rest = self.partial[self.done:].strip()
+        now = time.monotonic()
+        if (not self.drafts or self.draft_busy or self.finals_waiting or len(rest.split()) < DRAFT_MIN_WORDS
+                or rest == self.draft_src or now - self.draft_at < DRAFT_EVERY_S or indic_share(rest) < NATIVE_MIN_SHARE):
+            return
+        self.draft_busy, self.draft_at, self.draft_src, done = True, now, rest, self.done
+
+        def run():
+            try:
+                english = self.drafts(rest)
+            except Exception:
+                english = None
+            finally:
+                self.draft_busy = False
+            if english and self.done == done and not self.finals_waiting:  # still the sentence she's saying
+                self.hub.broadcast({"type": "draft", "text": english})
+        self.draft_pool.submit(run)
 
     def _cut(self, final):
         rest = self.partial[self.done:]
@@ -305,14 +340,19 @@ class Captioner:
             to = None if route == "english" else "en"
         self.hub.broadcast({"type": "original", "id": seg_id, "text": sentence, "route": route, "to": to})
         to_translate = self.pronouns(sentence) if to == "en" else sentence  # in order said, so not in work()
+        if to:
+            with self.draft_lock:
+                self.finals_waiting += 1
 
         def work():
             if to is None:
                 english = sentence
-            elif to == "en":
-                english = self._translate_in_time(to_translate)
             else:
-                english = self._to_indic(sentence)  # (Telugu text, despite the name)
+                try:
+                    english = self._translate_in_time(to_translate) if to == "en" else self._to_indic(sentence)
+                finally:  # (to == "te": Telugu text, despite the name)
+                    with self.draft_lock:
+                        self.finals_waiting -= 1
             full_english, kept = (sentence if to == "te" else english), []  # Laya and pictures read English
             hits = self.lexicon.find(sentence, self.lang)
             known_before = {h["id"] for h in hits if self.progress.known(h["id"])}  # before counting this hearing
@@ -352,8 +392,17 @@ class Captioner:
                                 "intent": decision["intent"] if decision else None, "cards": self._cards(sentence, decision)})
             topic, _ = topic_of(full_english, hits, decision.get("topic") if decision else None)
             self._follow_topic(topic)
-            # Pictures explain Telugu things to the English speaker, so not on lines going to the Telugu speaker.
+            # Pictures and Curious? questions help the English speaker with Telugu, so not on lines to the Telugu speaker.
             picture = self._picture(seg_id, hits, full_english, known_before) if to != "te" else None
+            if self.curious and to != "te" and not english.startswith("("):
+                try:
+                    questions = self.curious.for_line(full_english, hits if route != "english" else [], picture,
+                                                      decision["intent"] if decision else None, known_before)
+                except Exception as e:
+                    print(f"(Curious? questions failed: {type(e).__name__}: {e})", flush=True)
+                    questions = []
+                if questions:
+                    self.hub.broadcast({"type": "curious", "line": seg_id, "questions": questions})
             if self.prompter and route != "english":
                 import topics
                 self.prompter.offer(topics.about(hits, picture, self.lexicon.entries.get(self.lang)))
@@ -622,6 +671,8 @@ async def run(args):
     if args.two_way:
         return await run_two_way(args)
     captioner = Captioner(args.lang, args.translator, args.keep_at, keep_known=not args.outgoing)
+    if args.no_drafts:
+        captioner.drafts = None
     HUB.on_message = make_on_message(captioner, args, HUB)
     try:
         await listen(args, captioner)
@@ -643,7 +694,7 @@ def make_on_message(captioner, args, hub):
             hub.broadcast({"type": "answer", "id": wid, "text": entry.get("note") or entry.get("translate_as", ""),
                            "telugu": entry["forms"][0].strip(" ,.^"), "roman": (entry.get("roman") or "").strip(" ,")})
             captioner.progress.observe(entry["id"], "answer")
-        elif kind == "ask" and wid and msg.get("text"):
+        elif kind == "ask" and wid and msg.get("text") and not wid.startswith("reply:"):  # replies come with their answer
             def reply():  # anything else: Muse Spark, with the call so far (~1-2 s), off the WebSocket thread
                 a = captioner.answer(msg["text"], args.caller)
                 hub.broadcast({"type": "answer", "id": wid, "text": (a or {}).get("text") or "Couldn't look that up right now.",
@@ -765,6 +816,9 @@ async def load_helpers(loop, args, captioner, target):
             captioner.hub.welcome.append(starter)
             captioner.hub.broadcast(starter)
             print(f"  [to start: ask {args.caller}: {starter['roman']}  ({starter['english']})]", flush=True)
+    if not args.outgoing:
+        from curious import Curious
+        captioner.curious = Curious(captioner.decider, captioner.progress, captioner.progress.keep_at)
     captioner.show_topic("greetings")  # calls start with hello; the words follow the conversation from there
 
 
@@ -888,6 +942,8 @@ async def run_two_way(args):
                    side="me", roles=roles)
     for c in (them, me):
         c.original_volume = args.original_volume
+        if args.no_drafts:
+            c.drafts = None
         c.hub.on_message = make_on_message(them, args, c.hub)  # your word progress, whichever page you click on
     print(f"Roles to start: {'you speak Telugu, they speak English' if roles.telugu == 'me' else 'they speak Telugu, you speak English'}"
           + (" (fixed by --telugu-speaker)" if fixed else " (until the call shows otherwise)"), flush=True)
@@ -1046,6 +1102,7 @@ def main():
     p.add_argument("--out", default=None, help='output device (default: system default; with --outgoing, BlackHole 16ch); '
                                                '"none" = silent, with --file')
     p.add_argument("--no-voice", action="store_true", help="subtitles only, no English voice")
+    p.add_argument("--no-drafts", action="store_true", help="no live draft captions while she's mid-sentence")
     p.add_argument("--voice", choices=["clone", "stock"], default="clone",
                    help="clone = the English sounds like the caller (learned from ~10 s of their speech); stock = Kokoro")
     p.add_argument("--voice-sample", help="audio of the caller to clone right away, e.g. a WhatsApp voice note (.opus/.m4a/.wav)")

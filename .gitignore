@@ -21,3 +21,4 @@ images/cache/
 # call recordings and story pages stay on this computer
 calls/
 tools/two_way_run/
+progress_settings.json

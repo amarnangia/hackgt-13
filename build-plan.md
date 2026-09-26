@@ -27,7 +27,7 @@ Times are rough estimates for one person.
 - **Check it:** label 50 lines from `calls/*/call.json` with their topic and measure Laya's accuracy. Aim for at least 80%.
 - **Done when** a call starts on greetings, moves to food words when she talks about cooking, and doesn't flicker.
 
-## 4. Left, top: "Curious?" questions (about 4 h)
+## 4. Left, top: "Curious?" questions (about 4 h) ✅ built: curious.py (Laya ranks what to ask and recognizes her questions for the reply helper), LLM answers in subtitles.py
 - **Engine: candidates.** Build them from each line: word-list matches, proverbs, picture candidates, and the nouns `pictures.py` already finds.
 - **Engine: Laya picks the stem** for each candidate (what does ___ mean / what is ___ / who is ___ / why do people say ___), then ranks the candidates to keep the top 3. Also generate "How do I say ___ in Telugu?" from the reply the grandkid would likely give.
 - **Engine: send and expire.** Send `curious` messages, drop duplicates, and let questions expire after about 60 s.
@@ -37,11 +37,11 @@ Times are rough estimates for one person.
 - **Check it:** on 30 real lines, count how often the 3 shown questions include the one a person would pick. Time the answers (instant from the list; about 1.5 s from the model).
 - **Done when** clicking "What is Bhogi?" during a call shows a correct, short answer within about 2 s.
 
-## 5. Laya numbers for the judges (about 1.5 h)
+## 5. Laya numbers for the judges (about 1.5 h) ✅ `python tools/eval_laya.py --muse`; table in idea.md
 - **Put one labelled test set in `tools/eval_laya.py`,** covering intent, topic, stem choice and question ranking.
 - **Report accuracy and time per decision,** next to Muse Spark doing the same job. Put the table in the README and on a slide.
 
-## 6. Demo and submission (about 3 h)
+## 6. Demo and submission (about 3 h) ✏️ drafted: demo.md (checked through the pipeline), writeup.md, README.md; still to do: record the video
 - **Script a 2–3 minute call** that triggers each part:
   - a greeting (vocab on greetings);
   - cooking (vocab switches to food, gavvalu picture, "What does gavvalu mean?");
@@ -63,7 +63,7 @@ Times are rough estimates for one person.
   - Afterwards, quiz the grandkid on the words (knows / doesn't).
   - Fit the weights to those answers, e.g. with a small grid search that maximises log-likelihood.
   - Report how well the model predicts the quiz (accuracy, calibration) next to the old "heard it once" rule.
-- **Live draft captions,** so the subtitles feel instant like Google's.
+- ✅ **Live draft captions,** so the subtitles feel instant like Google's (`draft` messages; `--no-drafts` turns them off). Measured: drafts show 2–3 s before she finishes a sentence; the final English is no slower.
   - Translate her in-progress sentence every ~0.5 s and show it faded; replace it with the final English when she finishes.
   - The voice still waits for the finished sentence.
   - Telugu puts the verb last, so the draft will change as she talks. That's expected; the final line is what counts.

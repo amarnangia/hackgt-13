@@ -22,6 +22,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
 import origins  # noqa: E402
 from lexicon import Lexicon  # noqa: E402
+from curious import Curious  # noqa: E402
 from pictures import PictureFinder  # noqa: E402
 
 CALLER = "Ammamma"
@@ -57,6 +58,11 @@ clients = set()
 lexicon = Lexicon()
 entries = {e["id"]: e for e in lexicon.entries["te"]}
 pictures = PictureFinder(None)
+
+
+class Unknown:  # the fake call's grandkid knows nothing yet except family words
+    def probability(self, wid):
+        return 0.95 if entries.get(wid, {}).get("start_known") else 0.3
 
 
 def broadcast(msg):
@@ -112,12 +118,16 @@ def play(pause):
     n = 0
     while True:
         broadcast({"type": "topic", "topic": "Greetings", "words": []})
+        curious = Curious(None, Unknown(), 0.7)  # no Laya here: keyword replies and least-known-first
         for i, (telugu, english, kept_ids, intent, pic, topic) in enumerate(SCRIPT):
             n += 1
             broadcast({"type": "speaking"})
             words = telugu.split()
-            for k in range(1, len(words) + 1):  # her words appear as Muse hears them
+            en_words = english.split()
+            for k in range(1, len(words) + 1):  # her words appear as Muse hears them, with a draft of the English
                 broadcast({"type": "partial", "text": " ".join(words[:k])})
+                if k >= 3 and k < len(words):
+                    broadcast({"type": "draft", "text": " ".join(en_words[: max(1, len(en_words) * k // len(words) - 1)])})
                 time.sleep(0.25)
             broadcast({"type": "partial", "text": ""})
             broadcast({"type": "original", "id": n, "text": telugu, "route": "native"})
@@ -132,8 +142,12 @@ def play(pause):
                 kept.append({"id": wid, "telugu": roman, "english": gloss})
             broadcast({"type": "english", "id": n, "text": shown, "route": "native", "kept": kept})
             broadcast({"type": "details", "id": n, "intent": intent, "cards": cards(telugu)})
-            if pic:
-                broadcast({"type": "picture", **pictures.card(pic), "line": n})
+            card = pictures.card(pic) if pic else None
+            if card:
+                broadcast({"type": "picture", **card, "line": n})
+            questions = curious.for_line(english, lexicon.find(telugu, "te"), card, intent)
+            if questions:
+                broadcast({"type": "curious", "line": n, "questions": questions})
             if topic:
                 broadcast({"type": "topic", "topic": topic,
                            "words": [{"id": None, "telugu": t, "roman": r, "english": en} for t, r, en in TOPIC_WORDS[topic]]})
