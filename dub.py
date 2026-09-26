@@ -130,14 +130,20 @@ class Dubber:
 
 
 class VoiceSampler:
-    """Collects the caller's speech from the call audio until there's enough to clone their voice.
+    """Collects the caller's speech from the call audio to clone their voice, preferring their English.
+
+    The clone copies the voice from any speech, but the English accent mostly from English speech. So: switch
+    to the caller's voice after ~10 s of any speech (English utterances first), then once ~8 s of them speaking
+    English is collected, relearn from that alone.
 
     Fed the same 24 kHz 16-bit frames that go to Muse, so Muse's audioProcessedMs (speechStart / speechEnd)
-    locate each utterance in it. Only the call audio is recorded (BlackHole carries the other side only).
+    locate each utterance and speechComplete's transcript says which language it was. Only the call audio is
+    recorded (BlackHole carries the other side only).
     """
 
     SR = 24000
-    NEED_S = 10.0        # seconds of speech for a good clone
+    FIRST_S = 10.0       # any speech: enough for their voice
+    ENGLISH_S = 8.0      # their English: enough for their accent too
     MAX_TURN_S = 6.0     # take at most this much from one utterance, for variety
     MIN_TURN_S = 1.0
     KEEP_S = 60.0        # rolling window of call audio
@@ -146,12 +152,14 @@ class VoiceSampler:
         self.path, self.on_ready = path, on_ready
         self.frames, self.start_sample = [], 0   # rolling call audio; sample index of frames[0] in this session
         self.turn_start_ms = None
-        self.pieces, self.have_s, self.done = [], 0.0, False
+        self.pending = {}                        # turnId -> audio, until speechComplete says what language it was
+        self.english, self.native = [], []
+        self.first_done = self.done = False
         self.lock = threading.Lock()
 
     def new_session(self):
         with self.lock:
-            self.frames, self.start_sample, self.turn_start_ms = [], 0, None
+            self.frames, self.start_sample, self.turn_start_ms, self.pending = [], 0, None, {}
 
     def add_frame(self, pcm16):
         if self.done:
@@ -164,30 +172,47 @@ class VoiceSampler:
     def on_event(self, ev):
         if self.done:
             return
-        if ev.get("type") == "speechStart":
+        kind = ev.get("type")
+        if kind == "speechStart":
             self.turn_start_ms = ev.get("audioProcessedMs")
-        elif ev.get("type") == "speechEnd" and self.turn_start_ms is not None:
-            self._take(self.turn_start_ms, ev.get("audioProcessedMs"))
+        elif kind == "speechEnd" and self.turn_start_ms is not None:
+            audio = self._cut(self.turn_start_ms, ev.get("audioProcessedMs"))
+            if audio is not None:
+                self.pending[ev.get("turnId")] = audio
             self.turn_start_ms = None
+        elif kind == "speechComplete" and ev.get("turnId") in self.pending:
+            from lexicon import indic_share
+            audio, text = self.pending.pop(ev["turnId"]), ev.get("transcript", "")
+            is_english = indic_share(text) == 0 and len(text.split()) >= 3
+            (self.english if is_english else self.native).append(audio)
+            self._maybe_ready()
 
-    def _take(self, start_ms, end_ms):
+    def _cut(self, start_ms, end_ms):
         if end_ms is None or (end_ms - start_ms) / 1000 < self.MIN_TURN_S:
-            return
+            return None
         with self.lock:
             audio = np.concatenate(self.frames) if self.frames else np.zeros(0, np.int16)
             a = max(0, int(start_ms / 1000 * self.SR) - self.start_sample)
             b = min(len(audio), int(end_ms / 1000 * self.SR) - self.start_sample, a + int(self.MAX_TURN_S * self.SR))
-        if b - a < self.MIN_TURN_S * self.SR:
-            return
-        self.pieces.append(audio[a:b])
-        self.have_s += (b - a) / self.SR
-        if self.have_s >= self.NEED_S:
-            gap = np.zeros(int(0.3 * self.SR), np.int16)
-            clip = np.concatenate([p for piece in self.pieces for p in (piece, gap)])
-            with wave.open(self.path, "wb") as w:
-                w.setnchannels(1)
-                w.setsampwidth(2)
-                w.setframerate(self.SR)
-                w.writeframes(clip.tobytes())
+        return audio[a:b] if b - a >= self.MIN_TURN_S * self.SR else None
+
+    def _maybe_ready(self):
+        seconds = lambda pieces: sum(len(p) for p in pieces) / self.SR
+        if seconds(self.english) >= self.ENGLISH_S:
+            self._save(self.english)
             self.done = True
+            print("Learned the caller's English accent.", flush=True)
             self.on_ready(self.path)
+        elif not self.first_done and seconds(self.english) + seconds(self.native) >= self.FIRST_S:
+            self._save(self.english + self.native)  # English first; keep listening for more of it
+            self.first_done = True
+            self.on_ready(self.path)
+
+    def _save(self, pieces):
+        gap = np.zeros(int(0.3 * self.SR), np.int16)
+        clip = np.concatenate([p for piece in pieces for p in (piece, gap)])
+        with wave.open(self.path, "wb") as w:
+            w.setnchannels(1)
+            w.setsampwidth(2)
+            w.setframerate(self.SR)
+            w.writeframes(clip.tobytes())

@@ -8,3 +8,12 @@ __pycache__/
 *.jsonl
 progress.json
 caller_voice.wav
+*.m4a
+*.opus
+*.ogg
+*.mp3
+voices/
+images/cache/
+# macOS/iCloud conflict copies ("file 2.jpg")
+* 2.*
+* 2

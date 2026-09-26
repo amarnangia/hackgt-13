@@ -277,7 +277,7 @@
     "సంతకి": "to the weekly village market",
     "సంతలో": "at the weekly village market"
    },
-   "roman": "santa",
+   "roman": "santha",
    "category": "place",
    "note": "Open-air market held on one day each week"
   },
@@ -397,6 +397,8 @@
   {
    "id": "nanna_vocative",
    "forms": [
+    "హలో నాన్న",
+    "హలో నాన్నా",
     "నాన్నా,",
     "నాన్న,",
     "నాన్నా.",
@@ -419,7 +421,9 @@
     "నాన్నా!": "dear!",
     "నాన్న!": "dear!",
     "నాన్నా?": "dear?",
-    "నాన్న?": "dear?"
+    "నాన్న?": "dear?",
+    "హలో నాన్నా": "hello dear,",
+    "హలో నాన్న": "hello dear,"
    },
    "roman": "Nanna,",
    "start_known": true,
@@ -551,7 +555,8 @@
    },
    "roman": "avunu",
    "category": "phrase",
-   "note": "Yes"
+   "note": "Yes",
+   "start_known": true
   },
   {
    "id": "sare",
@@ -565,7 +570,8 @@
    },
    "roman": "sare",
    "category": "phrase",
-   "note": "Okay / alright"
+   "note": "Okay / alright",
+   "start_known": true
   },
   {
    "id": "jagratta",
@@ -667,7 +673,8 @@
    "substitute": false,
    "match_english": [
     "rice"
-   ]
+   ],
+   "start_known": true
   },
   {
    "id": "bhojanam",
@@ -1294,6 +1301,899 @@
    ],
    "category": "idiom",
    "note": "'What won't bend as a sapling won't bend as a tree': teach good habits while young"
+  },
+  {
+   "id": "ee_roju",
+   "forms": [
+    "ఈ రోజు",
+    "ఈరోజు",
+    "ఇవాళ",
+    "ఇవ్వాళ"
+   ],
+   "roman": "ee roju",
+   "substitute": false,
+   "match_english": [
+    "today"
+   ],
+   "category": "word",
+   "note": "Today"
+  },
+  {
+   "id": "ninna",
+   "forms": [
+    "నిన్న"
+   ],
+   "roman": "ninna",
+   "substitute": false,
+   "match_english": [
+    "yesterday"
+   ],
+   "category": "word",
+   "note": "Yesterday"
+  },
+  {
+   "id": "repu",
+   "forms": [
+    "రేపు"
+   ],
+   "roman": "repu",
+   "substitute": false,
+   "match_english": [
+    "tomorrow"
+   ],
+   "category": "word",
+   "note": "Tomorrow"
+  },
+  {
+   "id": "ippudu",
+   "forms": [
+    "ఇప్పుడు"
+   ],
+   "roman": "ippudu",
+   "substitute": false,
+   "match_english": [
+    "right now",
+    "now"
+   ],
+   "category": "word",
+   "note": "Now"
+  },
+  {
+   "id": "ikkada",
+   "forms": [
+    "ఇక్కడ"
+   ],
+   "roman": "ikkada",
+   "substitute": false,
+   "match_english": [
+    "here"
+   ],
+   "category": "word",
+   "note": "Here"
+  },
+  {
+   "id": "akkada",
+   "forms": [
+    "అక్కడ"
+   ],
+   "roman": "akkada",
+   "substitute": false,
+   "match_english": [
+    "there"
+   ],
+   "category": "word",
+   "note": "There"
+  },
+  {
+   "id": "manchi",
+   "forms": [
+    "మంచి"
+   ],
+   "roman": "manchi",
+   "substitute": false,
+   "match_english": [
+    "good",
+    "nice"
+   ],
+   "category": "word",
+   "note": "Good, nice"
+  },
+  {
+   "id": "kotta",
+   "forms": [
+    "కొత్త"
+   ],
+   "roman": "kotta",
+   "substitute": false,
+   "match_english": [
+    "new"
+   ],
+   "category": "word",
+   "note": "New"
+  },
+  {
+   "id": "pedda",
+   "forms": [
+    "పెద్ద"
+   ],
+   "roman": "pedda",
+   "substitute": false,
+   "match_english": [
+    "big",
+    "large"
+   ],
+   "category": "word",
+   "note": "Big"
+  },
+  {
+   "id": "chinna",
+   "forms": [
+    "చిన్న"
+   ],
+   "roman": "chinna",
+   "substitute": false,
+   "match_english": [
+    "small",
+    "little"
+   ],
+   "category": "word",
+   "note": "Small"
+  },
+  {
+   "id": "cinema",
+   "forms": [
+    "సినిమా",
+    "సినిమాకి",
+    "సినిమాలు"
+   ],
+   "roman": "cinema",
+   "substitute": false,
+   "match_english": [
+    "movies",
+    "movie",
+    "film",
+    "cinema"
+   ],
+   "category": "word",
+   "note": "Movie"
+  },
+  {
+   "id": "pani",
+   "forms": [
+    "పని",
+    "పనులు"
+   ],
+   "roman": "pani",
+   "substitute": false,
+   "match_english": [
+    "work"
+   ],
+   "category": "word",
+   "note": "Work, chores"
+  },
+  {
+   "id": "udyogam",
+   "forms": [
+    "ఉద్యోగం"
+   ],
+   "roman": "udyogam",
+   "substitute": false,
+   "match_english": [
+    "job"
+   ],
+   "category": "word",
+   "note": "Job"
+  },
+  {
+   "id": "dabbulu",
+   "forms": [
+    "డబ్బులు",
+    "డబ్బు"
+   ],
+   "roman": "dabbulu",
+   "substitute": false,
+   "match_english": [
+    "money"
+   ],
+   "category": "word",
+   "note": "Money"
+  },
+  {
+   "id": "pillalu",
+   "forms": [
+    "పిల్లలు",
+    "పిల్లల"
+   ],
+   "roman": "pillalu",
+   "substitute": false,
+   "match_english": [
+    "children",
+    "kids"
+   ],
+   "category": "word",
+   "note": "Children"
+  },
+  {
+   "id": "snehitulu",
+   "forms": [
+    "స్నేహితులు",
+    "ఫ్రెండ్స్"
+   ],
+   "roman": "snehitulu",
+   "substitute": false,
+   "match_english": [
+    "friends",
+    "friend"
+   ],
+   "category": "word",
+   "note": "Friends"
+  },
+  {
+   "id": "kukka",
+   "forms": [
+    "కుక్క"
+   ],
+   "roman": "kukka",
+   "substitute": false,
+   "match_english": [
+    "dog"
+   ],
+   "category": "word",
+   "note": "Dog"
+  },
+  {
+   "id": "pilli",
+   "forms": [
+    "పిల్లి"
+   ],
+   "roman": "pilli",
+   "substitute": false,
+   "match_english": [
+    "cat"
+   ],
+   "category": "word",
+   "note": "Cat"
+  },
+  {
+   "id": "puvvulu",
+   "forms": [
+    "పువ్వులు",
+    "పూలు"
+   ],
+   "roman": "puvvulu",
+   "substitute": false,
+   "match_english": [
+    "flowers"
+   ],
+   "category": "word",
+   "note": "Flowers"
+  },
+  {
+   "id": "chettu",
+   "forms": [
+    "చెట్టు",
+    "చెట్లు"
+   ],
+   "roman": "chettu",
+   "substitute": false,
+   "match_english": [
+    "trees",
+    "tree"
+   ],
+   "category": "word",
+   "note": "Tree"
+  },
+  {
+   "id": "nidra",
+   "forms": [
+    "నిద్ర"
+   ],
+   "roman": "nidra",
+   "substitute": false,
+   "match_english": [
+    "sleep"
+   ],
+   "category": "word",
+   "note": "Sleep"
+  },
+  {
+   "id": "aakali",
+   "forms": [
+    "ఆకలి",
+    "ఆకలిగా",
+    "ఆకలేస్తోంది"
+   ],
+   "roman": "aakali",
+   "substitute": false,
+   "match_english": [
+    "hungry",
+    "hunger"
+   ],
+   "category": "word",
+   "note": "Hungry"
+  },
+  {
+   "id": "kaalu",
+   "forms": [
+    "కాలు",
+    "కాళ్ళు"
+   ],
+   "roman": "kaalu",
+   "substitute": false,
+   "match_english": [
+    "legs",
+    "leg"
+   ],
+   "category": "word",
+   "note": "Leg"
+  },
+  {
+   "id": "tala",
+   "forms": [
+    "తల",
+    "తలనొప్పి"
+   ],
+   "roman": "tala",
+   "substitute": false,
+   "match_english": [
+    "head"
+   ],
+   "category": "word",
+   "note": "Head"
+  },
+  {
+   "id": "kallu",
+   "forms": [
+    "కళ్ళు",
+    "కళ్లు"
+   ],
+   "roman": "kallu",
+   "substitute": false,
+   "match_english": [
+    "eyes"
+   ],
+   "category": "word",
+   "note": "Eyes"
+  },
+  {
+   "id": "batalu",
+   "forms": [
+    "బట్టలు"
+   ],
+   "roman": "battalu",
+   "substitute": false,
+   "match_english": [
+    "clothes"
+   ],
+   "category": "word",
+   "note": "Clothes"
+  },
+  {
+   "id": "bandi",
+   "forms": [
+    "బండి"
+   ],
+   "roman": "bandi",
+   "substitute": false,
+   "match_english": [
+    "vehicle",
+    "car",
+    "bike",
+    "scooter"
+   ],
+   "category": "word",
+   "note": "Vehicle (car, bike or scooter)"
+  },
+  {
+   "id": "ooru_word",
+   "forms": [
+    "ఊరు",
+    "ఊర్లో",
+    "ఊరికి"
+   ],
+   "roman": "ooru",
+   "substitute": false,
+   "match_english": [
+    "hometown",
+    "village",
+    "town"
+   ],
+   "category": "word",
+   "note": "Hometown / village"
+  },
+  {
+   "id": "vaaram",
+   "forms": [
+    "వారం"
+   ],
+   "roman": "vaaram",
+   "substitute": false,
+   "match_english": [
+    "week"
+   ],
+   "category": "word",
+   "note": "Week"
+  },
+  {
+   "id": "nela",
+   "forms": [
+    "నెల"
+   ],
+   "roman": "nela",
+   "substitute": false,
+   "match_english": [
+    "month"
+   ],
+   "category": "word",
+   "note": "Month"
+  },
+  {
+   "id": "samvatsaram",
+   "forms": [
+    "సంవత్సరం"
+   ],
+   "roman": "samvatsaram",
+   "substitute": false,
+   "match_english": [
+    "year"
+   ],
+   "category": "word",
+   "note": "Year"
+  },
+  {
+   "id": "prema",
+   "forms": [
+    "ప్రేమ"
+   ],
+   "roman": "prema",
+   "substitute": false,
+   "match_english": [
+    "love"
+   ],
+   "category": "word",
+   "note": "Love"
+  },
+  {
+   "id": "bangaram",
+   "forms": [
+    "బంగారం",
+    "బంగారు"
+   ],
+   "translate_as": "sweetheart",
+   "roman": "bangaram",
+   "category": "family",
+   "note": "Literally 'gold'. Elders call a beloved child bangaram: 'my precious one'"
+  },
+  {
+   "id": "kanna",
+   "forms": [
+    "కన్నా,",
+    "కన్నా",
+    "కన్నయ్యా"
+   ],
+   "translate_as": "dear",
+   "roman": "kanna",
+   "category": "family",
+   "note": "From Krishna's childhood name; a loving way to call a child: 'my dear'"
+  },
+  {
+   "id": "bujji",
+   "forms": [
+    "బుజ్జి",
+    "బుజ్జీ",
+    "బుజ్జమ్మ"
+   ],
+   "translate_as": "little one",
+   "roman": "bujji",
+   "category": "family",
+   "note": "'Little one', said with lots of love to small children"
+  },
+  {
+   "id": "ammayi",
+   "forms": [
+    "అమ్మాయి"
+   ],
+   "roman": "ammayi",
+   "substitute": false,
+   "match_english": [
+    "girl",
+    "granddaughter",
+    "daughter"
+   ],
+   "category": "family",
+   "note": "'Girl'; grandparents often call a granddaughter ammayi"
+  },
+  {
+   "id": "abbayi",
+   "forms": [
+    "అబ్బాయి"
+   ],
+   "roman": "abbayi",
+   "substitute": false,
+   "match_english": [
+    "boy",
+    "grandson",
+    "son"
+   ],
+   "category": "family",
+   "note": "'Boy'; grandparents often call a grandson abbayi"
+  },
+  {
+   "id": "ayyo",
+   "forms": [
+    "అయ్యో",
+    "అయ్యయ్యో"
+   ],
+   "translate_as": "oh no",
+   "roman": "ayyo",
+   "category": "phrase",
+   "note": "'Oh no!' Sympathy or dismay; you'll hear it a lot"
+  },
+  {
+   "id": "ammo",
+   "forms": [
+    "అమ్మో",
+    "అమ్మబాబోయ్"
+   ],
+   "translate_as": "oh my",
+   "roman": "ammo",
+   "category": "phrase",
+   "note": "'Oh my!' Surprise or a little fear"
+  },
+  {
+   "id": "hammayya",
+   "forms": [
+    "హమ్మయ్య"
+   ],
+   "translate_as": "thank goodness",
+   "roman": "hammayya",
+   "category": "phrase",
+   "note": "'Phew!' Relief that something is over"
+  },
+  {
+   "id": "papam",
+   "forms": [
+    "పాపం"
+   ],
+   "roman": "papam",
+   "category": "phrase",
+   "note": "'Poor thing.' Said with sympathy for someone",
+   "substitute": false,
+   "match_english": [
+    "poor thing",
+    "sadly",
+    "poor"
+   ]
+  },
+  {
+   "id": "parvaledu",
+   "forms": [
+    "పర్వాలేదు",
+    "పరవాలేదు",
+    "ఏం పర్వాలేదు"
+   ],
+   "translate_as": "it's okay",
+   "roman": "parvaledu",
+   "category": "phrase",
+   "note": "'It's okay, no problem', said to reassure you"
+  },
+  {
+   "id": "tappakunda",
+   "forms": [
+    "తప్పకుండా"
+   ],
+   "translate_as": "definitely",
+   "roman": "tappakunda",
+   "category": "phrase",
+   "note": "'Definitely, for sure'"
+  },
+  {
+   "id": "nijama",
+   "forms": [
+    "నిజమా",
+    "నిజంగా"
+   ],
+   "translate_as": "really",
+   "translate_forms": {
+    "నిజంగా": "really"
+   },
+   "roman": "nijama",
+   "category": "phrase",
+   "note": "'Really?'"
+  },
+  {
+   "id": "chaala_santosham",
+   "forms": [
+    "చాలా సంతోషం",
+    "చాలా సంతోషంగా ఉంది"
+   ],
+   "translate_as": "very happy",
+   "translate_forms": {
+    "చాలా సంతోషంగా ఉంది": "I am very happy"
+   },
+   "roman": "chaala santosham",
+   "category": "phrase",
+   "note": "'I'm so happy', often said when you share good news with them"
+  },
+  {
+   "id": "baaga_tinu",
+   "forms": [
+    "బాగా తిను",
+    "బాగా తిను నాన్నా"
+   ],
+   "translate_as": "eat well",
+   "roman": "baaga tinu",
+   "category": "phrase",
+   "note": "'Eat well.' Grandparents show love by making sure you eat"
+  },
+  {
+   "id": "kadupu_ninda",
+   "forms": [
+    "కడుపు నిండా తిను",
+    "కడుపు నిండా"
+   ],
+   "translate_as": "eat until you're full",
+   "roman": "kadupu ninda",
+   "category": "phrase",
+   "note": "'Eat until your stomach is full', a grandparent's favourite instruction"
+  },
+  {
+   "id": "arogyam",
+   "forms": [
+    "ఆరోగ్యం జాగ్రత్త",
+    "ఆరోగ్యం"
+   ],
+   "translate_as": "health",
+   "translate_forms": {
+    "ఆరోగ్యం జాగ్రత్త": "take care of your health"
+   },
+   "roman": "aarogyam",
+   "category": "phrase",
+   "note": "'Take care of your health.' Health is the first thing elders ask about"
+  },
+  {
+   "id": "ashirvadam",
+   "forms": [
+    "ఆశీర్వాదం",
+    "ఆశీర్వాదాలు"
+   ],
+   "roman": "ashirvadam",
+   "substitute": false,
+   "match_english": [
+    "blessings",
+    "blessing"
+   ],
+   "category": "culture",
+   "note": "Blessings. Kids touch elders' feet and the elder blesses them"
+  },
+  {
+   "id": "deerghayushman",
+   "forms": [
+    "దీర్ఘాయుష్మాన్ భవ",
+    "దీర్ఘాయుష్మాన్ భవా",
+    "దీర్ఘాయుష్మాన్"
+   ],
+   "translate_as": "may you live a long life",
+   "roman": "deerghayushman bhava",
+   "category": "culture",
+   "note": "'May you live a long life', the blessing elders give when you touch their feet"
+  },
+  {
+   "id": "dishti",
+   "forms": [
+    "దిష్టి",
+    "దృష్టి తీయాలి",
+    "దిష్టి తీస్తాను"
+   ],
+   "translate_as": "evil eye",
+   "translate_forms": {
+    "దృష్టి తీయాలి": "remove the evil eye",
+    "దిష్టి తీస్తాను": "I will remove the evil eye"
+   },
+   "roman": "dishti",
+   "category": "culture",
+   "note": "The 'evil eye': jealous looks that can bring bad luck. Grandmas 'remove dishti' by circling salt or red chillies around you"
+  },
+  {
+   "id": "akshintalu",
+   "forms": [
+    "అక్షింతలు"
+   ],
+   "translate_as": "blessed rice",
+   "roman": "akshintalu",
+   "category": "culture",
+   "note": "Rice grains with turmeric, sprinkled on your head as a blessing at weddings and festivals"
+  },
+  {
+   "id": "namaskaram",
+   "forms": [
+    "నమస్కారం",
+    "నమస్తే",
+    "నమస్కారాలు"
+   ],
+   "translate_as": "namaste",
+   "roman": "namaskaram",
+   "category": "culture",
+   "note": "Greeting with palms pressed together; respectful hello to elders"
+  },
+  {
+   "id": "harathi",
+   "forms": [
+    "హారతి"
+   ],
+   "translate_as": "aarti",
+   "roman": "harathi",
+   "category": "culture",
+   "note": "Waving a lit lamp in circles in front of God (or a person) as a blessing"
+  },
+  {
+   "id": "upavasam",
+   "forms": [
+    "ఉపవాసం"
+   ],
+   "roman": "upavasam",
+   "substitute": false,
+   "match_english": [
+    "fasting",
+    "fast"
+   ],
+   "category": "culture",
+   "note": "A religious fast; skipping food or eating only certain things on holy days"
+  },
+  {
+   "id": "mokku",
+   "forms": [
+    "మొక్కు",
+    "మొక్కుకున్నాను",
+    "మొక్కు తీర్చుకోవాలి"
+   ],
+   "translate_as": "vow",
+   "translate_forms": {
+    "మొక్కుకున్నాను": "I made a vow",
+    "మొక్కు తీర్చుకోవాలి": "we must fulfil the vow"
+   },
+   "roman": "mokku",
+   "category": "culture",
+   "note": "A promise to God, e.g. to visit Tirupati if a wish comes true"
+  },
+  {
+   "id": "pandaga",
+   "forms": [
+    "పండగ",
+    "పండుగ",
+    "పండక్కి"
+   ],
+   "roman": "pandaga",
+   "substitute": false,
+   "match_english": [
+    "festival",
+    "festivals",
+    "feast"
+   ],
+   "category": "festival",
+   "note": "Festival: family, new clothes, special food"
+  },
+  {
+   "id": "puttina_roju",
+   "forms": [
+    "పుట్టినరోజు",
+    "పుట్టిన రోజు"
+   ],
+   "roman": "puttina roju",
+   "substitute": false,
+   "match_english": [
+    "birthday"
+   ],
+   "category": "festival",
+   "note": "Birthday: often starts with a temple visit and a new outfit"
+  },
+  {
+   "id": "bandhuvulu",
+   "forms": [
+    "బంధువులు",
+    "చుట్టాలు"
+   ],
+   "roman": "bandhuvulu",
+   "substitute": false,
+   "match_english": [
+    "relatives",
+    "relative",
+    "guests"
+   ],
+   "category": "family",
+   "note": "Relatives: the big extended family that visits during festivals"
+  },
+  {
+   "id": "subhakankshalu",
+   "forms": [
+    "శుభాకాంక్షలు"
+   ],
+   "roman": "subhakankshalu",
+   "substitute": false,
+   "match_english": [
+    "best wishes",
+    "wishes",
+    "greetings"
+   ],
+   "category": "culture",
+   "note": "Best wishes, e.g. 'Sankranti subhakankshalu' = Happy Sankranti"
+  },
+  {
+   "id": "peddavallu",
+   "forms": [
+    "పెద్దవాళ్ళు",
+    "పెద్దలు",
+    "పెద్దవాళ్ళ",
+    "పెద్దల"
+   ],
+   "roman": "peddavallu",
+   "substitute": false,
+   "match_english": [
+    "elders"
+   ],
+   "category": "family",
+   "note": "Elders. Respecting peddavallu is a core family value"
+  },
+  {
+   "id": "pilli_kallu",
+   "forms": [
+    "పిల్లి కళ్ళు మూసుకుని పాలు తాగినట్టు",
+    "కళ్ళు మూసుకుని పాలు తాగినట్టు"
+   ],
+   "category": "idiom",
+   "note": "'Like a cat drinking milk with its eyes closed', thinking nobody notices when everyone does",
+   "translate_as": "thinking nobody notices"
+  },
+  {
+   "id": "kukka_toka",
+   "forms": [
+    "కుక్క తోక వంకర"
+   ],
+   "category": "idiom",
+   "note": "'A dog's tail is always crooked': some people never change",
+   "translate_as": "someone who never changes"
+  },
+  {
+   "id": "goranta_deepam",
+   "forms": [
+    "గోరంత దీపం కొండంత వెలుగు"
+   ],
+   "category": "idiom",
+   "note": "'A lamp the size of a fingernail gives light the size of a mountain': a little help goes a long way",
+   "translate_as": "a little help goes a long way"
+  },
+  {
+   "id": "aavu_chelo",
+   "forms": [
+    "ఆవు చేలో మేస్తే దూడ గట్టున మేస్తుందా"
+   ],
+   "category": "idiom",
+   "note": "'If the cow grazes in the field, will the calf stay on the edge?' Kids follow their parents' example",
+   "translate_as": "kids follow their parents' example"
+  },
+  {
+   "id": "amma_pettadu",
+   "forms": [
+    "అమ్మ పెట్టదు అడుక్కు తిననివ్వదు"
+   ],
+   "category": "idiom",
+   "note": "'Mom won't feed you, and won't let you beg either': someone who neither helps nor lets others help"
+  },
+  {
+   "id": "tadini_tanne",
+   "forms": [
+    "తాడిని తన్నేవాడు ఉంటే వాడి తల తన్నేవాడు ఉంటాడు"
+   ],
+   "category": "idiom",
+   "note": "'If someone can kick a palm tree, someone can kick his head': there's always someone better, so stay humble"
+  },
+  {
+   "id": "ati_sarvatra",
+   "forms": [
+    "అతి సర్వత్ర వర్జయేత్"
+   ],
+   "category": "idiom",
+   "note": "'Too much of anything is bad', a Sanskrit saying elders use"
   }
  ],
  "en": [
@@ -1349,6 +2249,130 @@
    ],
    "category": "slang",
    "note": "Did something really well"
+  },
+  {
+   "id": "sus",
+   "forms": [
+    "sus",
+    "kinda sus"
+   ],
+   "category": "slang",
+   "note": "'Sus' means suspicious or shady"
+  },
+  {
+   "id": "rizz",
+   "forms": [
+    "rizz"
+   ],
+   "category": "slang",
+   "note": "'Rizz' means charm, being good at flirting"
+  },
+  {
+   "id": "mid",
+   "forms": [
+    "it's mid",
+    "so mid",
+    "kinda mid"
+   ],
+   "category": "slang",
+   "note": "'Mid' means average, not great"
+  },
+  {
+   "id": "bussin",
+   "forms": [
+    "bussin",
+    "bussin'"
+   ],
+   "category": "slang",
+   "note": "'Bussin' means the food is really delicious"
+  },
+  {
+   "id": "its_giving",
+   "forms": [
+    "it's giving"
+   ],
+   "category": "slang",
+   "note": "'It's giving ___' means it has the vibe of ___"
+  },
+  {
+   "id": "goat",
+   "forms": [
+    "the goat",
+    "is the goat"
+   ],
+   "category": "slang",
+   "note": "'The GOAT' = Greatest Of All Time"
+  },
+  {
+   "id": "bet",
+   "forms": [
+    "bet!",
+    "bet."
+   ],
+   "category": "slang",
+   "note": "'Bet' means okay, deal, for sure"
+  },
+  {
+   "id": "salty",
+   "forms": [
+    "salty"
+   ],
+   "category": "slang",
+   "note": "'Salty' means upset or bitter about something"
+  },
+  {
+   "id": "ghosted",
+   "forms": [
+    "ghosted",
+    "ghosting"
+   ],
+   "category": "slang",
+   "note": "'Ghosted' means someone suddenly stopped replying"
+  },
+  {
+   "id": "vibe",
+   "forms": [
+    "vibe",
+    "vibes",
+    "vibing"
+   ],
+   "category": "slang",
+   "note": "'Vibe' means the feeling or mood of something"
+  },
+  {
+   "id": "lit",
+   "forms": [
+    "was lit",
+    "so lit",
+    "is lit"
+   ],
+   "category": "slang",
+   "note": "'Lit' means exciting, a lot of fun"
+  },
+  {
+   "id": "hits_different",
+   "forms": [
+    "hits different"
+   ],
+   "category": "slang",
+   "note": "'Hits different' means it feels special this time"
+  },
+  {
+   "id": "sending_me",
+   "forms": [
+    "sending me",
+    "i'm crying"
+   ],
+   "category": "slang",
+   "note": "'That's sending me' / 'I'm crying' means it's very funny"
+  },
+  {
+   "id": "touch_grass",
+   "forms": [
+    "touch grass"
+   ],
+   "category": "slang",
+   "note": "'Touch grass' means go outside, you're online too much"
   }
  ]
 }

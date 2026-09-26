@@ -14,7 +14,7 @@ import subprocess
 import threading
 import time
 import wave
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, TimeoutError, wait
 
 import numpy as np
 from websockets.datastructures import Headers
@@ -27,6 +27,7 @@ from progress import Progress
 from translate_server import LocalTranslator
 
 PORT = int(os.environ.get("OVERLAY_PORT", 8765))
+HERE = os.path.dirname(os.path.abspath(__file__))
 CHUNK_MS = 80
 VOICE_SAMPLE = "caller_voice.wav"  # the caller's voice, saved locally (gitignored) and reused next call
 SAMPLE_RATE = 48000  # AudioLoop's rate
@@ -38,6 +39,7 @@ MAX_WAIT_WORDS = 20   # run-on speech with no punctuation: translate once this m
                       # mid-sentence when Muse left out punctuation and mistranslated; the translator handles long runs fine
 HOLD_BACK_WORDS = 3   # ...except the newest few, which Muse may still correct
 TRANSLATE_WORKERS = 3
+LOCAL_DEADLINE_S = 1.2  # after this, race Muse Spark against the local translator
 
 clients = set()
 on_client_message = None  # set by main(): handles clicks sent from the overlay
@@ -65,7 +67,15 @@ def ws_handler(conn):
 def serve_overlay(conn, request):
     if request.headers.get("Upgrade", "").lower() == "websocket":
         return None
-    with open("overlay.html", "rb") as f:
+    path = request.path.split("?")[0]
+    if path.startswith("/images/"):  # pictures for the pop-ups
+        file = os.path.realpath(os.path.join(HERE, path.lstrip("/")))
+        if not file.startswith(os.path.join(HERE, "images") + os.sep) or not os.path.isfile(file):
+            return conn.respond(http.HTTPStatus.NOT_FOUND, "not found")
+        body = open(file, "rb").read()
+        return Response(http.HTTPStatus.OK, "OK", Headers([("Content-Type", "image/jpeg"), ("Content-Length", str(len(body))),
+                                                            ("Cache-Control", "max-age=3600"), ("Connection", "close")]), body)
+    with open(os.path.join(HERE, "overlay.html"), "rb") as f:
         body = f.read()
     # Build the response directly: conn.respond() adds text/plain headers, and setting them again
     # duplicates them, which Chrome rejects ("localhost sent an invalid response").
@@ -83,7 +93,7 @@ class Captioner:
     by id, so they still show in order.
     """
 
-    def __init__(self, lang, translator="local", learn_after=3):
+    def __init__(self, lang, translator="local", learn_after=1):
         self.translate = None
         if translator == "local":
             local = LocalTranslator(lang)
@@ -97,6 +107,7 @@ class Captioner:
             self.translate = Translator(lang)
             print("Translating with Muse Spark", flush=True)
         self.pool = ThreadPoolExecutor(max_workers=TRANSLATE_WORKERS)
+        self.race_pool = ThreadPoolExecutor(max_workers=TRANSLATE_WORKERS * 2)  # local vs Muse Spark when slow
         for _ in range(TRANSLATE_WORKERS):
             self.pool.submit(self.translate.warm_up)  # the first request pays for TLS setup (~3 s)
         self.next_id = 0
@@ -106,6 +117,7 @@ class Captioner:
         self.dubber = None                    # set by listen() unless --no-voice
         self.sampler = None                   # collects the caller's voice for cloning
         self.decider = None                   # Laya, set by listen()
+        self.pictures = None                  # picture pop-ups (pictures.py), set by listen()
         self.speak_all = False                # --speak all: also voice lines she said (mostly) in English
         self.questions_only = False           # --speak questions: voice only questions/requests to you
         self.lexicon = Lexicon()
@@ -169,14 +181,12 @@ class Captioner:
             if route == "english":
                 english = sentence
             else:
-                try:
-                    english = self.translate(sentence)
-                except Exception as e:
-                    english = self._fallback_translate(sentence, e)
+                english = self._translate_in_time(sentence)
             full_english, kept = english, []
+            hits = self.lexicon.find(sentence, self.lang)
+            known_before = {h["id"] for h in hits if self.progress.known(h["id"])}  # before counting this hearing
             if route != "english" and not english.startswith("("):
                 # Words the listener knows stay in Telugu ("Today, Ammamma made pulihora"); the rest is English.
-                hits = self.lexicon.find(sentence, self.lang)
                 english, kept = self.progress.keep_known_words(english, hits)
                 self.progress.heard_words(hits)
             broadcast({"type": "english", "id": seg_id, "text": english, "route": route, "kept": kept})
@@ -186,6 +196,7 @@ class Captioner:
             decision = self.decider(full_english) if self.decider and not english.startswith("(") else None
             broadcast({"type": "details", "id": seg_id,
                        "intent": decision["intent"] if decision else None, "cards": self._cards(sentence, decision)})
+            self._picture(seg_id, hits, full_english, known_before)
             row["laya"] = decision["seconds"] if decision else None
             with self.order_lock:
                 self.finished_lines[seg_id] = (english, marks, row, decision, route)
@@ -193,7 +204,55 @@ class Captioner:
                     self._voice(self.next_to_voice, *self.finished_lines.pop(self.next_to_voice))
                     self.next_to_voice += 1
 
-        self.pool.submit(work)
+        def work_logged():
+            try:
+                work()
+            except Exception:
+                import traceback
+                traceback.print_exc()  # thread-pool errors are otherwise silent
+
+        self.pool.submit(work_logged)
+
+    def _translate_in_time(self, sentence):
+        """Local translation normally takes ~0.3 s, but when the Mac is short on memory it can take ~10 s.
+        If it hasn't answered in LOCAL_DEADLINE_S, also ask Muse Spark and use whichever answers first."""
+        local = self.race_pool.submit(self.translate, sentence)
+        try:
+            return local.result(timeout=LOCAL_DEADLINE_S)
+        except TimeoutError:
+            pass
+        except Exception as e:
+            return self._fallback_translate(sentence, e)
+        if isinstance(self.translate, Translator):
+            return local.result()  # already on Muse Spark; nothing faster to try
+        if self.backup is None:
+            self.backup = Translator(self.lang)
+        remote = self.race_pool.submit(self.backup, sentence)
+        done, _ = wait([local, remote], return_when=FIRST_COMPLETED)
+        for f in done:
+            if not f.exception():
+                if f is remote:
+                    print("(local translator slow; used Muse Spark for this line)", flush=True)
+                return f.result()
+        try:
+            return (remote if local in done else local).result()
+        except Exception as e:
+            return f"(translation failed: {type(e).__name__})"
+
+    def _picture(self, seg_id, hits, english, known_before):
+        """Pop up a picture of the thing in this line the grandkid most likely doesn't know (Laya picks).
+        Words they knew before this line don't need one (so: a picture on first mention, the Telugu word after)."""
+        if not self.pictures or english.startswith("("):
+            return
+        try:
+            key = self.pictures.pick(english, hits, known=lambda lexicon_id: lexicon_id in known_before)
+            card = self.pictures.card(key) if key else None
+        except Exception as e:
+            print(f"Picture lookup failed: {type(e).__name__}: {e}", flush=True)
+            return
+        if card:
+            broadcast({"type": "picture", "id": seg_id, **card})
+            print(f"  [picture: {card['name']}]", flush=True)
 
     def _fallback_translate(self, sentence, error):
         """The local translator died mid-call (e.g. its process was stopped): use Muse Spark for this line."""
@@ -252,8 +311,10 @@ def prepare_voice_sample(args):
     """The caller's voice clip to clone: --voice-sample (any audio file, e.g. a WhatsApp voice note), else the one
     saved from the last call, else None (learn it during this call)."""
     if args.voice_sample:
-        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", args.voice_sample, "-ac", "1", "-ar", "24000",
-                        "-t", "20", VOICE_SAMPLE], check=True)
+        # Trim silences and even out the volume; 30 s matched the speaker's pitch better than 15 s at the same speed.
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", args.voice_sample, "-af",
+                        "silenceremove=start_periods=1:start_threshold=-40dB:stop_periods=-1:stop_duration=0.6:"
+                        "stop_threshold=-40dB,loudnorm", "-ac", "1", "-ar", "24000", "-t", "30", VOICE_SAMPLE], check=True)
         return VOICE_SAMPLE
     if args.new_voice and os.path.exists(VOICE_SAMPLE):
         os.remove(VOICE_SAMPLE)
@@ -325,6 +386,9 @@ async def listen(args, captioner):
     print("Loading Laya...", flush=True)
     from decide import Decider
     captioner.decider = await loop.run_in_executor(None, Decider)
+    from pictures import PictureFinder
+    captioner.pictures = PictureFinder(captioner.decider)
+    await loop.run_in_executor(None, captioner.pictures._nouns, "warm up the noun finder")
     captioner.speak_all = args.speak == "all"
     captioner.questions_only = args.speak == "questions"
     if not args.no_voice:  # load before audio starts, or the first seconds of the call are lost
@@ -410,7 +474,7 @@ def main():
                    help="clone = the English sounds like the caller (learned from ~10 s of their speech); stock = Kokoro")
     p.add_argument("--voice-sample", help="audio of the caller to clone right away, e.g. a WhatsApp voice note (.opus/.m4a/.wav)")
     p.add_argument("--new-voice", action="store_true", help="relearn the caller's voice on this call (calling someone else)")
-    p.add_argument("--learn-after", type=int, default=3,
+    p.add_argument("--learn-after", type=int, default=1,
                    help="keep a word in Telugu after hearing it this many times (0 = keep every known word from the start)")
     p.add_argument("--reset-progress", action="store_true", help="forget which words you know (deletes progress.json)")
     p.add_argument("--speak", choices=["telugu", "questions", "all"], default="telugu",

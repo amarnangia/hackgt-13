@@ -29,6 +29,13 @@ class Decider:
         self.lock = threading.Lock()  # one model on one GPU; translation runs on several threads
         self("Hello, how are you?")   # warm up
 
+    def choose(self, english, question, **context):
+        """Ask Laya one choice question about an English line (plus any extra context); returns the criteria key."""
+        with self.lock:
+            answer = self.agent.predict({"english": english, **context}, {"q": question})["answers"]["q"]["choice"]
+            self.torch.mps.empty_cache()
+        return answer
+
     def __call__(self, english):
         start = time.monotonic()
         with self.lock:

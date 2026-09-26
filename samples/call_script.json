@@ -1,0 +1,110 @@
+[
+ {
+  "part": 3,
+  "text": "Okay, very good, very good.",
+  "meaning": "(English: should NOT be spoken)",
+  "route": "english"
+ },
+ {
+  "part": 3,
+  "text": "I saw your photos on WhatsApp.",
+  "meaning": "(English: should NOT be spoken)",
+  "route": "english"
+ },
+ {
+  "part": 1,
+  "text": "We are all fine here, the weather is very hot this year.",
+  "meaning": "(English: teaches her accent; not spoken)",
+  "route": "english"
+ },
+ {
+  "part": 1,
+  "text": "Your uncle is coming next week, he will bring sweets for everybody.",
+  "meaning": "(English: teaches her accent; not spoken)",
+  "route": "english"
+ },
+ {
+  "part": 1,
+  "text": "నాన్నా, బాగున్నావా? ఇక్కడ అందరం బాగున్నాం. తాతయ్య ఉదయాన్నే పొలానికి వెళ్ళారు.",
+  "meaning": "Nanna, are you well? Everyone here is fine. Grandpa went to the field early this morning.",
+  "route": "native"
+ },
+ {
+  "part": 1,
+  "text": "ఈ రోజు ఉదయం నేను గుడికి వెళ్ళి వచ్చాను, అక్కడ చాలా మంది ఉన్నారు.",
+  "meaning": "This morning I went to the temple; there were a lot of people.",
+  "route": "native"
+ },
+ {
+  "part": 1,
+  "text": "ఇక్కడ చాలా వేడిగా ఉంది, వానలు ఇంకా రాలేదు.",
+  "meaning": "It's very hot here; the rains haven't come yet.",
+  "route": "native"
+ },
+ {
+  "part": 2,
+  "text": "ఈ రోజు నీ కోసం పులిహోర చేశాను.",
+  "meaning": "I made pulihora for you today.",
+  "route": "native"
+ },
+ {
+  "part": 2,
+  "text": "అమ్మమ్మ ఆవకాయ పచ్చడి పెట్టింది.",
+  "meaning": "Grandma made mango pickle (avakaya).",
+  "route": "native"
+ },
+ {
+  "part": 2,
+  "text": "సంక్రాంతికి ఇంటికి వస్తావా?",
+  "meaning": "Will you come home for Sankranti?",
+  "route": "native"
+ },
+ {
+  "part": 2,
+  "text": "నిన్న ఆటోలో సంతకి వెళ్ళాను, మామిడి పండ్లు కొన్నాను.",
+  "meaning": "Yesterday I took an auto to the market and bought mangoes.",
+  "route": "native"
+ },
+ {
+  "part": 3,
+  "text": "నీ exam ఎప్పుడు?",
+  "meaning": "When is your exam? (Telugu with an English word: spoken)",
+  "route": "native"
+ },
+ {
+  "part": 3,
+  "text": "నాకు WhatsApp లో photo పంపించు.",
+  "meaning": "Send me a photo on WhatsApp.",
+  "route": "native"
+ },
+ {
+  "part": 4,
+  "text": "ఈ రోజు నీ కోసం పులిహోర చేశాను.",
+  "meaning": "(repeat) I made pulihora for you today.",
+  "route": "native"
+ },
+ {
+  "part": 4,
+  "text": "నిన్న ఆటోలో సంతకి వెళ్ళాను, మామిడి పండ్లు కొన్నాను.",
+  "meaning": "(repeat) Yesterday I took an auto to the market and bought mangoes.",
+  "route": "native"
+ },
+ {
+  "part": 4,
+  "text": "అన్నం తిన్నావా?",
+  "meaning": "Have you eaten? (how elders say 'how are you')",
+  "route": "native"
+ },
+ {
+  "part": 4,
+  "text": "ఎప్పుడు వస్తావు నాన్నా?",
+  "meaning": "When will you come, Nanna?",
+  "route": "native"
+ },
+ {
+  "part": 4,
+  "text": "జాగ్రత్తగా ఉండు, బాగా చదువుకో.",
+  "meaning": "Take care, study well.",
+  "route": "native"
+ }
+]

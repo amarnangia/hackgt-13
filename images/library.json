@@ -1,0 +1,2382 @@
+{
+ "items": {
+  "pulihora": {
+   "title": "Pulihora",
+   "description": "Pulihora, also known as Pulisoru, Pulinchoru, Puliyogare, Puliyodarai, Ambad Baath, Kokum rice, or simply Tamarind rice, is a common and traditional rice preparation in the South Indian states of Andhra Pradesh, Telangana, Tamil Nadu and Karnataka.",
+   "image": "images/pulihora.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Pulihora",
+   "name": "Pulihora",
+   "category": "food",
+   "aliases": [
+    "tamarind rice",
+    "pulihora"
+   ],
+   "lexicon_ids": [
+    "pulihora"
+   ],
+   "wikipedia": "Pulihora",
+   "region": "in"
+  },
+  "pesarattu": {
+   "title": "Pesarattu",
+   "description": "Pesarattu, pesara attu, pesara dosa, or cheeldo is a crepe-like bread, originating in Andhra Pradesh, India, that is a variety of dosa.",
+   "image": "images/pesarattu.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Pesarattu",
+   "name": "Pesarattu",
+   "category": "food",
+   "aliases": [
+    "pesarattu",
+    "green gram dosa",
+    "moong dal dosa"
+   ],
+   "lexicon_ids": [
+    "pesarattu"
+   ],
+   "wikipedia": "Pesarattu",
+   "region": "in"
+  },
+  "dosa": {
+   "title": "Dosa (food)",
+   "description": "A dosa or thosai is a thin, savoury batter bread in South Indian cuisine made from a fermented batter of ground black gram and rice.",
+   "image": "images/dosa.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Dosa_(food)",
+   "name": "Dosa (food)",
+   "category": "food",
+   "aliases": [
+    "dosa",
+    "dosas"
+   ],
+   "lexicon_ids": [
+    "dosa"
+   ],
+   "wikipedia": "Dosa (food)",
+   "region": "in"
+  },
+  "idli": {
+   "title": "Idli",
+   "description": "Idli or idly is a South Indian and Sri Lankan rice cake popular as a breakfast food.",
+   "image": "images/idli.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Idli",
+   "name": "Idli",
+   "category": "food",
+   "aliases": [
+    "idli",
+    "idlis"
+   ],
+   "lexicon_ids": [
+    "idli"
+   ],
+   "wikipedia": "Idli",
+   "region": "in"
+  },
+  "upma": {
+   "title": "Upma",
+   "description": "Upma, uppumavu, uppindi, kharabath, upit, upeet, rulanv, uppuma, or uppittu is a dish of thick porridge from dry-roasted semolina or coarse rice flour.",
+   "image": "images/upma.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Upma",
+   "name": "Upma",
+   "category": "food",
+   "aliases": [
+    "upma"
+   ],
+   "lexicon_ids": [
+    "upma"
+   ],
+   "wikipedia": "Upma",
+   "region": "in"
+  },
+  "dal": {
+   "title": "Dal",
+   "description": "In South Asian cuisine, dal are dried, split pulses that do or do not require soaking before cooking.",
+   "image": "images/dal.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Dal",
+   "name": "Dal (pappu)",
+   "category": "food",
+   "aliases": [
+    "dal",
+    "daal",
+    "lentils",
+    "dal rice"
+   ],
+   "lexicon_ids": [
+    "pappu"
+   ],
+   "wikipedia": "Dal",
+   "region": "in"
+  },
+  "sambar": {
+   "title": "Sambar (dish)",
+   "description": "Sāmbār, or sambhar, is a lentil-based vegetable spiced curry or stew, cooked with pigeon peas and tamarind broth.",
+   "image": "images/sambar.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Sambar_(dish)",
+   "name": "Sambar (dish)",
+   "category": "food",
+   "aliases": [
+    "sambar"
+   ],
+   "lexicon_ids": [
+    "sambar"
+   ],
+   "wikipedia": "Sambar (dish)",
+   "region": "in"
+  },
+  "curd_rice": {
+   "title": "Curd rice",
+   "description": "Curd rice or yogurt rice is a dish originating from India.",
+   "image": "images/curd_rice.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Curd_rice",
+   "name": "Curd rice",
+   "category": "food",
+   "aliases": [
+    "curd rice",
+    "yogurt rice"
+   ],
+   "lexicon_ids": [
+    "perugu_annam"
+   ],
+   "wikipedia": "Curd rice",
+   "region": "in"
+  },
+  "avakaya": {
+   "title": "Avakaya",
+   "description": "Avakaya is a traditional pickle originating from the Indian state of Andhra Pradesh.",
+   "image": "images/avakaya.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Avakaya",
+   "name": "Avakaya",
+   "category": "food",
+   "aliases": [
+    "mango pickle",
+    "avakaya"
+   ],
+   "lexicon_ids": [
+    "avakaya"
+   ],
+   "wikipedia": "Avakaya",
+   "region": "in"
+  },
+  "gongura": {
+   "title": "Gongura",
+   "description": "Gongura, or Puntikura, or Gogaaku is a variety of the roselle plant grown for its edible leaves in India and in other countries like Fiji.",
+   "image": "images/gongura.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Gongura",
+   "name": "Gongura",
+   "category": "food",
+   "aliases": [
+    "gongura",
+    "sorrel leaves",
+    "sorrel"
+   ],
+   "lexicon_ids": [
+    "gongura"
+   ],
+   "wikipedia": "Gongura",
+   "region": "in"
+  },
+  "biryani": {
+   "title": "Hyderabadi biryani",
+   "description": "Hyderabadi biryani is a style of biryani originating from Hyderabad, India made with basmati rice and meat.",
+   "image": "images/biryani.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Hyderabadi_biryani",
+   "name": "Biryani",
+   "category": "food",
+   "aliases": [
+    "biryani"
+   ],
+   "lexicon_ids": [
+    "biryani"
+   ],
+   "wikipedia": "Hyderabadi biryani",
+   "region": "in"
+  },
+  "laddu": {
+   "title": "Laddu",
+   "description": "Laddu, or laddoo, is a spherical sweet from the Indian subcontinent made of various ingredients and sugar syrup or jaggery.",
+   "image": "images/laddu.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Laddu",
+   "name": "Laddu",
+   "category": "food",
+   "aliases": [
+    "laddu",
+    "laddus",
+    "ladoo",
+    "ladoos"
+   ],
+   "lexicon_ids": [
+    "laddu"
+   ],
+   "wikipedia": "Laddu",
+   "region": "in"
+  },
+  "ariselu": {
+   "title": "Adhirasam",
+   "description": "Adhirasam, attarasalu,, kajjaya or athrasa in Kannada, ariselu in Telugu, anarasa in Marathi, Airsa in Chhattisgarhi or Arisa pitha in Odia is a type of Indian sweet made out of \nrice, jaggery, ghee and sometimes coconut and with spices like cardamom, sesame, pepper and ginger powder from Tamil cuisine, Karnataka cuisine, Telugu cuisine, Marathi cuisine and Odia cuisine. The doughnut-like fried dough has a long history of popularity in Kannada, Telugu, Maharashtra, Chhattisgarh, Odisha, and Tamil civilization. They are similar in shape to vada, but are not savoury and are eaten as a sweet.",
+   "image": "images/ariselu.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Adhirasam",
+   "name": "Adhirasam",
+   "category": "food",
+   "aliases": [
+    "ariselu",
+    "rice sweets"
+   ],
+   "lexicon_ids": [
+    "ariselu"
+   ],
+   "wikipedia": "Ariselu",
+   "region": "in"
+  },
+  "bobbatlu": {
+   "title": "Puran poli",
+   "description": "Puran poli is an Indian sweet flatbread that is popular in South India and mainly in the state of Maharashtra.",
+   "image": "images/bobbatlu.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Puran_poli",
+   "name": "Bobbatlu",
+   "category": "food",
+   "aliases": [
+    "bobbatlu",
+    "sweet flatbread",
+    "puran poli"
+   ],
+   "lexicon_ids": [
+    "bobbatlu"
+   ],
+   "wikipedia": "Puran poli",
+   "region": "in"
+  },
+  "chapati": {
+   "title": "Chapati",
+   "description": "Chapati is an unleavened flatbread originating from the Indian subcontinent.",
+   "image": "images/chapati.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Chapati",
+   "name": "Chapati",
+   "category": "food",
+   "aliases": [
+    "chapati",
+    "chapatis",
+    "roti",
+    "rotis"
+   ],
+   "lexicon_ids": [
+    "chapati"
+   ],
+   "wikipedia": "Chapati",
+   "region": "in"
+  },
+  "payasam": {
+   "title": "Kheer",
+   "description": "Kheer, khir, payesh, fenni, or payasam is a pudding or porridge popular in the Indian subcontinent, usually made by boiling milk, sugar or jaggery, and rice.",
+   "image": "images/payasam.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kheer",
+   "name": "Payasam",
+   "category": "food",
+   "aliases": [
+    "payasam",
+    "kheer",
+    "rice pudding"
+   ],
+   "lexicon_ids": [
+    "payasam"
+   ],
+   "wikipedia": "Kheer",
+   "region": "in"
+  },
+  "murukku": {
+   "title": "Murukku",
+   "description": "Muṟukku is a savoury, crunchy snack originating from the Indian subcontinent.",
+   "image": "images/murukku.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Murukku",
+   "name": "Murukku (jantikalu)",
+   "category": "food",
+   "aliases": [
+    "murukku",
+    "jantikalu",
+    "chakli"
+   ],
+   "lexicon_ids": [
+    "jantikalu"
+   ],
+   "wikipedia": "Murukku",
+   "region": "in"
+  },
+  "pongal_dish": {
+   "title": "Pongal (dish)",
+   "description": "Pongal is a dish of rice cooked in boiling milk.",
+   "image": "images/pongal_dish.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Pongal_(dish)",
+   "name": "Pongal (dish)",
+   "category": "food",
+   "aliases": [
+    "pongal"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Pongal (dish)",
+   "region": "in"
+  },
+  "vada": {
+   "title": "Medu vada",
+   "description": "Medu vada is a South Indian breakfast snack made from Vigna mungo.",
+   "image": "images/vada.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Medu_vada",
+   "name": "Vada (garelu)",
+   "category": "food",
+   "aliases": [
+    "vada",
+    "vadas",
+    "vadai",
+    "garelu"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Medu vada",
+   "region": "in"
+  },
+  "pani_puri": {
+   "title": "Panipuri",
+   "description": "Panipuri is a snack associated with the cuisines of the Indian subcontinent consisting of a deep-fried spherical puri shell, hollowed out for a filling and dipped in flavoured waters.",
+   "image": "images/pani_puri.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Panipuri",
+   "name": "Panipuri",
+   "category": "food",
+   "aliases": [
+    "pani puri",
+    "panipuri",
+    "golgappa"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Panipuri",
+   "region": "in"
+  },
+  "samosa": {
+   "title": "Samosa",
+   "description": "A samosa or shingara is a fried Indian subcontinent turnover with a savoury filling that mostly consists of vegetables like spiced potatoes, onions, and peas, but can include cheese such as paneer, meat or even fish.",
+   "image": "images/samosa.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Samosa",
+   "name": "Samosa",
+   "category": "food",
+   "aliases": [
+    "samosa",
+    "samosas"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Samosa",
+   "region": "in"
+  },
+  "jalebi": {
+   "title": "Jalebi",
+   "description": "Jalebi is a common sweet snack in South Asia, West Asia and some parts of Africa.",
+   "image": "images/jalebi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Jalebi",
+   "name": "Jalebi",
+   "category": "food",
+   "aliases": [
+    "jalebi",
+    "jalebis"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Jalebi",
+   "region": "in"
+  },
+  "gulab_jamun": {
+   "title": "Gulab jamun",
+   "description": "Gulab jamun is a sweet dessert or mithai which had originated in the Indian subcontinent, and is popular in India, Bangladesh, Nepal, Pakistan and Burmese cuisines.",
+   "image": "images/gulab_jamun.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Gulab_jamun",
+   "name": "Gulab jamun",
+   "category": "food",
+   "aliases": [
+    "gulab jamun"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Gulab jamun",
+   "region": "in"
+  },
+  "paneer": {
+   "title": "Paneer",
+   "description": "Paneer is a fresh acid-set cheese, common in South Asian cuisine, made from cow milk or buffalo milk.",
+   "image": "images/paneer.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Paneer",
+   "name": "Paneer",
+   "category": "food",
+   "aliases": [
+    "paneer"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Paneer",
+   "region": "in"
+  },
+  "paneer_curry": {
+   "title": "Palak paneer",
+   "description": "Palak paneer or palak chhena is a dish from the Indian subcontinent consisting of chhena or paneer in a thick paste made from puréed spinach, called palak in Hindi, Marathi, Gujarati, Punjabi and other Indian languages.",
+   "image": "images/paneer_curry.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Palak_paneer",
+   "name": "Paneer curry",
+   "category": "food",
+   "aliases": [
+    "paneer curry",
+    "palak paneer"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Palak paneer",
+   "region": "in"
+  },
+  "chole": {
+   "title": "Chole bhature",
+   "description": "Chole bhature is a dish pairing chickpea curry with bhatura, a deep-fried flatbread.",
+   "image": "images/chole.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Chole_bhature",
+   "name": "Chole",
+   "category": "food",
+   "aliases": [
+    "chole",
+    "chole bhature",
+    "chickpea curry"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Chole bhature",
+   "region": "in"
+  },
+  "paratha": {
+   "title": "Paratha",
+   "description": "Paratha is a flatbread from the Indian subcontinent, consisting of a wheat dough, typically whole wheat, that is folded and rolled with ghee, forming multiple layers, and shallow fried.",
+   "image": "images/paratha.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Paratha",
+   "name": "Paratha",
+   "category": "food",
+   "aliases": [
+    "paratha",
+    "parathas"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Paratha",
+   "region": "in"
+  },
+  "naan": {
+   "title": "Naan",
+   "description": "Naan is a leavened, oven-baked or tawa-fried flatbread, that can also be baked in a tandoor.",
+   "image": "images/naan.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Naan",
+   "name": "Naan",
+   "category": "food",
+   "aliases": [
+    "naan"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Naan",
+   "region": "in"
+  },
+  "indian_pickle": {
+   "title": "South Asian pickle",
+   "description": "South Asian pickles, known as achar among other names, are pickled and often highly spiced condiments made from a variety of vegetables and fruits preserved in brine, vinegar, edible oils, and South Asian spices.",
+   "image": "images/indian_pickle.jpg",
+   "credit": "https://en.wikipedia.org/wiki/South_Asian_pickle",
+   "name": "Pickle",
+   "category": "food",
+   "aliases": [
+    "pickle",
+    "pickles"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "South Asian pickle",
+   "region": "in"
+  },
+  "chutney": {
+   "title": "Chutney",
+   "description": "A chutney is a condiment associated with cuisines of the Indian subcontinent.",
+   "image": "images/chutney.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Chutney",
+   "name": "Pachadi (chutney)",
+   "category": "food",
+   "aliases": [
+    "chutney",
+    "chutneys"
+   ],
+   "lexicon_ids": [
+    "pachadi"
+   ],
+   "wikipedia": "Chutney",
+   "region": "in"
+  },
+  "papadum": {
+   "title": "Papadam",
+   "description": "A papadam is a snack that originated in the Indian subcontinent.",
+   "image": "images/papadum.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Papadam",
+   "name": "Papadam",
+   "category": "food",
+   "aliases": [
+    "papad",
+    "papadum",
+    "appadam"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Papadam",
+   "region": "in"
+  },
+  "halwa": {
+   "title": "Gajar ka halwa",
+   "description": "Gajar ka halwa, also known as gajorer halwa, gajarno halwo, gajar pak, and carrot pudding, is a type of halva, an Indian dessert, made by placing grated carrots in a pot containing a specific amount of water, milk, sugar, and cardamom and then cooking with ghee while stirring regularly.",
+   "image": "images/halwa.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Gajar_ka_halwa",
+   "name": "Halwa",
+   "category": "food",
+   "aliases": [
+    "halwa",
+    "carrot halwa",
+    "gajar halwa"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Gajar ka halwa",
+   "region": "in"
+  },
+  "mysore_pak": {
+   "title": "Mysore pak",
+   "description": "Mysore pak is a traditional Indian confectionery made primarily from gram flour (besan), sugar, and ghee and often flavoured with cardamom.",
+   "image": "images/mysore_pak.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Mysore_pak",
+   "name": "Mysore pak",
+   "category": "food",
+   "aliases": [
+    "mysore pak"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Mysore pak",
+   "region": "in"
+  },
+  "kaju_katli": {
+   "title": "Kaju katli",
+   "description": "Kaju katli is an Indian dessert.",
+   "image": "images/kaju_katli.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kaju_katli",
+   "name": "Kaju katli",
+   "category": "food",
+   "aliases": [
+    "kaju katli",
+    "kaju barfi"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Kaju katli",
+   "region": "in"
+  },
+  "lassi": {
+   "title": "Lassi",
+   "description": "Lassi is a yogurt–based beverage with a smoothie-like consistency.",
+   "image": "images/lassi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Lassi",
+   "name": "Lassi",
+   "category": "food",
+   "aliases": [
+    "lassi"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Lassi",
+   "region": "in"
+  },
+  "chai": {
+   "title": "Masala chai",
+   "description": "Masala chai is a popular beverage originating from India.",
+   "image": "images/chai.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Masala_chai",
+   "name": "Masala chai",
+   "category": "food",
+   "aliases": [
+    "chai",
+    "masala chai",
+    "tea"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Masala chai",
+   "region": "in"
+  },
+  "filter_coffee": {
+   "title": "Indian filter coffee",
+   "description": "Indian filter coffee is a coffee drink made by mixing hot milk and sugar with the infusion obtained by percolation brewing of finely ground coffee powder with chicory in a traditional Indian filter. It has been described as \"hot, strong, sweet and topped with bubbly froth\" and is known as filter kaapi in India.",
+   "image": "images/filter_coffee.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Indian_filter_coffee",
+   "name": "Indian filter coffee",
+   "category": "food",
+   "aliases": [
+    "filter coffee"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Indian filter coffee",
+   "region": "in"
+  },
+  "coconut_water": {
+   "title": "Coconut water",
+   "description": "Coconut water is the clear liquid inside young coconuts.",
+   "image": "images/coconut_water.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Coconut_water",
+   "name": "Tender coconut",
+   "category": "food",
+   "aliases": [
+    "tender coconut",
+    "coconut water"
+   ],
+   "lexicon_ids": [
+    "kobbari"
+   ],
+   "wikipedia": "Coconut water",
+   "region": "in"
+  },
+  "jaggery": {
+   "title": "Jaggery",
+   "description": "Jaggery is a traditional non-centrifugal cane sugar consumed in South Asia, Southeast Asia, North America, Central America, Brazil and parts of Africa.",
+   "image": "images/jaggery.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Jaggery",
+   "name": "Jaggery",
+   "category": "food",
+   "aliases": [
+    "jaggery"
+   ],
+   "lexicon_ids": [
+    "bellam"
+   ],
+   "wikipedia": "Jaggery",
+   "region": "in"
+  },
+  "mango": {
+   "title": "Mango",
+   "description": "A mango is an edible stone fruit produced by the tropical tree Mangifera indica.",
+   "image": "images/mango.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Mango",
+   "name": "Mango",
+   "category": "food",
+   "aliases": [
+    "mango",
+    "mangoes",
+    "raw mango"
+   ],
+   "lexicon_ids": [
+    "mamidi"
+   ],
+   "wikipedia": "Mango",
+   "region": "us"
+  },
+  "banana": {
+   "title": "Banana",
+   "description": "A banana is an elongated, edible fruit that is botanically a berry produced by several kinds of large treelike herbaceous flowering plants in the genus Musa.",
+   "image": "images/banana.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Banana",
+   "name": "Banana",
+   "category": "food",
+   "aliases": [
+    "banana",
+    "bananas"
+   ],
+   "lexicon_ids": [
+    "arati"
+   ],
+   "wikipedia": "Banana",
+   "region": "us"
+  },
+  "jackfruit": {
+   "title": "Jackfruit",
+   "description": "The jackfruit or jakfruit is a fruit tree in the mulberry family of Moraceae.",
+   "image": "images/jackfruit.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Jackfruit",
+   "name": "Jackfruit",
+   "category": "food",
+   "aliases": [
+    "jackfruit"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Jackfruit",
+   "region": "in"
+  },
+  "guava": {
+   "title": "Guava",
+   "description": "Guava, also known as the 'guava-pear' in various regions, is a common tropical fruit cultivated in many tropical and subtropical regions.",
+   "image": "images/guava.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Guava",
+   "name": "Guava",
+   "category": "food",
+   "aliases": [
+    "guava",
+    "guavas"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Guava",
+   "region": "in"
+  },
+  "sugarcane": {
+   "title": "Sugarcane juice",
+   "description": "Sugarcane juice is the liquid extracted from pressed sugarcane.",
+   "image": "images/sugarcane.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Sugarcane_juice",
+   "name": "Sugarcane juice",
+   "category": "food",
+   "aliases": [
+    "sugarcane",
+    "sugarcane juice"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Sugarcane juice",
+   "region": "in"
+  },
+  "pav_bhaji": {
+   "title": "Pav bhaji",
+   "description": "Pav bhaji, or pao bhaji is a staple food of Maharashtra, consisting of a thick spicy vegetable curry (bhaji) served with a soft, buttered bread roll (pav).",
+   "image": "images/pav_bhaji.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Pav_bhaji",
+   "name": "Pav bhaji",
+   "category": "food",
+   "aliases": [
+    "pav bhaji"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Pav bhaji",
+   "region": "in"
+  },
+  "uttapam": {
+   "title": "Uttapam",
+   "description": "An uttapam, uthappam, oothappam, uthapam, utapam or uttappam is a type of dosa from South India.",
+   "image": "images/uttapam.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Uttapam",
+   "name": "Uttapam",
+   "category": "food",
+   "aliases": [
+    "uttapam",
+    "uthappam"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Uttapam",
+   "region": "in"
+  },
+  "poha": {
+   "title": "Flattened rice",
+   "description": "Flattened rice is a preparation of rice made from raw, toasted, or parboiled rice grains pounded into flat flakes.",
+   "image": "images/poha.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Flattened_rice",
+   "name": "Poha (atukulu)",
+   "category": "food",
+   "aliases": [
+    "poha",
+    "atukulu"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Poha (rice)",
+   "region": "in"
+  },
+  "pakora": {
+   "title": "Pakora",
+   "description": "Pakora is a fritter originating from the Indian subcontinent.",
+   "image": "images/pakora.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Pakora",
+   "name": "Bajji (pakora)",
+   "category": "food",
+   "aliases": [
+    "pakora",
+    "pakoras",
+    "bajji",
+    "bajjis",
+    "mirchi bajji"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Pakora",
+   "region": "in"
+  },
+  "kulfi": {
+   "title": "Kulfi",
+   "description": "Kulfi is a frozen dairy dessert from the Indian subcontinent.",
+   "image": "images/kulfi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kulfi",
+   "name": "Kulfi",
+   "category": "food",
+   "aliases": [
+    "kulfi"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Kulfi",
+   "region": "in"
+  },
+  "prasadam": {
+   "title": "Prasada",
+   "description": "Prasāda, prasad or prasadam is a religious offering in Hinduism.",
+   "image": "images/prasadam.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Prasada",
+   "name": "Prasadam",
+   "category": "food",
+   "aliases": [
+    "prasadam",
+    "prasad"
+   ],
+   "lexicon_ids": [
+    "prasadam"
+   ],
+   "wikipedia": "Prasada",
+   "region": "in"
+  },
+  "pulao": {
+   "title": "Pilaf",
+   "description": "Pilaf is a rice dish, or in some regions, a wheat dish, whose recipe usually involves cooking in stock or broth, adding spices, and other ingredients such as vegetables and meat, and employing some technique for achieving cooked grains that do not adhere.",
+   "image": "images/pulao.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Pilaf",
+   "name": "Pulao",
+   "category": "food",
+   "aliases": [
+    "pulao",
+    "pulav"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Pilaf",
+   "region": "in"
+  },
+  "tamarind": {
+   "title": "Tamarind",
+   "description": "Tamarind is a leguminous tree bearing edible fruit that is indigenous to tropical Africa and naturalized in Asia.",
+   "image": "images/tamarind.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Tamarind",
+   "name": "Tamarind",
+   "category": "food",
+   "aliases": [
+    "tamarind"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Tamarind",
+   "region": "in"
+  },
+  "curry_leaves": {
+   "title": "Curry tree",
+   "description": "Bergera koenigii, synonym Murraya koenigii, and commonly known as curry tree, curry bush or sweet neem, is a tree in the citrus family Rutaceae, first described by Carl Linnaeus in 1767.",
+   "image": "images/curry_leaves.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Curry_tree",
+   "name": "Curry leaves",
+   "category": "food",
+   "aliases": [
+    "curry leaves"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Curry tree",
+   "region": "in"
+  },
+  "ragi": {
+   "title": "Finger millet",
+   "description": "Finger millet is an annual herbaceous plant.",
+   "image": "images/ragi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Finger_millet",
+   "name": "Ragi",
+   "category": "food",
+   "aliases": [
+    "ragi",
+    "finger millet",
+    "ragi java"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Finger millet",
+   "region": "in"
+  },
+  "thali": {
+   "title": "Thali",
+   "description": "Thali or bhojanam is a round platter used to serve food in South Asia, Southeast Asia and the Caribbean.",
+   "image": "images/thali.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Thali",
+   "name": "Full meal (bhojanam)",
+   "category": "food",
+   "aliases": [
+    "thali",
+    "banana leaf meal",
+    "full meal"
+   ],
+   "lexicon_ids": [
+    "bhojanam"
+   ],
+   "wikipedia": "Thali",
+   "region": "in"
+  },
+  "rice": {
+   "title": "Cooked rice",
+   "description": "Cooked rice refers to rice that has been cooked either by steaming or boiling.",
+   "image": "images/rice.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Cooked_rice",
+   "name": "Rice (annam)",
+   "category": "food",
+   "aliases": [
+    "rice",
+    "cooked rice"
+   ],
+   "lexicon_ids": [
+    "annam"
+   ],
+   "wikipedia": "Cooked rice",
+   "region": "us"
+  },
+  "curry": {
+   "title": "Curry",
+   "description": "Curry is a dish with a spicy sauce, initially in Indian cuisine, then modified by interchange with the Portuguese, followed by the British, and eventually thoroughly internationalised.",
+   "image": "images/curry.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Curry",
+   "name": "Curry (kura)",
+   "category": "food",
+   "aliases": [
+    "curry",
+    "curries"
+   ],
+   "lexicon_ids": [
+    "kura"
+   ],
+   "wikipedia": "Curry",
+   "region": "us"
+  },
+  "auto": {
+   "title": "Auto rickshaw",
+   "description": "An auto rickshaw is a motorized version of the pulled rickshaw or cycle rickshaw.",
+   "image": "images/auto.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Auto_rickshaw",
+   "name": "Auto rickshaw",
+   "category": "vehicle",
+   "aliases": [
+    "auto-rickshaw",
+    "auto rickshaw",
+    "auto"
+   ],
+   "lexicon_ids": [
+    "auto"
+   ],
+   "wikipedia": "Auto rickshaw",
+   "region": "in"
+  },
+  "rickshaw": {
+   "title": "Cycle rickshaw",
+   "description": "The cycle rickshaw is a small-scale means of local transport.",
+   "image": "images/rickshaw.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Cycle_rickshaw",
+   "name": "Cycle rickshaw",
+   "category": "vehicle",
+   "aliases": [
+    "rickshaw",
+    "cycle rickshaw"
+   ],
+   "lexicon_ids": [
+    "rickshaw"
+   ],
+   "wikipedia": "Cycle rickshaw",
+   "region": "in"
+  },
+  "bullock_cart": {
+   "title": "Bullock cart",
+   "description": "A bullock cart or ox cart is a two-wheeled or four-wheeled vehicle pulled by oxen.",
+   "image": "images/bullock_cart.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Bullock_cart",
+   "name": "Bullock cart",
+   "category": "vehicle",
+   "aliases": [
+    "bullock cart",
+    "bullock carts"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Bullock cart",
+   "region": "in"
+  },
+  "scooter": {
+   "title": "Scooter (motorcycle)",
+   "description": "A scooter or motor scooter is a motorcycle with an underbone or step-through frame, a seat, and a platform for the rider's feet.",
+   "image": "images/scooter.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Scooter_(motorcycle)",
+   "name": "Scooter (motorcycle)",
+   "category": "vehicle",
+   "aliases": [
+    "scooter",
+    "scooty"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Motor scooter",
+   "region": "us"
+  },
+  "gopuram": {
+   "title": "Gopuram",
+   "description": "A gopuram or gopura is a monumental, usually ornate entrance tower of a Hindu temple in the Dravidian architecture of South India and Sri Lanka.",
+   "image": "images/gopuram.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Gopuram",
+   "name": "Gopuram",
+   "category": "place",
+   "aliases": [
+    "gopuram",
+    "temple tower"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Gopuram",
+   "region": "in"
+  },
+  "paddy_field": {
+   "title": "Paddy field",
+   "description": "A paddy field is a flooded field of arable land used for growing semiaquatic crops, most notably rice and taro.",
+   "image": "images/paddy_field.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Paddy_field",
+   "name": "Paddy field (polam)",
+   "category": "place",
+   "aliases": [
+    "farm field",
+    "paddy field",
+    "rice field"
+   ],
+   "lexicon_ids": [
+    "polam"
+   ],
+   "wikipedia": "Paddy field",
+   "region": "in"
+  },
+  "well": {
+   "title": "Well",
+   "description": "A well is an excavation or structure created on the earth by digging, driving, or drilling to access liquid resources, usually water.",
+   "image": "images/well.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Well",
+   "name": "Well",
+   "category": "place",
+   "aliases": [
+    "village well",
+    "water well"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Water well",
+   "region": "in"
+  },
+  "tulsi": {
+   "title": "Ocimum tenuiflorum",
+   "description": "Ocimum tenuiflorum, commonly known as tulasi, tulsi, or holy basil, is an aromatic perennial plant in the family Lamiaceae.",
+   "image": "images/tulsi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Ocimum_tenuiflorum",
+   "name": "Tulsi (holy basil)",
+   "category": "place",
+   "aliases": [
+    "tulsi",
+    "holy basil",
+    "tulasi"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Ocimum tenuiflorum",
+   "region": "in"
+  },
+  "banyan": {
+   "title": "Banyan",
+   "description": "A banyan, also spelled banian, is a fig that develops accessory trunks from adjacent prop roots, allowing the tree to spread outwards indefinitely.",
+   "image": "images/banyan.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Banyan",
+   "name": "Banyan",
+   "category": "place",
+   "aliases": [
+    "banyan tree",
+    "banyan"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Banyan",
+   "region": "in"
+  },
+  "neem": {
+   "title": "Azadirachta indica",
+   "description": "Azadirachta indica, commonly known as neem, margosa, nimtree or Indian lilac, is a tree in the Mahogany family Meliaceae.",
+   "image": "images/neem.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Azadirachta_indica",
+   "name": "Neem tree",
+   "category": "place",
+   "aliases": [
+    "neem",
+    "neem tree"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Azadirachta indica",
+   "region": "in"
+  },
+  "coconut_tree": {
+   "title": "Coconut",
+   "description": "The coconut is a member of the palm family (Arecaceae) and the only living species of the genus Cocos.",
+   "image": "images/coconut_tree.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Coconut",
+   "name": "Coconut",
+   "category": "place",
+   "aliases": [
+    "coconut tree",
+    "coconut",
+    "coconuts"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Coconut",
+   "region": "us"
+  },
+  "cow": {
+   "title": "Zebu",
+   "description": "The zebu, also known as indicine cattle and humped cattle, is a species or subspecies of domestic cattle originating in South Asia.",
+   "image": "images/cow.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Zebu",
+   "name": "Cow",
+   "category": "place",
+   "aliases": [
+    "cow",
+    "cows"
+   ],
+   "lexicon_ids": [
+    "aavu"
+   ],
+   "wikipedia": "Zebu",
+   "region": "us"
+  },
+  "buffalo": {
+   "title": "Water buffalo",
+   "description": "The water buffalo, also called domestic water buffalo, Asian water buffalo, and Asiatic water buffalo, is a large domesticated bovine originating in South and Southeast Asia descended from the wild water buffalo.",
+   "image": "images/buffalo.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Water_buffalo",
+   "name": "Water buffalo",
+   "category": "place",
+   "aliases": [
+    "buffalo",
+    "buffaloes"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Water buffalo",
+   "region": "in"
+  },
+  "peacock": {
+   "title": "Indian peafowl",
+   "description": "The Indian peafowl, also known as the common peafowl, or blue peafowl, is a species of peafowl native to the Indian subcontinent.",
+   "image": "images/peacock.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Indian_peafowl",
+   "name": "Indian peafowl",
+   "category": "place",
+   "aliases": [
+    "peacock",
+    "peacocks"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Indian peafowl",
+   "region": "in"
+  },
+  "charminar": {
+   "title": "Charminar",
+   "description": "The Charminar is a monument located in Hyderabad, Telangana, India.",
+   "image": "images/charminar.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Charminar",
+   "name": "Charminar",
+   "category": "place",
+   "aliases": [
+    "charminar"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Charminar",
+   "region": "in"
+  },
+  "tirupati": {
+   "title": "Venkateswara Temple, Tirumala",
+   "description": "The Venkateswara Swami Temple—also known as Tirumala Temple, Tirupati Temple and Tirupati Balaji Temple—is a Hindu temple located in the hills of Tirumala, within Tirupati Urban Mandal, Tirupati district, Andhra Pradesh, India.",
+   "image": "images/tirupati.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Venkateswara_Temple%2C_Tirumala",
+   "name": "Tirupati temple",
+   "category": "place",
+   "aliases": [
+    "tirupati",
+    "tirumala"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Venkateswara Temple, Tirumala",
+   "region": "in"
+  },
+  "saree": {
+   "title": "Sari",
+   "description": "A sari is a draped cloth and women's garment in the Indian subcontinent.",
+   "image": "images/saree.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Sari",
+   "name": "Sari",
+   "category": "clothing",
+   "aliases": [
+    "saree",
+    "sari",
+    "sarees",
+    "saris"
+   ],
+   "lexicon_ids": [
+    "saree"
+   ],
+   "wikipedia": "Sari",
+   "region": "in"
+  },
+  "silk_saree": {
+   "title": "Kanchipuram silk sari",
+   "description": "The Kanchipuram silk sari, also called Kanjeevaram sari is a type of silk sari made in the Kanchipuram region in Tamil Nadu, India.",
+   "image": "images/silk_saree.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kanchipuram_silk_sari",
+   "name": "Pattu saree",
+   "category": "clothing",
+   "aliases": [
+    "silk saree",
+    "silk sari",
+    "pattu saree"
+   ],
+   "lexicon_ids": [
+    "pattu_cheera"
+   ],
+   "wikipedia": "Kanchipuram silk sari",
+   "region": "in"
+  },
+  "kurta": {
+   "title": "Kurta",
+   "description": "A kurta is a loose collarless shirt or tunic worn in many regions of South Asia, and now also worn around the world.",
+   "image": "images/kurta.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kurta",
+   "name": "Kurta",
+   "category": "clothing",
+   "aliases": [
+    "kurta",
+    "kurtas"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Kurta",
+   "region": "in"
+  },
+  "lungi": {
+   "title": "Lungi",
+   "description": "The lungi is a clothing similar to the sarong that originated in the Indian subcontinent.",
+   "image": "images/lungi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Lungi",
+   "name": "Lungi",
+   "category": "clothing",
+   "aliases": [
+    "lungi"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Lungi",
+   "region": "in"
+  },
+  "bangles": {
+   "title": "Bangle",
+   "description": "A bangle is a traditionally rigid bracelet which is usually made of metal, wood, glass or plastic.",
+   "image": "images/bangles.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Bangle",
+   "name": "Bangles (gajulu)",
+   "category": "clothing",
+   "aliases": [
+    "bangles",
+    "bangle"
+   ],
+   "lexicon_ids": [
+    "gajulu"
+   ],
+   "wikipedia": "Bangle",
+   "region": "in"
+  },
+  "bindi": {
+   "title": "Bindi",
+   "description": "A bindi is a coloured dot or, in modern times, a sticker worn on the centre of the forehead, by Hindus, Jains, and Buddhists from the Indian subcontinent.",
+   "image": "images/bindi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Bindi",
+   "name": "Bindi (bottu)",
+   "category": "clothing",
+   "aliases": [
+    "bindi",
+    "bottu"
+   ],
+   "lexicon_ids": [
+    "bottu"
+   ],
+   "wikipedia": "Bindi",
+   "region": "in"
+  },
+  "mangalsutra": {
+   "title": "Mangalasutra",
+   "description": "A mangala sutra, or tali, is a necklace worn by certain groups of married women from the Indian subcontinent.",
+   "image": "images/mangalsutra.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Mangalasutra",
+   "name": "Mangalasutra",
+   "category": "clothing",
+   "aliases": [
+    "mangalsutra",
+    "thali chain"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Mangalsutra",
+   "region": "in"
+  },
+  "anklet": {
+   "title": "Anklet",
+   "description": "An anklet, also called ankle chain, ankle bracelet or ankle string, is an ornament worn around the ankle.",
+   "image": "images/anklet.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Anklet",
+   "name": "Anklet",
+   "category": "clothing",
+   "aliases": [
+    "anklets",
+    "anklet",
+    "payal"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Anklet",
+   "region": "in"
+  },
+  "mehndi": {
+   "title": "Mehndi",
+   "description": "Mehndi or mehendi is a form of temporary skin decoration using a paste created with henna.",
+   "image": "images/mehndi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Mehndi",
+   "name": "Mehndi",
+   "category": "clothing",
+   "aliases": [
+    "mehndi",
+    "henna"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Mehndi",
+   "region": "in"
+  },
+  "sankranti": {
+   "title": "Makar Sankranti",
+   "description": "Makar(a) Sankrānti also referred to as Uttarāyana, Makara, or simply Sankrānti, is a Hindu observance and a mid-winter harvest festival in India and Nepal.",
+   "image": "images/sankranti.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Makar_Sankranti",
+   "name": "Sankranti",
+   "category": "festival",
+   "aliases": [
+    "sankranti",
+    "makar sankranti"
+   ],
+   "lexicon_ids": [
+    "sankranti"
+   ],
+   "wikipedia": "Makar Sankranti",
+   "region": "in"
+  },
+  "ugadi": {
+   "title": "Ugadi",
+   "description": "Ugādi, Yugādi or also known as Saṁvatsarādi, is the first day of the year on the Hindu calendar.",
+   "image": "images/ugadi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Ugadi",
+   "name": "Ugadi",
+   "category": "festival",
+   "aliases": [
+    "ugadi"
+   ],
+   "lexicon_ids": [
+    "ugadi"
+   ],
+   "wikipedia": "Ugadi",
+   "region": "in"
+  },
+  "diwali": {
+   "title": "Diwali",
+   "description": "Dipavali, commonly known as Diwali, is the Hindu festival of lights, with variations celebrated in other Indian religions such as Jainism and Sikhism.",
+   "image": "images/diwali.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Diwali",
+   "name": "Diwali",
+   "category": "festival",
+   "aliases": [
+    "diwali",
+    "deepavali"
+   ],
+   "lexicon_ids": [
+    "diwali"
+   ],
+   "wikipedia": "Diwali",
+   "region": "in"
+  },
+  "ganesh_chaturthi": {
+   "title": "Ganesh Chaturthi",
+   "description": "Ganesh Chaturthi, also known as Vinayaka Chaturthi, Vinayaka Chavithi, or Vinayagar Chaturthi, is a Hindu festival celebrating the arrival of the Hindu deity Ganesha to the south of India to meet his brother Karthikeya.",
+   "image": "images/ganesh_chaturthi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Ganesh_Chaturthi",
+   "name": "Vinayaka Chavithi",
+   "category": "festival",
+   "aliases": [
+    "vinayaka chavithi",
+    "ganesh chaturthi",
+    "ganesha"
+   ],
+   "lexicon_ids": [
+    "vinayaka_chavithi"
+   ],
+   "wikipedia": "Ganesh Chaturthi",
+   "region": "in"
+  },
+  "bathukamma": {
+   "title": "Bathukamma",
+   "description": "Bathukamma is a flower-festival celebrated by Telugu Hindu women of Telangana and some parts of Andhra Pradesh.",
+   "image": "images/bathukamma.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Bathukamma",
+   "name": "Bathukamma",
+   "category": "festival",
+   "aliases": [
+    "bathukamma"
+   ],
+   "lexicon_ids": [
+    "bathukamma"
+   ],
+   "wikipedia": "Bathukamma",
+   "region": "in"
+  },
+  "dussehra": {
+   "title": "Vijayadashami",
+   "description": "Vijayadashami, more commonly known as Dasara, or Dassahra, or Dussehra, and also known as Dashāhra or Dashain in Nepali, is a major Hindu festival celebrated every year at the end of Durga Puja and Navaratri.",
+   "image": "images/dussehra.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Vijayadashami",
+   "name": "Dasara",
+   "category": "festival",
+   "aliases": [
+    "dussehra",
+    "dasara",
+    "vijayadashami"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Vijayadashami",
+   "region": "in"
+  },
+  "pongal_festival": {
+   "title": "Pongal (festival)",
+   "description": "Pongal is a multi-day Hindu harvest festival celebrated by Tamils.",
+   "image": "images/pongal_festival.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Pongal_(festival)",
+   "name": "Pongal festival",
+   "category": "festival",
+   "aliases": [
+    "pongal festival"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Thai Pongal",
+   "region": "in"
+  },
+  "kite": {
+   "title": "Kite",
+   "description": "A kite is a tethered heavier-than-air craft with wing surfaces that react against the air to create lift and drag forces.",
+   "image": "images/kite.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kite",
+   "name": "Kites (galipatam)",
+   "category": "festival",
+   "aliases": [
+    "kites",
+    "kite"
+   ],
+   "lexicon_ids": [
+    "galipatam"
+   ],
+   "wikipedia": "Kite",
+   "region": "in"
+  },
+  "diya": {
+   "title": "Diya (lamp)",
+   "description": "A diya, diyo, deya, deeya, dia, divaa, deepa, deepam, deep, deepak or saaki is an oil lamp made from clay, brass or silver with a cotton wick dipped in oil or ghee.",
+   "image": "images/diya.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Diya_(lamp)",
+   "name": "Diya (oil lamp)",
+   "category": "festival",
+   "aliases": [
+    "diya",
+    "diyas",
+    "oil lamp",
+    "oil lamps"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Diya (lamp)",
+   "region": "in"
+  },
+  "puja": {
+   "title": "Puja (Hinduism)",
+   "description": "Puja is a worship ritual performed by Hindus to offer devotional homage and prayer to one or more deities, to host and honour a guest, or to spiritually celebrate an event.",
+   "image": "images/puja.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Puja_(Hinduism)",
+   "name": "Puja (Hinduism)",
+   "category": "festival",
+   "aliases": [
+    "puja",
+    "pooja"
+   ],
+   "lexicon_ids": [
+    "puja"
+   ],
+   "wikipedia": "Puja (Hinduism)",
+   "region": "in"
+  },
+  "aarti": {
+   "title": "Arti (Hinduism)",
+   "description": "Arti  or Arartikya is a Hindu ritual employed in worship, part of a puja, in which light from a flame is ritually waved in a clock-wise motion to venerate deities.",
+   "image": "images/aarti.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Arti_(Hinduism)",
+   "name": "Aarti",
+   "category": "festival",
+   "aliases": [
+    "aarti",
+    "harathi"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Arti (Hinduism)",
+   "region": "in"
+  },
+  "rangoli": {
+   "title": "Kolam",
+   "description": "Kolam, also known as Muggu, Tarai Alangaram and Rangole, is a form of traditional decorative art that is drawn by using rice flour as per age-old conventions.",
+   "image": "images/rangoli.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kolam",
+   "name": "Muggu (rangoli)",
+   "category": "festival",
+   "aliases": [
+    "rangoli",
+    "muggu",
+    "muggulu",
+    "kolam"
+   ],
+   "lexicon_ids": [
+    "muggu"
+   ],
+   "wikipedia": "Kolam",
+   "region": "in"
+  },
+  "veena": {
+   "title": "Saraswati veena",
+   "description": "The Sarasvatī vīṇa is an ancient Indian plucked veena.",
+   "image": "images/veena.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Saraswati_veena",
+   "name": "Veena",
+   "category": "festival",
+   "aliases": [
+    "veena"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Saraswati veena",
+   "region": "in"
+  },
+  "kuchipudi": {
+   "title": "Kuchipudi",
+   "description": "Kuchipudi is one of the eight major Indian classical dance forms.",
+   "image": "images/kuchipudi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kuchipudi",
+   "name": "Kuchipudi",
+   "category": "festival",
+   "aliases": [
+    "kuchipudi",
+    "classical dance"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Kuchipudi",
+   "region": "in"
+  },
+  "bharatanatyam": {
+   "title": "Bharatanatyam",
+   "description": "Bharatanatyam is an Indian classical dance form that comes from Tamil Nadu, India.",
+   "image": "images/bharatanatyam.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Bharatanatyam",
+   "name": "Bharatanatyam",
+   "category": "festival",
+   "aliases": [
+    "bharatanatyam"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Bharatanatyam",
+   "region": "in"
+  },
+  "carnatic": {
+   "title": "Carnatic music",
+   "description": "Carnatic music is a system of music commonly associated with South India, including the modern Indian states of Andhra Pradesh, Karnataka, Kerala, Tamil Nadu and Telangana.",
+   "image": "images/carnatic.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Carnatic_music",
+   "name": "Carnatic music",
+   "category": "festival",
+   "aliases": [
+    "carnatic music",
+    "carnatic"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Carnatic music",
+   "region": "in"
+  },
+  "cricket": {
+   "title": "Cricket",
+   "description": "Cricket is a bat-and-ball game that is played between two teams of eleven players on a field, at the centre of which is a 22-yard pitch with a wicket at each end, each comprising two bails balanced on three stumps.",
+   "image": "images/cricket.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Cricket",
+   "name": "Cricket",
+   "category": "festival",
+   "aliases": [
+    "cricket"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Cricket",
+   "region": "in"
+  },
+  "pressure_cooker": {
+   "title": "Pressure cooker",
+   "description": "A pressure cooker is a sealed vessel used for cooking food with the use of high pressure steam and water or a water-based liquid, in a process called pressure cooking.",
+   "image": "images/pressure_cooker.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Pressure_cooker",
+   "name": "Pressure cooker",
+   "category": "place",
+   "aliases": [
+    "pressure cooker"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Pressure cooking",
+   "region": "in"
+  },
+  "tawa": {
+   "title": "Tava",
+   "description": "The tava(h) / tawa(h) (IPA: [t̪əʋaː], mainly on the Indian subcontinent), saj (IPA: [sˁɑːdʒ]in Arabic), sac (IPA: [sadʒ], in Turkish), and other variations, is a metal cooking utensil.",
+   "image": "images/tawa.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Tava",
+   "name": "Tawa",
+   "category": "place",
+   "aliases": [
+    "tawa",
+    "tava",
+    "griddle"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Tava",
+   "region": "in"
+  },
+  "steel_tumbler": {
+   "title": "Indian filter coffee",
+   "description": "Indian filter coffee is a coffee drink made by mixing hot milk and sugar with the infusion obtained by percolation brewing of finely ground coffee powder with chicory in a traditional Indian filter. It has been described as \"hot, strong, sweet and topped with bubbly froth\" and is known as filter kaapi in India.",
+   "image": "images/steel_tumbler.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Indian_filter_coffee",
+   "name": "Steel tumbler (davara)",
+   "category": "place",
+   "aliases": [
+    "tumbler",
+    "davara"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Dabarah",
+   "region": "in"
+  },
+  "mortar_pestle": {
+   "title": "Mortar and pestle",
+   "description": "A mortar and pestle is a set of two simple tools used to prepare ingredients or substances by crushing and grinding them into a fine paste or powder in the kitchen, laboratory, and pharmacy.",
+   "image": "images/mortar_pestle.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Mortar_and_pestle",
+   "name": "Grinding stone (rolu)",
+   "category": "place",
+   "aliases": [
+    "mortar and pestle",
+    "grinding stone",
+    "rolu"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Mortar and pestle",
+   "region": "in"
+  },
+  "charpoy": {
+   "title": "Charpai",
+   "description": "Charpai is a traditional woven bed used across Indian subcontinent.",
+   "image": "images/charpoy.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Charpai",
+   "name": "Charpoy",
+   "category": "place",
+   "aliases": [
+    "charpoy",
+    "rope cot"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Charpai",
+   "region": "in"
+  },
+  "jhoola": {
+   "title": "Swing (seat)",
+   "description": "A swing is a seat or platform, suspended from chains, ropes, or bars, on which one or more people can swing back and forth for enjoyment or relaxation.",
+   "image": "images/jhoola.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Swing_(seat)",
+   "name": "Swing (uyyala)",
+   "category": "place",
+   "aliases": [
+    "jhoola",
+    "uyyala",
+    "swing seat"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Swing (seat)",
+   "region": "in"
+  },
+  "rangoli_powder": {
+   "title": "Rangoli",
+   "description": "Rangoli is an art form that originates from the Indian subcontinent, in which patterns are created on the floor or a tabletop using materials such as powdered limestone, red ochre, dry rice flour, coloured sand, quartz powder, flower petals, and coloured rocks.",
+   "image": "images/rangoli_powder.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Rangoli",
+   "name": "Rangoli colours",
+   "category": "festival",
+   "aliases": [
+    "rangoli powder"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Rangoli",
+   "region": "in"
+  },
+  "thanksgiving": {
+   "title": "Thanksgiving (United States)",
+   "description": "Thanksgiving is a federal holiday in the United States celebrated on the fourth Thursday of November.",
+   "image": "images/thanksgiving.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Thanksgiving_(United_States)",
+   "name": "Thanksgiving (United States)",
+   "category": "festival",
+   "aliases": [
+    "thanksgiving"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Thanksgiving (United States)",
+   "region": "us"
+  },
+  "halloween": {
+   "title": "Halloween",
+   "description": "Halloween, also known as All Hallows' Eve, or All Saints' Eve, is a celebration observed in many countries on 31 October, the eve of the Western Christian feast of All Hallows' Day.",
+   "image": "images/halloween.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Halloween",
+   "name": "Halloween",
+   "category": "festival",
+   "aliases": [
+    "halloween",
+    "trick-or-treating",
+    "trick or treating"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Halloween",
+   "region": "us"
+  },
+  "christmas_tree": {
+   "title": "Christmas tree",
+   "description": "A Christmas tree is a decorated tree, usually an evergreen conifer such as a spruce, pine or fir, associated with the celebration of Christmas.",
+   "image": "images/christmas_tree.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Christmas_tree",
+   "name": "Christmas tree",
+   "category": "festival",
+   "aliases": [
+    "christmas tree",
+    "christmas"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Christmas tree",
+   "region": "us"
+  },
+  "fourth_of_july": {
+   "title": "Independence Day (United States)",
+   "description": "Independence Day, known colloquially as the Fourth of July, is a federal holiday in the United States which commemorates the adoption of the Declaration of Independence on July 4, 1776, establishing the United States of America.",
+   "image": "images/fourth_of_july.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Independence_Day_(United_States)",
+   "name": "Fourth of July",
+   "category": "festival",
+   "aliases": [
+    "fourth of july",
+    "4th of july",
+    "independence day"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Independence Day (United States)",
+   "region": "us"
+  },
+  "hamburger": {
+   "title": "Hamburger",
+   "description": "A hamburger, often known as a burger, consists of fillings—usually a patty of panfried or grilled ground meat, typically beef—placed inside a sliced bun, sesame seed bun, or bread roll.",
+   "image": "images/hamburger.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Hamburger",
+   "name": "Hamburger",
+   "category": "food",
+   "aliases": [
+    "hamburger",
+    "burger",
+    "burgers"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Hamburger",
+   "region": "us"
+  },
+  "pizza": {
+   "title": "Pizza",
+   "description": "Pizza is an Italian dish typically consisting of a flat base of leavened wheat-based dough topped with tomato, cheese, and other ingredients, baked at a high temperature, traditionally in a wood-fired oven.",
+   "image": "images/pizza.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Pizza",
+   "name": "Pizza",
+   "category": "food",
+   "aliases": [
+    "pizza",
+    "pizzas"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Pizza",
+   "region": "us"
+  },
+  "hot_dog": {
+   "title": "Hot dog",
+   "description": "A hot dog is a grilled, steamed, or boiled sausage served in the slit of a partially sliced bun.",
+   "image": "images/hot_dog.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Hot_dog",
+   "name": "Hot dog",
+   "category": "food",
+   "aliases": [
+    "hot dog",
+    "hot dogs"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Hot dog",
+   "region": "us"
+  },
+  "mac_and_cheese": {
+   "title": "Macaroni and cheese",
+   "description": "Macaroni and cheese is a pasta dish of macaroni covered in cheese sauce, most commonly cheddar sauce.",
+   "image": "images/mac_and_cheese.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Macaroni_and_cheese",
+   "name": "Macaroni and cheese",
+   "category": "food",
+   "aliases": [
+    "mac and cheese",
+    "macaroni and cheese"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Macaroni and cheese",
+   "region": "us"
+  },
+  "pancake": {
+   "title": "Pancake",
+   "description": "A pancake, also known as a hotcake, griddlecake, or flapjack, is a flat type of batter bread like cake, often thin and round, prepared from a starch-based batter that may contain eggs, milk, and butter, and then cooked on a hot surface such as a griddle or frying pan.",
+   "image": "images/pancake.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Pancake",
+   "name": "Pancake",
+   "category": "food",
+   "aliases": [
+    "pancakes",
+    "pancake"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Pancake",
+   "region": "us"
+  },
+  "bagel": {
+   "title": "Bagel",
+   "description": "A bagel is a bread roll originating in the Jewish communities of Poland.",
+   "image": "images/bagel.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Bagel",
+   "name": "Bagel",
+   "category": "food",
+   "aliases": [
+    "bagel",
+    "bagels"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Bagel",
+   "region": "us"
+  },
+  "taco": {
+   "title": "Taco",
+   "description": "A taco is a traditional Mexican dish consisting of a small hand-sized corn- or wheat-based tortilla topped with a filling.",
+   "image": "images/taco.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Taco",
+   "name": "Taco",
+   "category": "food",
+   "aliases": [
+    "taco",
+    "tacos"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Taco",
+   "region": "us"
+  },
+  "burrito": {
+   "title": "Burrito",
+   "description": "A burrito or burro is historically a regional name in Mexico for what in other parts of the country is known as a taco.",
+   "image": "images/burrito.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Burrito",
+   "name": "Burrito",
+   "category": "food",
+   "aliases": [
+    "burrito",
+    "burritos"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Burrito",
+   "region": "us"
+  },
+  "pbj": {
+   "title": "Peanut butter and jelly sandwich",
+   "description": "A peanut butter and jelly sandwich is a sandwich that consists of peanut butter and fruit preserves spread on sandwich bread.",
+   "image": "images/pbj.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Peanut_butter_and_jelly_sandwich",
+   "name": "PB&J sandwich",
+   "category": "food",
+   "aliases": [
+    "peanut butter and jelly",
+    "pb&j",
+    "pbj"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Peanut butter and jelly sandwich",
+   "region": "us"
+  },
+  "smores": {
+   "title": "S'more",
+   "description": "A s'more is a confection consisting of a toasted marshmallow and chocolate, sandwiched between graham crackers.",
+   "image": "images/smores.jpg",
+   "credit": "https://en.wikipedia.org/wiki/S'more",
+   "name": "S'more",
+   "category": "food",
+   "aliases": [
+    "s'mores",
+    "smores"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "S'more",
+   "region": "us"
+  },
+  "apple_pie": {
+   "title": "Apple pie",
+   "description": "An apple pie is a fruit pie in which the principal filling is apples.",
+   "image": "images/apple_pie.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Apple_pie",
+   "name": "Apple pie",
+   "category": "food",
+   "aliases": [
+    "apple pie"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Apple pie",
+   "region": "us"
+  },
+  "pumpkin_pie": {
+   "title": "Pumpkin pie",
+   "description": "Pumpkin pie is a dessert pie with a spiced, pumpkin-based custard filling.",
+   "image": "images/pumpkin_pie.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Pumpkin_pie",
+   "name": "Pumpkin pie",
+   "category": "food",
+   "aliases": [
+    "pumpkin pie"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Pumpkin pie",
+   "region": "us"
+  },
+  "cereal": {
+   "title": "Breakfast cereal",
+   "description": "Breakfast cereal is a category of food, including food products, made from processed cereal grains, that are eaten as part of breakfast or as a snack food, primarily in Western societies.",
+   "image": "images/cereal.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Breakfast_cereal",
+   "name": "Breakfast cereal",
+   "category": "food",
+   "aliases": [
+    "cereal"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Breakfast cereal",
+   "region": "us"
+  },
+  "turkey_dinner": {
+   "title": "Turkey as food",
+   "description": "Turkey meat, commonly referred to simply as turkey, is the meat from turkeys, typically domesticated ones, but also wild turkeys.",
+   "image": "images/turkey_dinner.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Turkey_as_food",
+   "name": "Thanksgiving turkey",
+   "category": "food",
+   "aliases": [
+    "turkey"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Turkey as food",
+   "region": "us"
+  },
+  "baseball": {
+   "title": "Baseball",
+   "description": "Baseball is a bat-and-ball sport played between two teams of nine players each, taking turns batting and fielding.",
+   "image": "images/baseball.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Baseball",
+   "name": "Baseball",
+   "category": "festival",
+   "aliases": [
+    "baseball"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Baseball",
+   "region": "us"
+  },
+  "american_football": {
+   "title": "American football",
+   "description": "American football, referred to simply as football in the United States and Canada and also known as gridiron football, is a team sport played by two teams of eleven players on a rectangular field with goalposts at each end.",
+   "image": "images/american_football.jpg",
+   "credit": "https://en.wikipedia.org/wiki/American_football",
+   "name": "Football",
+   "category": "festival",
+   "aliases": [
+    "football",
+    "super bowl"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "American football",
+   "region": "us"
+  },
+  "basketball": {
+   "title": "Basketball",
+   "description": "Basketball is a team sport in which two teams of five players each oppose one another on a rectangular court.",
+   "image": "images/basketball.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Basketball",
+   "name": "Basketball",
+   "category": "festival",
+   "aliases": [
+    "basketball"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Basketball",
+   "region": "us"
+  },
+  "snow": {
+   "title": "Snow",
+   "description": "Snow is a form of solid atmospheric precipitation consisting of individual ice crystals that grow while suspended in the air—usually within clouds—and then fall, accumulating on the ground, where they undergo further changes.",
+   "image": "images/snow.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Snow",
+   "name": "Snow",
+   "category": "place",
+   "aliases": [
+    "snow",
+    "snowing"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Snow",
+   "region": "us"
+  },
+  "snowman": {
+   "title": "Snowman",
+   "description": "A snowman is an anthropomorphic snow sculpture often built in regions with sufficient snowfall and is a very common winter tradition.",
+   "image": "images/snowman.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Snowman",
+   "name": "Snowman",
+   "category": "place",
+   "aliases": [
+    "snowman"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Snowman",
+   "region": "us"
+  },
+  "school_bus": {
+   "title": "School bus",
+   "description": "A school bus is any type of bus owned, leased, contracted to, or operated by a school or school district.",
+   "image": "images/school_bus.jpg",
+   "credit": "https://en.wikipedia.org/wiki/School_bus",
+   "name": "School bus",
+   "category": "vehicle",
+   "aliases": [
+    "school bus"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "School bus",
+   "region": "us"
+  },
+  "subway": {
+   "title": "New York City Subway",
+   "description": "The New York City Subway is a rapid transit system in New York City, serving four of the city's five boroughs: Manhattan, Brooklyn, Queens, and the Bronx.",
+   "image": "images/subway.jpg",
+   "credit": "https://en.wikipedia.org/wiki/New_York_City_Subway",
+   "name": "Subway",
+   "category": "vehicle",
+   "aliases": [
+    "subway"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "New York City Subway",
+   "region": "us"
+  },
+  "prom": {
+   "title": "Prom",
+   "description": "A promenade dance or prom is a formal dance party for graduating high school students at the end of the school year.",
+   "image": "images/prom.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Prom",
+   "name": "Prom",
+   "category": "festival",
+   "aliases": [
+    "prom"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Prom",
+   "region": "us"
+  },
+  "hiking": {
+   "title": "Hiking",
+   "description": "A hike is a long, vigorous walk, usually on trails or footpaths in the countryside.",
+   "image": "images/hiking.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Hiking",
+   "name": "Hiking",
+   "category": "place",
+   "aliases": [
+    "hiking",
+    "hike"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Hiking",
+   "region": "us"
+  },
+  "ghee": {
+   "title": "Ghee",
+   "description": "Ghee is a type of clarified butter, originating in the Indian Subcontinent.",
+   "image": "images/ghee.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Ghee",
+   "name": "Ghee",
+   "category": "food",
+   "aliases": [
+    "ghee"
+   ],
+   "lexicon_ids": [
+    "neyyi"
+   ],
+   "wikipedia": "Ghee",
+   "region": "in"
+  },
+  "half_saree": {
+   "title": "Langa voni",
+   "description": "A langa voni is a traditional dress worn in South India by girls between puberty and marriage.",
+   "image": "images/half_saree.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Langa_voni",
+   "name": "Langa voni",
+   "category": "clothing",
+   "aliases": [
+    "half-saree",
+    "half saree",
+    "langa voni"
+   ],
+   "lexicon_ids": [
+    "langa_voni"
+   ],
+   "wikipedia": "Half saree",
+   "region": "in"
+  },
+  "holi": {
+   "title": "Holi",
+   "description": "Holi is a major Hindu festival of colours, love and spring.",
+   "image": "images/holi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Holi",
+   "name": "Holi",
+   "category": "festival",
+   "aliases": [
+    "holi"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Holi",
+   "region": "in"
+  },
+  "wedding": {
+   "title": "Hindu wedding",
+   "description": "A Hindu wedding, also known as vivaha in Hindi, lagna (लग्न) in Marathi, biyah (बियाह) in Bhojpuri, Maithil Vivah in Maithili, bibaho (বিবাহ) in Bengali, bahaghara (ବାହାଘର) or bibaha (ବିବାହ) in Odia, tirumanam (திருமணம்) in Tamil, pelli (పెళ్లి) in Telugu, maduve (ಮದುವೆ) in Kannada, and kalyanam in Malayalam and other languages, is the traditional marriage ceremony for Hindus.",
+   "image": "images/wedding.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Hindu_wedding",
+   "name": "Wedding (pelli)",
+   "category": "festival",
+   "aliases": [
+    "wedding",
+    "marriage"
+   ],
+   "lexicon_ids": [
+    "pelli"
+   ],
+   "wikipedia": "Hindu wedding",
+   "region": "in"
+  },
+  "golu": {
+   "title": "Golu (festival)",
+   "description": "Golu is the festive display of dolls and figurines in South India during the autumn festive season, particularly around the multiday Navaratri festival of Hinduism.",
+   "image": "images/golu.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Golu_(festival)",
+   "name": "Bommala Koluvu",
+   "category": "festival",
+   "aliases": [
+    "bommala koluvu",
+    "golu",
+    "doll festival"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Bommai Kolu",
+   "region": "in"
+  },
+  "high_school": {
+   "title": "Secondary school",
+   "description": "A secondary school, high school, or senior school, is an institution that provides students with secondary education.",
+   "image": "images/high_school.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Secondary_school",
+   "name": "High school",
+   "category": "place",
+   "aliases": [
+    "high school"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "High school",
+   "region": "us"
+  },
+  "indian_train": {
+   "title": "Rail transport in India",
+   "description": "Rail transport in India consists primarily of passenger and freight shipments along an integrated rail network.",
+   "image": "images/indian_train.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Rail_transport_in_India",
+   "name": "Train",
+   "category": "vehicle",
+   "aliases": [
+    "train"
+   ],
+   "lexicon_ids": [
+    "railu"
+   ],
+   "wikipedia": "Rail transport in India",
+   "region": "in"
+  },
+  "temple": {
+   "title": "Thousand Pillar Temple",
+   "description": "The Thousand Pillar Temple or Rudreswara Swamy Temple is a historical Hindu temple located in the city of Hanamakonda, Telangana, India.",
+   "image": "images/temple.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Thousand_Pillar_Temple",
+   "name": "Temple (gudi)",
+   "category": "place",
+   "aliases": [
+    "temple",
+    "temples"
+   ],
+   "lexicon_ids": [
+    "temple"
+   ],
+   "wikipedia": "Thousand Pillar Temple",
+   "region": "in"
+  },
+  "village_market": {
+   "title": "Haat bazaar",
+   "description": "Haat Bazaar is an open-air market that serves as a trading venue for local people in rural areas and towns and cities, mainly in Bangladesh, Bhutan, Nepal and India.",
+   "image": "images/village_market.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Haat_bazaar",
+   "name": "Market (santha)",
+   "category": "place",
+   "aliases": [
+    "weekly village market",
+    "village market",
+    "market",
+    "bazaar"
+   ],
+   "lexicon_ids": [
+    "santa"
+   ],
+   "wikipedia": "Haat bazaar",
+   "region": "in"
+  },
+  "monsoon": {
+   "title": "Monsoon",
+   "description": "A monsoon is traditionally a seasonal reversing wind accompanied by corresponding changes in precipitation, but now used to describe seasonal changes in atmospheric circulation and precipitation associated with annual latitudinal oscillation of the Intertropical Convergence Zone, specifically between its limits to the north and south of the equator.",
+   "image": "images/monsoon.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Monsoon",
+   "name": "Monsoon rains",
+   "category": "place",
+   "aliases": [
+    "monsoon",
+    "rains"
+   ],
+   "lexicon_ids": [
+    "vana"
+   ],
+   "wikipedia": "Monsoon",
+   "region": "in"
+  },
+  "dhoti": {
+   "title": "Veshti",
+   "description": "A veshti or vēṭṭi is a rectangular piece of non-stitched cloth, with varying lengths, used as a wrap for the lower body by the Tamils.",
+   "image": "images/dhoti.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Veshti",
+   "name": "Pancha (dhoti)",
+   "category": "clothing",
+   "aliases": [
+    "dhoti",
+    "pancha",
+    "veshti"
+   ],
+   "lexicon_ids": [
+    "pancha"
+   ],
+   "wikipedia": "Veshti",
+   "region": "in"
+  },
+  "college_campus": {
+   "title": "Harvard Yard",
+   "description": "Harvard Yard is the oldest and among the most prominent parts of the campus of Harvard University in Cambridge, Massachusetts.",
+   "image": "images/college_campus.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Harvard_Yard",
+   "name": "College",
+   "category": "place",
+   "aliases": [
+    "college",
+    "campus",
+    "university"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Harvard Yard",
+   "region": "us"
+  },
+  "skiing": {
+   "title": "Skiing",
+   "description": "Skiing is the use of skis to glide on snow for basic transport, a recreational activity, or a competitive winter sport. Many types of competitive skiing events are recognized by the International Olympic Committee (IOC), and the International Ski and Snowboard Federation (FIS).",
+   "image": "images/skiing.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Skiing",
+   "name": "Skiing",
+   "category": "place",
+   "aliases": [
+    "skiing",
+    "ski"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Skiing",
+   "region": "us"
+  },
+  "poornalu": {
+   "title": "Poornalu",
+   "description": "Poornalu, purnalu, boorelu  or burelu is an Indian sweet and dumpling made of rice flour stuffed with jaggery mixed dal paste and dry fruits.",
+   "image": "images/poornalu.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Poornalu",
+   "name": "Poornalu",
+   "category": "food",
+   "region": "in",
+   "aliases": [
+    "boorelu",
+    "poornalu",
+    "purnalu"
+   ],
+   "lexicon_ids": [
+    "boorelu"
+   ],
+   "wikipedia": "Poornalu"
+  },
+  "pootharekulu": {
+   "title": "Pootharekulu",
+   "description": "Pootharekulu (plural) or poothareku (singular) is a popular Indian sweet from the Andhra Pradesh state of south India.",
+   "image": "images/pootharekulu.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Pootharekulu",
+   "name": "Pootharekulu",
+   "category": "food",
+   "region": "in",
+   "aliases": [
+    "pootharekulu",
+    "paper sweet"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Pootharekulu"
+  },
+  "kakinada_kaja": {
+   "title": "Kakinada Kaja",
+   "description": "Kakinada Kaja is a traditional Indian sweet pastry from Kakinada, Andhra Pradesh, India, known for its unique taste and preparation.",
+   "image": "images/kakinada_kaja.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kakinada_Kaja",
+   "name": "Kakinada Kaja",
+   "category": "food",
+   "region": "in",
+   "aliases": [
+    "kaja",
+    "kakinada kaja"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Kakinada Kaja"
+  },
+  "sakinalu": {
+   "title": "Sakinalu",
+   "description": "Sakinalu is a special type of snack prepared in the northern region of Telangana, India.",
+   "image": "images/sakinalu.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Sakinalu",
+   "name": "Sakinalu",
+   "category": "food",
+   "region": "in",
+   "aliases": [
+    "sakinalu"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Sakinalu"
+  },
+  "bonda": {
+   "title": "Bonda (snack)",
+   "description": "Bonda is a deep-fried South Indian potato snack that has various sweet and savory versions in different regions.",
+   "image": "images/bonda.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Bonda_(snack)",
+   "name": "Bonda (snack)",
+   "category": "food",
+   "region": "in",
+   "aliases": [
+    "bonda",
+    "bondas"
+   ],
+   "lexicon_ids": [],
+   "wikipedia": "Bonda (snack)"
+  }
+ },
+ "_about": "Built by tools/build_images.py. Pictures and descriptions from Wikipedia (see each item's credit link)."
+}
