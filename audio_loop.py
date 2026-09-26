@@ -70,14 +70,16 @@ class AudioLoop:
     out_dev=None runs on a timer with no sound device at all (for tests).
     """
 
-    def __init__(self, in_dev, out_dev, on_audio=None, source=None):
+    def __init__(self, in_dev, out_dev, on_audio=None, source=None, original=1.0, duck=DUCK_LEVEL):
         self.in_dev, self.out_dev = in_dev, out_dev
+        self.original = original  # volume of the input between English lines; 0 = only the English voice is heard
+        self.duck = min(duck, original)  # ...and while an English line plays
         self.on_audio = on_audio
         self.source, self.source_pos = source, 0
         self.source_done = threading.Event()  # set when `source` has played to the end
         self.stop = threading.Event()         # set to end run()
         self.voice = VoiceBuffer()
-        self.gain = 1.0
+        self.gain = original
         self.level = 0.0
 
     def _mix(self, mono, frames):
@@ -85,8 +87,8 @@ class AudioLoop:
         if self.on_audio:
             self.on_audio(mono.copy())
         # Move the call volume one step toward its target each block, fading within the block.
-        target = DUCK_LEVEL if self.voice.active() else 1.0
-        step = (1.0 - DUCK_LEVEL) / RAMP_BLOCKS
+        target = self.duck if self.voice.active() else self.original
+        step = max(self.original - self.duck, 0.01) / RAMP_BLOCKS
         new_gain = max(target, self.gain - step) if target < self.gain else min(target, self.gain + step)
         ramp = np.linspace(self.gain, new_gain, frames, dtype=np.float32)
         self.gain = new_gain
@@ -121,8 +123,9 @@ class AudioLoop:
             stream = sd.OutputStream(device=self.out_dev, samplerate=SR, blocksize=BLOCK, channels=2,
                                      dtype="float32", callback=self._output_callback)
         else:
+            in_channels = min(2, sd.query_devices(self.in_dev)["max_input_channels"])  # the MacBook mic is mono
             stream = sd.Stream(device=(self.in_dev, self.out_dev), samplerate=SR, blocksize=BLOCK,
-                               channels=(2, 2), dtype="float32", callback=self._duplex_callback)
+                               channels=(in_channels, 2), dtype="float32", callback=self._duplex_callback)
         with stream:
             if meter:
                 print("Passing call audio through. Ctrl+C to stop.")
@@ -145,7 +148,7 @@ def check_volume():
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--in", dest="inp", default="BlackHole")
+    p.add_argument("--in", dest="inp", default="BlackHole 2ch")
     p.add_argument("--out", default=None, help="output device name (default: system default, must not be BlackHole)")
     a = p.parse_args()
     in_dev = find_device(a.inp, "input")
