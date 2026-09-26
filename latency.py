@@ -12,8 +12,9 @@ import json
 import statistics
 import time
 
-STAGES = ["speech_to_text", "split", "translate", "total"]
-LABELS = {"speech_to_text": "speech-to-text", "split": "waiting to split", "translate": "translate", "total": "spoken -> English"}
+STAGES = ["speech_to_text", "split", "translate", "total", "voice_wait", "total_voice"]
+LABELS = {"speech_to_text": "speech-to-text", "split": "waiting to split", "translate": "translate",
+          "total": "spoken -> English", "voice_wait": "English -> voice", "total_voice": "spoken -> voice"}
 
 
 class LatencyTracker:
@@ -51,11 +52,21 @@ class LatencyTracker:
             "split": marks["cut"] - marks["recognized"],
             "translate": now - marks["cut"],
             "total": now - marks["spoken"] if marks["spoken"] else None,
+            "voice_wait": None, "total_voice": None, "english_at": now,
         }
         self.rows.append(row)
-        self.log.write(json.dumps(row, ensure_ascii=False) + "\n")
-        self.log.flush()
         return row
+
+    def voice_started(self, row, marks):
+        """The English voice for this line just started playing."""
+        now = time.monotonic()
+        row["voice_wait"] = now - row["english_at"]
+        row["total_voice"] = now - marks["spoken"] if marks["spoken"] else None
+        self.log_row(row)
+
+    def log_row(self, row):
+        self.log.write(json.dumps({k: v for k, v in row.items() if k != "english_at"}, ensure_ascii=False) + "\n")
+        self.log.flush()
 
     @staticmethod
     def line(row):

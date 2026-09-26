@@ -40,6 +40,7 @@ function connect() {
     const m = JSON.parse(e.data);
     if (m.type === "speaking") { dot.className = "dot speaking"; status.textContent = "someone is speaking…"; return; }
     if (m.type === "partial") { live.textContent = m.text; return; }
+    if (m.type === "voice") { const el = byId[m.id]; if (el) el.querySelector(".en").prepend("🔊 "); return; }
     dot.className = "dot live"; status.textContent = "listening";
     let el = byId[m.id];
     if (!el) {

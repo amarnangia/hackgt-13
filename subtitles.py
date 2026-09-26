@@ -26,6 +26,7 @@ from translate_server import LocalTranslator
 
 PORT = int(os.environ.get("OVERLAY_PORT", 8765))
 CHUNK_MS = 80
+SAMPLE_RATE = 48000  # AudioLoop's rate
 SENTENCE_END = re.compile(r"[.?!।]+")
 CLAUSE_END = re.compile(r"[,;]")
 MIN_CLAUSE_WORDS = 5  # Muse often joins sentences with commas; cut there once a clause is long enough to translate well
@@ -95,6 +96,9 @@ class Captioner:
         self.partial = ""  # latest cumulative transcript for the current turn
         self.done = 0      # how many characters of it have been sent for translation
         self.latency = LatencyTracker()
+        self.dubber = None                    # set by listen() unless --no-voice
+        self.order_lock = threading.Lock()    # translations finish out of order; the voice must not
+        self.next_to_voice, self.finished_lines = 1, {}
 
     def on_event(self, ev):
         kind = ev.get("type")
@@ -146,37 +150,56 @@ class Captioner:
                 english = f"(translation failed: {type(e).__name__})"
             broadcast({"type": "english", "id": seg_id, "text": english})
             row = self.latency.finished(marks, sentence, english)
-            print(f"{LatencyTracker.line(row)} {sentence}  ->  {english}", flush=True)
+            with self.order_lock:
+                self.finished_lines[seg_id] = (english, marks, row)
+                while self.next_to_voice in self.finished_lines:
+                    self._voice(self.next_to_voice, *self.finished_lines.pop(self.next_to_voice))
+                    self.next_to_voice += 1
 
         self.pool.submit(work)
 
+    def _voice(self, seg_id, english, marks, row):
+        """Speak the line (in order), or leave it as a subtitle if the voice is too far behind."""
+        def on_start():
+            self.latency.voice_started(row, marks)
+            broadcast({"type": "voice", "id": seg_id})
+        voiced = self.dubber.say(english, spoken_at=marks["spoken"], on_start=on_start) if self.dubber else False
+        if not voiced:
+            self.latency.log_row(row)
+        tag = "" if not self.dubber else ("  [voice]" if voiced else "  [subtitle only: voice was behind]")
+        print(f"{LatencyTracker.line(row)} {row['text']}  ->  {english}{tag}", flush=True)
 
-async def file_audio(path, audio_q, latency):
-    """Send a recording at real-time pace, like a live call (Muse rejects audio sent much faster)."""
+
+def load_recording(path):
+    """A 16/24/48 kHz mono 16-bit wav as 48 kHz float32, to play through AudioLoop like a call."""
     with wave.open(path) as w:
-        rate, pcm = w.getframerate(), w.readframes(w.getnframes())
-    assert rate in (16000, 24000), "file must be 16 or 24 kHz mono 16-bit wav"
-    pcm += b"\0" * (rate * 2 * 2)  # 2 s of trailing silence lets Muse close the last utterance
-    size = rate * 2 * CHUNK_MS // 1000
-    start = time.monotonic()
-    latency.audio_started(start)  # audio position 0 = now; Muse's audioProcessedMs counts from here
-    for i in range(0, len(pcm), size):
-        await audio_q.put(pcm[i:i + size])
-        await asyncio.sleep(max(0, start + (i + size) / (rate * 2) - time.monotonic()))
-    await audio_q.put(None)
+        rate = w.getframerate()
+        assert w.getnchannels() == 1 and w.getsampwidth() == 2, "file must be mono 16-bit wav"
+        audio = np.frombuffer(w.readframes(w.getnframes()), dtype=np.int16).astype(np.float32) / 32768
+    n = int(len(audio) * SAMPLE_RATE / rate)
+    return np.interp(np.arange(n) * rate / SAMPLE_RATE, np.arange(len(audio)), audio).astype(np.float32)
 
 
-def start_live_audio(args, loop, target):
-    """Pass call audio through to the speakers (audio_loop.py) and copy it to Muse as 24 kHz 16-bit PCM.
+def make_audio(args, loop, target):
+    """Set up AudioLoop to play the call (or --file recording) through AudioLoop and copy it to Muse as 24 kHz 16-bit PCM.
 
     `target["q"]` is the queue of the current Muse session; it is swapped on reconnect. The latency clock
     starts when the first frame of a session is captured (frames queue up while Muse connects).
     """
     import sounddevice as sd
-    from audio_loop import AudioLoop, find_device
+    from audio_loop import AudioLoop, check_volume, find_device
 
-    in_dev = find_device(args.inp, "input")
-    out_dev = find_device(args.out, "output") if args.out else sd.default.device[1]
+    source = load_recording(args.file) if args.file else None
+    in_dev = None if args.file else find_device(args.inp, "input")
+    if args.out == "none":
+        out_dev = None  # silent, for tests; only works with --file
+    else:
+        out_dev = find_device(args.out, "output") if args.out else sd.default.device[1]
+        if "BlackHole" in sd.query_devices(out_dev)["name"]:
+            raise SystemExit("Output is BlackHole, so you'd hear nothing (and a live call would feed back into itself). "
+                             'Pass --out "MacBook Air Speakers" or your headphones.')
+    if not args.file:
+        check_volume()
     buf = []
 
     def on_audio(mono48k):
@@ -190,8 +213,7 @@ def start_live_audio(args, loop, target):
                 target["latency"].audio_started(time.monotonic() - CHUNK_MS / 1000)  # frame start, not end
             loop.call_soon_threadsafe(target["q"].put_nowait, frame)
 
-    audio = AudioLoop(in_dev, out_dev, on_audio=on_audio)
-    threading.Thread(target=audio.run, daemon=True).start()
+    return AudioLoop(in_dev, out_dev, on_audio=on_audio, source=source)
 
 
 async def run(args):
@@ -205,18 +227,22 @@ async def run(args):
 async def listen(args, captioner):
     loop = asyncio.get_running_loop()
     target = {"q": asyncio.Queue(), "latency": captioner.latency}
-    if not args.file:
-        start_live_audio(args, loop, target)
+    audio = make_audio(args, loop, target)
+    if not args.no_voice:  # load before audio starts, or the first seconds of the call are lost
+        print("Loading the English voice (Kokoro)...", flush=True)
+        from dub import Dubber
+        captioner.dubber = await loop.run_in_executor(None, Dubber, audio.voice)
+    threading.Thread(target=audio.run, kwargs={"meter": False}, daemon=True).start()
     while True:
         audio_q = target["q"] = asyncio.Queue()
         target["fresh"] = True
         if args.file:
-            encoding = "PCM_24KHZ" if wave.open(args.file).getframerate() == 24000 else "PCM_16KHZ"
-            feeder = asyncio.create_task(file_audio(args.file, audio_q, captioner.latency))
-        else:
-            encoding = "PCM_24KHZ"
+            async def end_of_file():  # 1 s of silence after the recording, then close the Muse stream
+                await loop.run_in_executor(None, audio.source_done.wait)
+                audio_q.put_nowait(None)
+            ender = asyncio.create_task(end_of_file())
         try:
-            async for ev in transcribe(audio_q, args.lang, encoding):
+            async for ev in transcribe(audio_q, args.lang, "PCM_24KHZ"):
                 captioner.on_event(ev)
         except Exception as e:
             if args.file:
@@ -225,9 +251,12 @@ async def listen(args, captioner):
             await asyncio.sleep(1)
             continue
         if args.file:
-            await feeder
-            await loop.run_in_executor(None, lambda: captioner.pool.shutdown(wait=True))  # let the last translations finish
-            await asyncio.sleep(0.5)
+            await ender
+            await loop.run_in_executor(None, lambda: captioner.pool.shutdown(wait=True))  # last translations
+            while captioner.dubber and (captioner.dubber.behind() > 0 or audio.voice.active()):
+                await asyncio.sleep(0.2)  # let the last English line finish speaking
+            await asyncio.sleep(0.3)
+            audio.stop.set()
             return
 
 
@@ -260,7 +289,8 @@ def main():
                    help="local = IndicTrans2 via translate_server.py (fast, same output every time); muse = Muse Spark")
     p.add_argument("--file", help="replay a 16/24 kHz mono wav instead of listening to the call")
     p.add_argument("--in", dest="inp", default="BlackHole")
-    p.add_argument("--out", default=None)
+    p.add_argument("--out", default=None, help='output device (default: system default); "none" = silent, with --file')
+    p.add_argument("--no-voice", action="store_true", help="subtitles only, no English voice")
     args = p.parse_args()
 
     if args.translator == "local":

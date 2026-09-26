@@ -21,7 +21,7 @@
 
 10. `python subtitles.py --out "MacBook Air Speakers"` (or your headphones' name), then open http://localhost:8765.
     - It starts the local translator in the background (~12 s; the first run downloads ~4 GB) and stops it when you quit. Its log is `translate_server.log`.
-    - No call handy? `python subtitles.py --file samples/telugu_grandma.wav`
+    - No call handy? `python subtitles.py --file samples/telugu_two_turns.wav --out "MacBook Air Speakers"` plays a recording as if it were the call, English voice included. `--out none` runs silently (for tests).
     - If the translator can't start it falls back to Muse Spark automatically; force it with `--translator muse`.
 
 What we learned the hard way:
@@ -39,6 +39,8 @@ What we learned the hard way:
 | waiting to split into a sentence | 0.00 s | 0.00 s | 0.00 s |
 | translate (IndicTrans2 + lexicon) | 0.37–0.41 s | 0.45–0.47 s | 0.57 s |
 | **spoken → English on screen** | **0.36–0.44 s** | **0.45–0.50 s** | **0.57 s** |
+| English → voice starts (Kokoro, incl. waiting for the previous line to finish) | 0.43–0.46 s | 2.24 s | 2.48 s |
+| **spoken → English voice** | **~0.95 s** | 2.6 s | 2.8 s |
 
 "Spoken" is when the last word of the sentence was said: capture time of the first audio frame plus Muse's `audioProcessedMs` for the update that first contained that word (checked against the recording: last word at 9.2 s, Muse reported 9.28 s). A live call adds network jitter on top. With Muse Spark instead of the local translator, translate was ~0.8–1.5 s.
 
@@ -122,7 +124,7 @@ What we learned from testing (script: `tools/laya_bench.py`):
 2. ✅ **Live subtitles:** Muse streams Telugu text into the overlay (`subtitles.py`, `muse.py`, `overlay.html`).
 3. ✅ **Translation:** Muse Spark, sentence by sentence while she is still talking.
 4. **Laya:** image cards (word list plus images) and slang cards (LLM explanation).
-5. **Dubbing:** text-to-speech, with the original lowered underneath.
+5. ✅ **Dubbing:** Kokoro speaks each English line (`dub.py`) while the call audio fades to 20% underneath (`audio_loop.py`). Lines are voiced in order; if the voice would be >3 s behind, that line is subtitle-only. `--no-voice` turns it off.
 6. **Known-words list:** show the translation fading out over a demo call.
 7. **Stretch:** the other direction (virtual mic), more languages, screen share.
 
