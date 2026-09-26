@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Weave captions",
+  "version": "1.0",
+  "description": "Live Telugu → English captions from Weave, floating over your WhatsApp Web call.",
+  "content_scripts": [
+    { "matches": ["https://web.whatsapp.com/*"], "js": ["content.js"], "run_at": "document_idle" }
+  ],
+  "web_accessible_resources": [
+    { "resources": ["captions.html", "captions.js"], "matches": ["https://web.whatsapp.com/*"] }
+  ],
+  "icons": { "128": "icon.png" }
+}

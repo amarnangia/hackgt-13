@@ -5,6 +5,17 @@ Everything in this folder is a layer on top of the translator. It reads the team
 
 ## During a call (the laptop)
 
+### Captions right on top of the call (Chrome extension, set up once)
+
+1. Chrome → `chrome://extensions` → turn on **Developer mode** (top right) → **Load unpacked** → pick `garden/extension`.
+2. That's it. Whenever web.whatsapp.com is open, a small "Weave · Waiting for subtitles.py" pill sits over it.
+   Start `python subtitles.py` and it opens into a caption bar over the call by itself: her Telugu as she speaks,
+   the English, pictures and "Ask" prompts (and your side too with `--outgoing`). Drag it by its top edge, resize it
+   from the corner, "–" tucks it away until her next line. It only needs `subtitles.py`, not the garden server.
+3. After pulling new code, press the ↻ on the extension's card in `chrome://extensions`.
+
+### The full app (optional, next to the call)
+
 1. Start the translator as usual: `python subtitles.py --out "MacBook Air Speakers"`
    (no call handy? `python subtitles.py --file samples/telugu_two_turns.wav --out none`)
 2. In a second terminal: `python3 -m garden` (standard library only, nothing to install)

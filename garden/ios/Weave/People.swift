@@ -88,10 +88,10 @@ final class People: ObservableObject {
     }
 
     /// Numbers for "Your language growth"; the Mac's garden when reachable, else the bundled sample.
-    var numbers: (newWords: Int, phrases: Int, known: Int, total: Int, adaptation: Int, days: [Int]) {
+    var numbers: (newWords: Int, phrases: Int, known: Int, total: Int, hearings: Int, days: [Int]) {
         let g = growth ?? .sample
         let week = g.days.suffix(7).reduce(0) { $0 + $1.new }
         let phrases = g.plants.filter { $0.stageEnum == .bloom && ["idiom", "family", "none"].contains($0.category) }.count
-        return (max(week, 1), phrases, g.totals.bloom, g.totals.phrases, min(96, 64 + g.calls.count * 3), g.days.map(\.heard))
+        return (week, phrases, g.totals.bloom, g.totals.phrases, g.totals.heard, g.days.map(\.heard))
     }
 }

@@ -12,6 +12,7 @@
 		100801F404358041FF508128 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A2CFF37231C6B3F01E8B6B /* WidgetViews.swift */; };
 		1865F70CDC909CB5A2E93E57 /* GardenClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA49E9E63150F76191F55B2E /* GardenClient.swift */; };
 		24F04E9B59E44F183F598748 /* sample.json in Resources */ = {isa = PBXBuildFile; fileRef = C4F2997DAF5168400429633D /* sample.json */; };
+		317CD386896012EA5E7CBFD3 /* Library.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7A7E10B09510149ED7D3EF /* Library.swift */; };
 		3EC4AAB4C5E5E40127FCCABA /* temple.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DE04792FF59D5F129A265691 /* temple.jpg */; };
 		40A2585CC84434804EDA4B20 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE2F89990A6D40DC02179E3 /* Models.swift */; };
 		555A260D10302DF8A1E90F90 /* GardenClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA49E9E63150F76191F55B2E /* GardenClient.swift */; };
@@ -83,6 +84,7 @@
 		23D82F8D87E320B4DCC5A459 /* WeaveApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaveApp.swift; sourceTree = "<group>"; };
 		2456D6508AC6B52E4F48356E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		26750F714F1E407889003F78 /* avakaya.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = avakaya.jpg; sourceTree = "<group>"; };
+		4F7A7E10B09510149ED7D3EF /* Library.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Library.swift; sourceTree = "<group>"; };
 		5E80C78AB92192EB8E6EE8A9 /* Sheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sheets.swift; sourceTree = "<group>"; };
 		6265F4E61DEC63A2D3490E48 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		684E6470AC706B79CD69A77D /* Weave.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Weave.entitlements; sourceTree = "<group>"; };
@@ -209,6 +211,7 @@
 				C025C6466A7485D1EA6440FB /* Conversation.swift */,
 				6FDD762CDED4DDE07A4E95DE /* HomeView.swift */,
 				A5A64500F6375BA3CEC5B21B /* Info.plist */,
+				4F7A7E10B09510149ED7D3EF /* Library.swift */,
 				BA09DCD3A4702F4BAF83DD54 /* People.swift */,
 				F28BE33DB5A492CA2B6D40A2 /* SessionView.swift */,
 				2456D6508AC6B52E4F48356E /* SettingsView.swift */,
@@ -363,6 +366,7 @@
 				8F30AB8AF0918A57669E8198 /* Conversation.swift in Sources */,
 				555A260D10302DF8A1E90F90 /* GardenClient.swift in Sources */,
 				6BE42605EFF015BBADA3A9A7 /* HomeView.swift in Sources */,
+				317CD386896012EA5E7CBFD3 /* Library.swift in Sources */,
 				40A2585CC84434804EDA4B20 /* Models.swift in Sources */,
 				066EFFA314B6E4478E7047BC /* People.swift in Sources */,
 				79EB066CC2889E08E964BEED /* SessionView.swift in Sources */,

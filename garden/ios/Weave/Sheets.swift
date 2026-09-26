@@ -164,13 +164,14 @@ struct GrowthSheet: View {
                 }
                 .reveal(1)
                 Panel {
+                    let pct = n.total > 0 ? Double(n.known) / Double(n.total) : 0
                     HStack {
-                        Eyebrow("Speech adaptation")
+                        Eyebrow("Kept in Telugu for you")
                         Spacer()
-                        Text("\(n.adaptation)%").font(Fonts.mono(13)).foregroundStyle(Theme.text)
+                        Text("\(Int(pct * 100))%").font(Fonts.mono(13)).foregroundStyle(Theme.text)
                     }
-                    Meter(value: Double(n.adaptation) / 100).padding(.top, 12)
-                    Text("How well Weave knows \(partner)'s voice, accent and the words she uses most.")
+                    Meter(value: pct).padding(.top, 12)
+                    Text("Once you know a word, Weave stops translating it and leaves it in Telugu.")
                         .font(Fonts.ui(13)).foregroundStyle(Theme.text2).padding(.top, 10)
                 }
                 .reveal(2)

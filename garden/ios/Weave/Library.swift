@@ -1,0 +1,371 @@
+import Charts
+import SwiftUI
+
+extension Stage {
+    /// One accent, three strengths: faint when new, half while learning, full once known.
+    var tint: Color {
+        switch self {
+        case .bloom: Theme.accent
+        case .sprout: Theme.accent.opacity(0.45)
+        case .seed: Theme.accent.opacity(0.14)
+        }
+    }
+}
+
+extension Plant {
+    /// Everything the word sheet needs: the team's lexicon and photos when we have them, the garden's own fields otherwise.
+    var asWord: Word {
+        let id = (roman ?? "").replacingOccurrences(of: " ", with: "_")
+        if !id.isEmpty, Knowledge.lexicon.contains(where: { $0.id == id }) {
+            var w = Knowledge.word(id)
+            w.telugu = phrase
+            return w
+        }
+        return Word(key: phrase, telugu: phrase, roman: roman, english: english ?? "", note: note, description: nil,
+                    image: nil, category: category, pictureName: nil)
+    }
+}
+
+// MARK: - Words: the family dictionary
+
+struct WordsView: View {
+    @EnvironmentObject var people: People
+    @State private var filter: Filter = .all
+    @State private var query = ""
+    @State private var open: Word?
+    @Namespace private var pill
+
+    enum Filter: String, CaseIterable, Identifiable { case all = "All", known = "Known", learning = "Learning", new = "New", saved = "Saved"; var id: String { rawValue } }
+
+    var body: some View {
+        let snap = people.growth ?? .sample
+        let plants = snap.plants
+            .filter { p in
+                switch filter {
+                case .all: true
+                case .known: p.stageEnum == .bloom
+                case .learning: p.stageEnum == .sprout
+                case .new: p.stageEnum == .seed
+                case .saved: false
+                }
+            }
+            .filter { query.isEmpty || [$0.phrase, $0.english ?? "", $0.roman ?? ""].contains { $0.localizedCaseInsensitiveContains(query) } }
+            .sorted { ($0.growth, $0.heard) > ($1.growth, $1.heard) }
+        let saved = people.vocab.filter { query.isEmpty || [$0.telugu ?? "", $0.english, $0.roman ?? ""].contains { $0.localizedCaseInsensitiveContains(query) } }
+
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Words").font(Fonts.ui(32, .medium)).tracking(-1.1).foregroundStyle(Theme.text)
+                    Text("Every word from your calls with Ammamma.").font(Fonts.ui(15)).foregroundStyle(Theme.text2)
+                }
+                .padding(.top, 16)
+                .reveal(0)
+
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass").font(.system(size: 14)).foregroundStyle(Theme.text3)
+                    TextField("", text: $query, prompt: Text("Telugu or English").foregroundColor(Theme.text3))
+                        .font(Fonts.ui(15)).foregroundStyle(Theme.text).autocorrectionDisabled().textInputAutocapitalization(.never)
+                }
+                .padding(.horizontal, 14).frame(height: 44)
+                .background(Theme.surface, in: .rect(cornerRadius: 12))
+                .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.border, lineWidth: 1))
+                .reveal(1)
+
+                segmented(snap).reveal(2)
+
+                if filter == .saved {
+                    if saved.isEmpty {
+                        empty("Tap a highlighted word during a call, then “Add to vocabulary”.")
+                    } else {
+                        list(saved.map { v in (v.id, Knowledge.lexicon.contains { $0.id == v.key } ? Knowledge.word(v.key) : Word(key: v.key, telugu: v.telugu, roman: v.roman, english: v.english, note: nil, description: nil, image: v.image, category: "word", pictureName: nil), nil as Plant?) })
+                    }
+                } else if plants.isEmpty {
+                    empty(query.isEmpty ? "Words you hear on calls show up here." : "No words match “\(query)”.")
+                } else {
+                    list(plants.map { ($0.id, $0.asWord, $0) })
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 32)
+            .animation(.easeOut(duration: 0.2), value: filter)
+        }
+        .scrollIndicators(.hidden)
+        .scrollDismissesKeyboard(.immediately)
+        .background(Backdrop())
+        .sheet(item: $open) { w in
+            WordSheet(word: w, line: nil, partnerName: "Ammamma", live: false) { people.save(w) } forget: {}
+                .environmentObject(people)
+                .presentationDetents([.large]).presentationBackground(Theme.bg2).presentationCornerRadius(24)
+        }
+    }
+
+    private func segmented(_ snap: GardenSnapshot) -> some View {
+        let counts: [Filter: Int] = [.all: snap.totals.phrases, .known: snap.totals.bloom, .learning: snap.totals.sprout, .new: snap.totals.seed, .saved: people.vocab.count]
+        return ScrollView(.horizontal) {
+            HStack(spacing: 2) {
+                ForEach(Filter.allCases) { f in
+                    let on = filter == f
+                    Button { filter = f } label: {
+                        HStack(spacing: 5) {
+                            Text(f.rawValue).font(Fonts.ui(13, .semibold))
+                            Text("\(counts[f] ?? 0)").font(Fonts.mono(11, .regular)).foregroundStyle(Theme.text3)
+                        }
+                        .foregroundStyle(on ? Theme.text : Theme.text2)
+                        .padding(.horizontal, 12).frame(height: 32)
+                        .background {
+                            if on {
+                                RoundedRectangle(cornerRadius: 9).fill(Theme.surface3)
+                                    .overlay(RoundedRectangle(cornerRadius: 9).strokeBorder(Theme.border2, lineWidth: 1))
+                                    .matchedGeometryEffect(id: "pill", in: pill)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .sensoryFeedback(.selection, trigger: on)
+                }
+            }
+            .padding(3)
+            .background(Theme.surface, in: .rect(cornerRadius: 12))
+            .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.border, lineWidth: 1))
+            .animation(.snappy(duration: 0.25), value: filter)
+        }
+        .scrollIndicators(.hidden)
+    }
+
+    private func list(_ rows: [(String, Word, Plant?)]) -> some View {
+        VStack(spacing: 0) {
+            ForEach(Array(rows.enumerated()), id: \.element.0) { i, row in
+                if i > 0 { Rectangle().fill(Theme.border).frame(height: 1).padding(.leading, 16) }
+                Button { open = row.1 } label: { WordRow(word: row.1, plant: row.2) }.buttonStyle(RowStyle())
+            }
+        }
+        .background(Theme.surface, in: .rect(cornerRadius: Theme.radius))
+        .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.border, lineWidth: 1))
+        .clipShape(.rect(cornerRadius: Theme.radius))
+        .reveal(3)
+    }
+
+    private func empty(_ text: String) -> some View {
+        Panel { Text(text).font(Fonts.ui(14)).foregroundStyle(Theme.text2) }
+    }
+}
+
+struct WordRow: View {
+    let word: Word
+    let plant: Plant?
+    var body: some View {
+        HStack(spacing: 14) {
+            if word.image != nil {
+                WordImage(path: word.image).frame(width: 40, height: 40).clipShape(.rect(cornerRadius: 10))
+            } else {
+                RoundedRectangle(cornerRadius: 10).fill(plant?.stageEnum.tint ?? Theme.surface2).frame(width: 40, height: 40)
+                    .overlay(Text(String((word.telugu ?? word.english).prefix(1))).font(Fonts.telugu(17, .medium)).foregroundStyle(Theme.text))
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(word.telugu ?? word.english).font(Fonts.telugu(17, .medium)).foregroundStyle(Theme.text)
+                Text([word.roman, word.english].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))
+                    .font(Fonts.ui(13)).foregroundStyle(Theme.text2).lineLimit(1)
+            }
+            Spacer(minLength: 8)
+            if let plant {
+                VStack(alignment: .trailing, spacing: 6) {
+                    Text(plant.stageEnum.label).font(Fonts.mono(10.5)).foregroundStyle(plant.stageEnum == .bloom ? Theme.accent : Theme.text3)
+                    SegmentBar(filled: plant.growth).frame(width: 56)
+                }
+            }
+        }
+        .padding(.horizontal, 16).padding(.vertical, 12)
+        .contentShape(Rectangle())
+    }
+}
+
+/// Eight thin steps from new to known.
+struct SegmentBar: View {
+    let filled: Int
+    var total = 8
+    var height: CGFloat = 3
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(0..<total, id: \.self) { i in
+                Capsule().fill(i < filled ? Theme.accent : Theme.surface3).frame(height: height)
+            }
+        }
+        .animation(.easeOut(duration: 0.3), value: filled)
+    }
+}
+
+// MARK: - Progress
+
+struct ProgressView_: View {
+    @EnvironmentObject var people: People
+    @State private var picked: Date?
+    @State private var open: Word?
+
+    var body: some View {
+        let snap = people.growth ?? .sample
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Progress").font(Fonts.ui(32, .medium)).tracking(-1.1).foregroundStyle(Theme.text)
+                    Text("\(snap.totals.bloom) words you understand without help.").font(Fonts.ui(15)).foregroundStyle(Theme.text2)
+                }
+                .padding(.top, 16).padding(.bottom, 6)
+                .reveal(0)
+
+                Grid(horizontalSpacing: 12, verticalSpacing: 12) {
+                    GridRow { stat("Known", "\(snap.totals.bloom)", "of \(snap.totals.phrases) words", accent: true); stat("Learning", "\(snap.totals.sprout)", "subtitles only") }
+                    GridRow { stat("Hearings", "\(snap.totals.heard)", "across all calls"); stat("Streak", "\(snap.streak)", snap.streak == 1 ? "day" : "days") }
+                }
+                .reveal(1)
+
+                chart(snap).reveal(2)
+                weave(snap).reveal(3)
+                stages(snap).reveal(4)
+                milestones(snap).reveal(5)
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 32)
+        }
+        .scrollIndicators(.hidden)
+        .background(Backdrop())
+        .sheet(item: $open) { w in
+            WordSheet(word: w, line: nil, partnerName: "Ammamma", live: false) { people.save(w) } forget: {}
+                .environmentObject(people)
+                .presentationDetents([.large]).presentationBackground(Theme.bg2).presentationCornerRadius(24)
+        }
+    }
+
+    private func stat(_ label: String, _ value: String, _ sub: String, accent: Bool = false) -> some View {
+        Panel {
+            Eyebrow(label, color: accent ? Theme.accent : Theme.text3)
+            Text(value).font(Fonts.ui(30, .medium)).tracking(-1).monospacedDigit().foregroundStyle(Theme.text)
+                .contentTransition(.numericText()).padding(.top, 10)
+            Text(sub).font(Fonts.ui(12)).foregroundStyle(Theme.text2)
+        }
+    }
+
+    private func chart(_ snap: GardenSnapshot) -> some View {
+        let day = picked.flatMap { p in snap.days.first { Calendar.current.isDate($0.day, inSameDayAs: p) } }
+        let week = snap.days.suffix(7).reduce(0) { $0 + $1.heard }
+        return Panel {
+            Eyebrow(day.map { $0.day.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()) } ?? "Last 14 days")
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text("\(day?.heard ?? week)").font(Fonts.ui(26, .medium)).tracking(-0.8).monospacedDigit().foregroundStyle(Theme.text)
+                    .contentTransition(.numericText())
+                Text(day == nil ? "words heard this week" : "words heard").font(Fonts.ui(14)).foregroundStyle(Theme.text2)
+            }
+            .padding(.top, 6)
+            .animation(.easeOut(duration: 0.2), value: day?.date)
+            Chart(snap.days) { d in
+                BarMark(x: .value("Day", d.day, unit: .day), y: .value("Heard", d.heard), width: .ratio(0.6))
+                    .foregroundStyle(day == nil || day?.date == d.date ? Theme.accent : Theme.accent.opacity(0.28))
+                    .cornerRadius(3)
+                if d.bloomed > 0 {
+                    PointMark(x: .value("Day", d.day, unit: .day), y: .value("Heard", d.heard))
+                        .symbolSize(16).foregroundStyle(Theme.text).offset(y: -9)
+                }
+            }
+            .chartXSelection(value: $picked)
+            .chartXAxis {
+                AxisMarks(values: .stride(by: .day, count: 2)) { _ in
+                    AxisValueLabel(format: .dateTime.day(), centered: true).foregroundStyle(Theme.text3)
+                }
+            }
+            .chartYAxis {
+                AxisMarks(position: .trailing, values: .automatic(desiredCount: 3)) { _ in
+                    AxisGridLine().foregroundStyle(Theme.border)
+                    AxisValueLabel().foregroundStyle(Theme.text3)
+                }
+            }
+            .frame(height: 170)
+            .padding(.top, 14)
+            HStack(spacing: 6) {
+                Circle().fill(Theme.text).frame(width: 5, height: 5)
+                Text("A word became known that day · touch for details").font(Fonts.ui(12)).foregroundStyle(Theme.text3)
+            }
+            .padding(.top, 12)
+        }
+    }
+
+    /// Every word as one tile, from faint to full as it becomes known.
+    private func weave(_ snap: GardenSnapshot) -> some View {
+        let words = snap.plants.sorted { ($0.firstHeard ?? 0) < ($1.firstHeard ?? 0) }
+        return Panel {
+            HStack(alignment: .firstTextBaseline) {
+                Eyebrow("Your weave")
+                Spacer()
+                Text("\(snap.totals.bloom) of \(snap.totals.phrases) known").font(Fonts.ui(13)).monospacedDigit().foregroundStyle(Theme.text2)
+            }
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 5), count: 12), spacing: 5) {
+                ForEach(words) { p in
+                    RoundedRectangle(cornerRadius: 3.5).fill(p.stageEnum.tint).aspectRatio(1, contentMode: .fit)
+                        .overlay(RoundedRectangle(cornerRadius: 3.5).strokeBorder(p.stageEnum == .seed ? Theme.accent.opacity(0.25) : .clear, lineWidth: 1))
+                        .onTapGesture { open = p.asWord }
+                }
+            }
+            .padding(.top, 14)
+            HStack(spacing: 16) {
+                ForEach(Stage.allCases.reversed()) { s in
+                    HStack(spacing: 6) {
+                        RoundedRectangle(cornerRadius: 2.5).fill(s.tint).frame(width: 10, height: 10)
+                        Text(s.label).font(Fonts.ui(12)).foregroundStyle(Theme.text2)
+                    }
+                }
+            }
+            .padding(.top, 14)
+        }
+    }
+
+    private func stages(_ snap: GardenSnapshot) -> some View {
+        let t = snap.thresholds
+        let rows: [(Stage, String)] = [(.seed, "Heard under \(t.subtitle)×"), (.sprout, "\(t.subtitle)–\(t.bloom - 1)×"), (.bloom, "\(t.bloom)× or more")]
+        return Panel(padding: 0) {
+            Eyebrow("How words move").padding([.horizontal, .top], 16).padding(.bottom, 4)
+            ForEach(Array(rows.enumerated()), id: \.offset) { i, row in
+                if i > 0 { Rectangle().fill(Theme.border).frame(height: 1).padding(.leading, 46) }
+                HStack(spacing: 14) {
+                    RoundedRectangle(cornerRadius: 4).fill(row.0.tint).frame(width: 16, height: 16)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(row.0.label).font(Fonts.ui(15, .medium)).foregroundStyle(Theme.text)
+                        Text("\(row.1) · \(row.0.meaning)").font(Fonts.ui(13)).foregroundStyle(Theme.text2)
+                    }
+                }
+                .padding(.horizontal, 16).padding(.vertical, 11)
+            }
+            Text("“Didn't know it” on a word moves it back a step.").font(Fonts.ui(12)).foregroundStyle(Theme.text3)
+                .padding(.horizontal, 16).padding(.top, 2).padding(.bottom, 14)
+        }
+    }
+
+    private func milestones(_ snap: GardenSnapshot) -> some View {
+        let events = snap.recent.filter { $0.kind != "heard" }.prefix(8)
+        return Panel(padding: 0) {
+            Eyebrow("Milestones").padding([.horizontal, .top], 16).padding(.bottom, 4)
+            if events.isEmpty {
+                Text("Words you learn will show up here.").font(Fonts.ui(14)).foregroundStyle(Theme.text2).padding(.horizontal, 16).padding(.bottom, 14)
+            }
+            ForEach(Array(events.enumerated()), id: \.element.id) { i, e in
+                if i > 0 { Rectangle().fill(Theme.border).frame(height: 1).padding(.leading, 60) }
+                Button { if let p = snap.plant(e.phrase) { open = p.asWord } } label: {
+                    HStack(spacing: 14) {
+                        Image(systemName: e.kind == "bloomed" ? "checkmark" : e.kind == "sprouted" ? "arrow.up.right" : "arrow.uturn.backward")
+                            .font(.system(size: 12, weight: .semibold)).foregroundStyle(e.kind == "bloomed" ? Theme.accent : Theme.text2)
+                            .frame(width: 30, height: 30)
+                            .background(e.kind == "bloomed" ? Theme.accent.opacity(0.12) : Theme.surface2, in: .rect(cornerRadius: 9))
+                        (Text(e.phrase).font(Fonts.telugu(15, .medium)).foregroundColor(Theme.text)
+                            + Text(e.kind == "bloomed" ? "  is now known" : e.kind == "sprouted" ? "  moved to learning" : "  needs more help").font(Fonts.ui(14)).foregroundColor(Theme.text2))
+                            .lineLimit(1)
+                        Spacer(minLength: 8)
+                        Text(timeAgo(e.ts, now: snap.now)).font(Fonts.mono(11, .regular)).foregroundStyle(Theme.text3)
+                    }
+                    .padding(.horizontal, 16).padding(.vertical, 10)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(RowStyle())
+            }
+            Spacer().frame(height: 6)
+        }
+    }
+}

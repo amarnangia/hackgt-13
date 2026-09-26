@@ -65,7 +65,7 @@ struct HomeView: View {
                     HStack(spacing: 1) {
                         teaser("This week", "+\(n.newWords)", "words")
                         teaser("Known", "\(n.known)", "/ \(n.total)")
-                        teaser("Adaptation", "\(n.adaptation)", "%")
+                        teaser("Hearings", "\(n.hearings)", "")
                     }
                     .background(Theme.border)
                     .clipShape(.rect(cornerRadius: Theme.radius))
