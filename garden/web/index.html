@@ -1,0 +1,1103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08090b">
+<title>Weave</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Noto+Sans+Telugu:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens ---------- */
+:root {
+  --bg: #08090b; --bg-2: #0c0d10;
+  --surface: #111216; --surface-2: #16171c; --surface-3: #1c1d23;
+  --border: rgba(255,255,255,.07); --border-2: rgba(255,255,255,.12);
+  --text: #f3f3f1; --text-2: #a2a2a8; --text-3: #68686f;
+  --accent: #5b8cff; --accent-rgb: 91,140,255;
+  --accent-2: rgba(var(--accent-rgb),.16); --accent-3: rgba(var(--accent-rgb),.08);
+  --r-lg: 20px; --r: 16px; --r-sm: 12px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s7: 32px; --s8: 40px; --s9: 56px;
+  --ui: "Geist", ui-sans-serif, -apple-system, sans-serif;
+  --mono: "Geist Mono", ui-monospace, monospace;
+  --serif: "Newsreader", Georgia, serif;
+  --telugu: "Noto Sans Telugu", "Geist", sans-serif;
+  --spring: cubic-bezier(.32,.72,0,1);
+  --out: cubic-bezier(.2,.8,.2,1);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: radial-gradient(1200px 600px at 50% -200px, rgba(var(--accent-rgb),.07), transparent 70%), var(--bg);
+  color: var(--text); font: 15px/1.5 var(--ui); -webkit-font-smoothing: antialiased; letter-spacing: -0.005em;
+  overflow: hidden;
+}
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2px solid rgba(var(--accent-rgb),.7); outline-offset: 2px; border-radius: 10px; }
+.te { font-family: var(--telugu); letter-spacing: 0; }
+.mono { font-family: var(--mono); font-feature-settings: "tnum"; }
+.eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); }
+.muted { color: var(--text-2); }
+svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* ---------- shell & views ---------- */
+#app { height: 100dvh; position: relative; }
+.view { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; pointer-events: none;
+        transform: translateY(8px) scale(.995); transition: opacity .32s var(--out), transform .4s var(--spring); }
+.view.on { opacity: 1; pointer-events: auto; transform: none; }
+.col { width: 100%; max-width: 560px; margin: 0 auto; padding: 0 var(--s5); }
+.scroll { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.scroll::-webkit-scrollbar { display: none; }
+
+/* stagger on view enter */
+.view.on .rise { animation: rise .46s var(--spring) both; animation-delay: calc(var(--d, 0) * 55ms + 60ms); }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+
+/* ---------- buttons ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); height: 48px; padding: 0 var(--s5);
+       border-radius: 14px; font-weight: 500; transition: transform .15s var(--out), background .2s, border-color .2s, opacity .2s; }
+.btn:active { transform: scale(.97); }
+.btn.primary { background: var(--text); color: #0a0a0c; }
+.btn.primary:hover { background: #fff; }
+.btn.accent { background: var(--accent); color: #fff; box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset, 0 8px 24px -8px rgba(var(--accent-rgb),.55); }
+.btn.accent:hover { background: #6d98ff; }
+.btn.ghost { border: 1px solid var(--border-2); background: var(--surface); }
+.btn.ghost:hover { background: var(--surface-2); border-color: rgba(255,255,255,.18); }
+.btn.block { width: 100%; }
+.icon-btn { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; color: var(--text-2);
+            border: 1px solid var(--border); background: var(--surface); transition: background .2s, color .2s, transform .15s; }
+.icon-btn:hover { background: var(--surface-2); color: var(--text); }
+.icon-btn:active { transform: scale(.94); }
+
+/* ---------- avatar / participant ---------- */
+.avatar { --size: 44px; width: var(--size); height: var(--size); border-radius: 50%; display: grid; place-items: center; flex: none;
+          background: linear-gradient(180deg, var(--surface-3), var(--surface)); border: 1px solid var(--border-2);
+          font-weight: 500; font-size: calc(var(--size) * .4); color: var(--text); position: relative; }
+.avatar.te { font-size: calc(var(--size) * .42); }
+.avatar .presence { position: absolute; right: -1px; bottom: -1px; width: 11px; height: 11px; border-radius: 50%;
+                    background: var(--text-3); border: 2px solid var(--bg); }
+.avatar .presence.on { background: var(--accent); }
+
+/* ---------- home ---------- */
+.topbar { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.02em; font-size: 16px; }
+.greet h1 { font: 500 32px/1.1 var(--ui); letter-spacing: -0.035em; margin: var(--s6) 0 var(--s2); }
+.greet p { margin: 0; color: var(--text-2); }
+.section-h { display: flex; align-items: baseline; justify-content: space-between; margin: var(--s8) 0 var(--s3); }
+.list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.conn { display: flex; align-items: center; gap: var(--s4); padding: var(--s4); width: 100%; text-align: left; position: relative;
+        transition: background .2s; }
+.conn + .conn::before, .row + .row::before { content: ""; position: absolute; top: 0; left: 76px; right: 0; height: 1px; background: var(--border); }
+.conn:hover { background: var(--surface-2); }
+.conn .who { flex: 1; min-width: 0; }
+.conn .name { font-weight: 500; font-size: 16px; letter-spacing: -0.015em; }
+.conn .pair { color: var(--text-2); font-size: 13px; display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.conn .state { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-3); flex: none; }
+.dot.on { background: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb),.18); }
+.start { margin-top: var(--s5); height: 56px; font-size: 16px; border-radius: 16px; }
+.row { display: flex; align-items: center; gap: var(--s4); padding: 14px var(--s4); position: relative; width: 100%; text-align: left; transition: background .2s; }
+.row:hover { background: var(--surface-2); }
+.row .t { flex: 1; min-width: 0; }
+.row .t b { font-weight: 500; }
+.row .t div { color: var(--text-2); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .when { color: var(--text-3); font-size: 12px; }
+.growth-teaser { margin-top: var(--s3); display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border);
+                 border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; width: 100%; text-align: left; }
+.growth-teaser > div { background: var(--surface); padding: var(--s4); transition: background .2s; }
+.growth-teaser:hover > div { background: var(--surface-2); }
+.stat-n { font: 500 24px/1 var(--ui); letter-spacing: -0.03em; margin-top: 10px; }
+.stat-n small { font-size: 13px; color: var(--text-2); margin-left: 2px; letter-spacing: 0; }
+
+/* ---------- onboarding ---------- */
+.ob { height: 100%; display: flex; flex-direction: column; }
+.ob-steps { display: flex; gap: 6px; margin: var(--s5) 0 var(--s8); }
+.ob-steps i { height: 3px; flex: 1; border-radius: 3px; background: var(--border-2); overflow: hidden; position: relative; }
+.ob-steps i::after { content: ""; position: absolute; inset: 0; background: var(--text); transform: scaleX(0); transform-origin: left; transition: transform .4s var(--spring); }
+.ob-steps i.done::after { transform: none; }
+.ob h2 { font: 500 28px/1.15 var(--ui); letter-spacing: -0.03em; margin: 0 0 var(--s2); }
+.ob p.sub { margin: 0 0 var(--s6); color: var(--text-2); }
+.ob-body { flex: 1; overflow-y: auto; }
+.ob-foot { padding: var(--s5) 0 calc(var(--s5) + env(safe-area-inset-bottom)); display: flex; gap: var(--s3); }
+.lang { display: flex; align-items: center; gap: var(--s4); width: 100%; padding: 14px var(--s4); text-align: left; position: relative; transition: background .2s; }
+.lang + .lang::before { content: ""; position: absolute; top: 0; left: var(--s4); right: 0; height: 1px; background: var(--border); }
+.lang:hover { background: var(--surface-2); }
+.lang .native { font-size: 17px; flex: 1; }
+.lang .en { color: var(--text-3); font-size: 13px; }
+.lang .check { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border-2); display: grid; place-items: center; transition: all .2s var(--out); }
+.lang.sel .check { background: var(--accent); border-color: var(--accent); }
+.lang .check svg { width: 12px; height: 12px; stroke: #fff; stroke-width: 2.4; opacity: 0; transform: scale(.5); transition: all .2s var(--spring); }
+.lang.sel .check svg { opacity: 1; transform: none; }
+.field { width: 100%; height: 56px; border-radius: 14px; border: 1px solid var(--border-2); background: var(--surface); color: var(--text);
+         font: 500 20px var(--ui); letter-spacing: -0.02em; padding: 0 var(--s4); outline: none; transition: border-color .2s, box-shadow .2s; }
+.field:focus { border-color: rgba(var(--accent-rgb),.6); box-shadow: 0 0 0 4px rgba(var(--accent-rgb),.12); }
+.chips { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s4); }
+.chip { height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--border-2); color: var(--text-2); font-size: 14px; transition: all .2s; }
+.chip:hover { color: var(--text); border-color: rgba(255,255,255,.2); }
+.chip.sel { color: var(--text); background: var(--accent-2); border-color: rgba(var(--accent-rgb),.5); }
+.ob-preview { margin-top: var(--s7); }
+
+/* ---------- connection visual ---------- */
+.cv { display: grid; grid-template-columns: auto 1fr auto; align-items: start; gap: var(--s3); padding: var(--s6) 0 var(--s3); }
+.party { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 92px; transition: opacity .3s; }
+.party .avatar { --size: 56px; transition: box-shadow .3s var(--out), border-color .3s; }
+.party.speaking .avatar { border-color: rgba(var(--accent-rgb),.7); box-shadow: 0 0 0 4px rgba(var(--accent-rgb),.12), 0 0 32px -4px rgba(var(--accent-rgb),.55); }
+.party .avatar::after { content: ""; position: absolute; inset: -1px; border-radius: 50%; border: 1px solid rgba(var(--accent-rgb),.5); opacity: 0; }
+.party.speaking .avatar::after { animation: ring 1.6s var(--out) infinite; }
+@keyframes ring { from { opacity: .8; transform: scale(1); } to { opacity: 0; transform: scale(1.55); } }
+.party .nm { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.party .lg { font-size: 12px; color: var(--text-3); margin-top: -4px; }
+.wire { position: relative; height: 56px; }
+.wire .line { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: linear-gradient(90deg, transparent, var(--border-2) 12%, var(--border-2) 88%, transparent);
+              transform-origin: center; transition: background .3s; }
+.wire .line::after { content: ""; position: absolute; inset: -1px 0; opacity: 0; transition: opacity .3s;
+                     background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb),.9), transparent) 0 0 / 40% 100% no-repeat; }
+.wire.translating .line::after { opacity: 1; animation: shimmer 1.1s linear infinite; }
+@keyframes shimmer { from { background-position: -40% 0; } to { background-position: 140% 0; } }
+.wire.live .line { background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb),.35) 12%, rgba(var(--accent-rgb),.35) 88%, transparent); }
+.wire.duplex .line { height: 1.5px; background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb),.6) 12%, rgba(var(--accent-rgb),.6) 88%, transparent); }
+.pulse { position: absolute; top: 50%; width: 36px; height: 3px; margin-top: -1.5px; border-radius: 3px; pointer-events: none;
+         background: linear-gradient(90deg, transparent, var(--accent), transparent); filter: drop-shadow(0 0 6px rgba(var(--accent-rgb),.8));
+         animation: travel 1.1s var(--out) forwards; }
+.pulse.rev { animation-name: travel-rev; }
+@keyframes travel { from { left: 4%; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } to { left: calc(96% - 36px); opacity: 0; } }
+@keyframes travel-rev { from { left: calc(96% - 36px); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } to { left: 4%; opacity: 0; } }
+.wire .mid { position: absolute; left: 50%; top: 50%; transform: translate(-50%, 14px); white-space: nowrap; font: 500 11px/1 var(--mono);
+             letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); transition: color .3s, opacity .3s; }
+.wire.translating .mid { color: var(--accent); }
+/* connecting */
+.cv.connecting .line { transform: scaleX(0); }
+.cv .line { transition: transform .55s var(--spring), background .3s; }
+.cv.connecting .party.left { transform: translateX(40%); opacity: .4; }
+.cv.connecting .party.right { transform: translateX(-40%); opacity: .4; }
+.cv .party { transition: transform .55s var(--spring), opacity .4s; }
+
+/* voice bars */
+.voice { display: flex; align-items: center; gap: 3px; height: 18px; opacity: 0; transition: opacity .25s; }
+.party.speaking .voice { opacity: 1; }
+.voice i { width: 3px; border-radius: 3px; background: var(--accent); height: 4px; transition: height .09s linear; }
+
+/* ---------- session ---------- */
+.session { height: 100%; display: grid; grid-template-rows: auto auto 1fr auto; }
+.s-head { display: flex; align-items: center; gap: var(--s3); height: 64px; }
+.status { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; }
+.status .timer { color: var(--text-3); font-weight: 400; margin-left: 2px; }
+.s-head .grow { flex: 1; }
+.mode { font: 500 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); border: 1px solid var(--border);
+        border-radius: 999px; padding: 6px 9px; }
+.mode.live { color: var(--accent); border-color: rgba(var(--accent-rgb),.35); }
+.transcript { padding: var(--s3) 0 var(--s6); mask-image: linear-gradient(transparent, #000 28px); }
+.msg { padding: var(--s5) 0; border-top: 1px solid var(--border); animation: msg-in .38s var(--spring) both; }
+.msg:first-child { border-top: 0; }
+@keyframes msg-in { from { opacity: 0; transform: translateY(8px); } }
+.msg .meta { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.msg .meta .who { font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.msg .meta .sep, .msg .meta .lang, .msg .meta time { font: 400 11px/1 var(--mono); color: var(--text-3); letter-spacing: .04em; }
+.msg .meta time { margin-left: auto; white-space: nowrap; }
+.msg.them .meta .who { color: var(--accent); }
+.msg .orig { font-size: 16px; color: var(--text-2); line-height: 1.6; }
+.msg .orig.te { font-size: 17px; }
+.msg .tr { font: 400 22px/1.38 var(--serif); letter-spacing: -0.01em; color: var(--text); margin-top: 6px; min-height: 1.38em; }
+.msg.you .orig { font: 400 20px/1.4 var(--serif); color: var(--text); }
+.msg.you.tx .orig { font: 400 17px/1.6 var(--telugu); color: var(--text-2); }
+.msg.you.tx .tr { color: var(--text); }
+.msg .tr.pending { font: 500 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 8px; min-height: 30px; }
+.msg .tr.pending::before { content: ""; width: 26px; height: 1.5px; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent) 0 0/60% 100% no-repeat; animation: shimmer .9s linear infinite; }
+.caret::after { content: ""; display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -0.15em; background: var(--accent); animation: blink .9s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.msg .note { margin-top: 8px; font-size: 13px; color: var(--text-3); }
+.msg .note b { font-weight: 500; color: var(--text-2); }
+.w { color: var(--text); background: linear-gradient(transparent 62%, rgba(var(--accent-rgb),.28) 62%); border-radius: 2px; cursor: pointer; transition: background .2s, color .2s; }
+.w:hover { background: linear-gradient(transparent 0%, rgba(var(--accent-rgb),.28) 0%); }
+.w.known { background: none; color: var(--accent); border-bottom: 1px dashed rgba(var(--accent-rgb),.6); }
+.visual { margin-top: var(--s3); display: inline-flex; align-items: center; gap: var(--s3); padding: 6px 12px 6px 6px; border-radius: 12px;
+          border: 1px solid var(--border); background: var(--surface); transition: background .2s, border-color .2s, transform .15s; animation: msg-in .38s var(--spring) both; }
+.visual:hover { background: var(--surface-2); border-color: var(--border-2); }
+.visual:active { transform: scale(.98); }
+.visual img { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; }
+.visual b { font-weight: 500; font-size: 14px; display: block; }
+.visual span { font-size: 12px; color: var(--text-3); }
+.tag { display: inline-flex; align-items: center; gap: 5px; font: 500 10px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase;
+       color: var(--accent); background: var(--accent-3); border-radius: 6px; padding: 4px 6px; }
+.empty-t { text-align: center; color: var(--text-3); padding: var(--s9) var(--s5); font-size: 14px; }
+.nowline { display: flex; align-items: center; justify-content: center; gap: 8px; height: 22px; color: var(--text-3); font-size: 13px; transition: color .3s; }
+.nowline.act { color: var(--text-2); }
+
+/* ask her */
+.ask { margin: var(--s2) 0 var(--s5); padding: var(--s4); border-radius: var(--r); border: 1px solid rgba(var(--accent-rgb),.3);
+       background: linear-gradient(180deg, rgba(var(--accent-rgb),.08), rgba(var(--accent-rgb),.02)); animation: msg-in .42s var(--spring) both; }
+.ask-h { display: flex; align-items: center; justify-content: space-between; }
+.ask-h .say { width: 36px; height: 36px; }
+.ask-te { font-size: 24px; margin-top: 6px; }
+.ask-roman { font: italic 400 18px/1.4 var(--serif); color: var(--text-2); margin-top: 2px; }
+.ask-en { font-size: 13px; color: var(--text-3); margin-top: 4px; }
+.livepill { flex: 1; height: 52px; border-radius: 16px; border: 1px solid rgba(var(--accent-rgb),.3); background: var(--accent-3);
+            display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--text-2); font-size: 14px; }
+.livepill[hidden], .talk[hidden] { display: none; }
+/* dock */
+.dock { padding: var(--s3) 0 calc(var(--s4) + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: var(--s3); }
+.talk { flex: 1; height: 52px; border-radius: 16px; border: 1px solid var(--border-2); background: var(--surface); display: flex; align-items: center; justify-content: center; gap: 10px;
+        font-weight: 500; transition: background .2s, border-color .2s, transform .15s, box-shadow .3s; user-select: none; touch-action: none; }
+.talk:hover { background: var(--surface-2); }
+.talk.on { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 10px 30px -10px rgba(var(--accent-rgb),.8); transform: scale(.985); }
+.dock .icon-btn { width: 52px; height: 52px; border-radius: 16px; position: relative; }
+.dock .icon-btn.sel { color: var(--accent); border-color: rgba(var(--accent-rgb),.35); background: var(--accent-3); }
+.badge { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--accent); color: #fff;
+         font: 600 10px/18px var(--ui); text-align: center; padding: 0 5px; transform: scale(0); transition: transform .3s var(--spring); }
+.badge.on { transform: scale(1); }
+.badge.bump { animation: bump .4s var(--spring); }
+@keyframes bump { 40% { transform: scale(1.35); } }
+.end { height: 52px; padding: 0 18px; border-radius: 16px; background: rgba(255,90,90,.1); color: #ff8a8a; border: 1px solid rgba(255,90,90,.2); font-weight: 500; transition: background .2s, transform .15s; }
+.end:hover { background: rgba(255,90,90,.16); }
+.end:active { transform: scale(.97); }
+
+/* desktop rail */
+.rail { display: none; }
+
+/* ---------- sheet ---------- */
+.backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity .3s var(--out); z-index: 20; }
+.backdrop.on { opacity: 1; pointer-events: auto; }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; max-height: 88dvh; display: flex; flex-direction: column;
+         background: var(--bg-2); border: 1px solid var(--border-2); border-bottom: 0; border-radius: 24px 24px 0 0;
+         transform: translateY(105%); transition: transform .42s var(--spring); box-shadow: 0 -20px 60px -20px rgba(0,0,0,.8); }
+.sheet.on { transform: translateY(0); }
+.sheet .grab { padding: 10px 0 4px; display: grid; place-items: center; cursor: grab; touch-action: none; }
+.sheet .grab i { width: 36px; height: 4px; border-radius: 4px; background: var(--border-2); }
+.sheet .body { overflow-y: auto; padding: var(--s3) var(--s5) calc(var(--s6) + env(safe-area-inset-bottom)); scrollbar-width: none; }
+.sheet .body > * { animation: rise .42s var(--spring) both; }
+.sheet .body > *:nth-child(2) { animation-delay: 40ms; } .sheet .body > *:nth-child(3) { animation-delay: 80ms; }
+.sheet .body > *:nth-child(4) { animation-delay: 120ms; } .sheet .body > *:nth-child(5) { animation-delay: 160ms; } .sheet .body > *:nth-child(n+6) { animation-delay: 200ms; }
+
+/* word explanation */
+.wx-img { position: relative; border-radius: var(--r); overflow: hidden; aspect-ratio: 16/10; background: var(--surface); border: 1px solid var(--border); }
+.wx-img img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.04); transition: transform 1.2s var(--out), opacity .5s; opacity: 0; }
+.wx-img img.ready { transform: none; opacity: 1; }
+.wx-img::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 55%, rgba(8,9,11,.75)); }
+.wx-img .credit { position: absolute; left: 12px; bottom: 10px; z-index: 1; font: 400 11px var(--mono); color: rgba(255,255,255,.6); }
+.wx-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--s4); margin-top: var(--s5); }
+.wx-head h3 { margin: 6px 0 0; font: 500 34px/1.15 var(--telugu); letter-spacing: 0; }
+.wx-head .roman { font: italic 400 18px var(--serif); color: var(--text-2); }
+.say { width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border-2); display: grid; place-items: center; color: var(--text); transition: background .2s, transform .15s; flex: none; }
+.say:hover { background: var(--surface-2); }
+.say.playing { color: var(--accent); border-color: rgba(var(--accent-rgb),.5); }
+.wx-mean { font: 400 21px/1.4 var(--serif); margin: var(--s4) 0 0; }
+.wx-desc { color: var(--text-2); margin: 6px 0 0; font-size: 14px; }
+.wx-ex { margin-top: var(--s5); padding: var(--s4); border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); }
+.wx-ex .te { color: var(--text-2); margin-top: 8px; }
+.wx-ex .en { font: 400 17px/1.4 var(--serif); margin-top: 4px; }
+.wx-actions { display: flex; gap: var(--s3); margin-top: var(--s5); }
+.wx-actions .btn { flex: 1; }
+.add.done { background: var(--accent-2); color: var(--accent); box-shadow: none; }
+.add .ok { display: none; } .add.done .ok { display: inline; } .add.done .plus { display: none; }
+
+/* learning */
+.lp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s3); margin-top: var(--s4); }
+.lp-cell { padding: var(--s4); border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--border); }
+.lp-cell .stat-n { font-size: 26px; }
+.meter { height: 4px; border-radius: 4px; background: var(--surface-3); margin-top: 10px; overflow: hidden; }
+.meter i { display: block; height: 100%; border-radius: 4px; background: var(--accent); transform-origin: left; animation: fill .9s var(--spring) both .2s; }
+@keyframes fill { from { transform: scaleX(0); } }
+.spark { display: flex; align-items: flex-end; gap: 4px; height: 64px; margin-top: var(--s4); }
+.spark i { flex: 1; border-radius: 3px 3px 1px 1px; background: rgba(var(--accent-rgb),.35); min-height: 2px; transform-origin: bottom; animation: grow .6s var(--spring) both; }
+.spark i.today { background: var(--accent); }
+@keyframes grow { from { transform: scaleY(0); } }
+.vocab { display: flex; align-items: center; gap: var(--s3); padding: 12px 0; border-top: 1px solid var(--border); }
+.vocab:first-child { border-top: 0; }
+.vocab img, .vocab .ph { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; background: var(--surface-2); flex: none; }
+.vocab .t { flex: 1; min-width: 0; }
+.vocab .t .te { font-size: 16px; }
+.vocab .t div:last-child { color: var(--text-3); font-size: 13px; }
+.sheet h2 { font: 500 24px/1.2 var(--ui); letter-spacing: -0.03em; margin: 6px 0 0; }
+.menu-item { display: flex; align-items: center; gap: var(--s3); width: 100%; padding: 14px 4px; border-top: 1px solid var(--border); text-align: left; transition: color .2s; color: var(--text-2); }
+.menu-item:hover { color: var(--text); }
+.menu-item:first-of-type { border-top: 0; }
+
+/* toast */
+.toast { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); opacity: 0; z-index: 30;
+         background: var(--surface-3); border: 1px solid var(--border-2); border-radius: 12px; padding: 10px 14px; font-size: 14px;
+         display: flex; align-items: center; gap: 8px; transition: all .3s var(--spring); pointer-events: none; white-space: nowrap; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+.toast svg { color: var(--accent); }
+
+/* ---------- desktop ---------- */
+@media (min-width: 1024px) {
+  body { overflow: hidden; }
+  .session-wrap { max-width: 1120px !important; display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--s8); }
+  .rail { display: flex; flex-direction: column; gap: var(--s4); padding-top: 88px; height: 100dvh; overflow-y: auto; scrollbar-width: none; }
+  .rail .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: var(--s5); }
+  .sheet { left: 50%; right: auto; width: 520px; transform: translate(-50%, calc(100% + 48px)); bottom: 24px; border-radius: 24px; border-bottom: 1px solid var(--border-2); }
+  .sheet.on { transform: translate(-50%, 0); }
+  .msg .tr { font-size: 24px; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <section class="view" id="v-onboard"></section>
+  <section class="view" id="v-home"></section>
+  <section class="view" id="v-session"></section>
+</div>
+<div class="backdrop" id="backdrop"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"><div class="grab"><i></i></div><div class="body"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ helpers ============ */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem("weave." + k)) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("weave." + k, JSON.stringify(v)); } catch {} },
+};
+const params = new URLSearchParams(location.search);
+const I = {
+  mic: '<path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/>',
+  more: '<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', check: '<path d="m5 12 5 5 9-10"/>', chev: '<path d="m9 6 6 6-6 6"/>', back: '<path d="m15 6-6 6 6 6"/>',
+  arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>', spark: '<path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/>',
+  cc: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 10.5a2 2 0 1 0 0 3M16 10.5a2 2 0 1 0 0 3"/>',
+  vol: '<path d="M11 5 6 9H3v6h3l5 4V5ZM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',
+  image: '<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-9 9"/>',
+  book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5Z"/><path d="M19 17H6a2 2 0 0 0-2 2"/>',
+  undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-4"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>',
+  swap: '<path d="M7 7h13l-4-4M17 17H4l4 4"/>',
+};
+const icon = (n, cls = "i") => `<svg class="${cls}" viewBox="0 0 24 24">${I[n]}</svg>`;
+const Logo = () => `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="3" stroke="#f3f3f1" stroke-width="1.6"/><circle cx="19" cy="12" r="3" fill="var(--accent)"/><path d="M8 12h8" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="2 2.4"/></svg>`;
+
+const LANGS = [
+  { code: "en", native: "English", en: "English" }, { code: "te", native: "తెలుగు", en: "Telugu" }, { code: "hi", native: "हिन्दी", en: "Hindi" },
+  { code: "ta", native: "தமிழ்", en: "Tamil" }, { code: "kn", native: "ಕನ್ನಡ", en: "Kannada" }, { code: "ml", native: "മലയാളം", en: "Malayalam" },
+  { code: "bn", native: "বাংলা", en: "Bengali" }, { code: "mr", native: "मराठी", en: "Marathi" }, { code: "es", native: "Español", en: "Spanish" },
+];
+const langName = (c) => LANGS.find((l) => l.code === c)?.en ?? c;
+const initialOf = (name) => (name || "?").trim()[0].toUpperCase();
+const TE_INITIAL = { ammamma: "అ", nanamma: "నా", thatayya: "తా", amma: "అ", nanna: "నా", pinni: "పి", mamayya: "మా", attayya: "అ" };
+const avatarText = (c) => (c.lang === "te" && TE_INITIAL[c.name.toLowerCase()]) || initialOf(c.name);
+
+/* ============ state ============ */
+const state = {
+  profile: store.get("profile", null),                 // { name, lang }
+  connections: store.get("connections", null),
+  vocab: store.get("vocab", []),                        // [{ key, telugu, roman, english, image }]
+  lexicon: [], library: {}, script: [], garden: null,
+  active: null,                                         // connection in the current session
+  session: null,
+};
+const DEFAULT_CONNECTIONS = [
+  { id: "ammamma", name: "Ammamma", lang: "te", last: Date.now() - 2 * 3600e3, recent: true },
+  { id: "thatayya", name: "Thatayya", lang: "te", last: Date.now() - 3 * 86400e3 },
+  { id: "pinni", name: "Pinni", lang: "te", last: Date.now() - 6 * 86400e3 },
+];
+const RECENT = [
+  { who: "ammamma", topic: "Sankranti plans, pulihora, your exam", when: "Yesterday", mins: 18 },
+  { who: "thatayya", topic: "The paddy field, the new tractor", when: "Tue", mins: 9 },
+  { who: "ammamma", topic: "Diwali sweets, cousins visiting", when: "Sun", mins: 24 },
+];
+
+async function loadData() {
+  const get = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  const [lex, lib, script, garden, progress] = await Promise.all([get("/lexicon.json"), get("/images/library.json"), get("/samples/call_script.json"), get("/api/garden"), get("/api/progress")]);
+  state.progress = progress;
+  state.hasDictionary = await fetch("/calls/dictionary.html", { method: "HEAD" }).then((r) => r.ok).catch(() => false);
+  if (lex) state.lexicon = Object.entries(lex).filter(([k]) => !k.startsWith("_")).flatMap(([lang, items]) => items.map((e) => ({ ...e, lang })));
+  if (lib) state.library = lib.items || lib;
+  if (script) state.script = script;
+  state.garden = garden;
+}
+
+/* ============ word knowledge ============ */
+const libFor = (entry) => entry && (state.library[entry.id] || Object.entries(state.library).find(([, v]) => (v.name || "").toLowerCase() === (entry.translate_as || "").toLowerCase())?.[1]);
+// Everyday English words that happen to name a picture ("are you well?" is not about a water well).
+const PLAIN_ENGLISH = new Set(["well", "home", "house", "people", "morning", "today", "fine", "good", "photo", "photos", "time", "water", "come", "rain", "rains", "field", "study", "care"]);
+function libKeyFor(word) {
+  if (PLAIN_ENGLISH.has(word.toLowerCase())) return null;
+  const w = word.toLowerCase().replace(/(es|s)$/, "");
+  for (const [k, v] of Object.entries(state.library)) {
+    const tail = k.split("_").pop();
+    if (k === w || tail === w || (v.name || "").toLowerCase() === w) return k;
+  }
+  return null;
+}
+const WORTH_EXPLAINING = new Set(["food", "vehicle", "place", "clothing", "festival", "culture", "idiom"]);
+const romanOf = (e) => e.roman || e.id?.replace(/_vocative$/, "").replace(/_/g, " ");
+function findEntries(teluguText) {
+  const hits = [];
+  for (const e of state.lexicon) {
+    if (e.lang !== "te") continue;
+    const form = (e.forms || []).find((f) => teluguText.includes(f.replace(/[,.]$/, "")));
+    if (form && !hits.some((h) => h.entry.id === e.id)) hits.push({ entry: e, form: form.replace(/[,.]$/, "") });
+  }
+  return hits;
+}
+/* A word the listener can tap: from the lexicon (Telugu) or the picture library (English noun). */
+function wordInfo(key) {
+  const entry = state.lexicon.find((e) => e.id === key);
+  const lib = entry ? libFor(entry) : state.library[key];
+  return {
+    key, entry, lib,
+    telugu: entry?.forms?.[0]?.replace(/[,.]$/, "") || null,
+    roman: entry ? romanOf(entry) : null,
+    english: entry?.translate_as || lib?.name || key.replace(/_/g, " "),
+    note: entry?.note || null,
+    description: lib?.description ? lib.description.split(/(?<=\.)\s/)[0] : null,
+    image: lib?.image ? "/" + lib.image : null,
+    category: entry?.category || lib?.category || "word",
+  };
+}
+
+/* ============ views ============ */
+let current = null;
+function show(view) {
+  for (const v of ["onboard", "home", "session"]) $("#v-" + v).classList.toggle("on", v === view);
+  current = view;
+}
+
+/* ---------- onboarding ---------- */
+const ob = { step: 0, mine: "en", theirs: "te", name: "Ammamma", isNew: false };
+function LanguageSelector(selected, exclude) {
+  return `<div class="list" role="listbox">${LANGS.filter((l) => l.code !== exclude).map((l) => `
+    <button class="lang ${l.code === selected ? "sel" : ""}" data-lang="${l.code}" role="option" aria-selected="${l.code === selected}">
+      <span class="native ${l.code === "en" || l.code === "es" ? "" : "te"}">${l.native}</span><span class="en">${l.code === "en" || l.code === "es" ? "" : l.en}</span>
+      <span class="check">${icon("check")}</span></button>`).join("")}</div>`;
+}
+function renderOnboard() {
+  const steps = [
+    { h: "What language do you speak?", p: "Everything will reach you in this language.", body: LanguageSelector(ob.mine) },
+    { h: "Who are you talking with?", p: "Pick the language they speak.", body: LanguageSelector(ob.theirs, ob.mine) },
+    { h: "What do you call them?", p: "The name you'd use on a call.", body: `<input class="field" id="ob-name" value="${esc(ob.name)}" autocomplete="off" spellcheck="false" maxlength="24">
+        <div class="chips">${["Ammamma", "Nanamma", "Thatayya", "Amma", "Nanna", "Pinni"].map((n) => `<button class="chip ${n === ob.name ? "sel" : ""}" data-name="${n}">${n}</button>`).join("")}</div>` },
+    { h: `You and ${esc(ob.name)}.`, p: `${langName(ob.theirs)} becomes ${langName(ob.mine)} for you as ${esc(ob.name)} speaks, and the words you learn stay in ${langName(ob.theirs)}.`,
+      body: `<div class="ob-preview">${ConnectionVisual({ you: { name: store.get("profile", {})?.name || "You", lang: ob.mine }, them: { name: ob.name, lang: ob.theirs, id: ob.name.toLowerCase() }, id: "ob-cv" })}</div>` },
+  ];
+  const s = steps[ob.step];
+  $("#v-onboard").innerHTML = `<div class="col ob">
+    <div class="ob-steps">${steps.map((_, i) => `<i class="${i <= ob.step ? "done" : ""}"></i>`).join("")}</div>
+    <div class="ob-body scroll">
+      <h2 class="rise" style="--d:0">${s.h}</h2><p class="sub rise" style="--d:1">${s.p}</p>
+      <div class="rise" style="--d:2">${s.body}</div>
+    </div>
+    <div class="ob-foot">
+      ${ob.step > 0 || ob.isNew ? `<button class="btn ghost" id="ob-back" aria-label="Back">${icon("back")}</button>` : ""}
+      <button class="btn ${ob.step === 3 ? "accent" : "primary"} block" id="ob-next">${ob.step === 3 ? `Start conversation ${icon("arrow")}` : "Continue"}</button>
+    </div></div>`;
+  const root = $("#v-onboard");
+  root.querySelectorAll(".lang").forEach((b) => b.onclick = () => {
+    if (ob.step === 0) ob.mine = b.dataset.lang; else ob.theirs = b.dataset.lang;
+    root.querySelectorAll(".lang").forEach((x) => x.classList.toggle("sel", x === b));
+  });
+  root.querySelectorAll(".chip").forEach((c) => c.onclick = () => { ob.name = c.dataset.name; $("#ob-name").value = ob.name; root.querySelectorAll(".chip").forEach((x) => x.classList.toggle("sel", x === c)); });
+  const input = $("#ob-name"); if (input) { input.oninput = () => { ob.name = input.value.trim() || "Ammamma"; }; setTimeout(() => input.focus(), 350); input.onkeydown = (e) => e.key === "Enter" && $("#ob-next").click(); }
+  $("#ob-back") && ($("#ob-back").onclick = () => { if (ob.step === 0 || (ob.isNew && ob.step === 1)) { home(); return; } ob.step--; renderOnboard(); });
+  $("#ob-next").onclick = () => {
+    if (ob.step < 3) { ob.step++; renderOnboard(); if (ob.step === 3) animateConnect("ob-cv"); return; }
+    if (!state.profile) { state.profile = { name: "Saanvi", lang: ob.mine }; store.set("profile", state.profile); }
+    const id = ob.name.toLowerCase().replace(/\W+/g, "-");
+    let c = state.connections.find((x) => x.id === id);
+    if (!c) { c = { id, name: ob.name, lang: ob.theirs, last: Date.now() }; state.connections.unshift(c); }
+    store.set("connections", state.connections);
+    startSession(c);
+  };
+}
+function onboard(isNew = false) { Object.assign(ob, { step: isNew ? 1 : 0, isNew, name: isNew ? "" : "Ammamma" }); if (isNew) ob.name = "Nanamma"; renderOnboard(); show("onboard"); }
+
+/* ---------- home ---------- */
+function ConnectionCard(c, live) {
+  const on = live && c.id === "ammamma";
+  const ago = Date.now() - c.last;
+  const label = on ? "Connected now" : ago < 86400e3 ? "Connected recently" : ago < 2 * 86400e3 ? "Yesterday" : `${Math.round(ago / 86400e3)} days ago`;
+  return `<button class="conn" data-conn="${c.id}">
+    <span class="avatar ${c.lang === "te" ? "te" : ""}">${avatarText(c)}<span class="presence ${on || ago < 86400e3 ? "on" : ""}"></span></span>
+    <span class="who"><div class="name">${esc(c.name)}</div><div class="pair">${langName(c.lang)} ${icon("arrow", "i").replace('class="i"', 'class="i" style="width:12px;height:12px"')} ${langName(state?.profile?.lang || "en")}</div></span>
+    <span class="state"><span class="dot ${on || ago < 86400e3 ? "on" : ""}"></span>${label}</span></button>`;
+}
+/* Real numbers from the translator's progress.json when there is one; the demo garden otherwise. */
+function growthNumbers() {
+  const p = state.progress, g = state.garden;
+  const days = g?.days?.length ? g.days.map((d) => d.heard) : [];
+  if (p?.met) return { real: true, met: p.met, known: p.known, hearings: p.hearings, days, learnAfter: p.learn_after,
+                       kept: p.words.filter((w) => w.known) };
+  return { real: false, met: g?.totals?.phrases ?? 0, known: g?.totals?.bloom ?? 0, hearings: g?.totals?.heard ?? 0, days, learnAfter: 3,
+           kept: (g?.plants || []).filter((x) => x.stage === "bloom" && !/vocative/.test(x.roman || "")).map((x) => ({ telugu: x.phrase, roman: x.roman, english: x.english })) };
+}
+function renderHome(live = false) {
+  const hr = new Date().getHours();
+  const greet = hr < 5 ? "Good night" : hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening";
+  const name = state.profile?.name || "Saanvi";
+  const g = growthNumbers();
+  const byId = Object.fromEntries(state.connections.map((c) => [c.id, c]));
+  $("#v-home").innerHTML = `<div class="scroll" style="height:100%"><div class="col" style="padding-bottom:48px">
+    <div class="topbar rise" style="--d:0"><div class="brand">${Logo()}Weave</div>
+      <button class="avatar" style="--size:34px" aria-label="Profile">${initialOf(name)}</button></div>
+    <div class="greet rise" style="--d:1"><h1>${greet}, ${esc(name)}</h1><p>${byId.ammamma ? "Ammamma usually calls around this time." : "Pick up where you left off."}</p></div>
+    <div class="section-h rise" style="--d:2"><span class="eyebrow">Your connections</span></div>
+    <div class="list rise" style="--d:3">${state.connections.map((c) => ConnectionCard(c, live)).join("")}</div>
+    <button class="btn accent block start rise" style="--d:4" id="start">${icon("plus")} Start a connection</button>
+    <div class="section-h rise" style="--d:5"><span class="eyebrow">Your language growth</span>${state.hasDictionary ? '<a class="eyebrow" href="/calls/dictionary.html" target="_blank" style="color:var(--text-2);text-decoration:none">Family dictionary ↗</a>' : '<button class="eyebrow" id="growth-more" style="color:var(--text-2)">Details</button>'}</div>
+    <button class="growth-teaser rise" style="--d:6" id="growth">
+      <div><div class="eyebrow">Words met</div><div class="stat-n">${g.met}</div></div>
+      <div><div class="eyebrow">In Telugu</div><div class="stat-n">${g.known}<small>/ ${g.met}</small></div></div>
+      <div><div class="eyebrow">Hearings</div><div class="stat-n">${g.hearings}</div></div>
+    </button>
+    <div class="section-h rise" style="--d:7"><span class="eyebrow">Recent conversations</span></div>
+    <div class="list rise" style="--d:8">${RECENT.map((r) => { const c = byId[r.who] || { name: r.who, lang: "te" }; return `
+      <button class="row" data-conn="${r.who}"><span class="avatar ${c.lang === "te" ? "te" : ""}" style="--size:40px">${avatarText(c)}</span>
+        <span class="t"><b>${esc(c.name)}</b><div>${esc(r.topic)}</div></span><span class="when mono">${r.when} · ${r.mins}m</span></button>`; }).join("")}</div>
+  </div></div>`;
+  const root = $("#v-home");
+  root.querySelectorAll("[data-conn]").forEach((b) => b.onclick = () => startSession(state.connections.find((c) => c.id === b.dataset.conn) || state.connections[0]));
+  $("#start").onclick = () => onboard(true);
+  $("#growth").onclick = () => openSheet(LearningProgress());
+  $("#growth-more") && ($("#growth-more").onclick = () => openSheet(LearningProgress()));
+}
+function home() { if (state.session) endSession(true); renderHome(); show("home"); probeLive().then((live) => live && current === "home" && renderHome(true)); }
+
+/* ---------- connection visual ---------- */
+function Participant(p, side, isYou) {
+  return `<div class="party ${side}" data-side="${isYou ? "you" : "them"}">
+    <span class="avatar ${p.lang === "te" && !isYou ? "te" : ""}">${isYou ? initialOf(p.name) : avatarText(p)}</span>
+    <div class="voice" aria-hidden="true">${"<i></i>".repeat(7)}</div>
+    <div class="nm">${isYou ? "You" : esc(p.name)}</div><div class="lg">${langName(p.lang)}</div></div>`;
+}
+function ConnectionVisual({ you, them, id }) {
+  return `<div class="cv connecting" id="${id}">${Participant(you, "left", true)}
+    <div class="wire"><div class="line"></div><div class="mid">Connecting</div></div>${Participant(them, "right", false)}</div>`;
+}
+async function animateConnect(id, label = "Connected") {
+  await sleep(120);
+  const cv = document.getElementById(id); if (!cv) return;
+  cv.classList.remove("connecting");
+  await sleep(560);
+  const mid = cv.querySelector(".mid"); if (mid) mid.textContent = label;
+  cv.querySelector(".wire").classList.add("live");
+  pulse(cv, "you"); await sleep(260); pulse(cv, "them");
+}
+function pulse(cv, from) {
+  const wire = cv?.querySelector(".wire"); if (!wire) return;
+  const p = document.createElement("i"); p.className = "pulse" + (from === "them" ? " rev" : "");
+  wire.append(p); p.addEventListener("animationend", () => p.remove());
+}
+
+/* voice bars: real mic levels for you, a natural-looking envelope for them */
+const voice = { mic: null, analyser: null, data: null, raf: 0 };
+function animateBars() {
+  cancelAnimationFrame(voice.raf);
+  const t0 = performance.now();
+  const loop = (t) => {
+    document.querySelectorAll(".party.speaking .voice").forEach((v) => {
+      const isYou = v.closest(".party").dataset.side === "you";
+      let level = 0.5;
+      if (isYou && voice.analyser) { voice.analyser.getByteTimeDomainData(voice.data); let m = 0; for (const x of voice.data) m = Math.max(m, Math.abs(x - 128)); level = Math.min(1, m / 50); }
+      [...v.children].forEach((b, i) => {
+        const wave = isYou && voice.analyser ? level * (0.55 + 0.45 * Math.sin(t / 90 + i)) : 0.25 + 0.75 * Math.abs(Math.sin(t / (140 + i * 23) + i * 1.7)) * (0.6 + 0.4 * Math.sin(t / 420));
+        b.style.height = `${4 + wave * 14}px`;
+      });
+    });
+    voice.raf = requestAnimationFrame(loop);
+  };
+  voice.raf = requestAnimationFrame(loop);
+}
+async function micOn() {
+  if (voice.analyser) return;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const ctx = new AudioContext(); const src = ctx.createMediaStreamSource(stream);
+    voice.analyser = ctx.createAnalyser(); voice.analyser.fftSize = 256; voice.data = new Uint8Array(voice.analyser.fftSize);
+    src.connect(voice.analyser); voice.mic = { stream, ctx };
+  } catch { /* no mic: the bars animate on their own */ }
+}
+function micOff() { voice.mic?.stream.getTracks().forEach((t) => t.stop()); voice.mic?.ctx.close(); voice.mic = voice.analyser = null; }
+
+/* ---------- session ---------- */
+function SessionView(c) {
+  return `<div class="col session-wrap" style="height:100%">
+    <div class="session">
+      <header class="s-head">
+        <button class="icon-btn" id="s-home" aria-label="Back to home">${icon("back")}</button>
+        <div class="status"><span class="dot on" id="s-dot"></span><span id="s-state">Connecting</span><span class="timer mono" id="s-timer">0:00</span></div>
+        <div class="grow"></div>
+        <span class="mode" id="s-mode">Demo</span>
+        <button class="icon-btn" id="s-menu" aria-label="Session options">${icon("more")}</button>
+      </header>
+      <div>
+        ${ConnectionVisual({ you: { name: state.profile?.name || "You", lang: state.profile?.lang || "en" }, them: c, id: "s-cv" })}
+        <div class="nowline" id="s-now">Listening</div>
+      </div>
+      <div class="transcript scroll" id="s-lines" aria-live="polite"><div class="empty-t" id="s-empty">When ${esc(c.name)} speaks, it appears here in ${langName(state.profile?.lang || "en")}.</div></div>
+      <div class="dock">
+        <button class="talk" id="s-talk">${icon("mic")}<span>Hold to talk</span></button>
+        <div class="livepill" id="s-livepill" hidden><span class="dot on"></span>Subtitles from the call</div>
+        <button class="icon-btn" id="s-growth" aria-label="Your language growth">${icon("book")}<span class="badge" id="s-badge">0</span></button>
+        <button class="end" id="s-end">End</button>
+      </div>
+    </div>
+    <aside class="rail" id="s-rail"></aside>
+  </div>`;
+}
+function startSession(c) {
+  if (state.session) endSession(true);
+  state.active = c;
+  c.last = Date.now(); store.set("connections", state.connections);
+  const s = state.session = { id: Math.random(), started: Date.now(), lines: [], byId: {}, words: new Map(), mode: "demo", ws: null, speaking: null, translating: 0, timer: 0, saved: 0 };
+  $("#v-session").innerHTML = SessionView(c);
+  show("session");
+  animateBars();
+  animateConnect("s-cv", "Connected").then(() => setState("Connected"));
+  s.timer = setInterval(() => { const t = Math.floor((Date.now() - s.started) / 1000); $("#s-timer").textContent = `${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`; }, 1000);
+  bindSession(c);
+  renderRail();
+  connectLive(s).then((live) => {
+    if (state.session !== s) return;
+    setMode(live ? "live" : "demo");
+    if (live) { connectOutgoing(s); return; }
+    runDemo(s);
+    if (!params.has("demo")) s.watch = setInterval(async () => {
+      if (state.session !== s) return clearInterval(s.watch);
+      if (await probeLive()) { clearInterval(s.watch); toast(`Live call found · switching to ${c.name}'s call`, "arrow"); startSession(c); }
+    }, 4000);
+  });
+}
+function setState(text) { const el = $("#s-state"); if (el) el.textContent = text; }
+function setMode(m) {
+  state.session.mode = m; const el = $("#s-mode"); el.textContent = m === "live" ? "Live" : "Demo"; el.classList.toggle("live", m === "live");
+  $("#s-talk").hidden = m === "live"; $("#s-livepill").hidden = m !== "live";
+}
+function setNow(text, active = false) { const el = $("#s-now"); if (!el) return; el.textContent = text; el.classList.toggle("act", active); }
+function speaking(who, on) {
+  const s = state.session; if (!s) return;
+  const cv = $("#s-cv"); if (!cv) return;
+  cv.querySelector(`.party[data-side="${who}"]`)?.classList.toggle("speaking", on);
+  const any = cv.querySelectorAll(".party.speaking").length;
+  cv.querySelector(".wire").classList.toggle("duplex", any === 2);
+  if (on) {
+    clearInterval(s["pulse_" + who]);
+    pulse(cv, who); s["pulse_" + who] = setInterval(() => pulse(cv, who), 620);
+    setNow(who === "you" ? "You're speaking" : `${state.active.name} is speaking`, true);
+  } else {
+    clearInterval(s["pulse_" + who]);
+    if (!any) setNow("Listening");
+  }
+}
+function translating(delta) {
+  const s = state.session; if (!s) return;
+  s.translating = Math.max(0, s.translating + delta);
+  const wire = $("#s-cv .wire"); wire?.classList.toggle("translating", s.translating > 0);
+  const mid = $("#s-cv .mid"); if (mid) mid.textContent = s.translating ? "Translating" : "Connected";
+
+}
+function bindSession(c) {
+  $("#s-home").onclick = home;
+  $("#s-end").onclick = () => openSheet(Summary(), { onClose: null });
+  $("#s-growth").onclick = () => openSheet(LearningProgress());
+  $("#s-menu").onclick = () => openSheet(SessionMenu());
+  $("#s-talk").addEventListener("pointerdown", talkDown);
+  $("#s-talk").addEventListener("pointerleave", talkUp);
+}
+async function talkDown(e) {
+  const talk = $("#s-talk"); if (!talk || !state.session) return;
+  e.preventDefault(); talk.classList.add("on"); talk.querySelector("span").textContent = "Listening to you…";
+  speaking("you", true); await micOn();
+}
+function talkUp() {
+  const talk = $("#s-talk"); if (!talk?.classList.contains("on")) return;
+  talk.classList.remove("on"); talk.querySelector("span").textContent = "Hold to talk"; speaking("you", false); micOff();
+  if (state.session?.mode === "demo") demoYouSpoke();
+}
+addEventListener("pointerup", talkUp);
+addEventListener("keydown", (e) => { if (e.code === "Space" && current === "session" && !e.repeat && document.activeElement?.tagName !== "INPUT" && !$("#sheet").classList.contains("on")) talkDown(e); });
+addEventListener("keyup", (e) => { if (e.code === "Space" && current === "session") talkUp(); });
+function endSession(silent = false) {
+  const s = state.session; if (!s) return;
+  s.ended = true; clearInterval(s.timer); clearInterval(s.watch); clearInterval(s.pulse_you); clearInterval(s.pulse_them);
+  if (s.ws) { s.ws.onclose = null; s.ws.close(); }
+  if (s.ws2) { s.ws2.onclose = null; s.ws2.close(); }
+  micOff(); cancelAnimationFrame(voice.raf);
+  state.session = null;
+  if (!silent) { const cv = $("#s-cv"); cv?.classList.add("connecting"); }
+}
+
+/* ---------- transcript ---------- */
+function stamp(t = Date.now()) { return new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
+function addLine(who, id, { lang, translated = false }) {
+  const s = state.session;
+  $("#s-empty")?.remove();
+  const el = document.createElement("article");
+  el.className = `msg ${who}${translated ? " tx" : ""}`;
+  const name = who === "you" ? "You" : state.active.name;
+  el.innerHTML = `<div class="meta"><span class="who">${esc(name)}</span><span class="sep">·</span><span class="lang">${langName(lang)}</span><time class="mono">${stamp()}</time></div>
+    <div class="orig ${lang === "te" ? "te" : ""}"></div>${who === "them" || translated ? '<div class="tr"></div>' : ""}`;
+  const list = $("#s-lines"); list.append(el);
+  const line = { id, who, el, orig: "", tr: "", words: [] };
+  s.byId[id] = line; s.lines.push(line);
+  scrollDown();
+  return line;
+}
+function scrollDown() { const list = $("#s-lines"); if (list) list.scrollTo({ top: list.scrollHeight, behavior: "smooth" }); }
+async function typeInto(el, text, cps = 60, s = state.session) {
+  el.classList.add("caret"); el.textContent = "";
+  const chars = [...text];
+  for (let i = 0; i < chars.length; i++) {
+    if (state.session !== s) return;
+    el.textContent += chars[i];
+    if (i % 3 === 0) scrollDown();
+    await sleep(1000 / cps);
+  }
+  el.classList.remove("caret");
+}
+/* Wrap tappable words in the translation (and in the original if the English doesn't mention them). */
+function markWords(line, words) {
+  const tr = line.el.querySelector(".tr"), orig = line.el.querySelector(".orig");
+  for (const w of words) {
+    const targets = [w.match, w.roman, w.english].filter(Boolean);
+    let done = !!line.el.querySelector(`[data-w="${CSS.escape(w.key)}"]`);
+    for (const t of done ? [] : targets) {
+      const re = new RegExp(`(^|[^\\p{L}])(${t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})(?![\\p{L}])`, "iu");
+      if (tr && re.test(tr.textContent)) { tr.innerHTML = tr.innerHTML.replace(re, `$1<span class="w ${w.known ? "known" : ""}" data-w="${esc(w.key)}" tabindex="0">$2</span>`); done = true; break; }
+    }
+    if (!done && w.telugu && orig.textContent.includes(w.telugu)) orig.innerHTML = orig.innerHTML.replace(w.telugu, `<span class="w" data-w="${esc(w.key)}" tabindex="0">${esc(w.telugu)}</span>`);
+    state.session.words.set(w.key, { ...wordInfo(w.key), line });
+  }
+  line.el.querySelectorAll(".w").forEach((sp) => {
+    const open = () => openWord(sp.dataset.w, line);
+    sp.onclick = open; sp.onkeydown = (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), open());
+  });
+  renderRail();
+}
+/* A follow-up she'd love to hear, in Telugu, with how to say it (prompts.py). */
+function addAsk(m) {
+  $("#s-empty")?.remove();
+  const el = document.createElement("article");
+  el.className = "ask";
+  el.innerHTML = `<div class="ask-h"><span class="eyebrow" style="color:var(--accent)">Ask ${esc(state.active?.name || m.caller || "her")}</span>
+      ${"speechSynthesis" in window ? `<button class="say" aria-label="Hear it">${icon("vol")}</button>` : ""}</div>
+    <div class="ask-te te">${esc(m.telugu)}</div><div class="ask-roman">“${esc(m.roman)}”</div><div class="ask-en">${esc(m.english || "")}</div>`;
+  el.querySelector(".say")?.addEventListener("click", (e) => {
+    speechSynthesis.cancel();
+    const v = speechSynthesis.getVoices().find((x) => x.lang?.startsWith("te"));
+    const u = new SpeechSynthesisUtterance(v ? m.telugu : m.roman); if (v) u.voice = v; u.lang = v ? v.lang : "en-IN"; u.rate = 0.85;
+    const b = e.currentTarget; b.classList.add("playing"); u.onend = () => b.classList.remove("playing"); speechSynthesis.speak(u);
+  });
+  $("#s-lines").append(el);
+  const cv = $("#s-cv"); pulse(cv, "you");
+  scrollDown();
+}
+function addVisual(line, info) {
+  if (!info.image || line.el.querySelector(".visual")) return;
+  const b = document.createElement("button");
+  b.className = "visual";
+  b.innerHTML = `<img src="${esc(info.image)}" alt="" loading="lazy"><span><b>${esc(info.lib?.name || info.english)}</b><span>Tap to see what this is</span></span>`;
+  b.onclick = () => openWord(info.key, line);
+  line.el.append(b);
+  scrollDown();
+}
+
+/* ---------- live: the translation pipeline's WebSocket (subtitles.py) ---------- */
+function wsUrl() { return params.get("ws") || `ws://${location.hostname || "localhost"}:8765`; }
+/* subtitles.py --outgoing (your voice, translated for them) runs its own server two ports up. */
+function wsOutUrl() { return params.get("ws2") || `ws://${location.hostname || "localhost"}:8767`; }
+function connectOutgoing(s) {
+  if (state.session !== s || s.ended || s.ws2) return;
+  let ws; try { ws = new WebSocket(wsOutUrl()); } catch { return; }
+  ws.onopen = () => { s.ws2 = ws; toast("Your side is being translated too", "swap"); };
+  ws.onmessage = (e) => onLive(s, JSON.parse(e.data), "you");
+  ws.onclose = () => { if (s.ws2 === ws) s.ws2 = null; if (state.session === s && !s.ended) setTimeout(() => connectOutgoing(s), 5000); };
+  ws.onerror = () => {};
+}
+function probeLive() {
+  if (params.has("demo")) return Promise.resolve(false);
+  return new Promise((resolve) => {
+    let ws; try { ws = new WebSocket(wsUrl()); } catch { return resolve(false); }
+    const t = setTimeout(() => { ws.close(); resolve(false); }, 1200);
+    ws.onopen = () => { clearTimeout(t); ws.close(); resolve(true); };
+    ws.onerror = () => { clearTimeout(t); resolve(false); };
+  });
+}
+function connectLive(s) {
+  if (params.has("demo")) return Promise.resolve(false);
+  return new Promise((resolve) => {
+    let ws; try { ws = new WebSocket(wsUrl()); } catch { return resolve(false); }
+    const t = setTimeout(() => { ws.close(); resolve(false); }, 1500);
+    ws.onerror = () => { clearTimeout(t); resolve(false); };
+    ws.onopen = () => { clearTimeout(t); s.ws = ws; resolve(true); ws.onclose = onDrop; };
+    const onDrop = () => { if (state.session === s && !s.ended && s.mode === "live") { setState("Reconnecting"); $("#s-dot").classList.remove("on"); setTimeout(() => connectLive(s).then((ok) => ok && (setState("Connected"), $("#s-dot").classList.add("on"))), 1500); } };
+    ws.onmessage = (e) => onLive(s, JSON.parse(e.data));
+  });
+}
+function onLive(s, m, side = "them") {
+  if (state.session !== s) return;
+  if (m.type === "prompt") { addAsk(m); return; }
+  const lang = state.active.lang, pk = "partial_" + side, key = (id) => `${side}:${id}`;
+  const newLine = (id) => addLine(side, id, { lang, translated: side === "you" });
+  if (m.type === "speaking") { speaking(side, true); s[pk] = s[pk] || newLine("partial-" + Date.now()); return; }
+  if (m.type === "partial") {
+    if (!m.text) return;
+    if (!s[pk]) s[pk] = newLine("partial-" + Date.now());
+    const o = s[pk].el.querySelector(".orig"); o.textContent = m.text; o.classList.add("caret"); scrollDown(); return;
+  }
+  if (m.type === "original") {
+    speaking(side, false);
+    let line = s[pk]; s[pk] = null;
+    if (line) { delete s.byId[line.id]; line.id = key(m.id); s.byId[line.id] = line; } else line = newLine(key(m.id));
+    const o = line.el.querySelector(".orig"); o.classList.remove("caret");
+    o.textContent = m.text; line.orig = m.text;
+    if (m.route === "english") { o.classList.remove("te"); line.el.querySelector(".lang").textContent = "English"; }
+    const tr = line.el.querySelector(".tr"); tr.className = "tr pending"; tr.textContent = "Translating";
+    translating(+1); line.translating = true;
+    return;
+  }
+  const line = s.byId[key(m.id)] || (m.type === "picture" ? s.lines.filter((l) => l.who === side).at(-1) : null);
+  if (!line) return;
+  if (m.type === "english") {
+    if (line.translating) { translating(-1); line.translating = false; }
+    const tr = line.el.querySelector(".tr"); tr.className = "tr";
+    if (m.route === "english") { tr.remove(); return; }
+    typeInto(tr, m.text, 90, s).then(() => {
+      if (side === "you") return;
+      markWords(line, (m.kept || []).map((k) => ({ key: k.id, match: k.telugu, known: true })));
+    });
+  } else if (m.type === "details") {
+    if (side === "them" && (m.intent === "question" || m.intent === "request")) line.el.querySelector(".meta .sep").insertAdjacentHTML("beforebegin", `<span class="tag">${m.intent === "question" ? "Asked you" : "Request"}</span>`);
+    const words = (m.cards || []).map((c) => { const e = state.lexicon.find((x) => (x.translate_as || "").toLowerCase() === (c.title || "").toLowerCase() || romanOf(x) === (c.title || "").toLowerCase()); return e ? { key: e.id, english: c.title } : null; }).filter(Boolean);
+    setTimeout(() => markWords(line, words), 400);
+  } else if (m.type === "picture") {
+    const pic = state.library[m.id] ? m.id : libKeyFor(m.name || "") || m.id;
+    if (!state.library[pic]) state.library[pic] = { name: m.name, description: m.description, image: m.image, category: m.category };
+    setTimeout(() => { markWords(line, [{ key: pic, english: m.name }]); addVisual(line, wordInfo(pic)); }, 500);
+  } else if (m.type === "voice") {
+    line.el.querySelector(".meta time").insertAdjacentHTML("beforebegin", `<span class="lang" title="Voiced in English">${icon("vol", "i").replace('class="i"', 'class="i" style="width:13px;height:13px;color:var(--text-3)"')}</span>`);
+  }
+}
+
+/* ---------- demo: the team's scripted call (samples/call_script.json) ---------- */
+const YOU_REPLIES = [
+  "I'm good, Ammamma! Tell Thatayya I said hi.", "It's already getting cold here.", "Pulihora! I miss your cooking so much.",
+  "I'll try to come for Sankranti this year.", "Next Friday. I'm studying a lot, don't worry.", "Yes, I just had dinner.",
+];
+function demoLines() {
+  const lines = state.script.filter((l) => l.route === "native" && !/^\(repeat\)/.test(l.meaning));
+  const english = state.script.find((l) => l.route === "english" && /very good/i.test(l.text));
+  const out = []; let r = 0;
+  lines.forEach((l, i) => {
+    const m = l.meaning.match(/^(.*?)(?:\s*\((.*)\))?$/);
+    out.push({ who: "them", text: l.text, meaning: m[1].trim(), note: m[2] && !/Telugu with an English word/.test(m[2]) ? m[2] : null });
+    if ([0, 2, 3, 5, 7, 9].includes(i) && r < YOU_REPLIES.length) out.push({ who: "you", text: YOU_REPLIES[r++] });
+    if (i === 6 && english) out.push({ who: "them", text: english.text, english: true });
+    const ask = state.lexicon.find((e) => e.id === "annam_tinnava");
+    if (i === 4 && ask) out.push({ who: "ask", telugu: ask.forms[0], roman: romanOf(ask), english: ask.translate_as });
+  });
+  return out.length ? out : [{ who: "them", text: "అన్నం తిన్నావా?", meaning: "Have you eaten?", note: "how elders say 'how are you'" }];
+}
+async function runDemo(s) {
+  await sleep(1400);
+  const script = demoLines();
+  s.demoQueue = script; s.demoAt = 0;
+  while (state.session === s && s.demoAt < script.length) {
+    const step = script[s.demoAt++];
+    if (step.who === "ask") { addAsk(step); await sleep(1200); continue; }
+    if (step.who === "you") { if (s.youReplyPending) { s.youReplyPending = false; continue; } await demoYou(s, step.text); }
+    else await demoThem(s, step);
+    await sleep(step.who === "you" ? 900 : 1700);
+  }
+  if (state.session === s) setNow("Listening");
+}
+async function demoThem(s, step) {
+  speaking("them", true);
+  const line = addLine("them", "d" + s.demoAt, { lang: step.english ? "en" : state.active.lang });
+  const o = line.el.querySelector(".orig");
+  if (step.english) o.classList.remove("te");
+  await typeInto(o, step.text, step.english ? 32 : 22, s);
+  speaking("them", false);
+  if (state.session !== s) return;
+  if (step.english) { line.el.querySelector(".tr").remove(); return; }
+  const tr = line.el.querySelector(".tr"); tr.className = "tr pending"; tr.textContent = "Translating";
+  translating(+1); await sleep(520); translating(-1);
+  if (state.session !== s) return;
+  tr.className = "tr"; await typeInto(tr, step.meaning, 70, s);
+  if (step.note) { const n = document.createElement("div"); n.className = "note"; n.innerHTML = `<b>Context</b> · ${esc(step.note)}`; line.el.append(n); }
+  // Only words worth explaining (things, places, festivals, customs, sayings), photo-backed first, two per line at most.
+  const hits = findEntries(step.text).filter((h) => WORTH_EXPLAINING.has(h.entry.category));
+  let words = hits.map((h) => ({ key: h.entry.id, telugu: h.form, roman: romanOf(h.entry), english: h.entry.translate_as }));
+  for (const w of step.meaning.split(/[^\p{L}]+/u)) { const k = w.length > 3 && libKeyFor(w); if (k && !words.some((x) => x.key === k || libFor(state.lexicon.find((e) => e.id === x.key)) === state.library[k])) words.push({ key: k, english: w }); }
+  words = words.sort((a, b) => !!wordInfo(b.key).image - !!wordInfo(a.key).image).slice(0, 2);
+  markWords(line, words);
+  const pic = words.map((w) => wordInfo(w.key)).find((i) => i.image);
+  if (pic) { await sleep(260); addVisual(line, pic); }
+}
+async function demoYou(s, text) {
+  speaking("you", true); await sleep(900); speaking("you", false);
+  const line = addLine("you", "y" + Date.now(), { lang: state.profile?.lang || "en" });
+  await typeInto(line.el.querySelector(".orig"), text, 55, s);
+}
+function demoYouSpoke() {
+  const s = state.session; if (!s?.demoQueue) return;
+  const next = s.demoQueue.slice(s.demoAt).find((x) => x.who === "you");
+  if (!next) return;
+  s.youReplyPending = true;
+  s.demoQueue.splice(s.demoQueue.indexOf(next), 1, { who: "you", text: next.text, done: true });
+  const line = addLine("you", "y" + Date.now(), { lang: state.profile?.lang || "en" });
+  typeInto(line.el.querySelector(".orig"), next.text, 55, s);
+}
+
+/* ---------- sheets ---------- */
+let sheetOpts = {};
+function openSheet(html, opts = {}) {
+  sheetOpts = opts;
+  const sh = $("#sheet"); sh.querySelector(".body").innerHTML = html; sh.querySelector(".body").scrollTop = 0;
+  sh.style.transform = "";
+  setTimeout(() => { sh.classList.add("on"); $("#backdrop").classList.add("on"); }, 20);
+  opts.bind?.(sh);
+  sh.querySelectorAll("[data-close]").forEach((b) => b.onclick = closeSheet);
+  sh.querySelectorAll("img").forEach((img) => (img.complete ? img.classList.add("ready") : (img.onload = () => img.classList.add("ready"))));
+}
+function closeSheet() { $("#sheet").classList.remove("on"); $("#backdrop").classList.remove("on"); speechSynthesis?.cancel(); sheetOpts.onClose?.(); }
+$("#backdrop").onclick = closeSheet;
+addEventListener("keydown", (e) => e.key === "Escape" && closeSheet());
+(() => { // drag the handle down to dismiss
+  const sh = $("#sheet"), grab = sh.querySelector(".grab"); let y0 = null, dy = 0;
+  grab.addEventListener("pointerdown", (e) => { y0 = e.clientY; sh.style.transition = "none"; grab.setPointerCapture(e.pointerId); });
+  grab.addEventListener("pointermove", (e) => { if (y0 == null) return; dy = Math.max(0, e.clientY - y0); sh.style.transform = innerWidth >= 1024 ? `translate(-50%, ${dy}px)` : `translateY(${dy}px)`; });
+  grab.addEventListener("pointerup", () => { sh.style.transition = ""; sh.style.transform = ""; if (dy > 90) closeSheet(); y0 = null; dy = 0; });
+})();
+
+function WordExplanation(info, line) {
+  const saved = state.vocab.some((v) => v.key === info.key);
+  const live = state.session?.mode === "live" && info.entry;
+  const cat = { food: "Food", vehicle: "Getting around", place: "Place", clothing: "Clothing", festival: "Festival", family: "Family", idiom: "Saying", slang: "Slang", custom: "Custom" }[info.category] || info.category;
+  const telugu = info.telugu || (line?.orig && findEntries(line.orig).find((h) => h.entry.id === info.key)?.form);
+  const title = telugu || info.english;
+  return `
+    ${info.image ? `<div class="wx-img"><img src="${esc(info.image)}" alt="${esc(info.english)}"><span class="credit">${esc(info.lib?.name || "")}</span></div>` : ""}
+    <div class="wx-head"><div><div class="eyebrow">${esc(cat)}${telugu ? " · Telugu" : ""}</div>
+      <h3 class="${telugu ? "te" : ""}" style="${telugu ? "" : "font-family:var(--ui);letter-spacing:-0.03em"}">${esc(title)}</h3>
+      ${info.roman ? `<div class="roman">${esc(info.roman)}</div>` : ""}</div>
+      ${telugu && "speechSynthesis" in window ? `<button class="say" id="wx-say" aria-label="Hear it">${icon("vol")}</button>` : ""}</div>
+    <p class="wx-mean">${esc(info.english[0].toUpperCase() + info.english.slice(1))}${info.note ? "" : "."}</p>
+    ${info.note || info.description ? `<p class="wx-desc">${esc(info.note || info.description)}</p>` : ""}
+    ${line ? `<div class="wx-ex"><div class="eyebrow">As ${esc(state.active?.name || "they")} said it</div>
+      <div class="te">${esc(line.el.querySelector(".orig").textContent)}</div><div class="en">${esc(line.el.querySelector(".tr")?.textContent || "")}</div></div>` : ""}
+    <div class="wx-actions">
+      ${live ? `<button class="btn ghost" id="wx-forget" title="Weave will translate it again">${icon("undo")} Didn't know it</button>` : ""}
+      <button class="btn accent add ${saved ? "done" : ""}" id="wx-add"><span class="plus">${icon("plus")} Add to vocabulary</span><span class="ok">${icon("check")} In your vocabulary</span></button>
+    </div>`;
+}
+function openWord(key, line) {
+  const info = { ...wordInfo(key), ...(state.session?.words.get(key) || {}) };
+  openSheet(WordExplanation(info, line), { bind: (sh) => {
+    sh.querySelector("#wx-add").onclick = (e) => {
+      const b = e.currentTarget; if (b.classList.contains("done")) return;
+      b.classList.add("done");
+      state.vocab.unshift({ key, telugu: info.telugu, roman: info.roman, english: info.english, image: info.image, at: Date.now() });
+      store.set("vocab", state.vocab);
+      const badge = $("#s-badge"); if (badge) { state.session.saved++; badge.textContent = state.session.saved; badge.classList.add("on", "bump"); setTimeout(() => badge.classList.remove("bump"), 400); }
+      renderRail();
+      setTimeout(() => { closeSheet(); toast(`Added ${info.roman || info.english} to your vocabulary`, "check"); }, 520);
+    };
+    const f = sh.querySelector("#wx-forget");
+    if (f) f.onclick = () => { state.session?.ws?.send(JSON.stringify({ type: "forget", id: key })); closeSheet(); toast("Weave will translate it again next time", "undo"); };
+    const say = sh.querySelector("#wx-say");
+    if (say) say.onclick = () => {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(info.telugu || info.english);
+      const v = speechSynthesis.getVoices().find((x) => x.lang?.startsWith("te"));
+      if (v) u.voice = v; else u.text = info.roman || info.english;
+      u.lang = v ? v.lang : "en-IN"; u.rate = 0.85;
+      say.classList.add("playing"); u.onend = () => say.classList.remove("playing");
+      speechSynthesis.speak(u);
+    };
+  } });
+}
+function VocabularyCard(v) {
+  return `<div class="vocab">${v.image ? `<img src="${esc(v.image)}" alt="">` : '<span class="ph"></span>'}
+    <div class="t">${v.telugu ? `<div class="te">${esc(v.telugu)}</div>` : `<div>${esc(v.english)}</div>`}<div>${esc([v.roman, v.english].filter(Boolean).join(" · "))}</div></div></div>`;
+}
+function LearningProgress() {
+  const g = growthNumbers();
+  const max = Math.max(...g.days, 1);
+  const pct = g.met ? Math.round((g.known / g.met) * 100) : 0;
+  return `<div class="eyebrow">With ${esc(state.active?.name || "Ammamma")}${g.real ? "" : " · sample data"}</div><h2>Your language growth</h2>
+    <div class="lp-grid">
+      <div class="lp-cell"><div class="eyebrow">Words met</div><div class="stat-n">${g.met}</div></div>
+      <div class="lp-cell"><div class="eyebrow">In Telugu</div><div class="stat-n">${g.known}</div></div>
+      <div class="lp-cell"><div class="eyebrow">Hearings</div><div class="stat-n">${g.hearings}</div></div>
+    </div>
+    <div class="lp-cell" style="margin-top:12px"><div style="display:flex;justify-content:space-between;align-items:baseline"><div class="eyebrow">Kept in Telugu for you</div><div class="mono">${pct}%</div></div>
+      <div class="meter"><i style="width:${pct}%"></i></div>
+      <div class="muted" style="font-size:13px;margin-top:10px">Once you've heard a word ${g.learnAfter} times, Weave stops translating it and leaves it in Telugu.</div></div>
+    ${g.days.length ? `<div class="lp-cell" style="margin-top:12px"><div class="eyebrow">Words heard per day</div>
+      <div class="spark">${g.days.map((d, i) => `<i class="${i === g.days.length - 1 ? "today" : ""}" style="height:${(d / max) * 100}%;animation-delay:${i * 25}ms" title="${d}"></i>`).join("")}</div></div>` : ""}
+    ${g.kept.length ? `<div style="margin-top:20px"><div class="eyebrow" style="margin-bottom:6px">Words you know now</div>${g.kept.slice(0, 8).map((w) => VocabularyCard(w)).join("")}</div>` : ""}
+    <div style="margin-top:20px"><div class="eyebrow" style="margin-bottom:6px">Saved from calls · ${state.vocab.length}</div>
+      ${state.vocab.length ? state.vocab.slice(0, 12).map(VocabularyCard).join("") : '<div class="muted" style="font-size:14px;padding:8px 0">Tap a highlighted word during a call to save it here.</div>'}</div>
+    ${state.hasDictionary ? '<a class="btn ghost block" style="margin-top:16px;text-decoration:none" href="/calls/dictionary.html" target="_blank">Open the family dictionary ↗</a>' : ""}`;
+}
+function SessionMenu() {
+  const s = state.session;
+  return `<div class="eyebrow">Session</div><h2>${esc(state.active.name)}</h2><div style="margin-top:12px">
+    <button class="menu-item" id="m-growth">${icon("book")} Your language growth</button>
+    <button class="menu-item" id="m-mode">${icon("swap")} ${s?.mode === "live" ? "Switch to demo call" : "Try the live call again"}</button>
+    <button class="menu-item" id="m-new">${icon("plus")} New connection</button>
+    ${state.hasDictionary ? `<a class="menu-item" href="/calls/dictionary.html" target="_blank" style="text-decoration:none">${icon("book")} Family dictionary ↗</a>` : ""}</div>`;
+}
+document.addEventListener("click", (e) => {
+  const id = e.target.closest("button")?.id;
+  if (id === "m-growth") openSheet(LearningProgress());
+  if (id === "m-mode") { closeSheet(); const c = state.active; if (state.session?.mode === "live") { history.replaceState(null, "", "?demo=1"); params.set("demo", "1"); } else { params.delete("demo"); history.replaceState(null, "", location.pathname); } startSession(c); }
+  if (id === "m-new") { closeSheet(); onboard(true); }
+  if (id === "sum-done") { closeSheet(); const cv = $("#s-cv"); cv?.classList.add("connecting"); setTimeout(home, 420); }
+});
+function Summary() {
+  const s = state.session; const mins = Math.max(1, Math.round((Date.now() - s.started) / 60000));
+  const heard = s.lines.filter((l) => l.who === "them").length;
+  const words = [...s.words.values()];
+  return `<div class="eyebrow">Conversation ended</div><h2>You and ${esc(state.active.name)}</h2>
+    <div class="lp-grid"><div class="lp-cell"><div class="eyebrow">Minutes</div><div class="stat-n">${mins}</div></div>
+      <div class="lp-cell"><div class="eyebrow">Lines</div><div class="stat-n">${heard}</div></div>
+      <div class="lp-cell"><div class="eyebrow">Words</div><div class="stat-n">${words.length}</div></div></div>
+    ${words.length ? `<div style="margin-top:18px"><div class="eyebrow" style="margin-bottom:6px">From this call</div>${words.slice(0, 6).map((w) => VocabularyCard(w)).join("")}</div>` : ""}
+    ${state.hasDictionary ? '<p class="muted" style="font-size:13px;margin:16px 0 0">When the call ends, her stories and voice are saved to the <a href="/calls/dictionary.html" target="_blank" style="color:var(--text)">family dictionary</a>.</p>' : ""}
+    <div class="wx-actions"><button class="btn ghost" data-close>Keep talking</button><button class="btn primary" id="sum-done">Done</button></div>`;
+}
+function renderRail() {
+  const rail = $("#s-rail"); if (!rail) return;
+  const words = [...(state.session?.words.values() || [])];
+  const g = growthNumbers();
+  rail.innerHTML = `<div class="card"><div class="eyebrow">In this call</div>
+      ${words.length ? words.slice(-8).reverse().map((w) => `<button class="vocab" style="width:100%;text-align:left" data-word="${esc(w.key)}">${w.image ? `<img src="${esc(w.image)}" alt="">` : '<span class="ph"></span>'}
+        <span class="t">${w.telugu ? `<div class="te">${esc(w.telugu)}</div>` : `<div>${esc(w.english)}</div>`}<div>${esc([w.roman, w.english].filter(Boolean).join(" · "))}</div></span></button>`).join("")
+      : '<div class="muted" style="font-size:14px;margin-top:10px">Words worth knowing will collect here as you talk.</div>'}</div>
+    <div class="card"><div class="eyebrow">Your language growth</div>
+      <div class="lp-grid" style="grid-template-columns:1fr 1fr"><div><div class="stat-n">${g.met}</div><div class="muted" style="font-size:12px">words met</div></div>
+        <div><div class="stat-n">${g.known}</div><div class="muted" style="font-size:12px">kept in Telugu</div></div></div>
+      <div class="meter"><i style="width:${g.met ? Math.round((g.known / g.met) * 100) : 0}%"></i></div></div>`;
+  rail.querySelectorAll("[data-word]").forEach((b) => b.onclick = () => { const w = state.session?.words.get(b.dataset.word); openWord(b.dataset.word, w?.line); });
+}
+
+/* ---------- toast ---------- */
+let toastT = 0;
+function toast(text, ic = "check") { const t = $("#toast"); t.innerHTML = `${icon(ic)}${esc(text)}`; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 2200); }
+
+/* ============ boot ============ */
+if (params.has("still")) document.head.insertAdjacentHTML("beforeend", "<style>*,*::before,*::after{transition:none!important;animation-duration:1ms!important;animation-delay:0ms!important}</style>");
+(async function boot() {
+  await loadData();
+  if (params.has("reset")) { localStorage.clear(); state.profile = null; state.vocab = []; state.connections = null; }
+  if (!state.connections) { state.connections = DEFAULT_CONNECTIONS; store.set("connections", state.connections); }
+  if (!state.profile && params.get("view")) state.profile = { name: "Saanvi", lang: "en" };
+  const start = params.get("view");
+  if (!state.profile && start !== "home" && start !== "session") onboard(false);
+  else if (start === "session") startSession(state.connections[0]);
+  else home();
+  // For demos and screenshots: ?word=pulihora opens that word once it comes up; ?sheet=growth opens the growth sheet.
+  if (params.get("word")) {
+    const key = params.get("word");
+    const wait = setInterval(() => { const w = state.session?.words.get(key); if (w) { clearInterval(wait); openWord(key, w.line); } }, 300);
+  }
+  if (params.get("sheet") === "growth") setTimeout(() => openSheet(LearningProgress()), 1200);
+})();
+</script>
+</body>
+</html>

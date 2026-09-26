@@ -17,12 +17,36 @@ targets:
   Weave:
     type: application
     platform: iOS
-    sources: [Weave, Shared]
+    sources:
+      - Weave
+      - Shared
+      # The team's word list, scripted call and a few photos, read from the repo (not copied).
+      - path: ../../lexicon.json
+        buildPhase: resources
+      - path: ../../samples/call_script.json
+        buildPhase: resources
+      - path: ../../images/library.json
+        buildPhase: resources
+      - path: ../../images/pulihora.jpg
+        buildPhase: resources
+      - path: ../../images/avakaya.jpg
+        buildPhase: resources
+      - path: ../../images/auto.jpg
+        buildPhase: resources
+      - path: ../../images/temple.jpg
+        buildPhase: resources
+      - path: ../../images/sankranti.jpg
+        buildPhase: resources
+      - path: ../../images/mango.jpg
+        buildPhase: resources
+      - path: ../../images/village_market.jpg
+        buildPhase: resources
+      - path: ../../images/paddy_field.jpg
+        buildPhase: resources
     info:
       path: Weave/Info.plist
       properties:
         CFBundleDisplayName: Weave
-        UIAppFonts: [InstrumentSerif-Regular.ttf, InstrumentSerif-Italic.ttf, BricolageGrotesque-Variable.ttf, TiroTelugu-Regular.ttf, TiroTelugu-Italic.ttf]
         UILaunchScreen:
           UIColorName: ""
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
@@ -53,7 +77,6 @@ targets:
       path: WeaveWidget/Info.plist
       properties:
         CFBundleDisplayName: Weave
-        UIAppFonts: [InstrumentSerif-Regular.ttf, InstrumentSerif-Italic.ttf, BricolageGrotesque-Variable.ttf, TiroTelugu-Regular.ttf, TiroTelugu-Italic.ttf]
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
         NSAppTransportSecurity:

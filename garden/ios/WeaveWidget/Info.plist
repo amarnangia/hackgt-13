@@ -32,13 +32,5 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
-	<key>UIAppFonts</key>
-	<array>
-		<string>InstrumentSerif-Regular.ttf</string>
-		<string>InstrumentSerif-Italic.ttf</string>
-		<string>BricolageGrotesque-Variable.ttf</string>
-		<string>TiroTelugu-Regular.ttf</string>
-		<string>TiroTelugu-Italic.ttf</string>
-	</array>
 </dict>
 </plist>
