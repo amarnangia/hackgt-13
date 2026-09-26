@@ -369,8 +369,8 @@ def make_audio(args, loop, target):
                 sampler.add_frame(pcm)  # same audio Muse hears, to clone the caller's voice
             loop.call_soon_threadsafe(target["q"].put_nowait, pcm.tobytes())
 
-    # --outgoing: your own voice stays quiet (--mine-volume) under the English voice.
-    return AudioLoop(in_dev, out_dev, on_audio=on_audio, source=source, original=args.mine_volume if args.outgoing else 1.0)
+    # The original voice (theirs, or yours with --outgoing) stays quiet the whole time; the English voice leads.
+    return AudioLoop(in_dev, out_dev, on_audio=on_audio, source=source, original=args.original_volume)
 
 
 async def run(args):
@@ -482,8 +482,9 @@ def main():
     p.add_argument("--outgoing", action="store_true",
                    help="translate what YOU say: your mic -> English voice -> BlackHole 16ch, which WhatsApp Web uses "
                         "as its microphone, so the other person hears only the English")
-    p.add_argument("--mine-volume", type=float, default=0.15,
-                   help="with --outgoing: how loud your real voice is in the call, 0-1 (0 = only the English voice)")
+    p.add_argument("--original-volume", type=float, default=0.05,
+                   help="how loud the original voice is under the English, 0-1 (0 = only the English voice; 1 = full "
+                        "volume, lowered only while the English plays). 0.05 sounds faint; 0.15 is still clearly audible")
     p.add_argument("--in", dest="inp", default=None, help="input device (default: BlackHole 2ch; with --outgoing, the Mac's mic)")
     p.add_argument("--out", default=None, help='output device (default: system default; with --outgoing, BlackHole 16ch); '
                                                '"none" = silent, with --file')
@@ -495,14 +496,15 @@ def main():
     p.add_argument("--learn-after", type=int, default=1,
                    help="keep a word in Telugu after hearing it this many times (0 = keep every known word from the start)")
     p.add_argument("--reset-progress", action="store_true", help="forget which words you know (deletes progress.json)")
-    p.add_argument("--speak", choices=["telugu", "questions", "all"], default="telugu",
-                   help="telugu = voice what she says in Telugu, never her English (default); "
-                        "questions = only Telugu questions/requests to you (Laya decides); all = every line")
+    p.add_argument("--speak", choices=["telugu", "questions", "all"], default=None,
+                   help="telugu = voice what she says in Telugu, never her English; questions = only Telugu "
+                        "questions/requests to you (Laya decides); all = every line (default while --original-volume "
+                        "is low, since her own English would be too quiet to follow)")
     args = p.parse_args()
     if args.outgoing:
         args.inp = args.inp or "MacBook"  # the built-in mic ("MacBook Pro Microphone"); pass --in for a headset mic
         args.out = args.out or "BlackHole 16ch"
-        args.speak = "all"  # your English lines too: nothing of your own voice reaches the call
+    args.speak = args.speak or ("all" if args.original_volume < 0.5 else "telugu")
     args.inp = args.inp or "BlackHole 2ch"  # not just "BlackHole": that also matches BlackHole 16ch, the --outgoing mic
     args.voice_file = MY_VOICE_SAMPLE if args.outgoing else VOICE_SAMPLE
     # Both directions can run at once (two terminals), so --outgoing gets its own overlay page.
