@@ -42,6 +42,10 @@ EVIDENCE = {
     "asked": (0.1, 0.7),        # asked "What does ___ mean?"
     "forgot": (0.03, 0.8),      # tapped a kept word: "I don't know this"
     "said": (0.9, 0.05),        # said it themselves on the call
+    # Their reply to a line that kept it in Telugu, judged by reply.py (rules + Laya's trained head; ~88% of these
+    # conclusions were right on held-out test replies, the rest of replies give no evidence):
+    "replied": (0.8, 0.25),     # the reply only makes sense if they know it ("save me some mangoes" after "mamidi")
+    "confused": (0.1, 0.75),    # they asked, sounded lost, or answered as if it meant something else
 }
 HALF_LIFE_DAYS, MIN_HALF_LIFE_DAYS, MAX_HALF_LIFE_DAYS = 7.0, 1.0, 60.0  # most families call about weekly
 
@@ -122,6 +126,8 @@ class Progress:
         if entry_id not in self.entries:
             return
         with self.lock:
+            if event in ("replied", "confused", "said"):
+                self.pending.pop(entry_id, None)  # stronger evidence than "didn't tap it" for this showing
             self._apply(entry_id, event)
             self._log(entry_id, event)
             self._save()

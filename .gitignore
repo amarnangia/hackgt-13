@@ -22,3 +22,5 @@ images/cache/
 calls/
 tools/two_way_run/
 progress_settings.json
+!tools/data/*.jsonl
+.progress_backup/

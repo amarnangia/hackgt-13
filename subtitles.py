@@ -144,6 +144,8 @@ class Captioner:
         self.speaking = False         # between Muse's speechStart and speechEnd
         self.on_speech_start = None   # --two-way: cut the translation playing to this person (they interrupted)
         self.echo_filter = None       # --two-way: callable(text) -> True if it's our speakers, not you
+        self.on_kept = None           # --two-way: callable(line, kept) for lines shown with words kept in Telugu
+        self.on_line = None           # --two-way: callable(text) with everything said on this side (reply.py)
         self.shown = collections.deque(maxlen=30)  # (time, text) this side showed/played, for the other side's echo check
         self.redo_lines = collections.deque(maxlen=12)  # (time, sentence, to, marks): redone if the roles change
         self.translate = None
@@ -342,6 +344,8 @@ class Captioner:
         if not redo and self.echo_filter and self.echo_filter(sentence):
             print(f"  [ignored, it was our own speakers: {sentence}]", flush=True)
             return
+        if not redo and self.on_line:
+            self.on_line(sentence)
         self.next_id += 1
         seg_id = self.next_id
         marks = marks or self.latency.piece_cut(end_offset)
@@ -386,6 +390,8 @@ class Captioner:
                 # Words the listener knows stay in Telugu ("Today, Ammamma made pulihora"); the rest is English.
                 english, kept = self.progress.keep_known_words(english, hits)
                 self.progress.heard_words(hits, kept={k["id"] for k in kept})
+                if kept and self.on_kept:
+                    self.on_kept(english, kept)
             if self.garden and to == "en" and hits:
                 self._plant(hits)
             self.hub.broadcast({"type": "english", "id": seg_id, "text": english, "route": route, "kept": kept, "to": to})
@@ -1055,6 +1061,11 @@ async def listen_two_way(args, them_args, me_args, them, me):
     indic_voice = None if error else them.translate.speak
     await load_helpers(loop, args, them, them_target)  # story page, prompts: about the person you called
     me.decider, me.pictures = them.decider, them.pictures
+    if them.decider:  # what you say back tells us which kept Telugu words you understood (reply.py)
+        from reply import ReplyJudge, ReplyWatch
+        watch = ReplyWatch(ReplyJudge(them.decider), them.progress, them.lexicon, args.lang,
+                           learner=lambda: them.roles.lang_of("me") == "en", log=lambda m: print(m, flush=True))
+        them.on_kept, me.on_line = watch.shown, watch.heard
     if not args.no_voice:
         print("Loading the voices...", flush=True)
         await load_voice(loop, them_args, them, them_audio, them_target, "the caller's ", indic_voice)

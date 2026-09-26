@@ -1,0 +1,81 @@
+{"line": "Your pedananna is coming to visit next week.", "word": "pedananna", "means": "uncle", "reply": "oh nice is uncle bringing the kids too", "label": "understood"}
+{"line": "Your pedananna is coming to visit next week.", "word": "pedananna", "means": "uncle", "reply": "wait who is pedananna", "label": "not_understood"}
+{"line": "Your pedananna is coming to visit next week.", "word": "pedananna", "means": "uncle", "reply": "okay", "label": "no_signal"}
+{"line": "I bought Etikoppaka bommalu for your cousins at the fair.", "word": "Etikoppaka bommalu", "means": "lacquer toys", "reply": "those painted wooden toys they'll love them", "label": "understood"}
+{"line": "I bought Etikoppaka bommalu for your cousins at the fair.", "word": "Etikoppaka bommalu", "means": "lacquer toys", "reply": "what did you buy sorry", "label": "not_understood"}
+{"line": "I bought Etikoppaka bommalu for your cousins at the fair.", "word": "Etikoppaka bommalu", "means": "lacquer toys", "reply": "hold on my mom is calling me", "label": "no_signal"}
+{"line": "We did the baby's annaprasana at the temple on Sunday.", "word": "annaprasana", "means": "first rice ceremony", "reply": "aw did she like eating the rice for the first time", "label": "understood"}
+{"line": "We did the baby's annaprasana at the temple on Sunday.", "word": "annaprasana", "means": "first rice ceremony", "reply": "oh congrats on the naming ceremony", "label": "not_understood"}
+{"line": "We did the baby's annaprasana at the temple on Sunday.", "word": "annaprasana", "means": "first rice ceremony", "reply": "mhm", "label": "no_signal"}
+{"line": "I brought prasadam from the temple for you.", "word": "prasadam", "means": "prasadam", "reply": "thank you I love the sweet offering from the temple", "label": "understood"}
+{"line": "I brought prasadam from the temple for you.", "word": "prasadam", "means": "prasadam", "reply": "prasadam what's that", "label": "not_understood"}
+{"line": "I brought prasadam from the temple for you.", "word": "prasadam", "means": "prasadam", "reply": "yeah yeah", "label": "no_signal"}
+{"line": "Your cousin started going to badi this year.", "word": "badi", "means": "school", "reply": "which grade is she in now", "label": "understood"}
+{"line": "Your cousin started going to badi this year.", "word": "badi", "means": "school", "reply": "going to where", "label": "not_understood"}
+{"line": "Your cousin started going to badi this year.", "word": "badi", "means": "school", "reply": "anyway did you see the photos I sent", "label": "no_signal"}
+{"line": "At the wedding everyone threw talambralu on the couple.", "word": "talambralu", "means": "wedding rice shower", "reply": "I saw the video with all the rice flying everywhere", "label": "understood"}
+{"line": "At the wedding everyone threw talambralu on the couple.", "word": "talambralu", "means": "wedding rice shower", "reply": "they threw flowers that's so pretty", "label": "not_understood"}
+{"line": "At the wedding everyone threw talambralu on the couple.", "word": "talambralu", "means": "wedding rice shower", "reply": "sorry you cut out for a second", "label": "no_signal"}
+{"line": "Your sister's mangalasutram is made of pure gold.", "word": "mangalasutram", "means": "mangalsutra", "reply": "the necklace from her wedding right it's so beautiful", "label": "understood"}
+{"line": "Your sister's mangalasutram is made of pure gold.", "word": "mangalasutram", "means": "mangalsutra", "reply": "her what", "label": "not_understood"}
+{"line": "Your sister's mangalasutram is made of pure gold.", "word": "mangalasutram", "means": "mangalsutra", "reply": "okay okay", "label": "no_signal"}
+{"line": "Today I made pappu with tomatoes.", "word": "pappu", "means": "dal", "reply": "I miss your dal so much nobody makes it like you", "label": "understood"}
+{"line": "Today I made pappu with tomatoes.", "word": "pappu", "means": "dal", "reply": "what is pappu", "label": "not_understood"}
+{"line": "Today I made pappu with tomatoes.", "word": "pappu", "means": "dal", "reply": "hmm", "label": "no_signal"}
+{"line": "I put a black dot on the baby's cheek so there's no dishti.", "word": "dishti", "means": "evil eye", "reply": "so nobody's jealousy hurts her that's sweet", "label": "understood"}
+{"line": "I put a black dot on the baby's cheek so there's no dishti.", "word": "dishti", "means": "evil eye", "reply": "so there's no rash", "label": "not_understood"}
+{"line": "I put a black dot on the baby's cheek so there's no dishti.", "word": "dishti", "means": "evil eye", "reply": "haha okay", "label": "no_signal"}
+{"line": "Eat the dosa with the coconut pachadi I sent.", "word": "pachadi", "means": "chutney", "reply": "I already finished the coconut chutney it was so good", "label": "understood"}
+{"line": "Eat the dosa with the coconut pachadi I sent.", "word": "pachadi", "means": "chutney", "reply": "the coconut what", "label": "not_understood"}
+{"line": "Eat the dosa with the coconut pachadi I sent.", "word": "pachadi", "means": "chutney", "reply": "yes grandma", "label": "no_signal"}
+{"line": "I made sunnundalu for Diwali, they're in the tin.", "word": "sunnundalu", "means": "urad dal laddus", "reply": "save some laddus for me please", "label": "understood"}
+{"line": "I made sunnundalu for Diwali, they're in the tin.", "word": "sunnundalu", "means": "urad dal laddus", "reply": "I don't know that word", "label": "not_understood"}
+{"line": "I made sunnundalu for Diwali, they're in the tin.", "word": "sunnundalu", "means": "urad dal laddus", "reply": "wait what time is it there", "label": "no_signal"}
+{"line": "Deerghayushman bhava, my dear, happy birthday.", "word": "deerghayushman bhava", "means": "may you live a long life", "reply": "thank you for the blessing ammamma", "label": "understood"}
+{"line": "Deerghayushman bhava, my dear, happy birthday.", "word": "deerghayushman bhava", "means": "may you live a long life", "reply": "what does that mean", "label": "not_understood"}
+{"line": "Deerghayushman bhava, my dear, happy birthday.", "word": "deerghayushman bhava", "means": "may you live a long life", "reply": "can you hear me", "label": "no_signal"}
+{"line": "Your Nanamma is resting now, her knee hurts.", "word": "Nanamma", "means": "grandma", "reply": "tell grandma to take her medicine and rest", "label": "understood"}
+{"line": "Your Nanamma is resting now, her knee hurts.", "word": "Nanamma", "means": "grandma", "reply": "oh no is the dog okay", "label": "not_understood"}
+{"line": "Your Nanamma is resting now, her knee hurts.", "word": "Nanamma", "means": "grandma", "reply": "uh huh", "label": "no_signal"}
+{"line": "I cooked dondakaya fry, it came out crispy.", "word": "dondakaya", "means": "ivy gourd", "reply": "I love that little green vegetable fry", "label": "understood"}
+{"line": "I cooked dondakaya fry, it came out crispy.", "word": "dondakaya", "means": "ivy gourd", "reply": "chicken fry nice", "label": "not_understood"}
+{"line": "I cooked dondakaya fry, it came out crispy.", "word": "dondakaya", "means": "ivy gourd", "reply": "one sec", "label": "no_signal"}
+{"line": "The gongura pickle this year is very sour.", "word": "gongura", "means": "sorrel leaves", "reply": "sour leaf pickle is the best with rice", "label": "understood"}
+{"line": "The gongura pickle this year is very sour.", "word": "gongura", "means": "sorrel leaves", "reply": "sorry which pickle", "label": "not_understood"}
+{"line": "The gongura pickle this year is very sour.", "word": "gongura", "means": "sorrel leaves", "reply": "right", "label": "no_signal"}
+{"line": "Everyone in Hyderabad is getting ready for Bonalu.", "word": "Bonalu", "means": "Bonalu", "reply": "are you going to carry the pot to the temple this year", "label": "understood"}
+{"line": "Everyone in Hyderabad is getting ready for Bonalu.", "word": "Bonalu", "means": "Bonalu", "reply": "what's bonalu", "label": "not_understood"}
+{"line": "Everyone in Hyderabad is getting ready for Bonalu.", "word": "Bonalu", "means": "Bonalu", "reply": "my phone is dying", "label": "no_signal"}
+{"line": "In the evenings we sit on the daaba and feel the breeze.", "word": "daaba", "means": "rooftop terrace", "reply": "I miss sitting up on the roof with you", "label": "understood"}
+{"line": "In the evenings we sit on the daaba and feel the breeze.", "word": "daaba", "means": "rooftop terrace", "reply": "you sit at the restaurant", "label": "not_understood"}
+{"line": "In the evenings we sit on the daaba and feel the breeze.", "word": "daaba", "means": "rooftop terrace", "reply": "cool", "label": "no_signal"}
+{"line": "We are going to the palletooru for the harvest.", "word": "palletooru", "means": "village", "reply": "say hi to everyone in the village", "label": "understood"}
+{"line": "We are going to the palletooru for the harvest.", "word": "palletooru", "means": "village", "reply": "going where", "label": "not_understood"}
+{"line": "We are going to the palletooru for the harvest.", "word": "palletooru", "means": "village", "reply": "okay nice", "label": "no_signal"}
+{"line": "I made payasam with extra cashews for you.", "word": "payasam", "means": "payasam", "reply": "the sweet milk pudding my favorite", "label": "understood"}
+{"line": "I made payasam with extra cashews for you.", "word": "payasam", "means": "payasam", "reply": "what's payasam again", "label": "not_understood"}
+{"line": "I made payasam with extra cashews for you.", "word": "payasam", "means": "payasam", "reply": "lol", "label": "no_signal"}
+{"line": "Eat pesarattu for breakfast, it's healthy.", "word": "pesarattu", "means": "green gram dosa", "reply": "the green dosa I'll ask mom to make it", "label": "understood"}
+{"line": "Eat pesarattu for breakfast, it's healthy.", "word": "pesarattu", "means": "green gram dosa", "reply": "eat what", "label": "not_understood"}
+{"line": "Eat pesarattu for breakfast, it's healthy.", "word": "pesarattu", "means": "green gram dosa", "reply": "sure sure", "label": "no_signal"}
+{"line": "Your pinni called and asked about you.", "word": "pinni", "means": "aunt", "reply": "tell auntie I'll call her this weekend", "label": "understood"}
+{"line": "Your pinni called and asked about you.", "word": "pinni", "means": "aunt", "reply": "who called", "label": "not_understood"}
+{"line": "Your pinni called and asked about you.", "word": "pinni", "means": "aunt", "reply": "aww", "label": "no_signal"}
+{"line": "The mamidi tree gave so many this summer.", "word": "mamidi", "means": "mangoes", "reply": "save me some mangoes when I visit", "label": "understood"}
+{"line": "The mamidi tree gave so many this summer.", "word": "mamidi", "means": "mangoes", "reply": "the coconut tree", "label": "not_understood"}
+{"line": "The mamidi tree gave so many this summer.", "word": "mamidi", "means": "mangoes", "reply": "wow", "label": "no_signal"}
+{"line": "Your mamayya is taking the train to Rajahmundry.", "word": "Rajahmundry", "means": "Rajahmundry", "reply": "is he going to see the godavari bridge there", "label": "understood"}
+{"line": "Your mamayya is taking the train to Rajahmundry.", "word": "Rajahmundry", "means": "Rajahmundry", "reply": "where is that", "label": "not_understood"}
+{"line": "Your mamayya is taking the train to Rajahmundry.", "word": "Rajahmundry", "means": "Rajahmundry", "reply": "okay tell him safe journey", "label": "no_signal"}
+{"line": "We went to Araku and saw the coffee plantations.", "word": "Araku", "means": "Araku Valley", "reply": "the valley with the waterfalls right did you go to the caves", "label": "understood"}
+{"line": "We went to Araku and saw the coffee plantations.", "word": "Araku", "means": "Araku Valley", "reply": "you went to a coffee shop", "label": "not_understood"}
+{"line": "We went to Araku and saw the coffee plantations.", "word": "Araku", "means": "Araku Valley", "reply": "hmm hmm", "label": "no_signal"}
+{"line": "Today I made pappu with tomatoes.", "word": "pappu", "means": "dal", "reply": "pappu with rice and ghee is the best", "label": "understood"}
+{"line": "Your pinni called and asked about you.", "word": "pinni", "means": "aunt", "reply": "is that mom's sister or dad's", "label": "understood"}
+{"line": "I made payasam with extra cashews for you.", "word": "payasam", "means": "payasam", "reply": "oh I thought that was a kind of curry", "label": "not_understood"}
+{"line": "The gongura pickle this year is very sour.", "word": "gongura", "means": "sorrel leaves", "reply": "ha I'll eat it anyway", "label": "no_signal"}
+{"line": "We are going to the palletooru for the harvest.", "word": "palletooru", "means": "village", "reply": "is it far from the city", "label": "understood"}
+{"line": "In the evenings we sit on the daaba and feel the breeze.", "word": "daaba", "means": "rooftop terrace", "reply": "what's a daaba", "label": "not_understood"}
+{"line": "Your cousin started going to badi this year.", "word": "badi", "means": "school", "reply": "does she like her teacher", "label": "understood"}
+{"line": "I brought prasadam from the temple for you.", "word": "prasadam", "means": "prasadam", "reply": "I don't understand", "label": "not_understood"}
+{"line": "I put a black dot on the baby's cheek so there's no dishti.", "word": "dishti", "means": "evil eye", "reply": "tell me more about the family", "label": "no_signal"}
