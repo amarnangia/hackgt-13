@@ -27,13 +27,14 @@ from websockets.datastructures import Headers
 from websockets.http11 import Response
 
 from muse import Translator, transcribe
-from decide import is_question, topic_of
+from decide import is_question, topic_of, words_topic
 from latency import LatencyTracker
-from lexicon import Lexicon, indic_share
+from lexicon import ENGLISH_ROMANS, Lexicon, indic_share
 import origins
 from progress import KEEP_AT, Progress
 from pronouns import PronounResolver
 from roles import Roles
+import sync
 from translate_server import LocalTranslator
 
 PORT = int(os.environ.get("OVERLAY_PORT", 8765))
@@ -45,13 +46,13 @@ MY_VOICE_SAMPLE = "my_voice.wav"    # --outgoing: your own voice, so the English
 SAMPLE_RATE = 48000  # AudioLoop's rate
 SENTENCE_END = re.compile(r"[.?!।]+")
 CLAUSE_END = re.compile(r"[,;]")
-ENGLISH_ROMANS = {"auto", "bus", "carriage", "cinema", "tiffin"}  # romanized word-list words that are English too
 NATIVE_MIN_SHARE = 0.34  # at least a third of the words in Telugu script -> translate and voice it
 MIN_CLAUSE_WORDS = 5  # Muse often joins sentences with commas; cut there once a clause is long enough to translate well
 MAX_WAIT_WORDS = 20   # run-on speech with no punctuation: translate once this many words are waiting. 12 cut
                       # mid-sentence when Muse left out punctuation and mistranslated; the translator handles long runs fine
 HOLD_BACK_WORDS = 3   # ...except the newest few, which Muse may still correct
 TRANSLATE_WORKERS = 3
+MAX_QUESTIONS_PER_LINE = 2  # "Curious?" questions from one line (curious.MAX_PER_LINE)
 # Live draft captions: while she's still mid-sentence, translate what she's said so far (faded on the overlay), like
 # Google's live translation. Telugu puts the verb last, so a draft can change as she goes; the final line replaces
 # it. Drafts only run when no real translation is waiting, so they never slow the final English or the voice.
@@ -89,6 +90,62 @@ class Hub:
                     self.on_message(json.loads(message))
         finally:
             self.clients.discard(conn)
+
+
+class Transcription:
+    """The overlay's switch for transcribing the call at all: {"type": "transcribe", "on": false} from any page turns it
+    off, "on": true back on. While it's off:
+      - no call audio goes to the speech service (it gets silence, which keeps the connection open), into the story
+        page's recording, or into the voice sample;
+      - everyone hears the call as it is, at full volume, and English lines still waiting to be spoken are dropped.
+    Every page is told the state as {"type": "transcribing", "on": ...}, and gets it when it connects."""
+
+    def __init__(self, hubs, on=True):
+        self.hubs, self.on, self.sides = hubs, on, []
+        self.lock = threading.Lock()
+        self._tell()
+
+    def add(self, target, audio, captioner):
+        """One direction of the call: its audio capture (`target`, see make_audio), player and captioner."""
+        self.sides.append((target, audio, captioner))
+        target["paused"] = not self.on
+        if not self.on:
+            audio.set_original(1.0)
+
+    def set(self, on):
+        with self.lock:
+            changed, self.on = on != self.on, on
+            for target, audio, captioner in self.sides if changed else []:
+                target["paused"] = not on
+                if not on:
+                    target["resume_level"] = audio.original
+                    audio.set_original(1.0)  # hear them as they are, not at 20% under a translation that isn't coming
+                    if captioner.dubber:
+                        captioner.dubber.cancel()
+                    if audio.voice.playing():
+                        audio.voice.fade_out()
+                    captioner.hub.broadcast({"type": "partial", "text": ""})
+                else:
+                    audio.set_original(target.pop("resume_level", captioner.original_volume))
+        self._tell()
+        if changed:
+            print(f"\nTranscription {'on' if on else 'off'} (from the overlay).", flush=True)
+
+    def _tell(self):
+        msg = {"type": "transcribing", "on": self.on}
+        for hub in self.hubs:
+            hub.current["transcribing"] = msg
+            hub.broadcast(msg)
+
+
+def with_transcription_switch(on_message, transcription):
+    """The overlay's transcription on/off switch; everything else goes to `on_message`."""
+    def handle(msg):
+        if msg.get("type") == "transcribe" and isinstance(msg.get("on"), bool):
+            transcription.set(msg["on"])
+        else:
+            on_message(msg)
+    return handle
 
 
 HUB = Hub()     # the one-way app's page; with --two-way, their side (the call -> you)
@@ -172,6 +229,8 @@ class Captioner:
         if not share_with:
             for _ in range(TRANSLATE_WORKERS):
                 self.pool.submit(self.translate.warm_up)  # the first request pays for TLS setup (~3 s)
+            if isinstance(self.translate, LocalTranslator):
+                self.pool.submit(self._warm_backup)  # Muse Spark, for her Telugu in English letters and slow lines
         self.next_id = 0
         self.partial = ""  # latest cumulative transcript for the current turn
         self.done = 0      # how many characters of it have been sent for translation
@@ -183,7 +242,7 @@ class Captioner:
         self.recorder = None                  # the family story keeper (calls.py)
         self.prompter = None                  # live "ask her" prompts (prompts.py)
         self.curious = None                   # the overlay's "Curious?" questions (curious.py), set by listen()
-        self.topic, self.topic_votes = None, collections.deque(maxlen=3)  # what the conversation is about now
+        self.topic, self.topic_votes = None, collections.deque(maxlen=3)  # what it's about now; (topic, votes) per line
         self.topic_lock = threading.Lock()
         self.vocab = json.load(open(os.path.join(HERE, "vocab.json"), encoding="utf-8"))["topics"]
         self.recent = collections.deque(maxlen=8)  # (Telugu, English) of her last lines, for answering questions
@@ -369,23 +428,36 @@ class Captioner:
         if to:
             with self.draft_lock:
                 self.finals_waiting += 1
+        # Her words (in Telugu script, or in English letters when the speech service writes them that way) are known
+        # the moment the line is cut. Everything they decide goes out now, while the line is being translated: the word
+        # cards, the topic words, the questions about her words, the picture of what she named, the "ask her" question.
+        hits = self.lexicon.find(sentence, self.lang, roman=to != "te")
+        known_before = {h["id"] for h in hits if self.progress.known(h["id"])}  # before counting this hearing
+        helps = to != "te"  # pictures, questions and words help the English speaker with Telugu
+        early = self._early(seg_id, sentence, hits, known_before, route) if helps else {}
+        if self.side == "me" and self.roles and self.roles.decided and self.roles.lang_of("me") == "en" and hits:
+            self.progress.said([h["id"] for h in hits])  # the learner said her words themselves
 
         def work():
             if to is None:
                 english = sentence
             else:
                 try:
-                    english = self._translate_in_time(to_translate) if to == "en" else self._to_indic(sentence)
+                    if to == "en" and indic_share(sentence) == 0:  # her Telugu in English letters
+                        english = self._translate_romanized(sentence, hits, model=route == "native")
+                    else:
+                        english = self._translate_in_time(to_translate) if to == "en" else self._to_indic(sentence)
                 finally:  # (to == "te": Telugu text, despite the name)
                     with self.draft_lock:
                         self.finals_waiting -= 1
             full_english, kept = (sentence if to == "te" else english), []  # Laya and pictures read English
-            hits = self.lexicon.find(sentence, self.lang)
-            known_before = {h["id"] for h in hits if self.progress.known(h["id"])}  # before counting this hearing
-            if self.keep_known and to == "en" and not english.startswith("("):
+            ok = not english.startswith("(")
+            if self.keep_known and to == "en" and ok:
                 # Words the listener knows stay in Telugu ("Today, Ammamma made pulihora"); the rest is English.
                 english, kept = self.progress.keep_known_words(english, hits)
-                self.progress.heard_words(hits, kept={k["id"] for k in kept})
+            if self.keep_known and helps and hits and ok:
+                # A word kept in Telugu and not tapped is evidence they know it, but only if someone could tap it.
+                self.progress.heard_words(hits, kept={k["id"] for k in kept} if self.hub.clients else set())
             if self.garden and to == "en" and hits:
                 self._plant(hits)
             self.hub.broadcast({"type": "english", "id": seg_id, "text": english, "route": route, "kept": kept, "to": to})
@@ -397,48 +469,81 @@ class Captioner:
             row["route"] = route
             if self.roles:
                 row["side"], row["to"] = self.side, to
-            usable = self.decider and not english.startswith("(")
-            decision = None
-            if self.questions_only and usable:
-                decision = self.decider(full_english)  # --speak questions needs Laya's request check before voicing
-            # Voice first: nothing below changes what gets said, and Laya + the picture lookup (sometimes a web fetch)
-            # used to hold the voice back ~0.3-0.6 s. The question rule alone sets its priority (questions keep their
-            # place when the voice is behind); Laya's request check still labels the line for cards and prompts.
-            quick = decision or {"intent": "question" if is_question(full_english) else "statement",
-                                 "needs_attention": is_question(full_english)}
+            usable = self.decider and ok
+            laya = [0.0]  # seconds of Laya on this line
+
+            def timed(f, *a):
+                start = time.monotonic()
+                try:
+                    return f(*a)
+                finally:
+                    laya[0] += time.monotonic() - start
+            intent = "question" if is_question(full_english) else None  # the rule; Laya only for request vs statement
+            if intent is None and self.questions_only and usable:
+                intent = timed(self.decider.intent, full_english)  # --speak questions: needed before voicing
+            # She said only words they know ("Sare", "Ninna vachanu" once both are learned): they understood her, so
+            # the English voice would only repeat it. The caption still shows it.
+            understood = (to == "en" and route == "native" and ok and hits and all(h["id"] in known_before for h in hits)
+                          and self.telugu_share(self.lexicon.leftover(sentence, self.lang, hits)) == 0)
+            # Voice first: nothing below changes what gets said, and Laya + the picture lookup used to hold the voice
+            # back ~0.3-0.6 s. The question rule alone sets its priority (questions keep their place when the voice is
+            # behind); Laya's request check still labels the line for cards and prompts.
+            quick = {"intent": intent or "statement", "needs_attention": intent in ("question", "request"),
+                     "understood": understood}
             with self.order_lock:
                 self.finished_lines[seg_id] = (english, marks, row, quick, route, to)
                 while self.next_to_voice in self.finished_lines:
                     self._voice(self.next_to_voice, *self.finished_lines.pop(self.next_to_voice))
                     self.next_to_voice += 1
-            # Then the extras, while the English is already playing.
-            if decision is None and usable:
-                decision = self.decider(full_english)
-            self.hub.broadcast({"type": "details", "id": seg_id,
-                                "intent": decision["intent"] if decision else None, "cards": self._cards(sentence, decision)})
-            topic, _ = topic_of(full_english, hits, decision.get("topic") if decision else None)
-            self._follow_topic(topic)
-            # Pictures and Curious? questions help the English speaker with Telugu, so not on lines to the Telugu speaker.
-            picture = self._picture(seg_id, hits, full_english, known_before) if to != "te" else None
-            if self.curious and to != "te" and not english.startswith("("):
-                try:
-                    questions = self.curious.for_line(full_english, hits if route != "english" else [], picture,
-                                                      decision["intent"] if decision else None, known_before)
+            # Then what needs the English, most urgent first, each sent the moment it's ready: a question to you (the
+            # rule, no model) and how to answer it; the picture; then Laya's request/statement check and the topic.
+            questions = []
+
+            def details_and_reply():
+                self.hub.broadcast({"type": "details", "id": seg_id, "intent": intent if ok else None,
+                                    "cards": [] if early.get("cards") else self._cards(sentence, hits)})
+                if self.curious and helps and ok and intent in ("question", "request"):
+                    try:  # she asked you something: how to answer, in Telugu (keywords, else Laya)
+                        reply = timed(self.curious.reply, full_english, intent)
+                        if reply:
+                            self.hub.broadcast({"type": "curious", "line": seg_id, "questions": [reply]})
+                            questions.append(reply)
+                    except Exception as e:
+                        print(f"(Curious? reply failed: {type(e).__name__}: {e})", flush=True)
+            if intent is not None:
+                details_and_reply()
+            picture = early.get("picture")
+            if helps and picture is None and ok:
+                picture = timed(self._picture, seg_id, hits, full_english, known_before)
+            if intent is None:
+                intent = timed(self.decider.intent, full_english) if usable else "statement"
+                details_and_reply()
+            if to == "te" and ok and self.pictures:  # the other way: what she may never have seen (Thanksgiving, prom)
+                timed(self._picture_for_her, seg_id, full_english)
+            if not early.get("topic"):
+                topic, how = topic_of(full_english, hits)
+                if topic is None and usable:
+                    topic, how = timed(self.decider.topic, full_english), "laya"
+                self._follow_topic(topic)
+            if self.curious and helps and ok:
+                try:  # a picture of something she didn't name in Telugu, and her words if they needed Laya to rank
+                    more = [q for q in [self.curious.about_picture(picture, hits)] if q]
+                    if early.get("open"):  # her words that tied for the last slots: Laya picks, with the English
+                        limit = min(early["open"], MAX_QUESTIONS_PER_LINE - len(questions) - len(more))
+                        more += timed(self.curious.words, hits, known_before, full_english, limit, picture)
+                    if more:
+                        self.hub.broadcast({"type": "curious", "line": seg_id, "questions": more})
                 except Exception as e:
                     print(f"(Curious? questions failed: {type(e).__name__}: {e})", flush=True)
-                    questions = []
-                if questions:
-                    self.hub.broadcast({"type": "curious", "line": seg_id, "questions": questions})
-            if self.prompter and route != "english":
+            if self.prompter and route != "english" and picture is not early.get("picture"):
                 import topics
-                self.prompter.offer(topics.about(hits, picture, self.lexicon.entries.get(self.lang)))
-            row["laya"] = decision["seconds"] if decision else None
-            intent = decision["intent"] if decision else None
+                self.prompter.offer(topics.about(hits, picture, self.lexicon.entries.get(self.lang), asking=intent == "question"))
+            row["laya"] = laya[0] if usable else None
             if self.recorder:
                 self.recorder.add_line(id=seg_id, telugu=sentence, english=english, english_full=full_english, route=route,
-                                       kept=kept, intent=intent, picture=picture, start_s=start_s, end_s=end_s)
+                                       kept=kept, intent=intent if ok else None, picture=picture, start_s=start_s, end_s=end_s)
             if self.prompter and route != "english":
-                self.prompter.on_line(sentence, full_english, intent, route)
+                self.prompter.on_line(sentence, full_english, intent if ok else None, route)
 
         def work_logged():
             try:
@@ -475,6 +580,63 @@ class Captioner:
         except Exception as e:
             return f"(translation failed: {type(e).__name__})"
 
+    def _early(self, seg_id, sentence, hits, known_before, route):
+        """What her words alone decide, sent before the English is back. Returns what was sent, so the rest of the line
+        doesn't send it again: {"cards", "topic", "picture", "open": question slots left for Laya once there's English}."""
+        sent = {"cards": False, "topic": False, "picture": None, "open": 0}
+        try:
+            cards = self._cards(sentence, hits)
+            if cards:
+                self.hub.broadcast({"type": "details", "id": seg_id, "intent": None, "cards": cards})
+                sent["cards"] = True
+            topic, strength = words_topic(hits)
+            if topic:
+                self._follow_topic(topic, strength)
+                sent["topic"] = True
+            if self.pictures:
+                key = self.pictures.pick_from_words(hits, known=lambda lexicon_id: lexicon_id in known_before)
+                if key:
+                    sent["picture"] = self._show_picture(seg_id, self.pictures.card(key), hits)
+            if self.curious:
+                # One slot is saved for the reply helper when she's asking something
+                limit = MAX_QUESTIONS_PER_LINE - 1 if "?" in sentence else MAX_QUESTIONS_PER_LINE
+                words, sent["open"] = self.curious.words_early(hits, known_before, limit=limit, picture=sent["picture"])
+                if words:
+                    self.hub.broadcast({"type": "curious", "line": seg_id, "questions": words})
+            if self.prompter and route != "english":
+                import topics
+                self.prompter.offer(topics.about(hits, sent["picture"], self.lexicon.entries.get(self.lang), asking="?" in sentence))
+        except Exception as e:  # the extras never stop the line
+            import traceback
+            traceback.print_exc()
+        return sent
+
+    def _warm_backup(self):
+        try:
+            self.backup = self.backup or Translator(self.lang)
+            self.backup.warm_up()
+        except (Exception, SystemExit):  # no API key: the local translator carries on alone
+            pass
+
+    def _translate_romanized(self, sentence, hits, model=True):
+        """Her Telugu written in English letters ("Bangaram, pulihora tinnava?"): IndicTrans2 only reads Telugu script
+        and gives it back unchanged, so Muse Spark translates it (model=True, for lines mostly in Telugu). Otherwise
+        (English with a Telugu word or two, or no Muse Spark) her word-list words are swapped for their English."""
+        try:
+            if model:
+                if self.backup is None:
+                    self.backup = Translator(self.lang)
+                return self.backup(sentence)
+        except (Exception, SystemExit) as e:  # SystemExit: no API key (muse.api_key); the line still gets its glosses
+            print(f"(Muse Spark couldn't translate '{sentence}': {type(e).__name__})", flush=True)
+        english = sentence
+        for h in hits:
+            gloss = h.get("translate_as") or (h.get("match_english") or [None])[0]
+            roman = (h.get("roman") or "").strip(" ,?^")
+            if gloss and roman:
+                english = re.sub(rf"(?<![A-Za-z]){re.escape(roman)}(?![A-Za-z])", gloss, english, flags=re.IGNORECASE)
+        return english
+
     def _picture(self, seg_id, hits, english, known_before):
         """Pop up a picture of the thing in this line the grandkid most likely doesn't know (Laya picks).
         Words they knew before this line don't need one (so: a picture on first mention, the Telugu word after)."""
@@ -486,6 +648,23 @@ class Captioner:
         except Exception as e:
             print(f"Picture lookup failed: {type(e).__name__}: {e}", flush=True)
             return None
+        return self._show_picture(seg_id, card, hits)
+
+    def _picture_for_her(self, seg_id, english):
+        """--two-way: a picture of the American thing the grandkid just mentioned, on this side's page (the one that
+        speaks to her), marked "for": "them", so the overlay can show it where she'll see it (screen share)."""
+        try:
+            key = self.pictures.pick_for_her(english)
+            card = self.pictures.card(key) if key else None
+        except Exception as e:
+            print(f"Picture lookup failed: {type(e).__name__}: {e}", flush=True)
+            return None
+        if card:
+            self.hub.broadcast({"type": "picture", **card, "line": seg_id, "for": "them"})
+            print(f"  [picture for them: {card['name']}]", flush=True)
+        return card
+
+    def _show_picture(self, seg_id, card, hits):
         if card:
             for entry in hits if self.keep_known else []:  # seeing its picture helps them learn the word
                 if entry["id"] in card.get("lexicon_ids", []):
@@ -514,14 +693,16 @@ class Captioner:
         except Exception as e:
             return f"(translation failed: {type(e).__name__})"
 
-    def _follow_topic(self, topic):
-        """Move the overlay's topic words once the same topic wins 2 of the last 3 lines (so they don't flicker)."""
+    def _follow_topic(self, topic, strength=1):
+        """Move the overlay's topic words once a topic has 2 votes in the last 3 lines, so they don't flicker. Her words
+        agreeing on a topic (gavvalu and ariselu; Bhogi) are 2 votes at once: the words move on that line."""
         if not topic:
             return
         with self.topic_lock:
-            self.topic_votes.append(topic)
-            if topic == self.topic or self.topic_votes.count(topic) < 2:
+            self.topic_votes.append((topic, strength))
+            if topic == self.topic or sum(s for t, s in self.topic_votes if t == topic) < 2:
                 return
+            self.topic = topic
         self.show_topic(topic)
 
     def show_topic(self, topic):
@@ -531,7 +712,7 @@ class Captioner:
         learning = []
         for e in self.lexicon.entries.get(self.lang, []):
             p = self.progress.probability(e["id"])
-            if e.get("topic") == topic and e.get("roman") and self.progress.heard.get(e["id"]) and 0.2 <= p < KEEP_AT:
+            if e.get("topic") == topic and e.get("roman") and self.progress.heard.get(e["id"]) and 0.2 <= p < self.progress.keep_at:
                 learning.append((p, {"id": e["id"], "telugu": e["forms"][0].strip(" ,.^"), "roman": e["roman"].strip(" ,"),
                                      "english": e.get("translate_as") or (e.get("match_english") or [""])[0],
                                      "p": round(p, 2), "learning": True}))
@@ -561,21 +742,18 @@ class Captioner:
             self.answers[question] = a
         return a
 
-    def _cards(self, sentence, decision):
-        """Word-list matches in what grandma said (exact), else Laya's category guess for the English line."""
+    def _cards(self, sentence, hits):
+        """Cards for the word-list words she used (`hits`), and English slang she used."""
         # Titled with her word (romanized), or a proverb in her own words, not our internal id ("Noru Manchidaite")
         title = lambda e: (e.get("roman") or (e["forms"][0] if e["category"] == "idiom" else e["id"].replace("_", " ").title())).strip(" ,^")
         cards = [{"id": e["id"], "title": title(e), "category": e["category"], "note": e.get("note", ""),
                   "telugu": e["forms"][0].strip(" ,.^"), "english": e.get("translate_as") or (e.get("match_english") or [""])[0],
                   "p": round(self.progress.probability(e["id"]), 2)}  # how likely they know it (progress.py)
-                 for e in self.lexicon.find(sentence, self.lang)]
+                 for e in hits]
         cards += [{"id": e["id"], "title": e["id"].replace("_", " ").title(), "category": e["category"],
                    "note": e.get("note", "")} for e in self.lexicon.find(sentence, "en")]  # English slang she used
         seen = set()  # two list entries for the same word (ఊరు as "village" and as "hometown"): one card
-        cards = [c for c in cards if not (c["title"].lower() in seen or seen.add(c["title"].lower()))]
-        if decision and decision["category"] != "none" and not any(c["category"] == decision["category"] for c in cards):
-            cards.append({"id": None, "title": decision["category"].title(), "category": decision["category"], "note": ""})
-        return cards
+        return [c for c in cards if not (c["title"].lower() in seen or seen.add(c["title"].lower()))]
 
     def _voice(self, seg_id, english, marks, row, decision, route, to):
         """Voice Telugu lines (in order). Questions/requests to you keep their place when the voice is behind."""
@@ -593,6 +771,8 @@ class Captioner:
                 why = "" if voiced else "voice was behind"
         elif route != "native" and not self.speak_all:
             voiced, why = False, "she said it in English" if route == "english" else "mostly English"
+        elif decision.get("understood"):
+            voiced, why = False, "they know every word"
         elif self.questions_only and not asks:
             voiced, why = False, "statement (--speak questions)"
         elif not self.dubber:
@@ -667,8 +847,10 @@ def make_audio(args, loop, target):
         if len(buf) * 10 >= CHUNK_MS:
             pcm = np.concatenate(buf)
             buf.clear()
-            sampler = target.get("sampler")
-            recorder = target.get("recorder")
+            if target.get("paused"):  # transcription switched off in the overlay: the speech service hears silence,
+                pcm = np.zeros_like(pcm)  # which keeps its connection open, and nothing is recorded or sampled
+            sampler = target.get("sampler") if not target.get("paused") else None
+            recorder = target.get("recorder") if not target.get("paused") else None
             if target.get("fresh"):
                 target["fresh"] = False
                 target["latency"].audio_started(time.monotonic() - CHUNK_MS / 1000)  # frame start, not end
@@ -699,7 +881,8 @@ async def run(args):
     captioner = Captioner(args.lang, args.translator, args.keep_at, keep_known=not args.outgoing)
     if args.no_drafts:
         captioner.drafts = None
-    HUB.on_message = make_on_message(captioner, args, HUB)
+    captioner.transcription = Transcription([HUB], on=not args.transcription_off)
+    HUB.on_message = with_transcription_switch(make_on_message(captioner, args, HUB), captioner.transcription)
     try:
         await listen(args, captioner)
     finally:  # also on Ctrl+C
@@ -850,10 +1033,26 @@ async def load_helpers(loop, args, captioner, target):
 
 
 async def load_voice(loop, args, captioner, audio, target, who, indic_voice=None):
-    """The English voice for this side (cloned from `who` once we have their speech), plus Telugu if given."""
+    """The English voice for this side (cloned from `who` once we have their speech), plus Telugu if given.
+    If this side's speaker recorded a personalized voice in the Weave app, their ElevenLabs voice instead."""
+    import eleven
+    import people
     from dub import Dubber, VoiceSampler
+    person = args.me if args.outgoing else args.caller
+    voice_id = people.voice_for(person) if args.voice in ("auto", "eleven") and eleven.api_key() else None
+    if args.voice == "eleven" and not voice_id:
+        print(f"No ElevenLabs voice for {person} (record one in the Weave app, and put ELEVENLABS_API_KEY in .env); "
+              "using the local voice.", flush=True)
+    if voice_id:
+        try:
+            captioner.dubber = await loop.run_in_executor(
+                None, lambda: Dubber(audio.voice, indic_voice=indic_voice, eleven_voice=voice_id))
+            print(f"Voice: {person}'s personalized ElevenLabs voice ({captioner.dubber.eleven.name}).", flush=True)
+            return
+        except Exception as e:  # removed from another laptop, bad key, no internet
+            print(f"Couldn't use {person}'s ElevenLabs voice ({type(e).__name__}: {e}); using the local voice.", flush=True)
     sample = prepare_voice_sample(args)
-    clone = args.voice == "clone"
+    clone = args.voice != "stock"
     captioner.dubber = await loop.run_in_executor(
         None, lambda: Dubber(audio.voice, clone=clone, voice_sample=sample, indic_voice=indic_voice))
     if clone and captioner.dubber.cloning:
@@ -924,11 +1123,12 @@ async def listen(args, captioner):
     loop = asyncio.get_running_loop()
     target = {"q": asyncio.Queue(), "latency": captioner.latency}
     audio = make_audio(args, loop, target)
+    captioner.transcription.add(target, audio, captioner)
     await load_helpers(loop, args, captioner, target)
     captioner.speak_all = args.speak == "all"
     captioner.questions_only = args.speak == "questions"
     if not args.no_voice:  # load before audio starts, or the first seconds of the call are lost
-        print("Loading the English voice (Kokoro)...", flush=True)
+        print("Loading the English voice...", flush=True)
         await load_voice(loop, args, captioner, audio, target, "your " if args.outgoing else "the caller's ")
     threading.Thread(target=audio.run, kwargs={"meter": False}, daemon=True).start()
     if not args.file:
@@ -989,11 +1189,13 @@ async def run_two_way(args):
     # Words kept in Telugu follow *your* progress, so only for what you hear, never in what goes to them.
     me = Captioner(args.lang, args.translator, args.keep_at, keep_known=False, hub=ME_HUB, share_with=them,
                    side="me", roles=roles)
+    transcription = them.transcription = me.transcription = Transcription(list(hubs.values()), on=not args.transcription_off)
     for c in (them, me):
         c.original_volume = args.original_volume
         if args.no_drafts:
             c.drafts = None
-        c.hub.on_message = with_language_choice(make_on_message(them, args, c.hub), roles)
+        c.hub.on_message = with_transcription_switch(with_language_choice(make_on_message(them, args, c.hub), roles),
+                                                     transcription)
     for hub in hubs.values():  # pages that connect get the current roles, so the overlay's "I speak" switch shows it
         hub.current["roles"] = {"type": "roles", "you": roles.lang_of("me"), "them": roles.lang_of("them"), "fixed": roles.fixed}
     print(f"Roles to start: {'you speak Telugu, they speak English' if roles.telugu == 'me' else 'they speak Telugu, you speak English'}"
@@ -1016,6 +1218,8 @@ async def listen_two_way(args, them_args, me_args, them, me):
     them_audio = make_audio(them_args, loop, them_target)  # the call -> your headphones/speakers
     me_audio = make_audio(me_args, loop, me_target)        # your mic -> BlackHole 16ch -> the call
     them.audio, me.audio = them_audio, me_audio
+    them.transcription.add(them_target, them_audio, them)
+    me.transcription.add(me_target, me_audio, me)
 
     # Walkie-talkie: on the laptop speakers your mic hears everything we play you, so while they're making sound
     # your mic counts as silent. With headphones you can talk over anything.
@@ -1154,13 +1358,17 @@ def main():
                                                '"none" = silent, with --file')
     p.add_argument("--no-voice", action="store_true", help="subtitles only, no English voice")
     p.add_argument("--no-drafts", action="store_true", help="no live draft captions while she's mid-sentence")
-    p.add_argument("--voice", choices=["clone", "stock"], default="clone",
-                   help="clone = the English sounds like the caller (learned from ~10 s of their speech); stock = Kokoro")
+    p.add_argument("--voice", choices=["auto", "eleven", "clone", "stock"], default="auto",
+                   help="auto = their personalized ElevenLabs voice if they recorded one in the Weave app, else clone; "
+                        "clone = the English sounds like the caller (learned locally from ~10 s of their speech); "
+                        "stock = Kokoro")
     p.add_argument("--voice-sample", help="audio of the caller to clone right away, e.g. a WhatsApp voice note (.opus/.m4a/.wav)")
     p.add_argument("--new-voice", action="store_true", help="relearn the caller's voice on this call (calling someone else)")
     p.add_argument("--caller", default="Grandma", help='who you are calling, e.g. "Ammamma" (used on the story page and prompts)')
     p.add_argument("--me", default="You", help='your name, e.g. "Amar" (shown in the overlay and saved with the call)')
     p.add_argument("--no-story", action="store_true", help="don't keep a story page for this call")
+    p.add_argument("--transcription-off", action="store_true",
+                   help="start with transcription off (the overlay's switch turns it on): nothing goes to the speech service")
     p.add_argument("--no-record", action="store_true", help="keep the story page but save no audio of the call")
     p.add_argument("--no-prompts", action="store_true", help="no live 'ask her' question suggestions")
     p.add_argument("--prompt-every", type=float, default=25, help="at most one 'ask her' prompt this many seconds apart")
@@ -1169,6 +1377,7 @@ def main():
                    help="keep a word in Telugu once it's this likely they know it, 0-1 (progress.py; lower = sooner, "
                         "e.g. 0.4 for a demo keeps a word from its second mention)")
     p.add_argument("--reset-progress", action="store_true", help="forget which words you know (deletes progress.json)")
+    p.add_argument("--no-sync", action="store_true", help="don't pull from / push to Firebase (sync.py) this time")
     p.add_argument("--speak", choices=["telugu", "questions", "all"], default=None,
                    help="telugu = voice what she says in Telugu, never her English; questions = only Telugu "
                         "questions/requests to you (Laya decides); all = every line (default while --original-volume "
@@ -1185,13 +1394,23 @@ def main():
     # Both directions can run at once (two terminals), so --outgoing gets its own overlay page.
     port = PORT + 2 if args.outgoing and "OVERLAY_PORT" not in os.environ else PORT
 
+    if not args.no_sync:
+        sync.pull(skip_progress=args.reset_progress)  # the team's progress, garden and calls; see sync.py
     if args.translator == "local":
         start_translator(args.lang)
 
     from websockets.sync.server import serve
     pages = [(HUB, port)] + ([(ME_HUB, port + 2)] if args.two_way else [])
-    for hub, _ in pages:  # who's on the call, sent to every page when it connects
-        hub.current["call"] = {"type": "call", "you": args.me, "caller": args.caller}
+    # Who's on the call, sent to every page (the overlay, and the phones through the Weave server) when it connects,
+    # so they follow this call instead of assuming one person. Both join the family list (people.py), and each side
+    # is spoken in its own speaker's voice if they recorded one in the Weave app.
+    import people
+    for name in (args.me, args.caller):
+        if name not in ("You", "Grandma"):
+            people.add(name)
+    voices = {"you": bool(people.voice_for(args.me)), "caller": bool(people.voice_for(args.caller))}
+    for hub, _ in pages:
+        hub.current["call"] = {"type": "call", "you": args.me, "caller": args.caller, "voices": voices}
     print(f"Call: {args.me} -> {args.caller}", flush=True)
     for hub, hub_port in pages:
         server = serve(hub.handler, "localhost", hub_port, process_request=serve_overlay)
@@ -1204,6 +1423,8 @@ def main():
         asyncio.run(run(args))
     except KeyboardInterrupt:
         print()
+    if not args.no_sync:
+        sync.push(replace_progress=args.reset_progress)
 
 
 if __name__ == "__main__":

@@ -10,8 +10,12 @@ POST /api/forget     {"id"}: "Didn't know it" from a phone, passed on to subtitl
 GET  /images/..., /lexicon.json, /samples/call_script.json, /calls/...   the team's files, read only
 POST /api/heard     {"phrase", "english"?, "category"?, "note"?, "roman"?}  -> {"mode"}
 POST /api/asked     {"phrase"}
+GET  /api/people    the family, for "who are you?": [{id, name, voice}] (voice: has a personalized voice)
+POST /api/people    {"name"}: add someone
+POST /api/voice?name=Saanvi&consent=1   body: ~1 min recording (m4a) -> ElevenLabs voice clone (eleven.py)
+POST /api/voice/remove  {"name"}: delete their voice at ElevenLabs
 """
-import json, mimetypes, os, queue, re, socket, sys
+import json, mimetypes, os, queue, re, socket, sys, threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -21,9 +25,14 @@ sys.path.insert(0, str(ROOT))
 from lexicon import Lexicon  # noqa: E402  (the translator's own word list and progress rules, so the numbers match)
 from progress import Progress  # noqa: E402
 import origins  # noqa: E402  (who may read the call: our own pages only)
+import eleven  # noqa: E402  (personalized voices)
+import people  # noqa: E402  (the family: who's who, who has a voice)
+import sync  # noqa: E402  (Firestore; quietly off without FIREBASE_KEY)
 # Team files the app reads. Anything else in the repo stays private.
 # calls/ is the story keeper's output (story pages, family dictionary, voice clips); it stays on this Mac.
-CALLS = re.compile(r"^/calls/[\w-]+(?:/[\w-]+){0,2}\.(?:html|m4a|json)$")
+# (not calls/people.json: /api/people serves it without the voice ids)
+CALLS = re.compile(r"^/calls/(?!people\.json$)[\w-]+(?:/[\w-]+){0,2}\.(?:html|m4a|json)$")
+MAX_VOICE_BYTES = 25 * 2**20  # a few minutes of m4a; ElevenLabs needs ~1 min
 # Where the story keeper saves calls (same setting as calls.py; tests point both at a temp folder)
 CALLS_ROOT = Path(os.environ.get("HACKGT_CALLS_DIR") or ROOT / "calls")
 SHARED = re.compile(r"^/(images/(?:cache/)?[\w.-]+\.(?:jpg|jpeg|png|webp|json)|lexicon\.json|samples/call_script\.json)$")
@@ -87,6 +96,20 @@ def calls():
     return out
 
 
+def family():
+    """Everyone for "who are you?": the people added in the app, plus whoever the saved calls were between."""
+    everyone = {pid: {"id": pid, "name": p["name"], "voice": bool(p.get("voice_id"))} for pid, p in people.load().items()}
+    for f in CALLS_ROOT.glob("*/call.json"):
+        try:
+            c = json.load(open(f, encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        for name in (c.get("caller"), c.get("you")):
+            if name and name not in ("You", "Grandma") and people.person_id(name) not in everyone:
+                everyone[people.person_id(name)] = {"id": people.person_id(name), "name": name, "voice": False}
+    return sorted(everyone.values(), key=lambda p: p["name"].lower())
+
+
 def make_handler(garden):
     from .relay import Relay
     relay = Relay()
@@ -132,6 +155,8 @@ def make_handler(garden):
                 self._send(200, progress() or {"met": 0})
             elif path == "/api/calls":
                 self._send(200, calls())
+            elif path == "/api/people":
+                self._send(200, family())
             elif path == "/api/live":
                 self._live()
             elif path == "/api/live/status":
@@ -184,6 +209,18 @@ def make_handler(garden):
                 except (ValueError, KeyError):
                     return self._send(400, {"error": "expected JSON with an 'id'"})
                 return self._send(200, {"ok": relay.forget(word)})
+            if self.path.startswith("/api/voice"):
+                return self._voice()
+            if self.path == "/api/people":
+                try:
+                    name = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or "{}")["name"].strip()
+                except (ValueError, KeyError, AttributeError):
+                    return self._send(400, {"error": "expected JSON with a 'name'"})
+                if not name or len(name) > 40:
+                    return self._send(400, {"error": "a name, please (up to 40 letters)"})
+                people.add(name)
+                threading.Thread(target=sync.people, daemon=True).start()  # the other laptops, through Firestore
+                return self._send(200, family())
             try:
                 body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or "{}")
                 phrase = body["phrase"]
@@ -196,6 +233,41 @@ def make_handler(garden):
                 self._send(200, {"ok": True})
             else:
                 self._send(404, {"error": "not found"})
+
+        def _voice(self):
+            """Record a personalized voice (the phone uploads the recording) or remove one."""
+            from urllib.parse import parse_qs, urlsplit
+            url = urlsplit(self.path)
+            q = {k: v[0] for k, v in parse_qs(url.query).items()}
+            size = int(self.headers.get("Content-Length", 0))
+            if size > MAX_VOICE_BYTES:
+                return self._send(413, {"error": "recording too long"})
+            body = self.rfile.read(size)
+            if not eleven.api_key():
+                return self._send(503, {"error": "the Mac has no ELEVENLABS_API_KEY in .env"})
+            try:
+                if url.path == "/api/voice/remove":
+                    try:
+                        name = json.loads(body or b"{}")["name"]
+                    except (ValueError, KeyError):
+                        return self._send(400, {"error": "expected JSON with a 'name'"})
+                    result = (200, {"removed": eleven.remove(name)})
+                elif url.path == "/api/voice":
+                    name = q.get("name", "").strip()
+                    if not name or q.get("consent") != "1":
+                        return self._send(400, {"error": "needs ?name= and consent=1 (they agreed to have their voice cloned)"})
+                    if size < 50_000:
+                        return self._send(400, {"error": "recording too short"})
+                    pid, record = eleven.clone(name, body, content_type=self.headers.get("Content-Type", "audio/mp4"),
+                                               consent_by=name)
+                    print(f"Personalized voice for {name}: {record['voice_id']}", flush=True)
+                    result = (200, {"id": pid, "name": name, "voice": True})
+                else:
+                    return self._send(404, {"error": "not found"})
+            except Exception as e:  # ElevenLabs refused it (bad key, out of voice slots, unreadable audio) or offline
+                return self._send(502, {"error": f"ElevenLabs: {type(e).__name__}: {str(e)[:200]}"})
+            threading.Thread(target=sync.people, daemon=True).start()  # the other laptops, through Firestore
+            self._send(*result)
 
         def log_message(self, *args):
             pass

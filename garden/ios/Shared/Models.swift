@@ -122,3 +122,15 @@ func timeAgo(_ ts: Double, now: Double = Date().timeIntervalSince1970) -> String
     default: return "\(Int(s / 86400))d ago"
     }
 }
+
+/// Someone in the family (GET /api/people): you pick yourself from these, and `voice` says whether their
+/// translations are spoken in their own (personalized) voice.
+struct Person: Codable, Identifiable, Hashable {
+    let id: String      // same as Connection.id and people.person_id on the Mac: "saanvi-r"
+    let name: String
+    var voice: Bool
+
+    static func id(for name: String) -> String {
+        name.trimmingCharacters(in: .whitespaces).lowercased().replacingOccurrences(of: " ", with: "-")
+    }
+}

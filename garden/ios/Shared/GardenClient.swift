@@ -73,6 +73,49 @@ enum GardenClient {
 
     static func url(_ path: String) -> URL? { URL(string: serverURL + "/" + path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))) }
 
+    /// The family, and who has a personalized voice (made on the Mac with ElevenLabs). nil: the Mac didn't answer.
+    static func people() async -> [Person]? {
+        try? await get("/api/people", as: [Person].self)
+    }
+
+    /// Adds someone to the family on the Mac (shared with the team's laptops). Returns everyone, or nil.
+    static func addPerson(_ name: String) async -> [Person]? {
+        guard let url = URL(string: serverURL + "/api/people") else { return nil }
+        var req = URLRequest(url: url, timeoutInterval: 6)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: ["name": name])
+        guard let (data, resp) = try? await URLSession.shared.data(for: req), (resp as? HTTPURLResponse)?.statusCode == 200 else { return nil }
+        return try? JSONDecoder().decode([Person].self, from: data)
+    }
+
+    /// Sends a recording of `name` to the Mac, which makes their ElevenLabs voice (the key stays on the Mac).
+    /// Returns nil when it worked, else what went wrong.
+    static func makeVoice(name: String, audio: Data) async -> String? {
+        var c = URLComponents(string: serverURL + "/api/voice")
+        c?.queryItems = [URLQueryItem(name: "name", value: name), URLQueryItem(name: "consent", value: "1")]
+        guard let url = c?.url else { return "The Mac's address isn't a URL." }
+        var req = URLRequest(url: url, timeoutInterval: 90)
+        req.httpMethod = "POST"
+        req.setValue("audio/mp4", forHTTPHeaderField: "Content-Type")
+        guard let (data, resp) = try? await URLSession.shared.upload(for: req, from: audio) else {
+            return "Couldn't reach the Mac. Is python -m garden --lan running?"
+        }
+        if (resp as? HTTPURLResponse)?.statusCode == 200 { return nil }
+        return (try? JSONDecoder().decode([String: String].self, from: data))?["error"] ?? "The Mac couldn't make the voice."
+    }
+
+    /// Deletes their voice at ElevenLabs (and on every laptop, through Firebase).
+    static func removeVoice(name: String) async -> Bool {
+        guard let url = URL(string: serverURL + "/api/voice/remove") else { return false }
+        var req = URLRequest(url: url, timeoutInterval: 20)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: ["name": name])
+        guard let (_, resp) = try? await URLSession.shared.data(for: req) else { return false }
+        return (resp as? HTTPURLResponse)?.statusCode == 200
+    }
+
     /// The "I didn't catch that" button: moves the phrase back a stage on the server.
     static func asked(_ phrase: String) async throws {
         guard let url = URL(string: serverURL + "/api/asked") else { throw URLError(.badURL) }

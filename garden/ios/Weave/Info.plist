@@ -38,6 +38,8 @@
 	</dict>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Weave reads your garden from the Mac running the call translator.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Weave records you reading for a minute to make your personalized voice.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

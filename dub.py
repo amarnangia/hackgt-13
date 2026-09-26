@@ -3,7 +3,8 @@
 #
 # Voice: Kokoro (a stock voice) until we have ~10 s of the caller's speech, then Pocket TTS cloning the
 # caller's voice from that clip, so the English sounds like the person you're talking to. The clip is saved
-# (caller_voice.wav, gitignored) and reused on the next call.
+# (caller_voice.wav, gitignored) and reused on the next call. If the person recorded a personalized voice in the
+# iPhone app (eleven.py), their ElevenLabs voice is used instead, from the first line, in English and in Telugu.
 import os
 import queue
 import re
@@ -57,18 +58,23 @@ def to_48k(audio, sr):
 
 
 class Dubber:
-    def __init__(self, voice_buffer, voice="af_heart", clone=True, voice_sample=None, indic_voice=None):
+    def __init__(self, voice_buffer, voice="af_heart", clone=True, voice_sample=None, indic_voice=None, eleven_voice=None):
         from mlx_audio.tts.utils import load_model
 
         self.buffer = voice_buffer  # AudioLoop.voice
         self.voice = voice
         self.indic_voice = indic_voice  # --two-way: callable(text) -> (int16 samples, rate) speaking Telugu
+        # Their personalized ElevenLabs voice (eleven.py), for English and Telugu; replaces Pocket TTS and Kokoro.
+        self.eleven = None
+        if eleven_voice:
+            from eleven import Speaker
+            self.eleven, clone = Speaker(eleven_voice), False
         self.pocket = load_model(CLONE_MODEL) if clone else None
         self.clone_state = None  # Pocket TTS conditioning for the caller's voice, once we have a sample
         if self.pocket and voice_sample and os.path.exists(voice_sample):
             self._use_sample(voice_sample)
         self.kokoro = None
-        if not self.cloning:  # the stock voice is only needed until we have the caller's voice
+        if not self.cloning and not self.eleven:  # the stock voice is only needed until we have the caller's voice
             self.kokoro = load_model(KOKORO_MODEL)
             list(self._kokoro_clips("Hello, there.", BASE_SPEED))  # the first generation takes ~4 s; do it now
         self.jobs = queue.Queue()
@@ -84,15 +90,15 @@ class Dubber:
         return self.buffer.pending_seconds() + self.jobs.qsize() * 1.5
 
     def say(self, text, spoken_at=None, on_start=None, priority=False, lang="en"):
-        """Queue `text` to be spoken (lang "en", or "te" with indic_voice). Returns False (and says nothing) if the
-        voice is too far behind."""
+        """Queue `text` to be spoken (lang "en", or "te" with indic_voice or an ElevenLabs voice). Returns False (and
+        says nothing) if the voice is too far behind."""
         if not text or not text.strip() or text.startswith("("):
             return False
         late = time.monotonic() - spoken_at if spoken_at else 0.0
         if self.behind() + late > (MAX_BEHIND_PRIORITY_S if priority else MAX_BEHIND_S):
             return False
         deadline = (spoken_at or time.monotonic()) + MAX_STALE_S + (2.0 if priority else 0.0)
-        self.jobs.put(("say" if lang == "en" else "say_indic", text, (on_start, deadline)))
+        self.jobs.put(("say", text, (on_start, deadline, lang)))
         return True
 
     def cancel(self):
@@ -107,7 +113,7 @@ class Dubber:
     def use_voice_sample(self, path):
         """Switch to the caller's voice (runs on the voice thread, between lines)."""
         if self.pocket:
-            self.jobs.put(("sample", path, (None, None)))
+            self.jobs.put(("sample", path, (None, None, None)))
 
     def _use_sample(self, path):
         self.clone_state = self.pocket.get_state_for_audio_prompt(path)  # encode the voice once, reuse per line
@@ -150,9 +156,14 @@ class Dubber:
             chunk = np.clip(np.asarray(chunk, dtype=np.float32).reshape(-1) * self.clone_gain, -1, 1)
             yield to_48k(chunk, self.pocket.sample_rate * speed)
 
+    def _eleven_clips(self, text, lang, speed=1.0):
+        """Their ElevenLabs voice, streamed: playback starts with the first ~0.1 s instead of the whole line."""
+        for pcm in self.eleven.stream(text, lang, speed):
+            yield to_48k(np.frombuffer(pcm, dtype=np.int16).astype(np.float32) / 32768, self.eleven.SR)
+
     def _worker(self):
         while True:
-            kind, text, (on_start, deadline) = self.jobs.get()
+            kind, text, (on_start, deadline, lang) = self.jobs.get()
             epoch = self.epoch
             try:
                 if kind == "sample":
@@ -164,7 +175,10 @@ class Dubber:
                     continue
                 if deadline is not None and time.monotonic() > deadline:
                     continue  # waited too long (the listener was talking); the subtitle showed it
-                if kind == "say_indic":
+                if self.eleven:  # network, not the GPU: no lock; ElevenLabs does the catch-up speed itself
+                    behind = self.buffer.pending_seconds()
+                    clips = self._eleven_clips(text, lang, BASE_SPEED + (1.2 - BASE_SPEED) * min(1.0, behind / CATCH_UP_S))
+                elif lang != "en":
                     samples, rate = self.indic_voice(text)  # the translate server's CPU voice, no GPU lock needed
                     clips = iter([to_48k(normalize(samples.astype(np.float32) / 32768), rate)])
                 elif self.cloning:

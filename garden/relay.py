@@ -16,6 +16,7 @@ class Relay:
         self.lock = threading.Lock()
         self.socks = {}
         self.connected = {side: False for side in PORTS}
+        self.call = {}  # who's on the live call, from subtitles.py's "call" message: {"you", "caller", ...}
         for side in PORTS:
             threading.Thread(target=self._run, args=(side,), daemon=True).start()
 
@@ -41,7 +42,9 @@ class Relay:
                 pass
 
     def status(self):
-        return {"live": self.connected["them"], "outgoing": self.connected["you"]}
+        call = self.call if self.connected["them"] else {}
+        return {"live": self.connected["them"], "outgoing": self.connected["you"],
+                "caller": call.get("caller"), "you": call.get("you"), "voices": call.get("voices", {})}
 
     def forget(self, word_id):
         """The phone's "Didn't know it": same message overlay.html sends."""
@@ -71,6 +74,8 @@ class Relay:
                         msg = json.loads(text)
                     except ValueError:
                         continue
+                    if msg.get("type") == "call" and side == "them":
+                        self.call = msg
                     self._publish({"side": side, **msg})
             except OSError:
                 pass

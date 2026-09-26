@@ -64,3 +64,61 @@ struct VoiceButton: View {
         .accessibilityLabel(on ? "Stop" : "Play her voice")
     }
 }
+
+/// Records someone reading for about a minute, for their personalized voice (sent to the Mac, which makes it with ElevenLabs).
+@MainActor
+final class VoiceRecorder: ObservableObject {
+    @Published private(set) var recording = false
+    @Published private(set) var seconds: TimeInterval = 0
+    @Published private(set) var level: Float = 0       // 0...1, for the meter
+    @Published private(set) var denied = false
+    @Published private(set) var failed = false     // the microphone stopped by itself (common on the Simulator)
+    private var recorder: AVAudioRecorder?
+    private var timer: Timer?
+    private let url = FileManager.default.temporaryDirectory.appendingPathComponent("voice-sample.m4a")
+
+    func start() async {
+        VoicePlayer.shared.stop()
+        guard await AVAudioApplication.requestRecordPermission() else { denied = true; return }
+        let session = AVAudioSession.sharedInstance()
+        try? session.setCategory(.record, mode: .default)
+        try? session.setActive(true)
+        let settings: [String: Any] = [AVFormatIDKey: kAudioFormatMPEG4AAC, AVSampleRateKey: 44100,
+                                       AVNumberOfChannelsKey: 1, AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue]
+        failed = false
+        guard let r = try? AVAudioRecorder(url: url, settings: settings) else { failed = true; return }
+        r.isMeteringEnabled = true
+        guard r.record() else { failed = true; return }
+        recorder = r
+        recording = true
+        seconds = 0
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+            Task { @MainActor in self?.tick() }
+        }
+    }
+
+    private func tick() {
+        guard let r = recorder else { return }
+        guard r.isRecording else { stop(); return }  // the input device went away mid-recording
+        seconds = r.currentTime
+        r.updateMeters()
+        level = max(0, min(1, (r.averagePower(forChannel: 0) + 50) / 50))
+        if seconds >= 120 { stop() }  // plenty; ElevenLabs wants about a minute
+    }
+
+    func stop() {
+        guard recording else { return }
+        recorder?.stop()
+        timer?.invalidate()
+        timer = nil
+        recording = false
+        level = 0
+        // What was really saved, not what the timer thought: the Simulator can lose the Mac's microphone and save ~0 s.
+        seconds = (try? AVAudioPlayer(contentsOf: url))?.duration ?? 0
+        failed = seconds < 1
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+    }
+
+    /// The finished recording (m4a).
+    var audio: Data? { recording ? nil : try? Data(contentsOf: url) }
+}
