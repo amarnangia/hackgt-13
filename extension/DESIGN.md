@@ -3,6 +3,12 @@
 One system for the overlay (`panel.css`, `content.js`), the web app (`garden/web/index.html`), the iPhone app and
 widget (`garden/ios/Shared/Theme.swift`) and the call summary pages (`calls.py`, `STYLE`).
 
+## English only
+
+Nothing in Telugu script is shown. Romanized words and English only; `noTe()` in panel.js is the last filter every
+shown string passes through. Captions show the English of each line (never her words as heard), and there's no speaker
+label.
+
 ## Layout over a call
 
 A video call puts the other person's face in the middle, your camera in a bottom corner and the call's buttons along the
@@ -12,10 +18,10 @@ bottom. Weave uses the edges and the space just above the call's buttons. Every 
 | Zone | Where | Size | When it's there |
 |---|---|---|---|
 | Ask her (top) | top center, 16px down | the pill's own width, up to 620px | after a 2 s pause in the talk; stays at least 5 s; leaves once someone has talked for 1.5 s; the question lasts 45 s |
-| Dictionary (left) | the top-left corner, 16px in, down the whole left edge | 300px wide, the window's height less 16px top and bottom; words fill it and scroll | always; the words button hides it |
-| Word bubbles (float) | rising from just above the translation bubble's right end | 310px wide, as tall as its bubbles | while there are some; each holds 20 s (dims for the last 3) unless kept |
+| Dictionary (left) | the top-left corner, 16px in | 300px wide, as tall as its 5 words and 3 questions | always; the words button hides it |
+| Pictures and meanings (float) | the top-right corner, 16px in | 320px wide, as tall as its cards (at most 2), ending 330px above the bottom to clear your camera tile | while there are some; each holds 20 s (dims for the last 3) unless kept |
 | Translation bubble | bottom center, right above the orb | up to 700 × 148, fixed | while someone talks; fades 9 s after the last words |
-| Orb | bottom center, 92px up (clear of the call's buttons) | 56px | always; hover it for the words and pictures buttons, ⋯ (the "I speak" switch, Hide) and the status |
+| The line | bottom center, 92px up (clear of the call's buttons) | 240 × 56 | always; beside it the words and pictures buttons, Transcribe and English / Telugu |
 
 ## Tokens
 
@@ -64,19 +70,12 @@ Color by meaning: cyan = connected and "Asked you"/"Request" tags; blue = select
 
 **Controls.** The status and all the buttons are 40px glass circles that spring out on either side of the orb on hover. The menu opens above the orb.
 
-## The orb
+## The line
 
-It's 44px: a turning conic gradient (cyan → blue → violet) under a highlight, with a soft glow behind it.
-
-| State | When | Motion |
-|---|---|---|
-| off | no engine | grayscale, 55% opacity, still |
-| idle | connected, quiet | breathes: scale .90 ↔ 1, opacity .6 ↔ .88, 4.2s ease-in-out; gradient turns once per 14s |
-| listening | someone is talking | grows to 1.12 (spring); two blurred blobs morph and turn (2.6s and 3.4s, one reversed); glow grows to 1.15 |
-| thinking | a line is being translated | gradient turns every .9s; a bright arc sweeps round the edge at the same speed |
-| speaking | Weave's voice is playing | three rings go out (scale 1 → 1.75, fading out, 1.5s, .5s apart); core and glow follow a voice-like level every 110ms |
-
-The page can't hear Weave's audio, so the speaking level is a smoothed random envelope (`--amp`). When reduced motion is on, the orb doesn't animate.
+This line replaces the orb. It's a 240 × 56 canvas (drawn every frame, so there's no layout at all) showing two gradient strands (cyan → blue → violet), pinned at both ends and slightly out of step, so it reads like a vibrating string.
+- **Real sound:** offscreen.js reads the captured tab's sound as 48 log-spaced bands from 80 Hz to 5 kHz, about 30 times a second. Low frequencies drive the middle of the line and high ones the ends.
+- **Movement:** levels rise fast and fall slowly, and the glow grows with overall loudness.
+- **No sound to read** (no capture, or the preview page): the line follows Weave's state instead. It's nearly flat when idle, ripples small and fast while translating, and moves more while someone talks or Weave speaks. When there's no engine it's a gray flat line.
 
 ## Motion
 

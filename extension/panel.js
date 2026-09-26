@@ -18,6 +18,10 @@ document.body.dataset.part = PART;
 const root = document.getElementById("root");
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const asset = (path) => (/^(https?:|data:)/.test(path) ? path : `${HTTP_URL}/${String(path).replace(/^\/+/, "")}`);
+// Nothing in Telugu script is shown: romanized words and English only. noTe() is the last line of defence.
+const TE = /[\u0C00-\u0C7F]/;
+const noTe = (s) => String(s ?? "").replace(/[\u0C00-\u0C7F]+/g, "").replace(/[“"‘']\s*[”"’']/g, "").replace(/\(\s*\)/g, "")
+  .replace(/\s+([,.!?;:])/g, "$1").replace(/\s{2,}/g, " ").replace(/^[\s,.;:·-]+/, "").trim();
 const tellParent = (msg) => parent.postMessage({ source: "weave-panel", part: PART, ...msg }, "*");
 
 // ---------- connection ----------
@@ -84,19 +88,23 @@ function captionLine(id) {
 }
 // The dock sends back the language you picked (two-way calls)
 addEventListener("message", (e) => {
+  if (PART === "captions" && e.data?.source === "weave-dock" && e.data.kind === "transcribe") send({ type: "transcribe", on: !!e.data.on });
   if (PART === "captions" && e.data?.source === "weave-dock" && e.data.kind === "i_speak") { chooseLanguage(e.data.lang); cap.roles && (cap.roles.you = e.data.lang); renderCaptions(); }
 });
 
 function withKept(text, kept) {
-  // Words kept in Telugu are underlined with their English; clicking one tells the engine you don't know it.
+  // Words kept in her language are underlined with their English; clicking one tells the engine you don't know it.
   let html = "", rest = text;
   for (const k of kept || []) {
-    const i = rest.indexOf(k.telugu);
-    if (i < 0) continue;
-    html += esc(rest.slice(0, i)) + `<span class="kept" data-id="${esc(k.id)}" data-en="${esc(k.english)}" title="Click if you don't know this word">${esc(k.telugu)}<small>(${esc(k.english)})</small></span>`;
-    rest = rest.slice(i + k.telugu.length);
+    const at = rest.indexOf(k.telugu);
+    if (at < 0) continue;
+    const word = TE.test(k.telugu) ? noTe(k.roman) : k.telugu;
+    html += esc(noTe(rest.slice(0, at))) + " " + (word
+      ? `<span class="kept" data-id="${esc(k.id)}" data-en="${esc(k.english)}" title="Click if you don't know this word">${esc(word)}<small>(${esc(k.english)})</small></span>`
+      : esc(k.english)) + " ";
+    rest = rest.slice(at + k.telugu.length);
   }
-  return html + esc(rest);
+  return (html + esc(noTe(rest))).replace(/\s+([,.!?;:])/g, "$1").trim();
 }
 // Captions are drawn in place: each line keeps its element and only its text changes, so nothing flashes. What she's
 // saying right now (the partial) becomes that line's element when the sentence is done; older lines glide up and fade.
@@ -106,28 +114,20 @@ function setHTML(node, html) { if (node._h !== html) { node.innerHTML = html; no
 function lineEl() {
   const el = document.createElement("div");
   el.className = "cl entering";
-  el.innerHTML = `<div class="meta"><span class="spk"><i></i><b></b></span><span class="orig"></span></div><div class="en"></div>`;
+  el.innerHTML = `<div class="en"></div>`;
   el.addEventListener("animationend", (e) => { if (e.animationName === "line-in") el.classList.remove("entering"); });
   return el;
 }
-function fillLine(el, l) {   // l: a caption line, or null for what she's saying right now
-  const you = !!l?.you;
-  el.classList.toggle("you", you);
-  setHTML(el.querySelector(".spk b"), esc(you ? conn.me || "You" : conn.name || "Her"));
-  const orig = el.querySelector(".orig");
+function fillLine(el, l) {   // l: a caption line, or null for what's being said right now
+  el.classList.toggle("you", !!l?.you);
   let en, kind;   // kind: final | draft | pending
   if (!l) {
-    orig.className = "orig te"; setHTML(orig, esc(cap.partial));
-    [en, kind] = cap.draft ? [esc(cap.draft), "draft"] : [cap.partial ? DOTS : "", "pending"];
-  } else if (l.english && !you) {
-    orig.className = "orig faint"; setHTML(orig, "said in English");
-    [en, kind] = [`${l.tag ? `<span class="tag">${esc(l.tag)}</span>` : ""}${esc(l.orig)}`, "final"];
-  } else if (you) {
-    orig.className = "orig"; setHTML(orig, esc(l.orig));
-    [en, kind] = l.english ? ["", "final"] : l.pending ? [DOTS, "pending"] : [`<span class="te">${esc(l.en)}</span>`, "final"];
+    const heard = noTe(cap.partial);   // English said aloud shows as it's heard; Telugu waits for its English
+    [en, kind] = cap.draft ? [esc(noTe(cap.draft)), "draft"] : heard ? [esc(heard), "draft"] : [cap.partial ? DOTS : "", "pending"];
+  } else if (l.to ? l.to !== "en" : l.english || l.you) {
+    [en, kind] = [`${l.tag && !l.you ? `<span class="tag">${esc(l.tag)}</span>` : ""}${esc(noTe(l.orig))}`, "final"];   // said in English
   } else {
-    orig.className = "orig te"; setHTML(orig, esc(l.orig));
-    [en, kind] = l.pending ? (l.draft ? [esc(l.draft), "draft"] : [DOTS, "pending"])
+    [en, kind] = l.pending ? (l.draft ? [esc(noTe(l.draft)), "draft"] : [DOTS, "pending"])
       : [`${l.tag ? `<span class="tag">${esc(l.tag)}</span>` : ""}${withKept(l.en, l.kept)}`, "final"];
   }
   const enEl = el.querySelector(".en");
@@ -277,15 +277,11 @@ function heardTalk() {
 function renderTop() {
   const now = Date.now();
   if (askState.ask && askState.ask !== askState.drawn) {
-    const a = askState.ask, who = a.caller || conn.name || "her";
-    const label = a.context ? `${a.context} · ask ${who}` : `Ask ${who}${a.about ? ` about ${a.about}` : ""}`;
+    const a = askState.ask;
+    const say = noTe(a.roman) || noTe(a.english), means = noTe(a.roman) ? noTe(a.english) : "";
     root.innerHTML = `<div class="pill">
         <span class="spark">${SPARK}</span>
-        <div class="pill-text">
-          <div class="pill-label">${esc(label)}</div>
-          <div class="q-roman">${esc(a.roman || a.english || "")}</div>
-          ${a.telugu || (a.english && a.roman) ? `<div class="q-sub">${a.telugu ? `<span class="te">${esc(a.telugu)}</span>` : ""}${a.telugu && a.english && a.roman ? `<i>·</i>` : ""}${a.english && a.roman ? `<span>${esc(a.english)}</span>` : ""}</div>` : ""}
-        </div>
+        <div class="pill-text"><div class="q-roman">${esc(say)}</div>${means ? `<div class="q-sub">${esc(means)}</div>` : ""}</div>
         <div class="timer"><i style="animation-duration:${ASK_MS}ms"></i></div>
       </div>`;
     askState.drawn = a;
@@ -326,7 +322,7 @@ const GREETINGS = [  // starter words until the engine picks a topic
 ];
 const SPEAKER = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>`;
 const left = { questions: [], engineQuestions: false, topic: "Greetings", words: GREETINGS, engineTopic: false, said: [], open: null, built: false };
-const MAX_QUESTIONS = 4, QUESTION_TTL_MS = 90000;
+const MAX_QUESTIONS = 3, MAX_WORDS = 5, QUESTION_TTL_MS = 90000;
 const QUESTION_KINDS = new Set(["idiom", "slang", "phrase", "culture", "festival", "food", "family", "clothing"]);
 
 function stemFor(card) {
@@ -339,7 +335,7 @@ function stemFor(card) {
   }
 }
 function addLocalQuestion(q) {
-  if (left.engineQuestions) return;
+  if (left.engineQuestions || TE.test(q.text)) return;
   const same = (x) => x.id === q.id || (q.word && x.word === q.word);
   const old = left.questions.find(same);
   if (old && !q.replace) return;
@@ -362,30 +358,27 @@ const norm = (r) => String(r).toLowerCase().replace(/\?$/, "");
 function renderLeft(force = false) {
   if (leftHeld && !force) { leftPending = true; return; }
   if (!left.built) {
-    root.innerHTML = `<section class="dict"><div class="head"><span class="eyebrow">Words</span><span class="topic"></span></div><div class="rows"></div></section>
-      <section class="cur"><div class="head"><span class="eyebrow">Curious?</span></div><div class="qs"></div></section>`;
+    root.innerHTML = `<section class="dict"><div class="rows"></div></section><section class="cur"><div class="qs"></div></section>`;
     left.built = true;
   }
   const now = Date.now();
   left.questions = left.questions.filter((q) => q.id === left.open || now - q.at < QUESTION_TTL_MS);
-  root.querySelector(".topic").textContent = left.topic;
   const said = new Set(left.said.flatMap((w) => [w.id, norm(w.roman)]));
   const words = [...left.said.map((w) => ({ ...w, said: true })),
-    ...left.words.filter((w) => !said.has(w.id) && !said.has(norm(w.roman)))];
+    ...left.words.filter((w) => !said.has(w.id) && !said.has(norm(w.roman)))]
+    .filter((w) => noTe(w.roman) && !TE.test(w.roman)).slice(0, MAX_WORDS);
   syncList(root.querySelector(".rows"), words, (w) => w.id || norm(w.roman),
-    () => html("div", "w", `<div class="w-top"><b class="w-roman"></b><span class="w-te te"></span><span class="w-tag"></span></div><div class="w-en"></div>
-      <button class="hear" title="Hear it">${SPEAKER}</button>`),
+    () => html("div", "w", `<b class="w-roman"></b><div class="w-en"></div><button class="hear" title="Hear it">${SPEAKER}</button>`),
     (el, w) => {
       el.classList.toggle("said", !!w.said);
-      el.querySelector(".w-roman").textContent = w.roman;
-      el.querySelector(".w-te").textContent = w.telugu;
-      el.querySelector(".w-tag").textContent = w.said ? "she said" : w.learning ? "learning" : "";
-      el.querySelector(".w-en").textContent = w.english;
+      el.querySelector(".w-roman").textContent = noTe(w.roman);
+      el.querySelector(".w-en").textContent = noTe(w.english);
       Object.assign(el.querySelector(".hear").dataset, { hear: w.telugu, roman: w.roman, id: w.id || "" });
     });
   const cur = root.querySelector(".cur");
-  cur.hidden = !left.questions.length;
-  syncList(root.querySelector(".qs"), left.questions, (q) => q.id,
+  const questions = left.questions.filter((q) => !TE.test(q.text)).slice(0, MAX_QUESTIONS);
+  cur.hidden = !questions.length;
+  syncList(root.querySelector(".qs"), questions, (q) => q.id,
     (q) => { const b = html("button", "question", `<div class="q"></div><div class="answer"><div></div></div>`); b.dataset.q = q.id; return b; },
     (el, q) => {
       el.classList.toggle("open", q.id === left.open);
@@ -396,8 +389,8 @@ function renderLeft(force = false) {
   report();
 }
 function formatAnswer(a) {
-  const say = a.telugu || a.roman ? `<div class="say">${a.telugu ? `<span class="te">${esc(a.telugu)}</span>` : ""}${a.telugu && a.roman ? " · " : ""}${esc(a.roman || "")}</div>` : "";
-  return `${say}${esc(a.text || "")}`;
+  const say = noTe(a.roman);
+  return `${say ? `<div class="say">${esc(say)}</div>` : ""}${esc(noTe(a.text))}`;
 }
 root.addEventListener("click", (e) => {
   if (PART !== "left") return;
@@ -433,7 +426,7 @@ function speak(telugu, roman) {
 // ---------- float: pictures and meanings as small bubbles that spring up above the captions ----------
 // Each holds for a while and fades away; hover one to see it, click to keep it.
 const float = { items: [] };
-const MAX_ITEMS = 4, HOLD_MS = 20000;
+const MAX_ITEMS = 2, HOLD_MS = 20000;   // two cards fit above your camera tile
 const MEANING_KINDS = new Set(["idiom", "slang", "phrase", "culture"]);
 const LABELS = { idiom: "Saying", slang: "Slang", phrase: "Phrase", culture: "Custom" };
 function addFloat(item) {
@@ -453,10 +446,8 @@ function renderFloat() {
   syncList(root.querySelector(".bubs") || (root.innerHTML = `<div class="bubs"></div>`, root.querySelector(".bubs")), float.items, (x) => x.key,
     (x) => {
       const el = html("div", `bub ${x.kind}`, x.kind === "picture"
-        ? `<div class="bub-row"><img class="thumb" src="${esc(asset(x.image))}" alt=""><b>${esc(x.name)}</b></div>
-           <div class="more"><div><img class="big" src="${esc(asset(x.image))}" alt="">${x.description ? `<p>${esc(x.description)}</p>` : ""}</div></div>`
-        : `<div class="bub-row"><span class="kind">${esc(x.label)}</span><b class="${/[ఀ-౿]/.test(x.title) ? "te" : ""}">${esc(x.title)}</b></div>
-           <div class="more"><div><p>${esc(x.note)}</p></div></div>`);
+        ? `<img class="big" src="${esc(asset(x.image))}" alt=""><div class="bub-body"><b>${esc(noTe(x.name))}</b>${noTe(x.description) ? `<p>${esc(noTe(x.description))}</p>` : ""}</div>`
+        : `<div class="bub-body"><span class="kind">${esc(x.label)}</span><b>${esc(x.title)}</b>${noTe(x.note) ? `<p>${esc(noTe(x.note))}</p>` : ""}</div>`);
       el.dataset.key = x.key;
       el.title = "Click to keep it";
       return el;
@@ -487,13 +478,15 @@ function handleCaptions(m) {
   cap.lastActivity = Date.now();
   switch (m.type) {
     case "voice": cap.voiceUntil = Date.now() + 2600; break;
+    case "transcribing": tellParent({ kind: "transcribing", on: !!m.on }); return;   // the engine says; the switch draws this
     case "speaking": cap.speaking = true; break;
     case "partial": cap.partial = m.text || ""; if (!m.text) cap.speaking = false; break;
     case "draft": cap.draft = m.text || ""; break;
     case "roles": cap.roles = { you: m.you, them: m.them, fixed: m.fixed }; break;
     case "original": {
       const l = captionLine(m.id);
-      l.orig = m.text; l.english = m.route === "english"; l.pending = !l.english; l.you = !!m.you;
+      l.orig = m.text; l.english = m.route === "english"; l.to = m.to; l.you = !!m.you;
+      l.pending = l.to ? l.to === "en" : !l.english;
       if (!m.you) { cap.partial = ""; cap.speaking = false; }
       l.draft = cap.draft; cap.draft = "";  // keep showing the draft until the final English arrives
       break;
@@ -523,6 +516,7 @@ function handleLeft(m) {
       left.engineQuestions = true;
       for (const q of (m.questions || []).slice().reverse()) {
         if (left.questions.some((x) => x.id === q.id)) continue;
+        if (TE.test(q.text)) continue;
         left.questions.unshift({ id: q.id, text: q.text, word: q.word || null, kind: q.kind, answer: q.answer || null, at: Date.now() });
       }
       left.questions = left.questions.slice(0, MAX_QUESTIONS);
@@ -565,7 +559,9 @@ function handleFloat(m) {
   } else if (m.type === "details") {
     for (const c of m.cards || []) {
       if (!c.note || !MEANING_KINDS.has(c.category)) continue;
-      addFloat({ key: `card:${c.id || c.title}`, kind: "meaning", word: c.id, label: LABELS[c.category] || "Meaning", title: c.title, note: c.note });
+      const title = TE.test(c.title) ? noTe(c.english) : noTe(c.title);   // a saying in Telugu script goes by its English
+      if (!title) continue;
+      addFloat({ key: `card:${c.id || c.title}`, kind: "meaning", word: c.id, label: LABELS[c.category] || "Meaning", title, note: c.note });
     }
   } else return;
   renderFloat();
