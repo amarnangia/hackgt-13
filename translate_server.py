@@ -13,6 +13,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from lexicon import Lexicon
 
 PORT = 8766
+KEEP_WARM_S = 3
 MODEL = "ai4bharat/indictrans2-indic-en-1B"
 FLORES = {"te": "tel_Telu", "hi": "hin_Deva", "ta": "tam_Taml", "kn": "kan_Knda", "ml": "mal_Mlym", "bn": "ben_Beng", "mr": "mar_Deva"}
 
@@ -34,8 +35,10 @@ class IndicTranslator:
         self.lexicon_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lexicon.json")
         self.lexicon_mtime = os.path.getmtime(self.lexicon_path)
         self.lock = threading.Lock()  # one GPU, one translation at a time
+        self.last_used = time.monotonic()
 
     def __call__(self, text, lang="te", use_lexicon=True):
+        self.last_used = time.monotonic()
         if not text.strip():
             return ""
         src = FLORES[lang]
@@ -101,6 +104,15 @@ def main():
         def log_message(self, *args):
             pass
 
+    def keep_warm():
+        # macOS swaps out memory that hasn't been touched lately; under memory pressure that made translations
+        # take ~10 s instead of ~0.4 s. A tiny translation every few idle seconds keeps the model in RAM.
+        while True:
+            time.sleep(KEEP_WARM_S)
+            if time.monotonic() - translate.last_used > KEEP_WARM_S:
+                translate("సరే", use_lexicon=False)
+
+    threading.Thread(target=keep_warm, daemon=True).start()
     print(f"Translator ready on http://localhost:{PORT}", flush=True)
     ThreadingHTTPServer(("localhost", PORT), Handler).serve_forever()
 
