@@ -14,7 +14,7 @@ import websockets
 API_URL = "https://api.meta.ai/v1"
 ASR_URL = "wss://api.meta.ai/v1/asr/realtime"
 ASR_MODEL = "muse-voice-transcribe-1.0"
-SPARK_MODEL = "muse-spark-1.2"  # ~1.9 s per sentence at minimal reasoning; 1.3 was ~2.8 s
+SPARK_MODEL = "muse-spark-1.1"  # ~0.8 s per sentence at minimal reasoning; 1.2 ~1.4 s, 1.3 ~2.8 s (measured 2026-09-25)
 
 # python.org's Python ships without CA certificates, so HTTPS fails unless we point it at certifi's bundle.
 os.environ.setdefault("SSL_CERT_FILE", certifi.where())
@@ -101,7 +101,7 @@ class Translator:
 
     def __call__(self, text):
         messages = [{"role": "system", "content": self.system}]
-        for original, english in self.history:
+        for original, english in list(self.history):  # copy: other translations may append meanwhile
             messages += [{"role": "user", "content": original}, {"role": "assistant", "content": english}]
         messages.append({"role": "user", "content": text})
         r = self.session.post(f"{API_URL}/chat/completions", timeout=20, json={

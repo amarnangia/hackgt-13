@@ -19,11 +19,14 @@ from websockets.http11 import Response
 
 from muse import Translator, transcribe
 
-PORT = 8765
+PORT = int(__import__("os").environ.get("OVERLAY_PORT", 8765))
 CHUNK_MS = 80
 SENTENCE_END = re.compile(r"[.?!।]+")
 CLAUSE_END = re.compile(r"[,;]")
 MIN_CLAUSE_WORDS = 5  # Muse often joins sentences with commas; cut there once a clause is long enough to translate well
+MAX_WAIT_WORDS = 7    # run-on speech with no punctuation: translate once this many words are waiting...
+HOLD_BACK_WORDS = 2   # ...except the newest few, which Muse may still correct
+TRANSLATE_WORKERS = 3
 
 clients = set()
 
@@ -63,25 +66,29 @@ def serve_overlay(conn, request):
 class Captioner:
     """Turns Muse's live partials into sentences and translates each one as soon as it ends.
 
-    Translation runs on a single worker thread so sentences finish in order and each one gets the
-    previous lines as context.
+    Pieces are translated in parallel so a backlog can't build up; the overlay places each result
+    by id, so they still show in order.
     """
 
     def __init__(self, lang):
         self.translate = Translator(lang)
-        self.pool = ThreadPoolExecutor(max_workers=1)
-        self.pool.submit(self.translate.warm_up)  # the first request pays for TLS setup (~3 s)
+        self.pool = ThreadPoolExecutor(max_workers=TRANSLATE_WORKERS)
+        for _ in range(TRANSLATE_WORKERS):
+            self.pool.submit(self.translate.warm_up)  # the first request pays for TLS setup (~3 s)
         self.next_id = 0
         self.partial = ""  # latest cumulative transcript for the current turn
         self.done = 0      # how many characters of it have been sent for translation
+        self.waiting_since = None  # when the oldest untranslated word appeared
 
     def on_event(self, ev):
         kind = ev.get("type")
         if kind == "speechStart":
-            self.partial, self.done = "", 0
+            self.partial, self.done, self.waiting_since = "", 0, None
             broadcast({"type": "speaking"})
         elif kind == "transcript" and not ev.get("final"):
             self.partial = ev["transcript"]
+            if self.waiting_since is None and self.partial[self.done:].strip():
+                self.waiting_since = time.monotonic()
             self._cut(final=False)
             broadcast({"type": "partial", "text": self.partial[self.done:].strip()})
         elif kind == "speechEnd":
@@ -103,18 +110,30 @@ class Captioner:
             start = end
         self.done += start
 
+        # Run-on speech: don't wait for punctuation that may never come.
+        words = list(re.finditer(r"\S+", self.partial[self.done:]))
+        if not final and len(words) >= MAX_WAIT_WORDS:
+            cut = self.done + words[-HOLD_BACK_WORDS - 1].end()
+            self._submit(self.partial[self.done:cut].strip())
+            self.done = cut
+
     def _submit(self, sentence):
         self.next_id += 1
-        seg_id, ended_at = self.next_id, time.monotonic()
+        seg_id, cut_at = self.next_id, time.monotonic()
+        waited = cut_at - (self.waiting_since or cut_at)
+        self.waiting_since = None if not self.partial[self.done:].strip() else cut_at
         broadcast({"type": "original", "id": seg_id, "text": sentence})
 
         def work():
+            start = time.monotonic()
             try:
                 english = self.translate(sentence)
             except Exception as e:
                 english = f"(translation failed: {type(e).__name__})"
             broadcast({"type": "english", "id": seg_id, "text": english})
-            print(f"[+{time.monotonic() - ended_at:.1f}s] {sentence}  ->  {english}", flush=True)
+            now = time.monotonic()
+            print(f"[first word -> English {waited + now - cut_at:.1f}s | waiting for words {waited:.1f}s, "
+                  f"queue {start - cut_at:.1f}s, translate {now - start:.1f}s] {sentence}  ->  {english}", flush=True)
 
         self.pool.submit(work)
 
