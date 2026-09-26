@@ -10,6 +10,11 @@ Everything in this folder is a layer on top of the translator. It reads the team
 2. In a second terminal: `python3 -m garden` (standard library only, nothing to install)
 3. Open **http://localhost:8770/app** and put it next to the WhatsApp Web window.
 
+4. Click **Float over call** (bottom of the page). A small caption window pops out and stays on top of
+   the WhatsApp window: her Telugu as she speaks, the English under it, pictures, and "Ask Ammamma" prompts.
+   Drag it anywhere and resize it; the text scales. Tap an underlined word for its picture and meaning.
+   Needs Chrome (it uses Document Picture-in-Picture); in other browsers use the full page.
+
 The badge at the top says **LIVE** when it's reading `subtitles.py` (port 8765). If you open the page first,
 it plays a demo call and switches to the live call by itself once `subtitles.py` starts.
 
@@ -24,7 +29,8 @@ What it shows, from the pipeline's WebSocket messages:
 overlay.html at http://localhost:8765 still works; both can be open at once.
 
 Try it without the translator: `python3 -m garden --demo`, then http://localhost:8770/app
-(`?demo=1` forces the demo call, `?reset=1` shows onboarding again).
+(`?demo=1` forces the demo call, `?reset=1` shows onboarding again, `?floatpreview=1` draws the
+floating window inside the page, for browsers without Picture-in-Picture).
 
 ## Between calls (the phone)
 

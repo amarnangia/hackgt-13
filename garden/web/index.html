@@ -235,7 +235,59 @@ svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-widt
 .ask-en { font-size: 13px; color: var(--text-3); margin-top: 4px; }
 .livepill { flex: 1; height: 52px; border-radius: 16px; border: 1px solid rgba(var(--accent-rgb),.3); background: var(--accent-3);
             display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--text-2); font-size: 14px; }
-.livepill[hidden], .talk[hidden] { display: none; }
+.livepill { color: var(--text); font-weight: 500; transition: background .2s, border-color .2s, transform .15s; }
+.livepill:hover { background: rgba(var(--accent-rgb),.14); border-color: rgba(var(--accent-rgb),.5); }
+.livepill:active { transform: scale(.98); }
+.livepill.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.livepill[hidden], .talk[hidden], .icon-btn[hidden] { display: none; }
+/* float over call */
+.fl-body { margin: 0; height: 100vh; overflow: hidden; background: var(--bg); }
+.fl { height: 100vh; display: flex; flex-direction: column; gap: 10px; padding: 12px 16px 14px; position: relative;
+      background: radial-gradient(520px 200px at 0 0, rgba(var(--accent-rgb),.09), transparent 70%), var(--bg); }
+.fl-h { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); white-space: nowrap; }
+.fl-h b { color: var(--text); font-weight: 500; }
+.fl-lang { font: 400 11px var(--mono); color: var(--text-3); }
+.fl-h .mode { padding: 4px 7px; font-size: 10px; }
+.fl-wire { flex: 1; position: relative; height: 12px; margin: 0 4px; min-width: 40px; }
+.fl-wire .ln { position: absolute; left: 7px; right: 7px; top: 50%; height: 1px; background: rgba(var(--accent-rgb),.3); overflow: hidden; }
+.fl-wire.translating .ln::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, var(--accent), transparent) 0 0 / 40% 100% no-repeat; animation: shimmer 1.1s linear infinite; }
+.fl-wire .n { position: absolute; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: var(--text-2); }
+.fl-wire .n.you { left: 0; } .fl-wire .n.them { right: 0; background: var(--accent); }
+.fl-wire .pulse { width: 18px; }
+.fl-prev { font: 400 clamp(13px, 3.3vw, 17px)/1.35 var(--serif); color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+           padding-bottom: 10px; border-bottom: 1px solid var(--border); min-height: 1.35em; }
+.fl-ask { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; padding: 8px 10px; border-radius: 12px; min-height: 0;
+          border: 1px solid rgba(var(--accent-rgb),.4); background: rgba(var(--accent-rgb),.08); animation: msg-in .32s var(--spring) both; }
+.fl-ask[hidden], .fl-prev[hidden] { display: none; }
+.fl-ask .te { font-size: 16px; color: var(--text); }
+.fl-ask .rom { font: italic 400 14px var(--serif); color: var(--text-2); }
+.fl-ask .en { font-size: 12px; color: var(--text-3); }
+.fl-cur { flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; }
+.fl-who { font: 500 10.5px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+.fl-who.you { color: var(--text-2); }
+.fl-orig { font: 400 clamp(14px, 3.6vw, 19px)/1.5 var(--ui); color: var(--text-2); }
+.fl-orig.te { font-family: var(--telugu); }
+.fl-tr { font: 400 clamp(20px, 5.8vw, 34px)/1.25 var(--serif); letter-spacing: -0.01em; color: var(--text); margin-top: 2px; }
+.fl-cur .tr.pending { margin-top: 6px; min-height: 0; }
+.fl-cur .w { cursor: pointer; }
+.fl-empty { color: var(--text-3); font-size: 14px; }
+.fl-vis { margin-top: 8px; align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; border-radius: 10px;
+          border: 1px solid var(--border); background: var(--surface); font-size: 13px; color: var(--text); animation: msg-in .35s var(--spring) both; transition: background .2s; }
+.fl-vis:hover { background: var(--surface-2); }
+.fl-vis img { width: 30px; height: 30px; border-radius: 7px; object-fit: cover; }
+.fl-card { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; gap: 12px; align-items: center; padding: 10px 12px 10px 10px;
+           border-radius: 14px; border: 1px solid var(--border-2); background: rgba(17,18,22,.96); box-shadow: 0 12px 40px -12px rgba(0,0,0,.8);
+           animation: msg-in .32s var(--spring) both; }
+.fl-card.ask { border-color: rgba(var(--accent-rgb),.45); background: linear-gradient(180deg, rgba(28,36,60,.97), rgba(17,18,22,.97)); }
+.fl-card img { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; flex: none; }
+.fl-card .t { flex: 1; min-width: 0; }
+.fl-card .big { font-size: 20px; line-height: 1.3; }
+.fl-card .rom { font: italic 400 15px var(--serif); color: var(--text-2); }
+.fl-card .en { font-size: 13px; color: var(--text); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.fl-card .en span { color: var(--text-3); }
+.fl-x { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; color: var(--text-3); align-self: flex-start; transition: background .2s, color .2s; }
+.fl-x:hover { background: var(--surface-2); color: var(--text); }
+.fl-x svg { width: 14px; height: 14px; }
 /* dock */
 .dock { padding: var(--s3) 0 calc(var(--s4) + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: var(--s3); }
 .talk { flex: 1; height: 52px; border-radius: 16px; border: 1px solid var(--border-2); background: var(--surface); display: flex; align-items: center; justify-content: center; gap: 10px;
@@ -365,6 +417,7 @@ const I = {
   book: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5Z"/><path d="M19 17H6a2 2 0 0 0-2 2"/>',
   undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-4"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>',
   swap: '<path d="M7 7h13l-4-4M17 17H4l4 4"/>',
+  float: '<rect x="3" y="4" width="18" height="14" rx="3"/><rect x="11" y="11" width="8" height="5" rx="1.5"/>',
 };
 const icon = (n, cls = "i") => `<svg class="${cls}" viewBox="0 0 24 24">${I[n]}</svg>`;
 const Logo = () => `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="5" cy="12" r="3" stroke="#f3f3f1" stroke-width="1.6"/><circle cx="19" cy="12" r="3" fill="var(--accent)"/><path d="M8 12h8" stroke="var(--accent)" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="2 2.4"/></svg>`;
@@ -630,7 +683,8 @@ function SessionView(c) {
       <div class="transcript scroll" id="s-lines" aria-live="polite"><div class="empty-t" id="s-empty">When ${esc(c.name)} speaks, it appears here in ${langName(state.profile?.lang || "en")}.</div></div>
       <div class="dock">
         <button class="talk" id="s-talk">${icon("mic")}<span>Hold to talk</span></button>
-        <div class="livepill" id="s-livepill" hidden><span class="dot on"></span>Subtitles from the call</div>
+        <button class="livepill" id="s-livepill" hidden>${icon("float")}<span>Float over call</span></button>
+        <button class="icon-btn" id="s-float" aria-label="Float captions over the call" title="Float captions over the call">${icon("float")}</button>
         <button class="icon-btn" id="s-growth" aria-label="Your language growth">${icon("book")}<span class="badge" id="s-badge">0</span></button>
         <button class="end" id="s-end">End</button>
       </div>
@@ -664,7 +718,8 @@ function startSession(c) {
 function setState(text) { const el = $("#s-state"); if (el) el.textContent = text; }
 function setMode(m) {
   state.session.mode = m; const el = $("#s-mode"); el.textContent = m === "live" ? "Live" : "Demo"; el.classList.toggle("live", m === "live");
-  $("#s-talk").hidden = m === "live"; $("#s-livepill").hidden = m !== "live";
+  $("#s-talk").hidden = m === "live"; $("#s-livepill").hidden = m !== "live"; $("#s-float").hidden = m === "live";
+  floatUpdate();
 }
 function setNow(text, active = false) { const el = $("#s-now"); if (!el) return; el.textContent = text; el.classList.toggle("act", active); }
 function speaking(who, on) {
@@ -681,12 +736,14 @@ function speaking(who, on) {
     clearInterval(s["pulse_" + who]);
     if (!any) setNow("Listening");
   }
+  floatUpdate();
 }
 function translating(delta) {
   const s = state.session; if (!s) return;
   s.translating = Math.max(0, s.translating + delta);
   const wire = $("#s-cv .wire"); wire?.classList.toggle("translating", s.translating > 0);
   const mid = $("#s-cv .mid"); if (mid) mid.textContent = s.translating ? "Translating" : "Connected";
+  floatUpdate();
 
 }
 function bindSession(c) {
@@ -694,6 +751,8 @@ function bindSession(c) {
   $("#s-end").onclick = () => openSheet(Summary(), { onClose: null });
   $("#s-growth").onclick = () => openSheet(LearningProgress());
   $("#s-menu").onclick = () => openSheet(SessionMenu());
+  $("#s-livepill").onclick = $("#s-float").onclick = toggleFloat;
+  new MutationObserver(scheduleFloat).observe($("#s-lines"), { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["class"] });
   $("#s-talk").addEventListener("pointerdown", talkDown);
   $("#s-talk").addEventListener("pointerleave", talkUp);
 }
@@ -717,6 +776,7 @@ function endSession(silent = false) {
   if (s.ws2) { s.ws2.onclose = null; s.ws2.close(); }
   micOff(); cancelAnimationFrame(voice.raf);
   state.session = null;
+  if (float.win) float.win.close();
   if (!silent) { const cv = $("#s-cv"); cv?.classList.add("connecting"); }
 }
 
@@ -742,6 +802,7 @@ async function typeInto(el, text, cps = 60, s = state.session) {
   const chars = [...text];
   for (let i = 0; i < chars.length; i++) {
     if (state.session !== s) return;
+    if (document.hidden) { el.textContent = text; break; }
     el.textContent += chars[i];
     if (i % 3 === 0) scrollDown();
     await sleep(1000 / cps);
@@ -782,6 +843,7 @@ function addAsk(m) {
     const b = e.currentTarget; b.classList.add("playing"); u.onend = () => b.classList.remove("playing"); speechSynthesis.speak(u);
   });
   $("#s-lines").append(el);
+  floatAsk(m);
   const cv = $("#s-cv"); pulse(cv, "you");
   scrollDown();
 }
@@ -794,6 +856,93 @@ function addVisual(line, info) {
   line.el.append(b);
   scrollDown();
 }
+
+/* ---------- float over call: Chrome's Document Picture-in-Picture keeps this window above WhatsApp ---------- */
+const float = { win: null, queued: false, cardTimer: 0 };
+function scheduleFloat() { if (!float.win || float.queued) return; float.queued = true; queueMicrotask(() => { float.queued = false; floatUpdate(); }); }
+const abs = (u) => (u ? new URL(u, location.href).href : "");
+async function toggleFloat() {
+  if (float.win) { float.win.close(); return; }
+  const preview = params.has("floatpreview");   // same window, drawn inside the page (for checking the design outside Chrome)
+  if (!preview && !("documentPictureInPicture" in window)) { toast("Floating captions need Chrome on a laptop", "x"); return; }
+  const win = preview ? previewFrame() : await documentPictureInPicture.requestWindow({ width: 460, height: 250 });
+  for (const n of document.head.querySelectorAll('style, link[rel="stylesheet"], link[rel="preconnect"]')) win.document.head.append(n.cloneNode(true));
+  win.document.body.className = "fl-body";
+  win.document.body.innerHTML = `<div class="fl">
+    <header class="fl-h"><span class="dot on"></span><b>${esc(state.active.name)}</b><span class="fl-lang">${langName(state.active.lang)} → ${langName(state.profile?.lang || "en")}</span>
+      <div class="fl-wire" id="fl-wire"><i class="n you"></i><span class="ln"></span><i class="n them"></i></div><span class="mode" id="fl-mode"></span></header>
+    <div class="fl-prev" id="fl-prev"></div>
+    <div class="fl-ask" id="fl-ask" hidden></div>
+    <div class="fl-cur" id="fl-cur"></div>
+    <div id="fl-card"></div></div>`;
+  // Tap a word or picture in the float: its meaning shows right there, no need to leave the call.
+  win.document.body.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-w], .fl-vis, .fl-x");
+    if (!t) return;
+    if (t.classList.contains("fl-x")) { hideFloatCard(); return; }
+    const info = wordInfo(t.dataset.w);
+    floatCard({ image: info.image, telugu: info.telugu, roman: info.roman, english: info.english, note: info.note || info.description }, 12000);
+  });
+  win.addEventListener("pagehide", () => {
+    const w = win.document.getElementById("fl-wire"); if (w) { clearInterval(+w.dataset.you); clearInterval(+w.dataset.them); }
+    float.win = null; $("#s-livepill")?.classList.remove("on"); const l = $("#s-livepill span"); if (l) l.textContent = "Float over call"; });
+  float.win = win;
+  $("#s-livepill").classList.add("on"); $("#s-livepill span").textContent = "Floating · tap to close";
+  floatUpdate();
+}
+function previewFrame() {
+  const f = document.createElement("iframe");
+  f.style.cssText = "position:fixed;left:12px;right:12px;bottom:84px;height:250px;width:calc(100% - 24px);max-width:460px;border:1px solid rgba(255,255,255,.12);border-radius:16px;z-index:40;box-shadow:0 20px 60px -10px #000";
+  document.body.append(f);
+  return f.contentWindow;
+}
+function floatUpdate() {
+  const win = float.win, s = state.session; if (!win || !s) return;
+  const d = win.document, $f = (id) => d.getElementById(id);
+  $f("fl-mode").textContent = s.mode === "live" ? "Live" : "Demo"; $f("fl-mode").classList.toggle("live", s.mode === "live");
+  const wire = $f("fl-wire");
+  const talking = [...document.querySelectorAll("#s-cv .party.speaking")].map((p) => p.dataset.side);
+  wire.classList.toggle("translating", s.translating > 0);
+  for (const side of ["you", "them"]) {
+    const on = talking.includes(side);
+    if (on && !wire.dataset[side]) wire.dataset[side] = setInterval(() => { const p = d.createElement("i"); p.className = "pulse" + (side === "them" ? " rev" : ""); wire.append(p); p.addEventListener("animationend", () => p.remove()); }, 620);
+    if (!on && wire.dataset[side]) { clearInterval(+wire.dataset[side]); delete wire.dataset[side]; }
+  }
+  const lines = s.lines.filter((l) => l.el.isConnected);
+  const cur = lines.at(-1), prev = lines.at(-2);
+  const textOf = (l) => l.el.querySelector(".tr:not(.pending)")?.textContent || l.el.querySelector(".orig").textContent;
+  $f("fl-prev").textContent = prev ? textOf(prev) : "";
+  if (!cur) { $f("fl-cur").innerHTML = `<div class="fl-empty">Captions appear here as ${esc(state.active.name)} speaks.</div>`; return; }
+  const tr = cur.el.querySelector(".tr"), orig = cur.el.querySelector(".orig"), vis = cur.el.querySelector(".visual");
+  const who = cur.who === "you" ? "You" : state.active.name;
+  const visKey = vis ? [...cur.el.querySelectorAll("[data-w]")].map((w) => w.dataset.w).find((k) => wordInfo(k).image) : null;
+  const visInfo = visKey ? wordInfo(visKey) : null;
+  $f("fl-cur").innerHTML = `<div class="fl-who ${cur.who}">${esc(who)}</div>
+    ${tr ? `<div class="fl-orig ${orig.classList.contains("te") ? "te" : ""} ${orig.classList.contains("caret") ? "caret" : ""}">${orig.innerHTML}</div>
+      ${tr.classList.contains("pending") ? `<div class="tr pending">Translating</div>` : `<div class="fl-tr ${tr.classList.contains("caret") ? "caret" : ""}">${tr.innerHTML}</div>`}`
+    : `<div class="fl-tr ${orig.classList.contains("caret") ? "caret" : ""}">${orig.innerHTML}</div>`}
+    ${visInfo ? `<button class="fl-vis" data-w="${esc(visKey)}"><img src="${esc(abs(visInfo.image))}" alt=""><span>${esc(visInfo.lib?.name || visInfo.english)}</span></button>` : ""}`;
+}
+function floatCard(c, ms) {
+  const win = float.win; if (!win) return;
+  const box = win.document.getElementById("fl-card");
+  box.innerHTML = `<div class="fl-card ${c.ask ? "ask" : ""}">${c.image ? `<img src="${esc(abs(c.image))}" alt="">` : ""}
+    <div class="t">${c.ask ? `<div class="eyebrow" style="color:var(--accent)">Ask ${esc(state.active.name)}</div>` : ""}
+      ${c.telugu ? `<div class="te big">${esc(c.telugu)}</div>` : ""}${c.roman ? `<div class="rom">${c.ask ? "“" + esc(c.roman) + "”" : esc(c.roman)}</div>` : ""}
+      <div class="en">${esc(c.english || "")}${c.note && !c.ask ? ` · <span>${esc(c.note)}</span>` : ""}</div></div>
+    <button class="fl-x" aria-label="Close">${icon("x")}</button></div>`;
+  clearTimeout(float.cardTimer); float.cardTimer = setTimeout(hideFloatCard, ms);
+}
+/* "Ask her" sits in the strip above the caption, so it never covers what she's saying. */
+function floatAsk(m) {
+  const win = float.win; if (!win) return;
+  const d = win.document, el = d.getElementById("fl-ask"), prev = d.getElementById("fl-prev");
+  el.innerHTML = `<span class="eyebrow" style="color:var(--accent)">Ask</span><span class="te">${esc(m.telugu)}</span><span class="rom">“${esc(m.roman)}”</span><span class="en">${esc(m.english || "")}</span>`;
+  el.hidden = false; prev.hidden = true;
+  clearTimeout(float.askTimer);
+  float.askTimer = setTimeout(() => { el.hidden = true; prev.hidden = false; }, 25000);
+}
+function hideFloatCard() { const box = float.win?.document.getElementById("fl-card"); if (box) box.innerHTML = ""; }
 
 /* ---------- live: the translation pipeline's WebSocket (subtitles.py) ---------- */
 function wsUrl() { return params.get("ws") || `ws://${location.hostname || "localhost"}:8765`; }
@@ -1097,6 +1246,7 @@ if (params.has("still")) document.head.insertAdjacentHTML("beforeend", "<style>*
     const wait = setInterval(() => { const w = state.session?.words.get(key); if (w) { clearInterval(wait); openWord(key, w.line); } }, 300);
   }
   if (params.get("sheet") === "growth") setTimeout(() => openSheet(LearningProgress()), 1200);
+  if (params.has("floatpreview") && state.session) setTimeout(toggleFloat, 1500);
 })();
 </script>
 </body>
