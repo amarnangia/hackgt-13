@@ -12,7 +12,7 @@ bottom. Weave uses the edges and the space just above the call's buttons. Every 
 | Zone | Where | Size | When it's there |
 |---|---|---|---|
 | Ask her (top) | top center, 16px down | the pill's own width, up to 620px | after a 2 s pause in the talk; stays at least 5 s; leaves once someone has talked for 1.5 s; the question lasts 45 s |
-| Dictionary (left) | middle left, 16px in, vertically centered | 260px wide, as tall as its rows (never past 72px from the top or bottom) | always; the words button hides it |
+| Dictionary (left) | the top-left corner, 16px in, down the whole left edge | 300px wide, the window's height less 16px top and bottom; words fill it and scroll | always; the words button hides it |
 | Word bubbles (float) | rising from just above the translation bubble's right end | 310px wide, as tall as its bubbles | while there are some; each holds 20 s (dims for the last 3) unless kept |
 | Translation bubble | bottom center, right above the orb | up to 700 × 148, fixed | while someone talks; fades 9 s after the last words |
 | Orb | bottom center, 92px up (clear of the call's buttons) | 56px | always; hover it for the words and pictures buttons, ⋯ (the "I speak" switch, Hide) and the status |

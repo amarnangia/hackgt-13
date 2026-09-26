@@ -62,12 +62,14 @@ body[data-part="top"] main { display: inline-block; }
 @keyframes drain { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 
 /* ================= left: the dictionary feed ================= */
-body[data-part="left"] main { padding: 14px 8px 10px; }
+body[data-part="left"] main { height: 100%; display: flex; flex-direction: column; padding: 16px 8px 10px; }
+body[data-part="left"] .dict { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 body[data-part="left"] section + section { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--edge); }
 .head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 0 8px 8px; }
 .topic { font-weight: 800; font-size: 11px; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .rows, .qs { position: relative; display: flex; flex-direction: column; gap: 2px; }
-.rows { max-height: 46vh; overflow-y: auto; scrollbar-width: none; }
+.rows { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; }
+.qs { max-height: 38vh; overflow-y: auto; scrollbar-width: none; }
 .w { position: relative; padding: 7px 40px 7px 10px; border-radius: 12px; transition: background 160ms var(--ease-out); }
 .w:hover { background: var(--fill); }
 .w-top { display: flex; align-items: baseline; gap: 7px; min-width: 0; }

@@ -197,15 +197,15 @@
     const w = innerWidth, h = innerHeight;
     // bottom center: the orb, and the translation bubble right above it
     core.style.bottom = `${ORB_BOTTOM}px`;
-    const capW = Math.min(700, w - 2 * M), capY = h - ORB_BOTTOM - ORB - 12 - CAP_H;
+    const leftW = Math.min(300, w - 2 * M);
+    const capW = Math.max(Math.min(360, w - 2 * M), Math.min(700, w - 2 * (M + leftW + 12))), capY = h - ORB_BOTTOM - ORB - 12 - CAP_H;
     place(frames.captions, (w - capW) / 2, capY, capW, CAP_H);
     menu.style.bottom = `${ORB_BOTTOM + ORB + 12}px`;
     // top center: the "Ask her" pill
     const [tw, th] = size.top;
     place(frames.top, (w - (tw || 620)) / 2, M, tw || 620, th || 1);
-    // middle left: the dictionary feed, centered on the left edge, never reaching the bubble or the pill
-    const lh = Math.min(size.left || 1, h - 2 * (M + 72));
-    place(frames.left, M, (h - lh) / 2, Math.min(260, w - 2 * M), lh);
+    // left: the dictionary feed, from the top-left corner down the whole left edge
+    place(frames.left, M, M, leftW, h - 2 * M);
     // float: word bubbles rising from just above the bubble's right end
     const fw = 310, fh = Math.min(size.float || 1, capY - M - 96);
     place(frames.float, Math.min(w - M - fw, (w + capW) / 2 - fw + 60), capY - 10 - fh, fw, fh);
