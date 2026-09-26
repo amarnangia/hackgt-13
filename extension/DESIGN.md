@@ -11,9 +11,9 @@ along the bottom. Weave stays on the edges and only takes space while it has som
 | Zone | Where | Size | When it's there |
 |---|---|---|---|
 | Dock | top left, 16px in | 48px tall capsule | always (just the orb while hidden) |
-| Questions and words | under the dock (top 74px) | up to 340 × 560, stops above the captions | opened from the dock; opens by itself for "Ask her" |
-| Pictures and meanings | top right, 16px in | 220–300px wide (24% of the window); ends 230px above the bottom, leaving room for your camera tile | only while there are cards; the bottom 28px fades out |
-| Captions | bottom middle, 104px above the bottom (clear of the call's buttons) | up to 780px wide, as tall as the text | while someone talks; fades 9 s after the last words |
+| Questions and words | under the dock (top 78px) | up to 340 × 560, stops above where the caption words sit | opened from the dock |
+| "Ask her" + pictures and meanings | top right, 16px in | 260–340px wide (26% of the window); ends 230px above the bottom, leaving room for your camera tile | only while there's something; "Ask her" is on top and opens this side by itself; the bottom 28px fades out |
+| Captions | bottom middle, 104px above the bottom (clear of the call's buttons) | a fixed 820 × 230 box; the words move inside it, the box never moves | while someone talks; fades 9 s after the last words |
 
 Each panel is its own frame, so it only covers the call where it actually is. The captions frame lets clicks through
 while it's faded out.
@@ -48,14 +48,26 @@ Color by meaning: cyan = connected and "Asked you"/"Request" tags; blue = select
 
 **Menu (⋯).** It's a glass popover under the dock. It holds the two-way "I speak" switch (a segmented control with a gradient for the chosen side) and "Hide Weave ⌥⇧W".
 
+**"Ask her" (top right, in focus).** It's the one thing on screen that asks for attention.
+- A 1.5px conic gradient border turns once every 5 seconds, with a blurred copy behind it as a glow.
+- Violet and cyan light pools in the corners, behind a sparkle badge.
+- Type goes from biggest to smallest: what to say (20px, 800), the Telugu, then the English.
+- A 2px gradient line drains over the 45 seconds before the card leaves.
+- It's drawn only when the question changes, so the border and timer never restart.
+
 **Questions and words.** It's one glass panel, with its sections split by hairlines rather than boxed.
-- "Ask her" is a violet-to-cyan tinted block with a 1px gradient border and a gradient label.
 - "Curious?" answers slide open (grid rows 0fr → 1fr).
 - Words she used get a cyan tint.
 
-**Pictures and meanings.** These are solid glass cards. A kept card gets a blue ring. They fade over their last 8 seconds, then leave.
+**Pictures and meanings.** Pictures are cinematic: the image runs edge to edge with its name over a dark gradient. Meanings have a gradient bar down the left. A kept card gets a blue ring. They fade over their last 8 seconds, then leave.
 
-**Captions.** There's no box. The text sits on a soft radial scrim, `ellipse 52% 60% at 50% 58%`, going from `.74` to transparent, plus a text shadow.
+**Captions.** There's no box: a dark radial pool sits under the words, with the orb's colors drifting low and slow behind it (brighter while someone talks). Each line has a small speaker label (gradient dot + name), her words, then the English at 28px and weight 750.
+- **Drawn in place.** Each line keeps its element and only its text changes. What she's saying right now becomes that line's element when the sentence ends, so nothing flashes.
+- **The draft** (the English guessed so far) is gray and firms up to white in place.
+- **English with no draft** writes itself in from the left, once.
+- **Translating** shows three gradient dots.
+- **When the current line changes height,** it grows or shrinks over 340ms and pushes the line above along with it.
+- **When a line arrives or leaves,** the others glide to their new place (tracked by their bottom edges). The previous line shrinks to 74% at 40% opacity, and the line before that lifts away in 260ms.
 
 ## The orb
 

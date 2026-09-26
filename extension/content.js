@@ -46,16 +46,23 @@
       .right { -webkit-mask-image: linear-gradient(#000 calc(100% - 28px), transparent); mask-image: linear-gradient(#000 calc(100% - 28px), transparent);
               transition: opacity 260ms var(--ease-out), transform 420ms var(--ease-spring), height 420ms var(--ease-spring); }
       .right.empty, .right:not(.open) { opacity: 0; transform: translateX(14px); pointer-events: none; }
-      .captions { transition: height 260ms var(--ease-spring); }
       .captions.idle { pointer-events: none; }
       .hidden iframe { opacity: 0 !important; transform: scale(.98) !important; pointer-events: none !important; visibility: hidden;
               transition: opacity 180ms var(--ease-in), transform 220ms var(--ease-in), visibility 0s linear 220ms !important; }
 
       /* ---- dock ---- */
-      .dock { position: fixed; z-index: ${Z + 2}; top: 16px; left: 16px; height: 48px; padding: 6px; display: flex; align-items: center; gap: 2px;
+      .dock { position: fixed; z-index: ${Z + 2}; top: 16px; left: 16px; height: 52px; padding: 6px; display: flex; align-items: center; gap: 2px;
               border-radius: 24px; background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
               box-shadow: var(--inner), var(--shadow); font: 600 13px/1 var(--font); color: var(--text); -webkit-font-smoothing: antialiased;
               transition: padding 420ms var(--ease-spring); }
+      .dock::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+              background: conic-gradient(from var(--weave-ang), rgba(34,211,238,0) 0deg, rgba(34,211,238,.9) 60deg, rgba(139,92,246,.9) 120deg, rgba(79,140,255,0) 200deg, rgba(79,140,255,0) 360deg);
+              -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+              opacity: .35; animation: weave-ang 7s linear infinite; transition: opacity 600ms var(--ease-out); }
+      .dock[data-state="listening"]::before, .dock[data-state="speaking"]::before { opacity: 1; animation-duration: 3s; }
+      .dock[data-state="thinking"]::before { opacity: .8; animation-duration: 1.6s; }
+      .dock[data-state="off"]::before { opacity: 0; }
+      @keyframes weave-ang { to { --weave-ang: 360deg; } }
       .status { max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap; color: var(--text-2); font-weight: 600; letter-spacing: -.005em;
               transition: max-width 420ms var(--ease-spring), opacity 200ms var(--ease-out), padding 420ms var(--ease-spring); }
       .dock:hover .status, .dock.peek .status { max-width: 240px; opacity: 1; padding: 0 8px 0 6px; }
@@ -79,8 +86,8 @@
       @keyframes tip { from { opacity: 0; transform: translate(-50%, -3px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
       /* ---- the orb ---- */
-      .orb-btn { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 18px; flex: none; }
-      .orb { position: relative; width: 28px; height: 28px; transition: transform 520ms var(--ease-spring), filter 420ms var(--ease-out), opacity 420ms var(--ease-out); }
+      .orb-btn { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 18px; flex: none; }
+      .orb { position: relative; width: 32px; height: 32px; transition: transform 520ms var(--ease-spring), filter 420ms var(--ease-out), opacity 420ms var(--ease-out); }
       .orb i { position: absolute; inset: 0; border-radius: 50%; pointer-events: none; }
       .core { background: conic-gradient(from 0deg, #22d3ee, #4f8cff, #8b5cf6, #4f8cff, #22d3ee); animation: spin 14s linear infinite; }
       .shine { background: radial-gradient(circle at 34% 28%, rgba(255,255,255,.85), rgba(255,255,255,0) 36%),
@@ -167,6 +174,9 @@
     </div>`;
   document.documentElement.append(host);
 
+  // The dock's turning edge needs an animatable angle; custom properties can only be registered on the page itself.
+  try { CSS.registerProperty({ name: "--weave-ang", syntax: "<angle>", inherits: false, initialValue: "0deg" }); } catch {}
+
   // The geometric face from the extension, for the dock (the panels load it themselves). Falls back to the system font.
   try {
     const face = new FontFace("Weave Manrope", `url(${url("fonts/manrope.woff2")})`, { weight: "200 800" });
@@ -177,24 +187,25 @@
   const wrap = $(".wrap"), dock = $(".dock"), orb = $(".orb"), menu = $(".menu");
   const frames = { left: $(".left"), right: $(".right"), captions: $(".captions") };
   const buttons = { left: $('[data-panel="left"]'), right: $('[data-panel="right"]'), menu: $('[data-panel="menu"]') };
-  const size = { captions: 0, right: 0 };
+  const size = { right: 0 };
+  const CAPTIONS_H = 230;
   const ui = { shown: true, left: false, right: true, roles: null, state: "off", connected: false };
 
   // ---- layout: edges only; the middle of the call stays clear ----
   function layout() {
     const w = innerWidth, h = innerHeight, m = 16;
     const controls = 104;                                   // the call's own buttons along the bottom
-    const capWidth = Math.min(780, w - 2 * m);
-    const capTop = h - controls - size.captions;
+    const capWidth = Math.min(820, w - 2 * m);
+    const capTop = h - controls - CAPTIONS_H;               // a fixed box: the words move inside it, the frame never does
     const top = m + 48 + 10;                                // under the dock
     const leftWidth = Math.min(340, w - 2 * m);
-    const leftHeight = Math.max(220, Math.min(560, (size.captions ? capTop : h - controls) - top - 12));
-    const rightWidth = Math.max(220, Math.min(300, Math.round(w * 0.24)));
+    const leftHeight = Math.max(220, Math.min(560, h - controls - 150 - top));   // stops above where the caption words sit
+    const rightWidth = Math.max(260, Math.min(340, Math.round(w * 0.26)));
     const rightMax = h - controls - 230;                    // leaves the bottom-right corner for your own camera tile
     Object.assign(frames.left.style, { left: `${m}px`, top: `${top}px`, width: `${leftWidth}px`, height: `${leftHeight}px` });
     Object.assign(frames.right.style, { right: `${m}px`, top: `${m}px`, width: `${rightWidth}px`, height: `${Math.max(1, Math.min(rightMax, size.right))}px` });
     Object.assign(frames.captions.style, { left: `${Math.round((w - capWidth) / 2)}px`, width: `${capWidth}px`,
-      top: `${capTop}px`, height: `${Math.max(1, size.captions)}px` });
+      top: `${capTop}px`, height: `${CAPTIONS_H}px` });
     const r = buttons.menu.getBoundingClientRect();
     menu.style.left = `${Math.max(m, Math.round(r.right - 232))}px`;
   }
@@ -248,6 +259,7 @@
     if (state === ui.state) return;
     ui.state = state;
     orb.dataset.state = state;
+    dock.dataset.state = state;
     clearInterval(ampTimer);
     if (state === "speaking") ampTimer = setInterval(() => { amp += (Math.random() - amp) * 0.55; orb.style.setProperty("--amp", amp.toFixed(3)); }, 110);
   }
@@ -256,9 +268,9 @@
   addEventListener("message", (e) => {
     const m = e.data;
     if (!m || m.source !== "weave-panel") return;
-    if (m.kind === "height" && (m.part === "captions" || m.part === "right")) {
-      size[m.part] = Math.max(0, Math.min(m.part === "captions" ? 320 : 2000, Math.ceil(m.height)));
-      if (m.part === "right") frames.right.classList.toggle("empty", !size.right);
+    if (m.kind === "height" && m.part === "right") {
+      size.right = Math.max(0, Math.min(2000, Math.ceil(m.height)));
+      frames.right.classList.toggle("empty", !size.right);
       layout();
     } else if (m.kind === "idle") {
       frames.captions.classList.toggle("idle", !!m.idle);
@@ -270,7 +282,7 @@
       ui.roles = m.roles;
       if (menu.classList.contains("open")) renderMenu();
     } else if (m.kind === "attention") {
-      if (m.part === "left" && m.what === "ask") setPanel("left", true);         // "Ask her" is worth opening for
+      if (m.part === "right" && m.what === "ask") setPanel("right", true);       // "Ask her" is worth opening for
       else if (m.part === "left" && !ui.left) buttons.left.classList.add("new");
       else if (m.part === "right" && !ui.right) buttons.right.classList.add("new");
     }
