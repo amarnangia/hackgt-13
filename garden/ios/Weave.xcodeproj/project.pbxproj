@@ -7,30 +7,42 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		09F58826BC32F021165C3032 /* InstrumentSerif-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 650D512EAA56E849A339811F /* InstrumentSerif-Regular.ttf */; };
 		100801F404358041FF508128 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A2CFF37231C6B3F01E8B6B /* WidgetViews.swift */; };
+		16618DB11C48930678FDC278 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = E64F318893813C3BFA5B8693 /* OFL.txt */; };
 		1865F70CDC909CB5A2E93E57 /* GardenClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA49E9E63150F76191F55B2E /* GardenClient.swift */; };
 		24F04E9B59E44F183F598748 /* sample.json in Resources */ = {isa = PBXBuildFile; fileRef = C4F2997DAF5168400429633D /* sample.json */; };
 		3458F1CBD09AB15D9670A5DC /* WordDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55E46919140FA05450F1135F /* WordDetail.swift */; };
+		3D4831DF0CF0840085F0336E /* InstrumentSerif-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 650D512EAA56E849A339811F /* InstrumentSerif-Regular.ttf */; };
+		3F157918AD32F297E5155C2B /* InstrumentSerif-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FC15D85A392CEE51F14A522C /* InstrumentSerif-Italic.ttf */; };
 		40A2585CC84434804EDA4B20 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE2F89990A6D40DC02179E3 /* Models.swift */; };
+		4E4257730C11162EDCFA9A5F /* BricolageGrotesque-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E3EC970DD6DACF4F206B8872 /* BricolageGrotesque-Variable.ttf */; };
+		506C13AA0795C40B5229B0EA /* BricolageGrotesque-Variable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E3EC970DD6DACF4F206B8872 /* BricolageGrotesque-Variable.ttf */; };
 		516F533E3E8C2DA7F4779BF7 /* TodayTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E91409CACE3964B2C0D41D9 /* TodayTab.swift */; };
 		555A260D10302DF8A1E90F90 /* GardenClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA49E9E63150F76191F55B2E /* GardenClient.swift */; };
 		6E43BD44B6179A7011385FC9 /* WeaveWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CE707959FBBB1B39AABC7C /* WeaveWidget.swift */; };
 		70640A5ECA2120A27B4BC257 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A2CFF37231C6B3F01E8B6B /* WidgetViews.swift */; };
 		7BD8917337D00D8CB5E47F3D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FF31E4BA926D699E444FA671 /* Assets.xcassets */; };
 		7EFD156CE697A16537541064 /* Starters.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFD0C7A52A4153505A102159 /* Starters.swift */; };
+		80341B234F30EF8593B69373 /* TiroTelugu-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5F95DA9382AD876D99A7C0C0 /* TiroTelugu-Italic.ttf */; };
 		804531FF46F64CB5FE98492B /* Starters.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFD0C7A52A4153505A102159 /* Starters.swift */; };
+		805E275C37C0ABA3BFF765D2 /* InstrumentSerif-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FC15D85A392CEE51F14A522C /* InstrumentSerif-Italic.ttf */; };
 		8E533B26B4DA0102C00490FB /* WidgetGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85C41142AB362B5CC3AE2606 /* WidgetGallery.swift */; };
 		8FAFD0767B530BAD38B8B582 /* ProgressTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DA09A50381E34BF17C73603 /* ProgressTab.swift */; };
+		92B6196FDB3E494107D293B4 /* TiroTelugu-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 040AB7C3E6E0F498185BA4B0 /* TiroTelugu-Regular.ttf */; };
 		93ABD8F146F9E4B013C496A1 /* sample.json in Resources */ = {isa = PBXBuildFile; fileRef = C4F2997DAF5168400429633D /* sample.json */; };
+		977FE15CF9D89D6CCDA44D1B /* TiroTelugu-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 040AB7C3E6E0F498185BA4B0 /* TiroTelugu-Regular.ttf */; };
 		AEA434A867EBA8CBAAACB941 /* WeaveWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1DEE5E944411384A95F20313 /* WeaveWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C6E1C67FF1B41ED9B2AB4493 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6265F4E61DEC63A2D3490E48 /* Theme.swift */; };
 		CA37E64AEB5C4B36B2A55870 /* WordsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74C01A95A16A7AFF840DE43E /* WordsTab.swift */; };
+		CC13B6774BDD2B5A0B40455E /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = E64F318893813C3BFA5B8693 /* OFL.txt */; };
 		CE6015C3C12AF0CF15A21999 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE2F89990A6D40DC02179E3 /* Models.swift */; };
 		DBAB1F7FC2C66D6B92F1CEE5 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6265F4E61DEC63A2D3490E48 /* Theme.swift */; };
 		DCAD173593896CE073393027 /* GardenModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2CFCFE8EFB0111925827FFE /* GardenModel.swift */; };
 		EDDA4825BA7D70C23331097C /* AddWidgetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8639B12146483969622FD4DD /* AddWidgetTests.swift */; };
 		F4514ED754A76F7D724D692B /* WeaveApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23D82F8D87E320B4DCC5A459 /* WeaveApp.swift */; };
 		FB5BC11F6127A4556B980964 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2456D6508AC6B52E4F48356E /* SettingsView.swift */; };
+		FC88BF07F0A18DCE08E0F292 /* TiroTelugu-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5F95DA9382AD876D99A7C0C0 /* TiroTelugu-Italic.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,6 +77,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		040AB7C3E6E0F498185BA4B0 /* TiroTelugu-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TiroTelugu-Regular.ttf"; sourceTree = "<group>"; };
 		0EE2F89990A6D40DC02179E3 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		16A2CFF37231C6B3F01E8B6B /* WidgetViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetViews.swift; sourceTree = "<group>"; };
 		16BB7E3510DC13AC51A5EAF7 /* WeaveWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WeaveWidget.entitlements; sourceTree = "<group>"; };
@@ -73,7 +86,9 @@
 		23D82F8D87E320B4DCC5A459 /* WeaveApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeaveApp.swift; sourceTree = "<group>"; };
 		2456D6508AC6B52E4F48356E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		55E46919140FA05450F1135F /* WordDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordDetail.swift; sourceTree = "<group>"; };
+		5F95DA9382AD876D99A7C0C0 /* TiroTelugu-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "TiroTelugu-Italic.ttf"; sourceTree = "<group>"; };
 		6265F4E61DEC63A2D3490E48 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		650D512EAA56E849A339811F /* InstrumentSerif-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "InstrumentSerif-Regular.ttf"; sourceTree = "<group>"; };
 		684E6470AC706B79CD69A77D /* Weave.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Weave.entitlements; sourceTree = "<group>"; };
 		74C01A95A16A7AFF840DE43E /* WordsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WordsTab.swift; sourceTree = "<group>"; };
 		777A0BC4EEA3784608A5BC2E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -88,6 +103,9 @@
 		C4F2997DAF5168400429633D /* sample.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = sample.json; sourceTree = "<group>"; };
 		CA49E9E63150F76191F55B2E /* GardenClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenClient.swift; sourceTree = "<group>"; };
 		CFD0C7A52A4153505A102159 /* Starters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Starters.swift; sourceTree = "<group>"; };
+		E3EC970DD6DACF4F206B8872 /* BricolageGrotesque-Variable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "BricolageGrotesque-Variable.ttf"; sourceTree = "<group>"; };
+		E64F318893813C3BFA5B8693 /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
+		FC15D85A392CEE51F14A522C /* InstrumentSerif-Italic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "InstrumentSerif-Italic.ttf"; sourceTree = "<group>"; };
 		FF31E4BA926D699E444FA671 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -113,6 +131,19 @@
 			);
 			sourceTree = "<group>";
 		};
+		2F5D536FAC13639917726F86 /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				E3EC970DD6DACF4F206B8872 /* BricolageGrotesque-Variable.ttf */,
+				FC15D85A392CEE51F14A522C /* InstrumentSerif-Italic.ttf */,
+				650D512EAA56E849A339811F /* InstrumentSerif-Regular.ttf */,
+				E64F318893813C3BFA5B8693 /* OFL.txt */,
+				5F95DA9382AD876D99A7C0C0 /* TiroTelugu-Italic.ttf */,
+				040AB7C3E6E0F498185BA4B0 /* TiroTelugu-Regular.ttf */,
+			);
+			path = Fonts;
+			sourceTree = "<group>";
+		};
 		5142891431676226D310FF43 /* WeaveUITests */ = {
 			isa = PBXGroup;
 			children = (
@@ -130,6 +161,7 @@
 				CFD0C7A52A4153505A102159 /* Starters.swift */,
 				6265F4E61DEC63A2D3490E48 /* Theme.swift */,
 				16A2CFF37231C6B3F01E8B6B /* WidgetViews.swift */,
+				2F5D536FAC13639917726F86 /* Fonts */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -272,6 +304,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				7BD8917337D00D8CB5E47F3D /* Assets.xcassets in Resources */,
+				4E4257730C11162EDCFA9A5F /* BricolageGrotesque-Variable.ttf in Resources */,
+				805E275C37C0ABA3BFF765D2 /* InstrumentSerif-Italic.ttf in Resources */,
+				3D4831DF0CF0840085F0336E /* InstrumentSerif-Regular.ttf in Resources */,
+				CC13B6774BDD2B5A0B40455E /* OFL.txt in Resources */,
+				80341B234F30EF8593B69373 /* TiroTelugu-Italic.ttf in Resources */,
+				92B6196FDB3E494107D293B4 /* TiroTelugu-Regular.ttf in Resources */,
 				24F04E9B59E44F183F598748 /* sample.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -280,6 +318,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				506C13AA0795C40B5229B0EA /* BricolageGrotesque-Variable.ttf in Resources */,
+				3F157918AD32F297E5155C2B /* InstrumentSerif-Italic.ttf in Resources */,
+				09F58826BC32F021165C3032 /* InstrumentSerif-Regular.ttf in Resources */,
+				16618DB11C48930678FDC278 /* OFL.txt in Resources */,
+				FC88BF07F0A18DCE08E0F292 /* TiroTelugu-Italic.ttf in Resources */,
+				977FE15CF9D89D6CCDA44D1B /* TiroTelugu-Regular.ttf in Resources */,
 				93ABD8F146F9E4B013C496A1 /* sample.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

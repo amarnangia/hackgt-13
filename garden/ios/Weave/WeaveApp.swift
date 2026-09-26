@@ -12,6 +12,7 @@ struct WeaveApp: App {
             }
             .environmentObject(model)
             .tint(Theme.accent)
+            .preferredColorScheme(.dark)
             .onChange(of: phase, initial: true) { _, p in
                 if p == .active { model.start() } else { model.stop() }
             }
@@ -29,10 +30,22 @@ struct RootView: View {
         // Solid tab bar with a hairline, instead of the translucent default that tints with the content behind it.
         let bar = UITabBarAppearance()
         bar.configureWithOpaqueBackground()
-        bar.backgroundColor = UIColor(Theme.bg)
+        bar.backgroundColor = UIColor(Theme.bgDeep)
         bar.shadowColor = UIColor(Theme.border)
+        for item in [bar.stackedLayoutAppearance, bar.inlineLayoutAppearance, bar.compactInlineLayoutAppearance] {
+            item.normal.iconColor = UIColor(Theme.muted)
+            item.normal.titleTextAttributes = [.foregroundColor: UIColor(Theme.muted), .font: UIFont(name: "InstrumentSerif-Regular", size: 12) ?? .systemFont(ofSize: 11)]
+            item.selected.titleTextAttributes = [.foregroundColor: UIColor(Theme.gold), .font: UIFont(name: "InstrumentSerif-Regular", size: 12) ?? .systemFont(ofSize: 11)]
+        }
         UITabBar.appearance().standardAppearance = bar
         UITabBar.appearance().scrollEdgeAppearance = bar
+        // Serif titles over the loom, no bar background.
+        let nav = UINavigationBarAppearance()
+        nav.configureWithTransparentBackground()
+        nav.largeTitleTextAttributes = [.foregroundColor: UIColor(Theme.ink), .font: UIFont(name: "InstrumentSerif-Regular", size: 44) ?? .systemFont(ofSize: 34)]
+        nav.titleTextAttributes = [.foregroundColor: UIColor(Theme.ink), .font: UIFont(name: "InstrumentSerif-Regular", size: 20) ?? .systemFont(ofSize: 17)]
+        UINavigationBar.appearance().standardAppearance = nav
+        UINavigationBar.appearance().scrollEdgeAppearance = nav
     }
 
     var body: some View {
@@ -48,7 +61,7 @@ struct RootView: View {
             WordDetail(plant: model.snapshot.plant(plant.phrase) ?? plant)
                 .presentationDetents([.medium, .large])
                 .presentationCornerRadius(24)
-                .presentationBackground(Theme.bg)
+                .presentationBackground { Loom(animated: false) }
         }
         .overlay(alignment: .top) {
             if let p = model.celebration {
@@ -76,17 +89,17 @@ struct KnownBanner: View {
     let plant: Plant
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "checkmark").font(.system(size: 13, weight: .bold)).foregroundStyle(Theme.accent)
-                .frame(width: 30, height: 30).background(Theme.accent.opacity(0.12), in: .rect(cornerRadius: 9))
+            Image(systemName: "checkmark").font(.system(size: 13, weight: .bold)).foregroundStyle(Color(hex: 0x1a1208))
+                .frame(width: 30, height: 30).background(Theme.zari, in: .rect(cornerRadius: 9))
             VStack(alignment: .leading, spacing: 1) {
-                Text("\(plant.phrase) is now known").font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.ink)
-                Text("No more subtitles for this one").font(.system(size: 13)).foregroundStyle(Theme.ink2)
+                (Text(plant.phrase).font(Fonts.telugu(16)).foregroundStyle(Theme.zari) + Text(" is now known").font(Fonts.ui(15, .semibold)).foregroundColor(Theme.ink))
+                Text("No more subtitles for this one").font(Fonts.ui(13)).foregroundStyle(Theme.ink2)
             }
             Spacer(minLength: 0)
         }
         .padding(14)
-        .background(Theme.surface, in: .rect(cornerRadius: Theme.radius))
-        .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.border, lineWidth: 1))
+        .background(.ultraThinMaterial, in: .rect(cornerRadius: Theme.radius))
+        .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.silkBorder, lineWidth: 1))
         .padding(.horizontal, 16)
         .padding(.top, 4)
     }

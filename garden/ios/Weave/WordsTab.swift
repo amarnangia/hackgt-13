@@ -19,7 +19,7 @@ struct WordsTab: View {
                     segmented(snap)
                     if words.isEmpty {
                         Panel { Text(query.isEmpty ? "Words you hear on calls show up here." : "No words match “\(query)”.")
-                            .font(.system(size: 15)).foregroundStyle(Theme.ink2) }
+                            .font(Fonts.ui(15)).foregroundStyle(Theme.ink2) }
                     } else {
                         Panel(padding: 0) {
                             ForEach(Array(words.enumerated()), id: \.element.id) { i, p in
@@ -34,9 +34,8 @@ struct WordsTab: View {
                 .animation(.easeOut(duration: 0.2), value: filter)
             }
             .scrollIndicators(.hidden)
-            .background(Theme.bg)
+            .background(Loom())
             .navigationTitle("Words")
-            .toolbarBackground(Theme.bg, for: .navigationBar)
             .searchable(text: $query, prompt: "Telugu or English")
         }
     }
@@ -49,15 +48,15 @@ struct WordsTab: View {
                 let on = filter == stage
                 Button { filter = stage } label: {
                     HStack(spacing: 5) {
-                        Text(title).font(.system(size: 13, weight: .semibold))
-                        Text("\(count)").font(.system(size: 12, weight: .medium)).monospacedDigit().foregroundStyle(Theme.muted)
+                        Text(title).font(Fonts.ui(13, .semibold))
+                        Text("\(count)").font(Fonts.ui(12, .medium)).monospacedDigit().foregroundStyle(Theme.muted)
                     }
                     .foregroundStyle(on ? Theme.ink : Theme.ink2)
                     .frame(maxWidth: .infinity).frame(height: 32)
                     .background {
                         if on {
-                            RoundedRectangle(cornerRadius: 9).fill(Theme.surface)
-                                .overlay(RoundedRectangle(cornerRadius: 9).strokeBorder(Theme.border, lineWidth: 1))
+                            RoundedRectangle(cornerRadius: 9).fill(Color.white.opacity(0.09))
+                                .overlay(RoundedRectangle(cornerRadius: 9).strokeBorder(stage?.color.opacity(0.6) ?? Theme.gold.opacity(0.5), lineWidth: 1))
                                 .matchedGeometryEffect(id: "pill", in: pill)
                         }
                     }
@@ -68,7 +67,8 @@ struct WordsTab: View {
             }
         }
         .padding(3)
-        .background(Theme.raised, in: .rect(cornerRadius: 12))
+        .background(Theme.surface, in: .rect(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.sheen, lineWidth: 1))
         .animation(.snappy(duration: 0.25), value: filter)
     }
 }
@@ -78,15 +78,15 @@ struct WordRow: View {
     var body: some View {
         HStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 2) {
-                Text(plant.phrase).font(.system(size: 17, weight: .semibold)).tracking(-0.2).foregroundStyle(Theme.ink)
+                Text(plant.phrase).font(Fonts.telugu(19)).foregroundStyle(Theme.ink)
                 Text([plant.romanIfUseful, plant.english].compactMap { $0 }.joined(separator: " · "))
-                    .font(.system(size: 13)).foregroundStyle(Theme.ink2).lineLimit(1)
+                    .font(Fonts.ui(13)).foregroundStyle(Theme.ink2).lineLimit(1)
             }
             Spacer(minLength: 8)
             VStack(alignment: .trailing, spacing: 6) {
                 HStack(spacing: 5) {
-                    if plant.thirsty { Image(systemName: "arrow.uturn.backward").font(.system(size: 9, weight: .bold)).foregroundStyle(Theme.accent) }
-                    Text(plant.stageEnum.label).font(.system(size: 11, weight: .semibold)).foregroundStyle(plant.stageEnum == .bloom ? Theme.accent : Theme.muted)
+                    if plant.thirsty { Image(systemName: "arrow.uturn.backward").font(.system(size: 9, weight: .bold)).foregroundStyle(Theme.vermilion) }
+                    Text(plant.stageEnum.label).font(Fonts.ui(11, .semibold)).foregroundStyle(plant.stageEnum.color)
                 }
                 GrowthBar(growth: plant.growth, height: 3).frame(width: 56)
             }

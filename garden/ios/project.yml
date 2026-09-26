@@ -22,6 +22,7 @@ targets:
       path: Weave/Info.plist
       properties:
         CFBundleDisplayName: Weave
+        UIAppFonts: [InstrumentSerif-Regular.ttf, InstrumentSerif-Italic.ttf, BricolageGrotesque-Variable.ttf, TiroTelugu-Regular.ttf, TiroTelugu-Italic.ttf]
         UILaunchScreen:
           UIColorName: ""
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
@@ -52,6 +53,7 @@ targets:
       path: WeaveWidget/Info.plist
       properties:
         CFBundleDisplayName: Weave
+        UIAppFonts: [InstrumentSerif-Regular.ttf, InstrumentSerif-Italic.ttf, BricolageGrotesque-Variable.ttf, TiroTelugu-Regular.ttf, TiroTelugu-Italic.ttf]
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
         NSAppTransportSecurity:

@@ -38,6 +38,14 @@
 	</dict>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Weave reads your garden from the Mac running the call translator.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>InstrumentSerif-Regular.ttf</string>
+		<string>InstrumentSerif-Italic.ttf</string>
+		<string>BricolageGrotesque-Variable.ttf</string>
+		<string>TiroTelugu-Regular.ttf</string>
+		<string>TiroTelugu-Italic.ttf</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
