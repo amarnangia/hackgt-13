@@ -185,7 +185,7 @@ NAMES = {"cow": "Cow", "tulsi": "Tulsi (holy basil)", "neem": "Neem tree", "rang
          "steel_tumbler": "Steel tumbler (davara)", "charpoy": "Charpoy", "jhoola": "Swing (uyyala)", "monsoon": "Monsoon rains",
          "indian_train": "Train", "rtc_bus": "RTC bus", "rice": "Rice (annam)", "payasam": "Payasam", "bobbatlu": "Bobbatlu",
          "prasadam": "Prasadam", "pulao": "Pulao", "curry_leaves": "Curry leaves", "ragi": "Ragi", "aarti": "Aarti",
-         "murukku": "Murukku (jantikalu)", "village_market": "Market (santha)", "indian_village": "Village (ooru)",
+         "murukku": "Murukku (jantikalu)", "ariselu": "Ariselu", "village_market": "Market (santha)", "indian_village": "Village (ooru)",
          "paddy_field": "Paddy field (polam)", "dhoti": "Pancha (dhoti)", "chutney": "Pachadi (chutney)", "vada": "Vada (garelu)",
          "coconut_water": "Tender coconut", "paneer_curry": "Paneer curry", "chole": "Chole", "halwa": "Halwa",
          "indian_pickle": "Pickle", "thali": "Full meal (bhojanam)", "curry": "Curry (kura)", "silk_saree": "Pattu saree",

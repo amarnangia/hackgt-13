@@ -47,14 +47,21 @@ class IndicTranslator:
         prepared = self.lexicon.substitute(text, lang) if use_lexicon else text
         # IndicTrans2 is trained on single sentences and silently drops the second of two, so split and batch.
         sentences = [s for s in re.split(r"(?<=[.?!।])\s+", prepared.strip()) if s]
+        # A sentence the word list already turned fully into English ("sweetheart, are you doing well?") must not go
+        # through the model: it expects Telugu and garbled it ("Sweetheart is you doing well, having you eat").
+        english_already = [not re.search(r"[\u0900-\u0DFF]", s) for s in sentences]
+        to_translate = [s for s, done in zip(sentences, english_already) if not done]
+        if not to_translate:
+            return " ".join(s[:1].upper() + s[1:] for s in sentences)
         with self.lock:  # IndicProcessor deadlocks when two threads call it at once, so it stays inside the lock too
-            batch = self.ip.preprocess_batch(sentences, src_lang=src, tgt_lang="eng_Latn")
+            batch = self.ip.preprocess_batch(to_translate, src_lang=src, tgt_lang="eng_Latn")
             inputs = self.tok(batch, return_tensors="pt", padding=True, truncation=True).to(self.device)
             with self.torch.no_grad():
                 # Greedy decoding: the same input always gives the same English.
                 out = self.model.generate(**inputs, num_beams=1, do_sample=False, max_new_tokens=128, use_cache=True)
             decoded = self.tok.batch_decode(out, skip_special_tokens=True, clean_up_tokenization_spaces=True)
-            return " ".join(self.ip.postprocess_batch(decoded, lang="eng_Latn"))
+            translated = iter(self.ip.postprocess_batch(decoded, lang="eng_Latn"))
+        return " ".join((s[:1].upper() + s[1:]) if done else next(translated) for s, done in zip(sentences, english_already))
 
 
 class LocalTranslator:

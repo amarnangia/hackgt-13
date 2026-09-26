@@ -8,11 +8,13 @@ import asyncio
 import atexit
 import http
 import json
+import mimetypes
 import os
 import re
 import subprocess
 import threading
 import time
+import urllib.parse
 import wave
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, TimeoutError, wait
 
@@ -67,14 +69,18 @@ def ws_handler(conn):
 def serve_overlay(conn, request):
     if request.headers.get("Upgrade", "").lower() == "websocket":
         return None
-    path = request.path.split("?")[0]
-    if path.startswith("/images/"):  # pictures for the pop-ups
-        file = os.path.realpath(os.path.join(HERE, path.lstrip("/")))
-        if not file.startswith(os.path.join(HERE, "images") + os.sep) or not os.path.isfile(file):
-            return conn.respond(http.HTTPStatus.NOT_FOUND, "not found")
-        body = open(file, "rb").read()
-        return Response(http.HTTPStatus.OK, "OK", Headers([("Content-Type", "image/jpeg"), ("Content-Length", str(len(body))),
-                                                            ("Cache-Control", "max-age=3600"), ("Connection", "close")]), body)
+    path = urllib.parse.unquote(request.path.split("?")[0])
+    for folder in ("images", "calls"):  # pop-up pictures; call story pages, the family dictionary and voice clips
+        if path.startswith(f"/{folder}/"):
+            file = os.path.realpath(os.path.join(HERE, path.lstrip("/")))
+            if not file.startswith(os.path.join(HERE, folder) + os.sep) or not os.path.isfile(file):
+                return conn.respond(http.HTTPStatus.NOT_FOUND, "not found")
+            body = open(file, "rb").read()
+            kind = mimetypes.guess_type(file)[0] or "application/octet-stream"
+            if kind.startswith("text/"):
+                kind += "; charset=utf-8"
+            return Response(http.HTTPStatus.OK, "OK", Headers([("Content-Type", kind), ("Content-Length", str(len(body))),
+                                                                ("Cache-Control", "no-cache"), ("Connection", "close")]), body)
     with open(os.path.join(HERE, "overlay.html"), "rb") as f:
         body = f.read()
     # Build the response directly: conn.respond() adds text/plain headers, and setting them again
@@ -118,18 +124,26 @@ class Captioner:
         self.sampler = None                   # collects the caller's voice for cloning
         self.decider = None                   # Laya, set by listen()
         self.pictures = None                  # picture pop-ups (pictures.py), set by listen()
+        self.recorder = None                  # the family story keeper (calls.py)
+        self.prompter = None                  # live "ask her" prompts (prompts.py)
         self.speak_all = False                # --speak all: also voice lines she said (mostly) in English
         self.questions_only = False           # --speak questions: voice only questions/requests to you
         self.lexicon = Lexicon()
         self.lang = lang
         self.backup = None  # Muse Spark, created if the local translator fails mid-call
         self.progress = Progress(self.lexicon, lang, learn_after=learn_after)  # words kept in Telugu
+        self.known_at_start = {i for i in self.progress.entries if self.progress.known(i)}  # for the story page
+        self.heard_at_start = dict(self.progress.heard)
         self.order_lock = threading.Lock()    # translations finish out of order; the voice must not
         self.next_to_voice, self.finished_lines = 1, {}
 
     def on_event(self, ev):
         if self.sampler:
             self.sampler.on_event(ev)
+        if self.recorder:
+            self.recorder.on_event(ev)
+        if self.prompter:
+            self.prompter.on_event(ev)
         kind = ev.get("type")
         if kind == "speechStart":
             self.partial, self.done = "", 0
@@ -170,6 +184,7 @@ class Captioner:
         self.next_id += 1
         seg_id = self.next_id
         marks = self.latency.piece_cut(end_offset)
+        start_s, end_s = self.recorder.span(marks["audio_ms"]) if self.recorder else (None, None)
         share = indic_share(sentence)
         # english: grandma said it in English, you understood it -> show as-is, no translation, no voice
         # mixed:   mostly English with a Telugu word or two -> translated subtitle, no voice
@@ -196,8 +211,14 @@ class Captioner:
             decision = self.decider(full_english) if self.decider and not english.startswith("(") else None
             broadcast({"type": "details", "id": seg_id,
                        "intent": decision["intent"] if decision else None, "cards": self._cards(sentence, decision)})
-            self._picture(seg_id, hits, full_english, known_before)
+            picture = self._picture(seg_id, hits, full_english, known_before)
             row["laya"] = decision["seconds"] if decision else None
+            intent = decision["intent"] if decision else None
+            if self.recorder:
+                self.recorder.add_line(id=seg_id, telugu=sentence, english=english, english_full=full_english, route=route,
+                                       kept=kept, intent=intent, picture=picture, start_s=start_s, end_s=end_s)
+            if self.prompter and route != "english":
+                self.prompter.on_line(sentence, full_english, intent, route)
             with self.order_lock:
                 self.finished_lines[seg_id] = (english, marks, row, decision, route)
                 while self.next_to_voice in self.finished_lines:
@@ -243,16 +264,17 @@ class Captioner:
         """Pop up a picture of the thing in this line the grandkid most likely doesn't know (Laya picks).
         Words they knew before this line don't need one (so: a picture on first mention, the Telugu word after)."""
         if not self.pictures or english.startswith("("):
-            return
+            return None
         try:
             key = self.pictures.pick(english, hits, known=lambda lexicon_id: lexicon_id in known_before)
             card = self.pictures.card(key) if key else None
         except Exception as e:
             print(f"Picture lookup failed: {type(e).__name__}: {e}", flush=True)
-            return
+            return None
         if card:
             broadcast({"type": "picture", "id": seg_id, **card})
             print(f"  [picture: {card['name']}]", flush=True)
+        return card
 
     def _fallback_translate(self, sentence, error):
         """The local translator died mid-call (e.g. its process was stopped): use Muse Spark for this line."""
@@ -293,7 +315,7 @@ class Captioner:
             why = "" if voiced else "voice was behind"
         if not voiced:
             self.latency.log_row(row)
-        tag = f"  [voice{': question' if asks else ''}]" if voiced else (f"  [no voice: {why}]" if why else "")
+        tag = f"  [voice{': ' + decision['intent'] if asks else ''}]" if voiced else (f"  [no voice: {why}]" if why else "")
         print(f"{LatencyTracker.line(row)} {row['text']}  ->  {english}{tag}", flush=True)
 
 
@@ -350,14 +372,22 @@ def make_audio(args, loop, target):
             pcm = np.concatenate(buf)
             buf.clear()
             sampler = target.get("sampler")
+            recorder = target.get("recorder")
             if target.get("fresh"):
                 target["fresh"] = False
                 target["latency"].audio_started(time.monotonic() - CHUNK_MS / 1000)  # frame start, not end
                 if sampler:
                     sampler.new_session()
+                if recorder:
+                    recorder.new_session()
             if sampler:
                 sampler.add_frame(pcm)  # same audio Muse hears, to clone the caller's voice
-            loop.call_soon_threadsafe(target["q"].put_nowait, pcm.tobytes())
+            if recorder:
+                recorder.add_frame(pcm)  # her side of the call, for the story page
+            try:
+                loop.call_soon_threadsafe(target["q"].put_nowait, pcm.tobytes())
+            except RuntimeError:
+                pass  # the app is shutting down (event loop closed) but the audio device is still delivering
 
     return AudioLoop(in_dev, out_dev, on_audio=on_audio, source=source)
 
@@ -377,6 +407,23 @@ async def run(args):
         await listen(args, captioner)
     finally:  # also on Ctrl+C
         print("\n" + captioner.latency.summary() + "\n(per-sentence log: latency_log.jsonl)", flush=True)
+        finish_call(captioner, args)
+
+
+def finish_call(captioner, args):
+    """Turn the call into its story page and update the family dictionary."""
+    if not captioner.recorder:
+        return
+    captioner.pool.shutdown(wait=True)  # the last lines must be translated before the page is written
+    print("Writing the family story page for this call...", flush=True)
+    page = captioner.recorder.finish(captioner.known_at_start, captioner.heard_at_start, captioner.progress,
+                                     captioner.lexicon, args.lang)
+    if not page:
+        print("(nothing was said, so no story page)", flush=True)
+        return
+    print(f"Story page:        {page}\nFamily dictionary: {os.path.join(HERE, 'calls', 'dictionary.html')}", flush=True)
+    if not args.no_open:
+        subprocess.run(["open", page], check=False)
 
 
 async def listen(args, captioner):
@@ -389,6 +436,20 @@ async def listen(args, captioner):
     from pictures import PictureFinder
     captioner.pictures = PictureFinder(captioner.decider)
     await loop.run_in_executor(None, captioner.pictures._nouns, "warm up the noun finder")
+    if not args.no_story:
+        from calls import CallRecorder
+        target["recorder"] = captioner.recorder = CallRecorder(args.caller, record_audio=not args.no_record)
+        print(f"Keeping this call's story in calls/{captioner.recorder.id}/"
+              + ("" if not args.no_record else " (no audio: --no-record)"), flush=True)
+    if not args.no_prompts:
+        from prompts import StoryPrompter
+
+        def on_prompt(q):
+            broadcast({"type": "prompt", "caller": args.caller, **q})
+            if captioner.recorder:
+                captioner.recorder.add_prompt(q)
+            print(f"  [ask {args.caller}: {q['roman']}  ({q['english']})]", flush=True)
+        captioner.prompter = StoryPrompter(captioner.decider, args.caller, on_prompt)
     captioner.speak_all = args.speak == "all"
     captioner.questions_only = args.speak == "questions"
     if not args.no_voice:  # load before audio starts, or the first seconds of the call are lost
@@ -474,6 +535,11 @@ def main():
                    help="clone = the English sounds like the caller (learned from ~10 s of their speech); stock = Kokoro")
     p.add_argument("--voice-sample", help="audio of the caller to clone right away, e.g. a WhatsApp voice note (.opus/.m4a/.wav)")
     p.add_argument("--new-voice", action="store_true", help="relearn the caller's voice on this call (calling someone else)")
+    p.add_argument("--caller", default="Grandma", help='who you are calling, e.g. "Ammamma" (used on the story page and prompts)')
+    p.add_argument("--no-story", action="store_true", help="don't keep a story page for this call")
+    p.add_argument("--no-record", action="store_true", help="keep the story page but save no audio of the call")
+    p.add_argument("--no-prompts", action="store_true", help="no live 'ask her' question suggestions")
+    p.add_argument("--no-open", action="store_true", help="don't open the story page when the call ends")
     p.add_argument("--learn-after", type=int, default=1,
                    help="keep a word in Telugu after hearing it this many times (0 = keep every known word from the start)")
     p.add_argument("--reset-progress", action="store_true", help="forget which words you know (deletes progress.json)")

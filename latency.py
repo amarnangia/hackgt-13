@@ -42,7 +42,7 @@ class LatencyTracker:
                 audio_ms, recognized = ms, wall
                 break
         spoken = self.stream_start + audio_ms / 1000 if self.stream_start and audio_ms is not None else None
-        return {"spoken": spoken, "recognized": recognized, "cut": time.monotonic()}
+        return {"spoken": spoken, "recognized": recognized, "cut": time.monotonic(), "audio_ms": audio_ms}
 
     def finished(self, marks, text, english):
         now = time.monotonic()

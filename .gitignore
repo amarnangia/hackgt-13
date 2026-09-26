@@ -17,3 +17,5 @@ images/cache/
 # macOS/iCloud conflict copies ("file 2.jpg")
 * 2.*
 * 2
+# call recordings and story pages stay on this computer
+calls/
