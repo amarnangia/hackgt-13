@@ -1,5 +1,6 @@
 # Laya's per-line decisions (~0.1 s, local): should the English voice speak this line, and what kind of
 # thing does it mention? Exact card details come from lexicon.json; Laya covers what the list doesn't.
+import re
 import threading
 import time
 
@@ -16,6 +17,19 @@ QUESTIONS = {
         "festival": "Diwali, Holi, Sankranti, puja, wedding", "none": "nothing concrete"}},
 }
 CATEGORY_MIN_CONFIDENCE = 0.8
+QUESTION_WORDS = {"what", "when", "where", "who", "whom", "whose", "why", "how", "which", "did", "do", "does", "are", "is",
+                  "was", "were", "will", "would", "can", "could", "have", "has", "had", "shall", "should", "may", "won't",
+                  "didn't", "don't", "doesn't", "aren't", "isn't", "haven't", "hasn't", "can't", "what's", "how's", "where's",
+                  "who's", "when's"}
+
+
+def is_question(english):
+    words = re.findall(r"[a-z']+", english.lower())
+    # skip a leading address or filler: "Sweetheart, are you...", "Sare dear, what did you..."
+    while words and words[0] in {"sweetheart", "dear", "sare", "okay", "ok", "so", "and", "hello", "hi", "nanna", "kanna",
+                                  "bangaram", "ammamma", "grandma", "well", "oh", "ayyo", "hey", "yes", "no", "tell", "me"}:
+        words = words[1:]
+    return english.rstrip().endswith("?") or bool(words and words[0] in QUESTION_WORDS)
 
 
 class Decider:
@@ -41,12 +55,17 @@ class Decider:
         with self.lock:
             answers = self.agent.predict({"english": english}, QUESTIONS)["answers"]
             self.torch.mps.empty_cache()  # don't let torch hold on to GPU memory between lines
-        intent = answers["intent"]["choice"]
         category = answers["category"]["choice"]
+        # Questions by rule: Laya called plain story lines questions ("There was a big mango tree in front of our
+        # house."). Muse sometimes drops the "?", so a leading question word counts too. Laya is still good at
+        # requests ("send me a photo", "call me after your exam").
+        if is_question(english):
+            intent = "question"
+        else:
+            intent = "request" if answers["intent"]["choice"] == "request" else "statement"
         return {
             "intent": intent,
-            # "?" catches questions Laya misses; Laya catches requests and questions without a "?"
-            "needs_attention": intent in ("question", "request") or english.rstrip().endswith("?"),
+            "needs_attention": intent in ("question", "request"),
             "category": category if answers["category"]["confidence"] >= CATEGORY_MIN_CONFIDENCE else "none",
             "seconds": time.monotonic() - start,
         }

@@ -139,3 +139,22 @@ class Translator:
         english = r.json()["choices"][0]["message"]["content"].strip()
         self.history.append((text, english))
         return english
+
+
+def spark_json(system, user, model="muse-spark-1.3", effort="low", timeout=60):
+    """Ask Muse Spark for a JSON object (story summaries, question suggestions). Returns a dict, or None."""
+    try:
+        r = requests.post(f"{API_URL}/chat/completions", timeout=timeout,
+                          headers={"Authorization": f"Bearer {api_key()}"},
+                          json={"model": model, "reasoning_effort": effort,
+                                "messages": [{"role": "system", "content": system + " Reply with only a JSON object."},
+                                             {"role": "user", "content": user}]})
+        r.raise_for_status()
+        text = r.json()["choices"][0]["message"]["content"]
+    except (requests.RequestException, KeyError, ValueError):
+        return None
+    start, end = text.find("{"), text.rfind("}")  # tolerate ```json fences or a sentence around it
+    try:
+        return json.loads(text[start:end + 1]) if start >= 0 else None
+    except ValueError:
+        return None

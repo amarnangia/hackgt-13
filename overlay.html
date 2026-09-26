@@ -27,6 +27,15 @@
   .kept { color: var(--accent); cursor: pointer; border-bottom: 1px dashed var(--accent); }
   .kept small { color: var(--muted); font-weight: 400; font-size: 0.6em; margin-left: 3px; }
   .hint { color: var(--muted); font-size: 12px; padding: 0 16px 8px; }
+  #ask { margin: 0 16px 12px; background: #2d2210; border: 2px solid var(--accent); border-radius: 14px; padding: 12px 14px;
+         display: none; }
+  #ask.show { display: block; animation: pop .3s ease; }
+  @keyframes pop { from { transform: scale(.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  #ask .label { color: var(--accent); font-size: 13px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
+  #ask .te { font-size: 22px; margin-top: 4px; }
+  #ask .roman { font-size: 24px; font-weight: 700; color: var(--text); }
+  #ask .meaning { color: var(--muted); font-size: 15px; }
+  header a { margin-left: auto; color: var(--accent); text-decoration: none; font-size: 13px; }
   #popup { position: fixed; right: 16px; bottom: 16px; width: min(360px, calc(100vw - 32px)); background: var(--card);
            border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.5); transform: translateY(140%);
            transition: transform .35s ease; }
@@ -40,7 +49,8 @@
 </style>
 </head>
 <body>
-<header><span class="dot" id="dot"></span><span id="status">connecting…</span></header>
+<header><span class="dot" id="dot"></span><span id="status">connecting…</span><a href="/calls/dictionary.html" target="_blank">📖 Family dictionary</a></header>
+<div id="ask"><div class="label"></div><div class="te"></div><div class="roman"></div><div class="meaning"></div></div>
 <div class="hint">Orange words stay in Telugu because you know them. Click one if you don't.</div>
 <div id="live"></div>
 <div id="lines"></div>
@@ -54,6 +64,19 @@ const ICONS = { food: "🍛", vehicle: "🛺", place: "🛕", clothing: "🥻", 
 
 let socket = null;
 let popupTimer = null;
+let askTimer = null;
+
+// A question the grandkid can ask in Telugu when grandma pauses in a story.
+function showAsk(m) {
+  const ask = document.getElementById("ask");
+  ask.querySelector(".label").textContent = "💬 Ask " + (m.caller || "her") + ":";
+  ask.querySelector(".te").textContent = m.telugu;
+  ask.querySelector(".roman").textContent = "“" + m.roman + "”";
+  ask.querySelector(".meaning").textContent = m.english;
+  ask.classList.remove("show"); void ask.offsetWidth; ask.classList.add("show");
+  clearTimeout(askTimer);
+  askTimer = setTimeout(() => ask.classList.remove("show"), 25000);
+}
 
 // A picture of the thing grandma just mentioned, e.g. pulihora; also kept as a thumbnail on that line.
 function showPicture(m) {
@@ -103,6 +126,7 @@ function connect() {
     if (m.type === "speaking") { dot.className = "dot speaking"; status.textContent = "someone is speaking…"; return; }
     if (m.type === "partial") { live.textContent = m.text; return; }
     if (m.type === "picture") { showPicture(m); return; }
+    if (m.type === "prompt") { showAsk(m); return; }
     if (m.type === "voice") { const el = byId[m.id]; if (el) el.querySelector(".en").prepend("🔊 "); return; }
     dot.className = "dot live"; status.textContent = "listening";
     let el = byId[m.id];

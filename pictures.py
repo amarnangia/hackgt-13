@@ -34,6 +34,10 @@ class PictureFinder:
         data = json.load(open(os.path.join(HERE, "images", "library.json"), encoding="utf-8"))
         self.items = data["items"]
         self.by_lexicon = {lid: iid for iid, it in self.items.items() for lid in it.get("lexicon_ids", [])}
+        # Our own one-line notes read better than Wikipedia's first sentence ("Adhirasam, attarasalu,, kajjaya...")
+        lexicon = json.load(open(os.path.join(HERE, "lexicon.json"), encoding="utf-8"))
+        notes = {e["id"]: e.get("note") for lang, entries in lexicon.items() if not lang.startswith("_") for e in entries}
+        self.notes = {iid: notes[lid] for iid, it in self.items.items() for lid in it.get("lexicon_ids", []) if notes.get(lid)}
         aliases = sorted(((a.lower(), iid) for iid, it in self.items.items() for a in it.get("aliases", [])),
                          key=lambda x: -len(x[0]))
         self.alias_patterns = [(re.compile(rf"(?<![A-Za-z]){re.escape(a)}(?![A-Za-z])", re.IGNORECASE), iid)
@@ -165,7 +169,7 @@ class PictureFinder:
         """{name, description, image} for a library id, or for a web noun (may fetch from Wikipedia)."""
         if not key.startswith("web:"):
             it = self.items[key]
-            return {"id": key, "name": it["name"], "description": it.get("description", ""), "image": it["image"],
+            return {"id": key, "name": it["name"], "description": self.notes.get(key) or it.get("description", ""), "image": it["image"],
                     "category": it.get("category", "")}
         noun = key[4:]
         if noun not in self.web_cache:
