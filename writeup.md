@@ -54,10 +54,10 @@ answers.
   - A cloned-voice queue that speeds up slightly to keep up.
 - **Overlay:** a Chrome extension of three panels over the call, fed by a local WebSocket that only accepts our own pages.
 - **After-call story keeper** and the Weave app (web and iPhone).
+- **Live draft captions:** a faded draft of the English appears while she's still mid-sentence, 2–3 s before she finishes. Telugu puts the verb last, so the final line replaces the draft.
 - **Latency is logged for every sentence.**
 
 ## What's next
 - **A faster, more personal reverse direction:** her side is fast and in her own voice. The grandkid's side takes about 3 s in a stock Telugu voice; it could use the laptop translator and a cloned voice.
-- **Live draft captions** while she's still mid-sentence. Telugu puts the verb last, so a sentence can't be final until she finishes it.
-- **Fitting the word-knowledge model** to quizzes, instead of our hand-set weights.
+- **Fitting the word-knowledge model** to real quiz data. The tools are built (`tools/quiz.py`, `tools/fit_progress.py`); the weights are still hand-set until a few weeks of calls.
 - **More languages:** Hindi and Tamil use the same pipeline.
