@@ -12,8 +12,8 @@ import json
 import statistics
 import time
 
-STAGES = ["speech_to_text", "split", "translate", "total", "voice_wait", "total_voice"]
-LABELS = {"speech_to_text": "speech-to-text", "split": "waiting to split", "translate": "translate",
+STAGES = ["speech_to_text", "split", "translate", "laya", "total", "voice_wait", "total_voice"]
+LABELS = {"speech_to_text": "speech-to-text", "split": "waiting to split", "translate": "translate", "laya": "Laya decides",
           "total": "spoken -> English", "voice_wait": "English -> voice", "total_voice": "spoken -> voice"}
 
 
@@ -52,7 +52,7 @@ class LatencyTracker:
             "split": marks["cut"] - marks["recognized"],
             "translate": now - marks["cut"],
             "total": now - marks["spoken"] if marks["spoken"] else None,
-            "voice_wait": None, "total_voice": None, "english_at": now,
+            "voice_wait": None, "total_voice": None, "english_at": now, "laya": None,
         }
         self.rows.append(row)
         return row
@@ -79,7 +79,7 @@ class LatencyTracker:
             return "No sentences measured."
         out = [f"Latency over {len(self.rows)} sentences (seconds):", f"  {'stage':20} {'p50':>6} {'p90':>6} {'max':>6}"]
         for stage in STAGES:
-            vals = sorted(r[stage] for r in self.rows if r[stage] is not None)
+            vals = sorted(r[stage] for r in self.rows if r.get(stage) is not None)
             if not vals:
                 continue
             p90 = vals[min(len(vals) - 1, int(round(0.9 * (len(vals) - 1))))]

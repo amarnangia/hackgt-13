@@ -81,7 +81,7 @@ WhatsApp Web in Chrome (Mac output = BlackHole 2ch)
 | Audio input/output | `sounddevice` (Python) | Reads BlackHole and writes to the headphones. |
 | Speech-to-text | **Muse Voice Transcribe** (Meta Model API, streaming, `languageBias: telugu`) | Words appear ~1–2 s after she starts talking; ends of utterances are detected by Muse. Much more accurate on Telugu than local Whisper. |
 | Translation | **IndicTrans2 1B, local** (`translate_server.py`) + `lexicon.json` glossary | ~0.3–0.5 s per sentence, greedy decoding so the same input always gives the same English. Fallback: Muse Spark `muse-spark-1.1` (~0.8–1.5 s, online). NLLB 600M/1.3B were as fast but got food, vehicle and place words wrong. |
-| Decisions | **Laya** `convaiinnovations/laya` (English checkpoint, `device="mps"`) | Load at startup; the first load takes ~35 s. |
+| Decisions | **Laya** `convaiinnovations/laya` (English checkpoint, `device="mps"`) | ~0.15 s per line. "Question, request or statement?" as a choice got 17/18; as a yes/no it got 9/14. Loads in ~6 s. |
 | Words & phrases | **`lexicon.json`** (hard-coded) | 40 Telugu entries (food, vehicles, places, clothing, festivals, family, idioms) + English slang. Fixes translations, and will drive the image and explanation cards. |
 | Images | a local `images/` folder, one file per `lexicon.json` id | Still to do. |
 | Text-to-speech | **Kokoro-82M, local** (`mlx-audio`, voice `af_heart`) | 7 s of speech in ~0.6 s on the M4 after a ~4 s warm-up. Needs `brew install espeak-ng`. |
@@ -125,7 +125,7 @@ What we learned from testing (script: `tools/laya_bench.py`):
 1. ✅ **Audio loop:** WhatsApp → BlackHole → Python → headphones, with no processing, during a real call (`audio_loop.py`).
 2. ✅ **Live subtitles:** Muse streams Telugu text into the overlay (`subtitles.py`, `muse.py`, `overlay.html`).
 3. ✅ **Translation:** Muse Spark, sentence by sentence while she is still talking.
-4. **Laya:** image cards (word list plus images) and slang cards (LLM explanation).
+4. 🟡 **Laya + cards** (`decide.py`): Laya decides per line whether it's a question, request or statement (17/18 on real call lines) and what kind of thing it mentions. The voice speaks only questions and requests to you (`--speak all` for everything), which removed the voice backlog. Cards in the overlay come from `lexicon.json` matches in the Telugu (exact) or Laya's category otherwise. Still to do: pictures on the cards.
 5. ✅ **Dubbing:** Kokoro speaks each English line (`dub.py`) while the call audio fades to 20% underneath (`audio_loop.py`). Lines are voiced in order; if the voice would be >3 s behind, that line is subtitle-only. `--no-voice` turns it off.
 6. **Known-words list:** show the translation fading out over a demo call.
 7. **Stretch:** the other direction (virtual mic), more languages, screen share.

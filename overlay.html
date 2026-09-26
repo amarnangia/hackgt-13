@@ -19,6 +19,11 @@
   .orig { color: var(--muted); font-size: 18px; }
   .en { font-size: 26px; font-weight: 600; margin-top: 4px; min-height: 1.4em; }
   .en.pending { color: var(--muted); font-weight: 400; font-size: 18px; }
+  .cards { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .card { background: #262d36; border-radius: 10px; padding: 6px 10px; font-size: 15px; max-width: 100%; }
+  .card b { color: var(--accent); }
+  .card span { color: var(--muted); }
+  .line.ask { border-left: 4px solid var(--accent); }
   #live { padding: 0 16px 10px; color: var(--accent); font-size: 20px; min-height: 1.6em; }
 </style>
 </head>
@@ -31,6 +36,7 @@ const lines = document.getElementById("lines");
 const dot = document.getElementById("dot"), status = document.getElementById("status");
 const live = document.getElementById("live");
 const byId = {};
+const ICONS = { food: "🍛", vehicle: "🛺", place: "🛕", clothing: "🥻", festival: "🪔", family: "👵", idiom: "💬", slang: "💬" };
 
 function connect() {
   const ws = new WebSocket(`ws://${location.host || "localhost:8765"}`);
@@ -53,6 +59,21 @@ function connect() {
     }
     if (m.type === "original") el.querySelector(".orig").textContent = m.text;
     if (m.type === "english") { const en = el.querySelector(".en"); en.textContent = m.text; en.classList.remove("pending"); }
+    if (m.type === "details") {
+      const en = el.querySelector(".en");
+      if (m.intent === "question" || m.intent === "request") { el.classList.add("ask"); en.prepend("❓ "); }
+      if (m.cards && m.cards.length) {
+        const box = document.createElement("div"); box.className = "cards";
+        for (const c of m.cards) {
+          const card = document.createElement("div"); card.className = "card";
+          card.innerHTML = `${ICONS[c.category] || "🔖"} <b></b> <span></span>`;
+          card.querySelector("b").textContent = c.title;
+          card.querySelector("span").textContent = c.note ? "— " + c.note : "";
+          box.append(card);
+        }
+        el.append(box);
+      }
+    }
   };
 }
 connect();

@@ -22,6 +22,7 @@ from websockets.http11 import Response
 
 from muse import Translator, transcribe
 from latency import LatencyTracker
+from lexicon import Lexicon
 from translate_server import LocalTranslator
 
 PORT = int(os.environ.get("OVERLAY_PORT", 8765))
@@ -97,6 +98,10 @@ class Captioner:
         self.done = 0      # how many characters of it have been sent for translation
         self.latency = LatencyTracker()
         self.dubber = None                    # set by listen() unless --no-voice
+        self.decider = None                   # Laya, set by listen()
+        self.speak_all = False                # --speak all: voice every line, not just questions/requests
+        self.lexicon = Lexicon()
+        self.lang = lang
         self.order_lock = threading.Lock()    # translations finish out of order; the voice must not
         self.next_to_voice, self.finished_lines = 1, {}
 
@@ -148,25 +153,43 @@ class Captioner:
                 english = self.translate(sentence)
             except Exception as e:
                 english = f"(translation failed: {type(e).__name__})"
-            broadcast({"type": "english", "id": seg_id, "text": english})
+            broadcast({"type": "english", "id": seg_id, "text": english})  # show it now; cards follow in ~0.15 s
             row = self.latency.finished(marks, sentence, english)
+            decision = self.decider(english) if self.decider and not english.startswith("(") else None
+            broadcast({"type": "details", "id": seg_id,
+                       "intent": decision["intent"] if decision else None, "cards": self._cards(sentence, decision)})
+            row["laya"] = decision["seconds"] if decision else None
             with self.order_lock:
-                self.finished_lines[seg_id] = (english, marks, row)
+                self.finished_lines[seg_id] = (english, marks, row, decision)
                 while self.next_to_voice in self.finished_lines:
                     self._voice(self.next_to_voice, *self.finished_lines.pop(self.next_to_voice))
                     self.next_to_voice += 1
 
         self.pool.submit(work)
 
-    def _voice(self, seg_id, english, marks, row):
-        """Speak the line (in order), or leave it as a subtitle if the voice is too far behind."""
+    def _cards(self, sentence, decision):
+        """Word-list matches in what grandma said (exact), else Laya's category guess for the English line."""
+        cards = [{"id": e["id"], "title": e["id"].replace("_vocative", "").replace("_", " ").title(),
+                  "category": e["category"], "note": e.get("note", "")} for e in self.lexicon.find(sentence, self.lang)]
+        if decision and decision["category"] != "none" and not any(c["category"] == decision["category"] for c in cards):
+            cards.append({"id": None, "title": decision["category"].title(), "category": decision["category"], "note": ""})
+        return cards
+
+    def _voice(self, seg_id, english, marks, row, decision):
+        """Speak the line (in order) if it needs the listener's attention; otherwise it stays a subtitle."""
         def on_start():
             self.latency.voice_started(row, marks)
             broadcast({"type": "voice", "id": seg_id})
-        voiced = self.dubber.say(english, spoken_at=marks["spoken"], on_start=on_start) if self.dubber else False
+        wanted = self.speak_all or decision is None or decision["needs_attention"]
+        voiced = bool(self.dubber and wanted and self.dubber.say(english, spoken_at=marks["spoken"], on_start=on_start))
         if not voiced:
             self.latency.log_row(row)
-        tag = "" if not self.dubber else ("  [voice]" if voiced else "  [subtitle only: voice was behind]")
+        if not self.dubber:
+            tag = ""
+        elif voiced:
+            tag = f"  [voice: {decision['intent'] if decision else 'all'}]"
+        else:
+            tag = "  [subtitle only: statement]" if not wanted else "  [subtitle only: voice was behind]"
         print(f"{LatencyTracker.line(row)} {row['text']}  ->  {english}{tag}", flush=True)
 
 
@@ -228,6 +251,10 @@ async def listen(args, captioner):
     loop = asyncio.get_running_loop()
     target = {"q": asyncio.Queue(), "latency": captioner.latency}
     audio = make_audio(args, loop, target)
+    print("Loading Laya...", flush=True)
+    from decide import Decider
+    captioner.decider = await loop.run_in_executor(None, Decider)
+    captioner.speak_all = args.speak == "all"
     if not args.no_voice:  # load before audio starts, or the first seconds of the call are lost
         print("Loading the English voice (Kokoro)...", flush=True)
         from dub import Dubber
@@ -291,6 +318,8 @@ def main():
     p.add_argument("--in", dest="inp", default="BlackHole")
     p.add_argument("--out", default=None, help='output device (default: system default); "none" = silent, with --file')
     p.add_argument("--no-voice", action="store_true", help="subtitles only, no English voice")
+    p.add_argument("--speak", choices=["attention", "all"], default="attention",
+                   help="attention = voice only questions/requests to you (Laya decides), the rest as subtitles; all = every line")
     args = p.parse_args()
 
     if args.translator == "local":
