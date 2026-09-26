@@ -23,6 +23,7 @@ from websockets.datastructures import Headers
 from websockets.http11 import Response
 
 from muse import Translator, transcribe
+from decide import is_question
 from latency import LatencyTracker
 from lexicon import Lexicon, indic_share
 from progress import Progress
@@ -212,8 +213,23 @@ class Captioner:
             broadcast({"type": "english", "id": seg_id, "text": english, "route": route, "kept": kept})
             row = self.latency.finished(marks, sentence, english)
             row["route"] = route
-            # Laya reads the all-English version; cards follow the text by ~0.15 s
-            decision = self.decider(full_english) if self.decider and not english.startswith("(") else None
+            usable = self.decider and not english.startswith("(")
+            decision = None
+            if self.questions_only and usable:
+                decision = self.decider(full_english)  # --speak questions needs Laya's request check before voicing
+            # Voice first: nothing below changes what gets said, and Laya + the picture lookup (sometimes a web fetch)
+            # used to hold the voice back ~0.3-0.6 s. The question rule alone sets its priority (questions keep their
+            # place when the voice is behind); Laya's request check still labels the line for cards and prompts.
+            quick = decision or {"intent": "question" if is_question(full_english) else "statement",
+                                 "needs_attention": is_question(full_english)}
+            with self.order_lock:
+                self.finished_lines[seg_id] = (english, marks, row, quick, route)
+                while self.next_to_voice in self.finished_lines:
+                    self._voice(self.next_to_voice, *self.finished_lines.pop(self.next_to_voice))
+                    self.next_to_voice += 1
+            # Then the extras, while the English is already playing.
+            if decision is None and usable:
+                decision = self.decider(full_english)
             broadcast({"type": "details", "id": seg_id,
                        "intent": decision["intent"] if decision else None, "cards": self._cards(sentence, decision)})
             picture = self._picture(seg_id, hits, full_english, known_before)
@@ -224,11 +240,6 @@ class Captioner:
                                        kept=kept, intent=intent, picture=picture, start_s=start_s, end_s=end_s)
             if self.prompter and route != "english":
                 self.prompter.on_line(sentence, full_english, intent, route)
-            with self.order_lock:
-                self.finished_lines[seg_id] = (english, marks, row, decision, route)
-                while self.next_to_voice in self.finished_lines:
-                    self._voice(self.next_to_voice, *self.finished_lines.pop(self.next_to_voice))
-                    self.next_to_voice += 1
 
         def work_logged():
             try:

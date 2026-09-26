@@ -34,7 +34,10 @@ CATCH_UP_S = 2.0                  # queued speech at which we reach MAX_SPEED
 CLAUSE_SPLIT = r"(?<=[,;:.!?])\s+"  # generate and start playing clause by clause
 
 
-def normalize(audio, target_rms=0.08, peak=0.9):
+TARGET_RMS = 0.08  # speaking level of the English voice
+
+
+def normalize(audio, target_rms=TARGET_RMS, peak=0.9):
     """The clone copies the recording's volume too, and call audio is quiet; bring each clause to a steady level."""
     rms = float(np.sqrt(np.mean(audio ** 2))) if len(audio) else 0.0
     if rms < 1e-4:
@@ -94,18 +97,30 @@ class Dubber:
         # Generating appends each sentence to this state; unless we cut it back to just the voice before every
         # sentence, the model "remembers" earlier sentences and stops almost immediately (0.2 s clips).
         self.voice_frames = self.pocket._get_flow_cache_num_frames(self.clone_state)
-        list(self._clone_clips("Okay."))  # warm up
+        # The clone copies the recording's volume (call audio is quiet). Work out the boost once, from a calibration
+        # sentence, so each chunk can play as soon as it's generated instead of waiting for the whole phrase to be
+        # normalized (that wait held the voice back ~0.2-0.8 s).
+        self.clone_gain = 1.0
+        calibration = [np.asarray(c).reshape(-1) for c in self._clone_raw("Hello, how are you doing today? I hope you are well.")]
+        sample = np.concatenate(calibration)
+        rms, peak = float(np.sqrt(np.mean(sample ** 2))), float(np.abs(sample).max())
+        if rms > 1e-4:
+            self.clone_gain = min(TARGET_RMS / rms, 0.9 / max(peak, 1e-6))
 
     def _kokoro_clips(self, text, speed):
         for r in self.kokoro.generate(text, voice=self.voice, speed=speed, lang_code="a", split_pattern=CLAUSE_SPLIT):
             yield to_48k(r.audio, 24000)
 
-    def _clone_clips(self, text):
+    def _clone_raw(self, text):
         for clause in (c for c in re.split(CLAUSE_SPLIT, text) if c.strip()):
-            self.pocket._slice_flow_cache(self.clone_state, self.voice_frames)
-            chunks = [np.asarray(c).reshape(-1) for c in self.pocket.generate_audio_stream(self.clone_state, clause)]
-            if chunks:
-                yield to_48k(normalize(np.concatenate(chunks)), self.pocket.sample_rate)
+            self.pocket._slice_flow_cache(self.clone_state, self.voice_frames)  # just her voice, no earlier sentences
+            yield from self.pocket.generate_audio_stream(self.clone_state, clause)
+
+    def _clone_clips(self, text):
+        """Her voice, chunk by chunk as it's generated (~4x faster than real time, so playback doesn't run dry)."""
+        for chunk in self._clone_raw(text):
+            chunk = np.clip(np.asarray(chunk, dtype=np.float32).reshape(-1) * self.clone_gain, -1, 1)
+            yield to_48k(chunk, self.pocket.sample_rate)
 
     def _worker(self):
         while True:
