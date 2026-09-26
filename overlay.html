@@ -24,11 +24,15 @@
   .card b { color: var(--accent); }
   .card span { color: var(--muted); }
   .line.ask { border-left: 4px solid var(--accent); }
+  .kept { color: var(--accent); cursor: pointer; border-bottom: 1px dashed var(--accent); }
+  .kept small { color: var(--muted); font-weight: 400; font-size: 0.6em; margin-left: 3px; }
+  .hint { color: var(--muted); font-size: 12px; padding: 0 16px 8px; }
   #live { padding: 0 16px 10px; color: var(--accent); font-size: 20px; min-height: 1.6em; }
 </style>
 </head>
 <body>
 <header><span class="dot" id="dot"></span><span id="status">connecting…</span></header>
+<div class="hint">Orange words stay in Telugu because you know them. Click one if you don't.</div>
 <div id="live"></div>
 <div id="lines"></div>
 <script>
@@ -36,10 +40,30 @@ const lines = document.getElementById("lines");
 const dot = document.getElementById("dot"), status = document.getElementById("status");
 const live = document.getElementById("live");
 const byId = {};
-const ICONS = { food: "🍛", vehicle: "🛺", place: "🛕", clothing: "🥻", festival: "🪔", family: "👵", idiom: "💬", slang: "💬" };
+const ICONS = { food: "🍛", vehicle: "🛺", place: "🛕", clothing: "🥻", festival: "🪔", family: "👵", idiom: "💬", slang: "💬", phrase: "💬" };
+
+let socket = null;
+
+// Words kept in Telugu are highlighted with their English underneath; click one if you've forgotten it.
+function renderKept(en, text, kept) {
+  en.textContent = "";
+  let rest = text;
+  for (const k of kept) {
+    const i = rest.indexOf(k.telugu);
+    if (i < 0) continue;
+    en.append(rest.slice(0, i));
+    const w = document.createElement("span"); w.className = "kept"; w.title = "Click if you don't know this word";
+    w.textContent = k.telugu;
+    const small = document.createElement("small"); small.textContent = "(" + k.english + ")"; w.append(small);
+    w.onclick = () => { if (socket) socket.send(JSON.stringify({ type: "forget", id: k.id })); w.replaceWith(k.english); };
+    en.append(w);
+    rest = rest.slice(i + k.telugu.length);
+  }
+  en.append(rest);
+}
 
 function connect() {
-  const ws = new WebSocket(`ws://${location.host || "localhost:8765"}`);
+  const ws = socket = new WebSocket(`ws://${location.host || "localhost:8765"}`);
   ws.onopen = () => { dot.className = "dot live"; status.textContent = "listening"; };
   ws.onclose = () => { dot.className = "dot"; status.textContent = "disconnected, retrying…"; setTimeout(connect, 1000); };
   ws.onmessage = (e) => {
@@ -59,7 +83,8 @@ function connect() {
     }
     if (m.type === "original") el.querySelector(".orig").textContent = m.text;
     if (m.type === "english") {
-      const en = el.querySelector(".en"); en.textContent = m.text; en.classList.remove("pending");
+      const en = el.querySelector(".en"); en.classList.remove("pending");
+      renderKept(en, m.text, m.kept || []);
       if (m.route === "english") el.querySelector(".orig").textContent = "said in English";
     }
     if (m.type === "details") {

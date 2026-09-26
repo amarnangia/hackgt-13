@@ -16,8 +16,10 @@ class Lexicon:
             forms = sorted(((f, e) for e in items for f in e["forms"]), key=lambda fe: -len(fe[0]))
             # Whole-word matches only, so సంత (market) doesn't fire inside సంతోషం (happiness).
             letters = INDIC_LETTERS if lang != "en" else "A-Za-z"
+            # A form starting with "^" only matches at the start of what was said (e.g. నాన్న calling the listener).
             self._patterns[lang] = [
-                (re.compile(rf"(?<![{letters}]){re.escape(f)}(?![{letters}])", re.IGNORECASE), f, e) for f, e in forms
+                (re.compile((r"^\s*" if f.startswith("^") else rf"(?<![{letters}])")
+                            + rf"{re.escape(f.lstrip('^'))}(?![{letters}])", re.IGNORECASE), f, e) for f, e in forms
             ]
 
     def find(self, text, lang):

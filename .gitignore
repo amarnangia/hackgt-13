@@ -6,3 +6,4 @@ __pycache__/
 .venv-translate/
 *.log
 *.jsonl
+progress.json

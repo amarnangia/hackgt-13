@@ -23,6 +23,7 @@ from websockets.http11 import Response
 from muse import Translator, transcribe
 from latency import LatencyTracker
 from lexicon import Lexicon, indic_share
+from progress import Progress
 from translate_server import LocalTranslator
 
 PORT = int(os.environ.get("OVERLAY_PORT", 8765))
@@ -32,11 +33,13 @@ SENTENCE_END = re.compile(r"[.?!।]+")
 CLAUSE_END = re.compile(r"[,;]")
 NATIVE_MIN_SHARE = 0.34  # at least a third of the words in Telugu script -> translate and voice it
 MIN_CLAUSE_WORDS = 5  # Muse often joins sentences with commas; cut there once a clause is long enough to translate well
-MAX_WAIT_WORDS = 12   # run-on speech with no punctuation: translate once this many words are waiting (fewer hurt quality)
-HOLD_BACK_WORDS = 2   # ...except the newest few, which Muse may still correct
+MAX_WAIT_WORDS = 20   # run-on speech with no punctuation: translate once this many words are waiting. 12 cut
+                      # mid-sentence when Muse left out punctuation and mistranslated; the translator handles long runs fine
+HOLD_BACK_WORDS = 3   # ...except the newest few, which Muse may still correct
 TRANSLATE_WORKERS = 3
 
 clients = set()
+on_client_message = None  # set by main(): handles clicks sent from the overlay
 
 
 def broadcast(msg):
@@ -51,8 +54,9 @@ def broadcast(msg):
 def ws_handler(conn):
     clients.add(conn)
     try:
-        for _ in conn:
-            pass
+        for message in conn:
+            if on_client_message:
+                on_client_message(json.loads(message))
     finally:
         clients.discard(conn)
 
@@ -78,7 +82,7 @@ class Captioner:
     by id, so they still show in order.
     """
 
-    def __init__(self, lang, translator="local"):
+    def __init__(self, lang, translator="local", learn_after=3):
         self.translate = None
         if translator == "local":
             local = LocalTranslator(lang)
@@ -105,6 +109,7 @@ class Captioner:
         self.lexicon = Lexicon()
         self.lang = lang
         self.backup = None  # Muse Spark, created if the local translator fails mid-call
+        self.progress = Progress(self.lexicon, lang, learn_after=learn_after)  # words kept in Telugu
         self.order_lock = threading.Lock()    # translations finish out of order; the voice must not
         self.next_to_voice, self.finished_lines = 1, {}
 
@@ -164,10 +169,17 @@ class Captioner:
                     english = self.translate(sentence)
                 except Exception as e:
                     english = self._fallback_translate(sentence, e)
-            broadcast({"type": "english", "id": seg_id, "text": english, "route": route})  # cards follow in ~0.15 s
+            full_english, kept = english, []
+            if route != "english" and not english.startswith("("):
+                # Words the listener knows stay in Telugu ("Today, Ammamma made pulihora"); the rest is English.
+                hits = self.lexicon.find(sentence, self.lang)
+                english, kept = self.progress.keep_known_words(english, hits)
+                self.progress.heard_words(hits)
+            broadcast({"type": "english", "id": seg_id, "text": english, "route": route, "kept": kept})
             row = self.latency.finished(marks, sentence, english)
             row["route"] = route
-            decision = self.decider(english) if self.decider and not english.startswith("(") else None
+            # Laya reads the all-English version; cards follow the text by ~0.15 s
+            decision = self.decider(full_english) if self.decider and not english.startswith("(") else None
             broadcast({"type": "details", "id": seg_id,
                        "intent": decision["intent"] if decision else None, "cards": self._cards(sentence, decision)})
             row["laya"] = decision["seconds"] if decision else None
@@ -269,7 +281,16 @@ def make_audio(args, loop, target):
 
 
 async def run(args):
-    captioner = Captioner(args.lang, args.translator)
+    if args.reset_progress and os.path.exists("progress.json"):
+        os.remove("progress.json")
+    captioner = Captioner(args.lang, args.translator, args.learn_after)
+
+    def on_message(msg):
+        if msg.get("type") == "forget" and msg.get("id"):
+            captioner.progress.forget(msg["id"])
+            print(f"Marked '{msg['id']}' as not known; it will be translated again.", flush=True)
+    global on_client_message
+    on_client_message = on_message
     try:
         await listen(args, captioner)
     finally:  # also on Ctrl+C
@@ -356,6 +377,9 @@ def main():
     p.add_argument("--in", dest="inp", default="BlackHole")
     p.add_argument("--out", default=None, help='output device (default: system default); "none" = silent, with --file')
     p.add_argument("--no-voice", action="store_true", help="subtitles only, no English voice")
+    p.add_argument("--learn-after", type=int, default=3,
+                   help="keep a word in Telugu after hearing it this many times (0 = keep every known word from the start)")
+    p.add_argument("--reset-progress", action="store_true", help="forget which words you know (deletes progress.json)")
     p.add_argument("--speak", choices=["telugu", "questions", "all"], default="telugu",
                    help="telugu = voice what she says in Telugu, never her English (default); "
                         "questions = only Telugu questions/requests to you (Laya decides); all = every line")
