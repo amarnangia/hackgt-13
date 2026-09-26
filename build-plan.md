@@ -37,7 +37,7 @@ Times are rough estimates for one person.
 - **Check it:** on 30 real lines, count how often the 3 shown questions include the one a person would pick. Time the answers (instant from the list; about 1.5 s from the model).
 - **Done when** clicking "What is Bhogi?" during a call shows a correct, short answer within about 2 s.
 
-## 5. Laya numbers for the judges (about 1.5 h)
+## 5. Laya numbers for the judges (about 1.5 h) ✅ `python tools/eval_laya.py --muse`; table in idea.md
 - **Put one labelled test set in `tools/eval_laya.py`,** covering intent, topic, stem choice and question ranking.
 - **Report accuracy and time per decision,** next to Muse Spark doing the same job. Put the table in the README and on a slide.
 

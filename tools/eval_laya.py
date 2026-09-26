@@ -1,6 +1,7 @@
 # How well Laya makes its per-line decisions, and how fast (build-plan steps 3 and 5): the numbers for the judges.
 #   python tools/eval_laya.py            # topic + intent accuracy and time per line
 #   python tools/eval_laya.py --wrong    # also print every line it got wrong
+#   python tools/eval_laya.py --muse     # also ask Muse Spark the same questions (a cloud LLM), for comparison
 # The lines are English the way the translator gives her Telugu. We wrote and labelled them (6 per topic, plus
 # questions and requests); a few are from our real calls. They're not a random sample of calls, so read the numbers
 # as "does this work", not a benchmark.
@@ -126,6 +127,7 @@ REPLY_LINES = [
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--wrong", action="store_true", help="print the lines it got wrong")
+    ap.add_argument("--muse", action="store_true", help="compare with Muse Spark (about 90 API calls)")
     a = ap.parse_args()
     from decide import Decider, topic_of
     from lexicon import Lexicon
@@ -170,9 +172,41 @@ def main():
     print(f"  reply kind, keywords + Laya >= {0.5}  {reply_ok}/{r} = {reply_ok / r:.0%}   (no reply offered when unsure)")
     print(f"  intent                  {intent_ok}/{n} = {intent_ok / n:.0%}   (question / request / statement, with decide.is_question)")
     print(f"  time                    median {times[n // 2] * 1000:.0f} ms, slowest {times[-1] * 1000:.0f} ms per line")
+    if a.muse:
+        muse_compare(decider)
     if a.wrong:
         for line, topic, got_topic, intent, got_intent in wrong + held_wrong:
             print(f"  {line!r}: topic {topic} -> {got_topic}" + (f", intent {intent} -> {got_intent}" if intent != got_intent else ""))
+
+
+def muse_compare(decider):
+    """The same topic and reply-kind questions to Muse Spark (the cloud LLM we use for stories), one line at a time
+    like during a call: accuracy and time per line, next to Laya alone."""
+    from curious import REPLY_KIND
+    from decide import QUESTIONS
+    from muse import spark_json
+
+    def ask(question, line):
+        options = "; ".join(f'"{k}" = {v}' for k, v in question["criteria"].items())
+        start = time.monotonic()
+        got = spark_json(f"{question['instructions']} Options: {options}. Key: \"choice\" (one option key).", line,
+                         model="muse-spark-1.1", effort="minimal", timeout=15)
+        return (got or {}).get("choice"), time.monotonic() - start
+
+    for name, question, lines in (("topic", QUESTIONS["topic"], [(l, t) for l, t, _ in LINES]), ("reply kind", REPLY_KIND, REPLY_LINES)):
+        ok_muse = ok_laya = 0
+        t_muse, t_laya = [], []
+        for line, want in lines:
+            got, secs = ask(question, line)
+            ok_muse += got == want
+            t_muse.append(secs)
+            start = time.monotonic()
+            ok_laya += decider.choose(line, question) == want
+            t_laya.append(time.monotonic() - start)
+        n = len(lines)
+        t_muse.sort(), t_laya.sort()
+        print(f"  {name:11} Muse Spark {ok_muse}/{n} = {ok_muse / n:.0%}, median {t_muse[n // 2]:.2f} s  |  "
+              f"Laya {ok_laya}/{n} = {ok_laya / n:.0%}, median {t_laya[n // 2]:.2f} s (both alone, no rules)")
 
 
 if __name__ == "__main__":

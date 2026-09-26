@@ -150,13 +150,16 @@ forgetting added:
 
 **Laya's measured accuracy** (`python tools/eval_laya.py`, on lines we wrote and labelled, plus a held-out sample call):
 
-| Decision | Laya alone | With rules first | Time on the Mac |
+| Decision | Laya alone | Rules first, then Laya | Muse Spark alone (cloud LLM) |
 |---|---|---|---|
-| Question, request or statement? | — | 97% | ~0.25 s for intent + category + topic together |
-| What is the line about? (11 topics) | 64% | 91%, and 9/10 on the held-out call | (same pass) |
-| What is she asking you? (for the reply in Telugu) | 78% | 96%, with no reply offered when Laya is unsure | ~0.07 s |
+| Question, request or statement? | — | 97% | — |
+| What is the line about? (11 topics) | 64%, 0.13 s | 91%, and 9/10 on the held-out call | 95%, 1.0 s |
+| What is she asking you? (for the reply in Telugu) | 78%, 0.10 s | 96%, with no reply offered when Laya is unsure | 100%, 0.9 s |
 
-The rules come first (her Telugu words' topics, clear keywords), and Laya decides the rest.
+The rules come first (her Telugu words' topics, clear keywords), and Laya decides the rest: only about 1 line in 11
+gets past the rules, and Laya got 5 of those 6 right. The cloud LLM is a little more accurate alone, but about 8x
+slower and an API call per line. Rules + Laya get close to it on the laptop, in a tenth of the time, for free, and
+without sending every line to the cloud. If needed, Muse Spark could handle just the lines where Laya is unsure.
 
 **The pitch line for AI:** *"Generative models create; Laya decides."* Every sentence gets 4–5 fast decisions on the
 laptop (which questions, which topic, which picture, is she asking you something). The cloud LLM only runs when the
