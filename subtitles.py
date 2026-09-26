@@ -465,7 +465,7 @@ async def listen(args, captioner):
             if captioner.recorder:
                 captioner.recorder.add_prompt(q)
             print(f"  [ask {args.caller}: {q['roman']}  ({q['english']})]", flush=True)
-        captioner.prompter = StoryPrompter(captioner.decider, args.caller, on_prompt)
+        captioner.prompter = StoryPrompter(captioner.decider, args.caller, on_prompt, cooldown_s=args.prompt_every)
     captioner.speak_all = args.speak == "all"
     captioner.questions_only = args.speak == "questions"
     if not args.no_voice:  # load before audio starts, or the first seconds of the call are lost
@@ -564,6 +564,7 @@ def main():
     p.add_argument("--no-story", action="store_true", help="don't keep a story page for this call")
     p.add_argument("--no-record", action="store_true", help="keep the story page but save no audio of the call")
     p.add_argument("--no-prompts", action="store_true", help="no live 'ask her' question suggestions")
+    p.add_argument("--prompt-every", type=float, default=25, help="at most one 'ask her' prompt this many seconds apart")
     p.add_argument("--no-open", action="store_true", help="don't open the story page when the call ends")
     p.add_argument("--learn-after", type=int, default=1,
                    help="keep a word in Telugu after hearing it this many times (0 = keep every known word from the start)")

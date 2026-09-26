@@ -1,29 +1,38 @@
-# Live "ask her" prompts: when grandma has been telling a story and pauses, suggest one short follow-up question
-# the grandkid can ask *in Telugu* (with pronunciation), so they take part instead of just listening.
+# Live "ask her" prompts: when grandma shares something (a memory, news, something she made) and pauses, suggest one
+# short follow-up question the grandkid can ask *in Telugu* (with pronunciation), so they take part instead of just
+# listening.
 #
-# When: after >= 2 story/news lines, during a pause of >= PAUSE_S, at most once every COOLDOWN_S, and never right
-# after she asked the grandkid something (then they should answer, not ask). Laya judges story vs news vs
-# questions vs small talk (all 4 stories in testing; a prompt/no-prompt call on 10/10 windows).
-# What: Muse Spark writes the question from her last few lines (~1.5 s).
+# When: at least MIN_LINES shareable lines since the last prompt, a pause of PAUSE_S after she stops, at most one
+# prompt every COOLDOWN_S (--prompt-every), and never right after she asked the grandkid something (then they should
+# answer). A line is shareable if it's a statement (Laya + the question rule in decide.py sort out questions and
+# requests like "take care, study well") with at least MIN_WORDS words and not just affection or a blessing.
+# Asking Laya directly "is this worth a follow-up?" failed: it said no to "Today I made pulihora for you" and
+# "Uncle is coming next week" (10/18), so the rule is plain.
+# What: Muse Spark writes the question from her last few shareable lines (~1.5 s).
+import os
+import re
 import threading
 import time
 
-PAUSE_S = 2.5
-COOLDOWN_S = 120
-MIN_LINES = 2
-WINDOW_S = 90  # only lines from the last minute and a half count
+PAUSE_S = 1.2      # quiet this long after Muse says she stopped (Muse already waits ~0.5 s of silence for that)
+COOLDOWN_S = 25    # at most one prompt this often (--prompt-every); short enough for a live demo
+MIN_LINES = 1      # one shareable line is enough
+MIN_WORDS = 5
+WINDOW_S = 90
+AFFECTION = re.compile(r"\b(love you|miss you|bless|god|take care|good night|bye)\b", re.IGNORECASE)
+DEBUG = bool(os.environ.get("PROMPT_DEBUG"))  # PROMPT_DEBUG=1 prints why a prompt did or didn't fire
 
-WHAT_IS_SHE_DOING = {"type": "choice", "instructions": "What is the grandmother doing in these lines?", "criteria": {
-    "story": "telling a story or memory from her past",
-    "news": "sharing recent everyday news or updates",
-    "asking": "asking the grandchild questions",
-    "small_talk": "greetings, blessings or small talk"}}
+
+def shareable(english, intent):
+    return intent == "statement" and len(english.split()) >= MIN_WORDS and not AFFECTION.search(english)
 
 
 class StoryPrompter:
-    def __init__(self, decider, caller, on_prompt):
+    def __init__(self, decider, caller, on_prompt, cooldown_s=COOLDOWN_S):
         self.decider, self.caller, self.on_prompt = decider, caller, on_prompt
-        self.lines = []            # (time, telugu, english, intent) since the last prompt
+        self.cooldown_s = cooldown_s
+        self.lines = []            # shareable (time, telugu, english) since the last prompt
+        self.last_intent = None    # of her most recent line, shareable or not
         self.speaking = False
         self.last_speech_end = time.monotonic()
         self.last_prompt = -1e9
@@ -42,22 +51,26 @@ class StoryPrompter:
         if english.startswith("("):
             return
         with self.lock:
-            self.lines.append((time.monotonic(), telugu, english, intent))
+            self.last_intent = intent
+            if shareable(english, intent):
+                self.lines.append((time.monotonic(), telugu, english))
 
     def _watch(self):
+        last_reason = None
         while True:
-            time.sleep(0.5)
+            time.sleep(0.25)
             now = time.monotonic()
-            if self.speaking or now - self.last_speech_end < PAUSE_S or now - self.last_prompt < COOLDOWN_S:
-                continue
             with self.lock:
                 recent = [l for l in self.lines if now - l[0] < WINDOW_S]
-            if len(recent) < MIN_LINES or recent[-1][3] in ("question", "request"):
-                continue  # not enough to go on, or she just asked the grandkid something
-            english = " ".join(l[2] for l in recent[-5:])
-            if self.decider.choose(english, WHAT_IS_SHE_DOING) not in ("story", "news"):
-                with self.lock:
-                    self.lines = [l for l in self.lines if l[0] > recent[-1][0]]  # don't re-check the same lines
+            reason = ("she's talking" if self.speaking else
+                      "waiting for a pause" if now - self.last_speech_end < PAUSE_S else
+                      "cooldown" if now - self.last_prompt < self.cooldown_s else
+                      "nothing shareable yet" if len(recent) < MIN_LINES else
+                      "she just asked something" if self.last_intent in ("question", "request") else None)
+            if DEBUG and reason != last_reason:
+                print(f"  (prompt check: {reason or 'writing a question'})", flush=True)
+            last_reason = reason
+            if reason:
                 continue
             self.last_prompt = now
             with self.lock:
@@ -67,7 +80,7 @@ class StoryPrompter:
     def _suggest(self, recent):
         from muse import spark_json
 
-        said = "\n".join(f"{telugu}  =  {english}" for _, telugu, english, _ in recent)
+        said = "\n".join(f"{telugu}  =  {english}" for _, telugu, english in recent)
         q = spark_json(
             f"You help a grandchild raised in the US (beginner Telugu) keep a conversation going with their Telugu-speaking "
             f"grandparent ({self.caller}). The grandparent just said the lines below and paused. Suggest ONE short, warm, "

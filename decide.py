@@ -23,13 +23,24 @@ QUESTION_WORDS = {"what", "when", "where", "who", "whom", "whose", "why", "how",
                   "who's", "when's"}
 
 
+WH_WORDS = {"what", "when", "where", "who", "whom", "whose", "why", "how", "which"}
+AUXILIARIES = {"is", "are", "was", "were", "am", "will", "would", "do", "does", "did", "can", "could", "should", "shall",
+               "have", "has", "had", "may", "might", "time", "about", "else", "much", "many", "long", "far", "old"}
+
+
 def is_question(english):
     words = re.findall(r"[a-z']+", english.lower())
     # skip a leading address or filler: "Sweetheart, are you...", "Sare dear, what did you..."
     while words and words[0] in {"sweetheart", "dear", "sare", "okay", "ok", "so", "and", "hello", "hi", "nanna", "kanna",
                                   "bangaram", "ammamma", "grandma", "well", "oh", "ayyo", "hey", "yes", "no", "tell", "me"}:
         words = words[1:]
-    return english.rstrip().endswith("?") or bool(words and words[0] in QUESTION_WORDS)
+    if english.rstrip().endswith("?"):
+        return True
+    if not words:
+        return False
+    if words[0] in WH_WORDS:  # "When is your exam" is a question, "When I was a child..." is a story
+        return len(words) > 1 and words[1] in AUXILIARIES
+    return words[0] in QUESTION_WORDS
 
 
 class Decider:
