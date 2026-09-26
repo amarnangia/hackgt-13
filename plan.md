@@ -26,6 +26,18 @@
     - Add `--caller "Ammamma"` so the story page and prompts use her name. When you press Ctrl+C the call's story page opens.
     - No call handy for the story features? `python subtitles.py --file samples/grandma_story.wav --out "MacBook Air Speakers" --caller Ammamma`
 
+**Your side in Telugu: grandma hears you in Telugu (`--to-telugu`)**
+
+1. Steps 11 and 12 below: install BlackHole 16ch and choose it as Chrome's microphone.
+2. In a second terminal, next to the normal `subtitles.py`: `python subtitles.py --to-telugu` (overlay on http://localhost:8767).
+3. What it does:
+   - Meta Muse transcribes your English from the MacBook mic (`--in "<name>"` for another mic).
+   - Muse Spark translates it to simple spoken Telugu in the respectful form (~1.5 s).
+   - Meta's MMS Telugu voice says it into BlackHole 16ch, with your own voice faintly underneath.
+   - Grandma hears it about 3 s after you stop.
+   - Anything you say in Telugu passes through as is.
+4. It's a stock Telugu voice; it doesn't sound like you. Wear headphones.
+
 **Your side too: the other person hears only English (`--outgoing`)**
 
 11. `brew install --cask blackhole-16ch`, then `sudo killall coreaudiod`. This second virtual device carries the English you send; BlackHole 2ch keeps carrying the call to you.

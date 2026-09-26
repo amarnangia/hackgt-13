@@ -6,7 +6,7 @@ calls shrink to *"Annam tinnava?"* ("Did you eat?") and "bye". Grandma doesn't n
 WhatsApp or Instagram on her phone. The grandkid takes the call on their laptop in Chrome, with Weave on top.
 
 ## How it strengthens connection
-- **They can actually talk.** Her Telugu becomes English about half a second after each sentence, spoken **in her own cloned voice**, so it still sounds like her.
+- **They can actually talk, both ways.** Her Telugu becomes English about half a second after each sentence, spoken **in her own cloned voice**, so it still sounds like her. The grandkid's English reaches her as spoken Telugu about 3 s later.
 - **The grandkid takes part, not just listens.**
   - When she asks something, Weave shows how to answer *in Telugu*: "How do I say 'Yes, I ate. Did you eat?'" → *"Avunu, tinnanu. Meeru tinnara?"*
   - At her pauses, it suggests a question that turns what she said into a story: *"Meeru, Thatayya ela kalisaru?"* (How did you and Thatayya meet?)
@@ -57,7 +57,7 @@ answers.
 - **Latency is logged for every sentence.**
 
 ## What's next
-- **The reverse direction:** the grandkid's English spoken to her in Telugu.
+- **A faster, more personal reverse direction:** her side is fast and in her own voice. The grandkid's side takes about 3 s in a stock Telugu voice; it could use the laptop translator and a cloned voice.
 - **Live draft captions** while she's still mid-sentence. Telugu puts the verb last, so a sentence can't be final until she finishes it.
 - **Fitting the word-knowledge model** to quizzes, instead of our hand-set weights.
 - **More languages:** Hindi and Tamil use the same pipeline.

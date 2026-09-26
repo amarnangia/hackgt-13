@@ -242,6 +242,7 @@ class TeluguVoice:
     can't clone). Same interface as Dubber. Runs on the CPU: ~0.6 s for 4 s of speech, clause by clause."""
 
     MODEL = "facebook/mms-tts-tel"
+    MAX_BEHIND_S = 8.0
     cloning = False
 
     def __init__(self, voice_buffer):
@@ -262,8 +263,10 @@ class TeluguVoice:
     def say(self, text, spoken_at=None, on_start=None, priority=False):
         if not text or not text.strip() or text.startswith("("):
             return False
+        # Telugu takes longer to say than the English it came from, and dropping a line means she misses what you
+        # said; allow more backlog than the English voice does
         late = time.monotonic() - spoken_at if spoken_at else 0.0
-        if self.behind() + late > (MAX_BEHIND_PRIORITY_S if priority else MAX_BEHIND_S):
+        if self.behind() + late > self.MAX_BEHIND_S:
             return False
         self.jobs.put((text, on_start))
         return True

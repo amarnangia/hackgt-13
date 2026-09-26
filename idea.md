@@ -178,6 +178,15 @@ grandkid actually clicks.
   - **From the overlay back to the engine:** `ask` `{id}` (a click on a question) and the existing `forget` `{id}`.
 - **Same audio setup** for both apps. The call plays in Chrome, the Mac's output is BlackHole 2ch at 100%, and the engine listens to BlackHole. So Instagram web calls work the same way as WhatsApp Web.
 
+## Both directions
+- **Grandma → grandkid:** the main engine (`subtitles.py`): English captions, her cloned voice, and everything in the panels.
+- **Grandkid → grandma** (`subtitles.py --to-telugu`, a second terminal):
+  - Meta Muse transcribes their English.
+  - Muse Spark translates it to spoken Telugu in the respectful form.
+  - Meta's MMS Telugu voice says it into the microphone WhatsApp Web uses.
+  - She hears them in Telugu about 3 s after they stop.
+  - It's a stock voice, and slower than her side (a cloud LLM translates instead of the laptop model; IndicTrans2's English → Telugu model is gated and would make it faster).
+
 ## What we keep, drop or move
 - **Keep:** live translation, known words kept in Telugu (now decided by the probability above), the cloned voice, pictures and cards, "Asked you" tags.
 - **Keep, after the call:** the story page with her voice clips, and the family dictionary.
