@@ -1005,8 +1005,7 @@
    "aliases": [
     "farm field",
     "paddy field",
-    "rice field",
-    "field"
+    "rice field"
    ],
    "lexicon_ids": [
     "polam"
@@ -1022,8 +1021,8 @@
    "name": "Well",
    "category": "place",
    "aliases": [
-    "well",
-    "village well"
+    "village well",
+    "water well"
    ],
    "lexicon_ids": [],
    "wikipedia": "Water well",
@@ -1455,7 +1454,7 @@
     "diya",
     "diyas",
     "oil lamp",
-    "lamps"
+    "oil lamps"
    ],
    "lexicon_ids": [],
    "wikipedia": "Diya (lamp)",
@@ -1654,7 +1653,7 @@
    "category": "place",
    "aliases": [
     "charpoy",
-    "cot"
+    "rope cot"
    ],
    "lexicon_ids": [],
    "wikipedia": "Charpai",
@@ -1668,9 +1667,9 @@
    "name": "Swing (uyyala)",
    "category": "place",
    "aliases": [
-    "swing",
     "jhoola",
-    "uyyala"
+    "uyyala",
+    "swing seat"
    ],
    "lexicon_ids": [],
    "wikipedia": "Swing (seat)",

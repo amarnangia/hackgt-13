@@ -3,6 +3,7 @@
 #   python tools/build_images.py            # fetch anything missing
 #   python tools/build_images.py --refresh  # fetch everything again
 # Add an item: (id, Wikipedia title, category, [English words that mean it], [lexicon.json ids]).
+# Don't use everyday English words as aliases: "well" popped up a water well for "are you doing well?".
 import json
 import os
 import re
@@ -90,9 +91,9 @@ ITEMS = [
     # --- places, nature, animals ---
     ("temple", "Thousand Pillar Temple", "place", ["temple", "temples"], ["temple"]),
     ("gopuram", "Gopuram", "place", ["gopuram", "temple tower"], []),
-    ("paddy_field", "Paddy field", "place", ["farm field", "paddy field", "rice field", "field"], ["polam"]),
+    ("paddy_field", "Paddy field", "place", ["farm field", "paddy field", "rice field"], ["polam"]),
     ("village_market", "Haat bazaar", "place", ["weekly village market", "village market", "market", "bazaar"], ["santa"]),
-    ("well", "Water well", "place", ["well", "village well"], []),
+    ("well", "Water well", "place", ["village well", "water well"], []),
     ("tulsi", "Ocimum tenuiflorum", "place", ["tulsi", "holy basil", "tulasi"], []),
     ("banyan", "Banyan", "place", ["banyan tree", "banyan"], []),
     ("neem", "Azadirachta indica", "place", ["neem", "neem tree"], []),
@@ -126,7 +127,7 @@ ITEMS = [
     ("dussehra", "Vijayadashami", "festival", ["dussehra", "dasara", "vijayadashami"], []),
     ("pongal_festival", "Thai Pongal", "festival", ["pongal festival"], []),
     ("kite", "Kite", "festival", ["kites", "kite"], ["galipatam"]),
-    ("diya", "Diya (lamp)", "festival", ["diya", "diyas", "oil lamp", "lamps"], []),
+    ("diya", "Diya (lamp)", "festival", ["diya", "diyas", "oil lamp", "oil lamps"], []),
     ("puja", "Puja (Hinduism)", "festival", ["puja", "pooja"], ["puja"]),
     ("aarti", "Arti (Hinduism)", "festival", ["aarti", "harathi"], []),
     ("wedding", "Hindu wedding", "festival", ["wedding", "marriage"], ["pelli"]),
@@ -142,8 +143,8 @@ ITEMS = [
     ("tawa", "Tava", "place", ["tawa", "tava", "griddle"], []),
     ("steel_tumbler", "Dabarah", "place", ["tumbler", "davara"], []),
     ("mortar_pestle", "Mortar and pestle", "place", ["mortar and pestle", "grinding stone", "rolu"], []),
-    ("charpoy", "Charpai", "place", ["charpoy", "cot"], []),
-    ("jhoola", "Swing (seat)", "place", ["swing", "jhoola", "uyyala"], []),
+    ("charpoy", "Charpai", "place", ["charpoy", "rope cot"], []),
+    ("jhoola", "Swing (seat)", "place", ["jhoola", "uyyala", "swing seat"], []),
     ("rangoli_powder", "Rangoli", "festival", ["rangoli powder"], []),
     # --- American things (so relatives can see what the kid's life is like) ---
     ("thanksgiving", "Thanksgiving (United States)", "festival", ["thanksgiving"], []),
