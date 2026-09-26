@@ -367,7 +367,8 @@ def make_audio(args, loop, target):
                     sampler.new_session()
             if sampler:
                 sampler.add_frame(pcm)  # same audio Muse hears, to clone the caller's voice
-            loop.call_soon_threadsafe(target["q"].put_nowait, pcm.tobytes())
+            if not loop.is_closed():  # audio can still arrive for a moment after Ctrl+C
+                loop.call_soon_threadsafe(target["q"].put_nowait, pcm.tobytes())
 
     # The original voice (theirs, or yours with --outgoing) stays quiet the whole time; the English voice leads.
     return AudioLoop(in_dev, out_dev, on_audio=on_audio, source=source, original=args.original_volume)
