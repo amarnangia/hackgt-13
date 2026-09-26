@@ -56,3 +56,14 @@ Times are rough estimates for one person.
 - **Steps 3 and 4** each need both the engine and the overlay. Build the engine side against the message format, then plug in the overlay.
 - **Step 5 can start any time** after the topic labels exist.
 - **If time is short,** cut Instagram, then the hear-it button, then the "How do I say" stem.
+
+## To do (after the steps above)
+- **Tune how strongly each signal counts toward knowing a word** (`progress.py`). The priors, learning chances, evidence weights, the 7-day half-life and the 70% threshold are sensible guesses, not measured.
+  - Record every signal with a timestamp during test calls.
+  - Afterwards, quiz the grandkid on the words (knows / doesn't).
+  - Fit the weights to those answers, e.g. with a small grid search that maximises log-likelihood.
+  - Report how well the model predicts the quiz (accuracy, calibration) next to the old "heard it once" rule.
+- **Live draft captions,** so the subtitles feel instant like Google's.
+  - Translate her in-progress sentence every ~0.5 s and show it faded; replace it with the final English when she finishes.
+  - The voice still waits for the finished sentence.
+  - Telugu puts the verb last, so the draft will change as she talks. That's expected; the final line is what counts.

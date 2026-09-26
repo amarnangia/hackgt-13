@@ -1,0 +1,103 @@
+/* Weave overlay panels: dark glass on top of a video call, readable over any background. */
+:root {
+  --glass: rgba(12, 14, 18, .80);
+  --glass-2: rgba(255, 255, 255, .06);
+  --line: rgba(255, 255, 255, .10);
+  --text: #f1f3f5;
+  --text-2: #b4bac3;
+  --text-3: #7d8591;
+  --accent: #7aa2ff;
+  --accent-soft: rgba(122, 162, 255, .16);
+  --warm: #f5b35c;
+  --warm-soft: rgba(245, 179, 92, .16);
+  --green: #34d399;
+  --radius: 16px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: transparent; color: var(--text);
+  font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Telugu", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+.te { font-family: "Noto Sans Telugu", "Kohinoor Telugu", "Telugu Sangam MN", sans-serif; }
+.muted { color: var(--text-2); }
+.faint { color: var(--text-3); }
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+
+/* ---------- side panels ---------- */
+body[data-part="left"] main, body[data-part="right"] main { height: 100%; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+.card { background: var(--glass); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px;
+  backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); box-shadow: 0 10px 30px -12px rgba(0,0,0,.6); }
+.section { display: flex; flex-direction: column; min-height: 0; }
+.section.grow { flex: 1; }
+.section .head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.scroll { overflow-y: auto; min-height: 0; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.2) transparent; }
+.enter { animation: enter .35s cubic-bezier(.2,.8,.2,1); }
+@keyframes enter { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.fading { opacity: .35; transition: opacity 1s; }
+
+/* "Ask her" (a question for grandma, from the engine) */
+.ask { border-color: rgba(245, 179, 92, .45); background: linear-gradient(180deg, rgba(245,179,92,.14), rgba(12,14,18,.82)); }
+.ask .eyebrow { color: var(--warm); }
+.ask .q-te { font-size: 17px; margin-top: 4px; }
+.ask .q-roman { font-size: 16px; font-weight: 700; margin-top: 2px; }
+.ask .q-en { color: var(--text-2); font-size: 13px; }
+
+/* "Curious?" questions for the app */
+.questions { display: flex; flex-direction: column; gap: 6px; }
+.question { text-align: left; width: 100%; background: var(--glass-2); border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px;
+  cursor: pointer; transition: background .15s, border-color .15s; }
+.question:hover { background: var(--accent-soft); border-color: rgba(122,162,255,.4); }
+.question .q { font-weight: 600; }
+.question .answer { margin-top: 6px; color: var(--text-2); font-size: 13px; display: none; }
+.question.open { background: var(--accent-soft); border-color: rgba(122,162,255,.4); }
+.question.open .answer { display: block; }
+.answer .say { color: var(--text); font-weight: 600; }
+.loading::after { content: "…"; animation: pulse 1s infinite; }
+@keyframes pulse { 50% { opacity: .3; } }
+
+/* topic words */
+.topic { color: var(--accent); font-weight: 700; text-transform: none; letter-spacing: 0; font-size: 12px; }
+.words { display: flex; flex-direction: column; gap: 4px; }
+.word { display: grid; grid-template-columns: 1fr auto; gap: 0 8px; align-items: center; padding: 6px 8px; border-radius: 10px; background: var(--glass-2); }
+.word.said { background: var(--accent-soft); }
+.word .w-te { font-size: 15px; }
+.word .w-roman { font-weight: 600; }
+.word .w-en { grid-column: 1; color: var(--text-2); font-size: 12.5px; }
+.word .hear { grid-row: 1 / span 2; grid-column: 2; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line);
+  background: transparent; cursor: pointer; color: var(--text-2); }
+.word .hear:hover { color: var(--text); background: var(--glass-2); }
+.tag-said { font-size: 10px; font-weight: 700; color: var(--accent); margin-left: 6px; text-transform: uppercase; letter-spacing: .05em; }
+
+/* right: pictures and meanings */
+.stack { display: flex; flex-direction: column; gap: 10px; }
+.pic { padding: 0; overflow: hidden; cursor: pointer; }
+.pic img { width: 100%; height: 150px; object-fit: cover; display: block; background: #222; }
+.pic .body, .meaning .body { padding: 10px 12px 12px; }
+.pic .name { font-weight: 700; font-size: 15px; }
+.pic .desc, .meaning .desc { color: var(--text-2); font-size: 13px; margin-top: 2px; }
+.meaning { cursor: pointer; padding: 0; }
+.meaning .title { font-weight: 700; font-size: 15px; }
+.meaning .kind { color: var(--warm); }
+.pinned { border-color: rgba(122,162,255,.55); }
+.empty { color: var(--text-3); font-size: 13px; padding: 4px 2px; }
+
+/* ---------- captions ---------- */
+body[data-part="captions"] { display: flex; align-items: flex-end; }
+body[data-part="captions"] main { width: 100%; }
+.captions { padding: 10px 16px 12px; }
+.status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-3); margin-bottom: 4px; }
+.status .dot { width: 7px; height: 7px; border-radius: 50%; background: #6b7280; }
+.status .dot.on { background: var(--green); }
+.status .dot.speaking { background: var(--warm); animation: pulse 1s infinite; }
+.line { padding: 4px 0; }
+.line + .line { border-top: 1px solid var(--line); }
+.line.old { opacity: .55; }
+.line .orig { color: var(--text-2); font-size: 14px; }
+.line .en { font-size: 20px; font-weight: 600; line-height: 1.35; }
+.line .en.pending { color: var(--text-3); font-weight: 400; font-size: 15px; }
+.line.partial .orig { color: var(--text-3); font-style: italic; }
+.tag { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #1b1300;
+  background: var(--warm); border-radius: 6px; padding: 2px 6px; margin-right: 6px; vertical-align: 3px; }
+.kept { color: var(--accent); border-bottom: 1px dashed var(--accent); cursor: pointer; }
+.kept small { color: var(--text-3); font-weight: 400; font-size: .62em; margin-left: 3px; }
+.warning { background: rgba(245, 179, 92, .16); border: 1px solid rgba(245, 179, 92, .4); color: #ffd9a8; border-radius: 10px;
+  padding: 6px 10px; font-size: 13px; margin-bottom: 6px; }

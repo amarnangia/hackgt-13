@@ -332,7 +332,9 @@ class Captioner:
         """Word-list matches in what grandma said (exact), else Laya's category guess for the English line."""
         # Titled with her word (romanized), or a proverb in her own words, not our internal id ("Noru Manchidaite")
         title = lambda e: (e.get("roman") or (e["forms"][0] if e["category"] == "idiom" else e["id"].replace("_", " ").title())).strip(" ,^")
-        cards = [{"id": e["id"], "title": title(e), "category": e["category"], "note": e.get("note", "")}
+        cards = [{"id": e["id"], "title": title(e), "category": e["category"], "note": e.get("note", ""),
+                  "telugu": e["forms"][0].strip(" ,.^"), "english": e.get("translate_as") or (e.get("match_english") or [""])[0],
+                  "p": round(self.progress.probability(e["id"]), 2)}  # how likely they know it (progress.py)
                  for e in self.lexicon.find(sentence, self.lang)]
         cards += [{"id": e["id"], "title": e["id"].replace("_", " ").title(), "category": e["category"],
                    "note": e.get("note", "")} for e in self.lexicon.find(sentence, "en")]  # English slang she used
@@ -453,9 +455,19 @@ async def run(args):
     captioner = Captioner(args.lang, args.translator, args.keep_at, keep_known=not args.outgoing)
 
     def on_message(msg):
-        if msg.get("type") == "forget" and msg.get("id"):
-            captioner.progress.forget(msg["id"])
-            entry = next((e for e in captioner.lexicon.entries.get(captioner.lang, []) if e["id"] == msg["id"]), None)
+        kind, wid = msg.get("type"), msg.get("id")
+        entry = next((e for e in captioner.lexicon.entries.get(captioner.lang, []) if e["id"] == wid), None) if wid else None
+        if kind == "ask" and entry:
+            # "What does ___ mean?" from the overlay: strong evidence they don't know it yet, then the answer teaches it.
+            # Word-list words are answered from the list's note; other questions wait for the LLM (build-plan step 4).
+            captioner.progress.observe(wid, "asked")
+            broadcast({"type": "answer", "id": wid, "text": entry.get("note") or entry.get("translate_as", ""),
+                       "telugu": entry["forms"][0].strip(" ,.^"), "roman": (entry.get("roman") or "").strip(" ,")})
+            captioner.progress.observe(wid, "answer")
+        elif kind == "practiced" and entry:
+            captioner.progress.observe(wid, "practiced")
+        if kind == "forget" and wid:
+            captioner.progress.forget(wid)
             if captioner.garden and entry:
                 from garden import from_lexicon
                 captioner.garden.asked(from_lexicon(entry)["phrase"])  # the "?" in the garden: it gets more help again

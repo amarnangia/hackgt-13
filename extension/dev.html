@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weave overlay preview</title>
+<style>
+  /* A stand-in for the call page, so the overlay can be worked on without installing the extension:
+     python3 -m http.server 8799 --directory extension   then open http://localhost:8799/dev.html
+     (with python tools/fake_call.py or subtitles.py running). */
+  html, body { margin: 0; height: 100%; background: #0b141a; font-family: system-ui, sans-serif; color: #e9edef; }
+  .call { position: fixed; inset: 0; display: grid; place-items: center;
+          background: radial-gradient(ellipse at 50% 40%, #3b4a54 0%, #111b21 70%); }
+  .face { width: 180px; height: 180px; border-radius: 50%; background: #6b7c85; display: grid; place-items: center; font-size: 64px; }
+  .name { margin-top: 14px; text-align: center; font-size: 22px; }
+  .controls { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 16px; }
+  .controls span { width: 52px; height: 52px; border-radius: 50%; background: #2a3942; display: grid; place-items: center; }
+  .controls span.end { background: #ea0038; }
+</style>
+</head>
+<body>
+<div class="call"><div><div class="face">👵</div><div class="name">Ammamma · 04:12</div></div></div>
+<div class="controls"><span>🎤</span><span>📷</span><span class="end">📞</span></div>
+<script>
+  // What content.js needs from the extension APIs, when the page is served from the extension folder.
+  window.chrome = window.chrome || {};
+  chrome.runtime = { getURL: (p) => new URL(p, location.href).href };
+  chrome.storage = { local: { get: (key, cb) => cb({ wsUrl: new URLSearchParams(location.search).get("ws") || undefined }) } };
+</script>
+<script src="content.js"></script>
+</body>
+</html>
