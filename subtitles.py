@@ -277,8 +277,10 @@ def prepare_voice_sample(args):
     """The caller's voice clip to clone: --voice-sample (any audio file, e.g. a WhatsApp voice note), else the one
     saved from the last call, else None (learn it during this call)."""
     if args.voice_sample:
-        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", args.voice_sample, "-ac", "1", "-ar", "24000",
-                        "-t", "20", VOICE_SAMPLE], check=True)
+        # Trim silences and even out the volume; 30 s matched the speaker's pitch better than 15 s at the same speed.
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", args.voice_sample, "-af",
+                        "silenceremove=start_periods=1:start_threshold=-40dB:stop_periods=-1:stop_duration=0.6:"
+                        "stop_threshold=-40dB,loudnorm", "-ac", "1", "-ar", "24000", "-t", "30", VOICE_SAMPLE], check=True)
         return VOICE_SAMPLE
     if args.new_voice and os.path.exists(VOICE_SAMPLE):
         os.remove(VOICE_SAMPLE)

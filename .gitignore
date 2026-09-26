@@ -8,3 +8,8 @@ __pycache__/
 *.jsonl
 progress.json
 caller_voice.wav
+*.m4a
+*.opus
+*.ogg
+*.mp3
+voices/
