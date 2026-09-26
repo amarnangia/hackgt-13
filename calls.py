@@ -29,12 +29,12 @@ CLIP_PAD_S = (0.35, 0.45)  # a little before and after each line, so clips don't
 
 
 class CallRecorder:
-    def __init__(self, caller="Grandma", record_audio=True):
+    def __init__(self, caller="Grandma", record_audio=True, me=None):
         self.started = datetime.datetime.now()
         self.id = self.started.strftime("%Y-%m-%d_%H-%M")
         self.dir = os.path.join(CALLS_DIR, self.id)
         os.makedirs(os.path.join(self.dir, "clips"), exist_ok=True)
-        self.caller, self.record_audio = caller, record_audio
+        self.caller, self.record_audio, self.me = caller, record_audio, me
         self.lines, self.prompts = [], []
         self.lock = threading.Lock()
         # audio: samples are counted as they arrive; Muse's clock restarts on every reconnect (new_session)
@@ -112,7 +112,7 @@ class CallRecorder:
         duration = (datetime.datetime.now() - self.started).seconds
         story = summarize(lines, self.caller)
         words = words_from_call(lines, progress_before, heard_before, progress, lexicon, lang)
-        call = {"id": self.id, "caller": self.caller, "started": self.started.isoformat(timespec="minutes"),
+        call = {"id": self.id, "caller": self.caller, "you": self.me, "started": self.started.isoformat(timespec="minutes"),
                 "duration_s": duration, "lines": lines, "prompts": self.prompts, "story": story, "words": words}
         json.dump(call, open(os.path.join(self.dir, "call.json"), "w"), ensure_ascii=False, indent=1)
         page = os.path.join(self.dir, "index.html")

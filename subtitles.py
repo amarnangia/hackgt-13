@@ -45,6 +45,7 @@ MY_VOICE_SAMPLE = "my_voice.wav"    # --outgoing: your own voice, so the English
 SAMPLE_RATE = 48000  # AudioLoop's rate
 SENTENCE_END = re.compile(r"[.?!।]+")
 CLAUSE_END = re.compile(r"[,;]")
+ENGLISH_ROMANS = {"auto", "bus", "carriage", "cinema", "tiffin"}  # romanized word-list words that are English too
 NATIVE_MIN_SHARE = 0.34  # at least a third of the words in Telugu script -> translate and voice it
 MIN_CLAUSE_WORDS = 5  # Muse often joins sentences with commas; cut there once a clause is long enough to translate well
 MAX_WAIT_WORDS = 20   # run-on speech with no punctuation: translate once this many words are waiting. 12 cut
@@ -191,6 +192,10 @@ class Captioner:
         self.speak_all = False                # --speak all: also voice lines she said (mostly) in English
         self.questions_only = False           # --speak questions: voice only questions/requests to you
         self.lexicon = share_with.lexicon if share_with else Lexicon()
+        # Muse sometimes writes her Telugu in English letters ("Akka.", "Bangaram.", "Pani puri"); those words count
+        # as Telugu, or the English listener would get them untranslated as if she'd spoken English.
+        self.roman_telugu = {t for e in self.lexicon.entries.get(lang, []) for t in re.findall(r"[a-z]+", (e.get("roman") or "").lower())
+                             if len(t) >= 3} - ENGLISH_ROMANS
         self.lang = lang
         self.pronouns = PronounResolver(lang)  # తను -> she or he, from who was mentioned before
         self.backup = None  # Muse Spark, created if the local translator fails mid-call
@@ -312,6 +317,27 @@ class Captioner:
             self._submit(self.partial[self.done:cut].strip(), cut)
             self.done = cut
 
+    def telugu_share(self, text):
+        """Fraction of words that are Telugu: in Telugu script, or Telugu words from the word list in English letters."""
+        words = re.findall(r"[\u0900-\u0DFFA-Za-z]+", text)
+        if not words:
+            return 0.0
+        return sum(bool(re.match(r"[\u0900-\u0DFF]", w)) or w.lower() in self.roman_telugu for w in words) / len(words)
+
+    def speech_lang(self):
+        """The language to tell Muse to expect from this side: its speaker's, once --two-way knows who speaks what
+        (your English transcribed as Telugu came back in Telugu letters and was passed on untranslated)."""
+        if self.roles and self.roles.decided and self.roles.lang_of(self.side) == "en":
+            return "en"
+        return self.lang
+
+    def restart_speech(self):
+        """Reconnect to Muse if this side's language changed (called when the roles are decided or change)."""
+        q, loop = getattr(self, "stream_q", None), getattr(self, "stream_loop", None)
+        if q is not None and loop is not None and self.speech_lang() != getattr(self, "stream_lang", None):
+            self.speech_restart = True  # so stream() reconnects instead of treating it as the end of a recording
+            loop.call_soon_threadsafe(q.put_nowait, None)  # ends this Muse session; stream() opens a new one
+
     def _submit(self, sentence, end_offset, marks=None, redo=False):
         if not redo and self.echo_filter and self.echo_filter(sentence):
             print(f"  [ignored, it was our own speakers: {sentence}]", flush=True)
@@ -320,7 +346,7 @@ class Captioner:
         seg_id = self.next_id
         marks = marks or self.latency.piece_cut(end_offset)
         start_s, end_s = self.recorder.span(marks["audio_ms"]) if self.recorder else (None, None)
-        share = indic_share(sentence)
+        share = self.telugu_share(sentence)
         # english: grandma said it in English, you understood it -> show as-is, no translation, no voice
         # mixed:   mostly English with a Telugu word or two -> translated subtitle, no voice
         # native:  Telugu (or mostly) -> translated subtitle + English voice
@@ -794,7 +820,7 @@ async def load_helpers(loop, args, captioner, target):
     await loop.run_in_executor(None, captioner.pictures._nouns, "warm up the noun finder")
     if not args.no_story:
         from calls import CallRecorder
-        target["recorder"] = captioner.recorder = CallRecorder(args.caller, record_audio=not args.no_record)
+        target["recorder"] = captioner.recorder = CallRecorder(args.caller, record_audio=not args.no_record, me=args.me)
         print(f"Keeping this call's story in calls/{captioner.recorder.id}/"
               + ("" if not args.no_record else " (no audio: --no-record)"), flush=True)
     if not args.outgoing:  # Weave's garden grows from her Telugu (python -m garden shows it)
@@ -859,8 +885,10 @@ async def stream(loop, args, captioner, audio, target):
                 await loop.run_in_executor(None, audio.source_done.wait)
                 audio_q.put_nowait(None)
             ender = asyncio.create_task(end_of_file())
+        lang = captioner.speech_lang() if captioner.roles else args.lang
+        captioner.stream_q, captioner.stream_loop, captioner.stream_lang = audio_q, loop, lang
         try:
-            async for ev in transcribe(audio_q, args.lang, "PCM_24KHZ"):
+            async for ev in transcribe(audio_q, lang, "PCM_24KHZ"):
                 if failures:
                     print("Reconnected to Muse.", flush=True)
                     failures = 0
@@ -875,6 +903,11 @@ async def stream(loop, args, captioner, audio, target):
             elif offline and failures == 2:
                 print("No internet (can't reach Muse). Waiting for the Wi-Fi to come back...", flush=True)
             await asyncio.sleep(min(0.2 * 2 ** (failures - 1), 3.0))  # 0.2, 0.4, ... up to 3 s between tries
+            continue
+        if getattr(captioner, "speech_restart", False):  # restart_speech(): same audio, new language
+            captioner.speech_restart = False
+            if args.file:
+                ender.cancel()
             continue
         if args.file:
             await ender
@@ -947,6 +980,9 @@ async def run_two_way(args):
             hub.broadcast(msg)
         for c in (them, me):
             c.catch_up()
+            if roles.fixed:  # you said who speaks what: transcribe each person in their own language from now on.
+                c.restart_speech()  # (A mid-call guess waits for the next reconnect: reconnecting then made
+                                    # interruptions less reliable, tools/check_two_way.py --swap.)
     fixed = None if args.telugu_speaker == "auto" else args.telugu_speaker
     roles = Roles(fixed=fixed, default="me", on_change=on_roles)
     them = Captioner(args.lang, args.translator, args.keep_at, hub=HUB, side="them", roles=roles)
@@ -1123,6 +1159,7 @@ def main():
     p.add_argument("--voice-sample", help="audio of the caller to clone right away, e.g. a WhatsApp voice note (.opus/.m4a/.wav)")
     p.add_argument("--new-voice", action="store_true", help="relearn the caller's voice on this call (calling someone else)")
     p.add_argument("--caller", default="Grandma", help='who you are calling, e.g. "Ammamma" (used on the story page and prompts)')
+    p.add_argument("--me", default="You", help='your name, e.g. "Amar" (shown in the overlay and saved with the call)')
     p.add_argument("--no-story", action="store_true", help="don't keep a story page for this call")
     p.add_argument("--no-record", action="store_true", help="keep the story page but save no audio of the call")
     p.add_argument("--no-prompts", action="store_true", help="no live 'ask her' question suggestions")
@@ -1153,6 +1190,9 @@ def main():
 
     from websockets.sync.server import serve
     pages = [(HUB, port)] + ([(ME_HUB, port + 2)] if args.two_way else [])
+    for hub, _ in pages:  # who's on the call, sent to every page when it connects
+        hub.current["call"] = {"type": "call", "you": args.me, "caller": args.caller}
+    print(f"Call: {args.me} -> {args.caller}", flush=True)
     for hub, hub_port in pages:
         server = serve(hub.handler, "localhost", hub_port, process_request=serve_overlay)
         threading.Thread(target=server.serve_forever, daemon=True).start()

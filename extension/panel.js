@@ -19,7 +19,7 @@ const tellParent = (msg) => parent.postMessage({ source: "weave-panel", part: PA
 
 // ---------- connection ----------
 let ws = null;
-const conn = { on: false, name: "" };
+const conn = { on: false, name: "", me: "" };  // name: who you're calling; me: you (the engine's "call" message)
 function connect() {
   try { ws = new WebSocket(WS_URL); } catch { setTimeout(connect, 2500); return; }
   ws.onopen = () => {
@@ -55,7 +55,11 @@ function connectYou() {
   };
 }
 function status() {
-  if (PART === "captions") { tellParent({ kind: "status", connected: conn.on, name: conn.name ? `listening to ${conn.name}` : "" }); renderCaptions(); }
+  if (PART === "captions") {
+    const who = conn.me && conn.name ? `${conn.me} ↔ ${conn.name}` : conn.name ? `listening to ${conn.name}` : "";
+    tellParent({ kind: "status", connected: conn.on, name: who });
+    renderCaptions();
+  }
 }
 
 // ---------- captions ----------
@@ -93,7 +97,7 @@ function renderCaptions() {
   const statusText = !conn.on ? `Waiting for the Weave engine (${esc(WS_URL)})` : cap.speaking ? `${esc(who)} is speaking…` : `Listening to ${esc(who)}`;
   const lines = cap.lines.map((l, i) => `
     <div class="line ${i < cap.lines.length - 1 || cap.partial ? "old" : ""}">
-      <div class="orig ${l.english && !l.you ? "faint" : l.you ? "" : "te"}">${l.you ? `<span class="tag you">You</span>${esc(l.orig)}` : l.english ? "said in English" : esc(l.orig)}</div>
+      <div class="orig ${l.english && !l.you ? "faint" : l.you ? "" : "te"}">${l.you ? `<span class="tag you">${esc(conn.me || "You")}</span>${esc(l.orig)}` : l.english ? "said in English" : esc(l.orig)}</div>
       ${l.english ? `<div class="en">${l.tag ? `<span class="tag">${esc(l.tag)}</span>` : ""}${esc(l.orig)}</div>`
         : l.you ? (l.english ? "" : `<div class="en te ${l.pending ? "pending" : ""}">${l.pending ? "translating…" : esc(l.en)}</div>`)
         : `<div class="en ${l.pending ? (l.draft ? "draft" : "pending") : ""}">${l.tag ? `<span class="tag">${esc(l.tag)}</span>` : ""}${l.pending ? esc(l.draft || "translating…") : withKept(l.en, l.kept)}</div>`}
@@ -266,7 +270,8 @@ const LABELS = { idiom: "Saying", slang: "Slang", phrase: "Phrase", culture: "Cu
 
 // ---------- messages ----------
 function handle(m) {
-  if (m.caller && m.caller !== conn.name) { conn.name = m.caller; status(); }
+  if (m.type === "call") { conn.name = m.caller || conn.name; conn.me = m.you && m.you !== "You" ? m.you : ""; status(); }
+  else if (m.caller && m.caller !== conn.name) { conn.name = m.caller; status(); }
   if (PART === "captions") return handleCaptions(m);
   if (PART === "left") return handleLeft(m);
   if (PART === "right") return handleRight(m);
