@@ -28,6 +28,21 @@ function connect() {
   ws.onmessage = (e) => { let m; try { m = JSON.parse(e.data); } catch { return; } handle(m); };
 }
 function send(msg) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(msg)); }
+
+// Your side (subtitles.py --to-telugu, two ports up): what you said and the Telugu she heard, in the captions
+const YOU_URL = (() => { try { const u = new URL(WS_URL); u.port = String(Number(u.port || 80) + 2); return u.href.replace(/\/$/, ""); } catch { return null; } })();
+function connectYou() {
+  if (!YOU_URL) return;
+  let you;
+  try { you = new WebSocket(YOU_URL); } catch { setTimeout(connectYou, 5000); return; }
+  you.onclose = () => setTimeout(connectYou, 5000);
+  you.onerror = () => {};
+  you.onmessage = (e) => {
+    let m; try { m = JSON.parse(e.data); } catch { return; }
+    if (m.type !== "original" && m.type !== "english") return;
+    handleCaptions({ ...m, id: `you:${m.id}`, you: true });
+  };
+}
 function status() {
   if (PART === "captions") { tellParent({ kind: "status", connected: conn.on, name: conn.name ? `listening to ${conn.name}` : "" }); renderCaptions(); }
 }
@@ -60,8 +75,9 @@ function renderCaptions() {
   const statusText = !conn.on ? `Waiting for the Weave engine (${esc(WS_URL)})` : cap.speaking ? `${esc(who)} is speaking…` : `Listening to ${esc(who)}`;
   const lines = cap.lines.map((l, i) => `
     <div class="line ${i < cap.lines.length - 1 || cap.partial ? "old" : ""}">
-      <div class="orig ${l.english ? "faint" : "te"}">${l.english ? "said in English" : esc(l.orig)}</div>
+      <div class="orig ${l.english && !l.you ? "faint" : l.you ? "" : "te"}">${l.you ? `<span class="tag you">You</span>${esc(l.orig)}` : l.english ? "said in English" : esc(l.orig)}</div>
       ${l.english ? `<div class="en">${l.tag ? `<span class="tag">${esc(l.tag)}</span>` : ""}${esc(l.orig)}</div>`
+        : l.you ? (l.english ? "" : `<div class="en te ${l.pending ? "pending" : ""}">${l.pending ? "translating…" : esc(l.en)}</div>`)
         : `<div class="en ${l.pending ? (l.draft ? "draft" : "pending") : ""}">${l.tag ? `<span class="tag">${esc(l.tag)}</span>` : ""}${l.pending ? esc(l.draft || "translating…") : withKept(l.en, l.kept)}</div>`}
     </div>`).join("");
   // While she's mid-sentence: her words so far, and a faded draft of the English that firms up when she finishes
@@ -242,7 +258,8 @@ function handleCaptions(m) {
     case "draft": cap.draft = m.text || ""; break;
     case "original": {
       const l = captionLine(m.id);
-      l.orig = m.text; l.english = m.route === "english"; l.pending = !l.english; cap.partial = ""; cap.speaking = false;
+      l.orig = m.text; l.english = m.route === "english"; l.pending = !l.english; l.you = !!m.you;
+      if (!m.you) { cap.partial = ""; cap.speaking = false; }
       l.draft = cap.draft; cap.draft = "";  // keep showing the draft until the final English arrives
       break;
     }
@@ -323,7 +340,7 @@ function handleRight(m) {
 }
 
 // ---------- start ----------
-if (PART === "captions") { renderCaptions(); new ResizeObserver(() => tellParent({ kind: "height", height: root.offsetHeight })).observe(root); }
+if (PART === "captions") { renderCaptions(); connectYou(); new ResizeObserver(() => tellParent({ kind: "height", height: root.offsetHeight })).observe(root); }
 if (PART === "left") { renderLeft(); setInterval(renderLeft, 15000); }
 if (PART === "right") { renderRight(); setInterval(renderRight, 5000); }
 connect();
