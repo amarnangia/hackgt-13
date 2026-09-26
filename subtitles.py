@@ -6,6 +6,7 @@
 import argparse
 import asyncio
 import atexit
+import glob
 import http
 import json
 import mimetypes
@@ -49,6 +50,7 @@ LOCAL_DEADLINE_S = 1.2  # after this, race Muse Spark against the local translat
 
 clients = set()
 on_client_message = None  # set by main(): handles clicks sent from the overlay
+welcome = []  # sent to each page that connects before she starts talking (the next-call starter)
 
 
 def broadcast(msg):
@@ -62,6 +64,8 @@ def broadcast(msg):
 
 def ws_handler(conn):
     clients.add(conn)
+    for msg in list(welcome):
+        conn.send(json.dumps(msg, ensure_ascii=False))
     try:
         for message in conn:
             if on_client_message:
@@ -223,6 +227,7 @@ class Captioner:
             if self.garden and route != "english" and hits:
                 self._plant(hits)
             broadcast({"type": "english", "id": seg_id, "text": english, "route": route, "kept": kept})
+            welcome.clear()  # the call is under way; pages opened from now on don't need the starter
             row = self.latency.finished(marks, sentence, english)
             row["route"] = route
             usable = self.decider and not english.startswith("(")
@@ -245,6 +250,9 @@ class Captioner:
             broadcast({"type": "details", "id": seg_id,
                        "intent": decision["intent"] if decision else None, "cards": self._cards(sentence, decision)})
             picture = self._picture(seg_id, hits, full_english, known_before)
+            if self.prompter and route != "english":
+                import topics
+                self.prompter.offer(topics.about(hits, picture, self.lexicon.entries.get(self.lang)))
             row["laya"] = decision["seconds"] if decision else None
             intent = decision["intent"] if decision else None
             if self.recorder:
@@ -319,10 +327,14 @@ class Captioner:
 
     def _cards(self, sentence, decision):
         """Word-list matches in what grandma said (exact), else Laya's category guess for the English line."""
-        cards = [{"id": e["id"], "title": e["id"].replace("_vocative", "").replace("_", " ").title(),
-                  "category": e["category"], "note": e.get("note", "")} for e in self.lexicon.find(sentence, self.lang)]
+        # Titled with her word (romanized), or a proverb in her own words, not our internal id ("Noru Manchidaite")
+        title = lambda e: (e.get("roman") or (e["forms"][0] if e["category"] == "idiom" else e["id"].replace("_", " ").title())).strip(" ,^")
+        cards = [{"id": e["id"], "title": title(e), "category": e["category"], "note": e.get("note", "")}
+                 for e in self.lexicon.find(sentence, self.lang)]
         cards += [{"id": e["id"], "title": e["id"].replace("_", " ").title(), "category": e["category"],
                    "note": e.get("note", "")} for e in self.lexicon.find(sentence, "en")]  # English slang she used
+        seen = set()  # two list entries for the same word (ఊరు as "village" and as "hometown"): one card
+        cards = [c for c in cards if not (c["title"].lower() in seen or seen.add(c["title"].lower()))]
         if decision and decision["category"] != "none" and not any(c["category"] == decision["category"] for c in cards):
             cards.append({"id": None, "title": decision["category"].title(), "category": decision["category"], "note": ""})
         return cards
@@ -488,6 +500,24 @@ def watch_call_audio(audio, args):
                 warned_volume = False
 
 
+def next_call_starter(caller, this_call=None):
+    """A question from the last call's story page ("questions for next time"), as an "ask her" prompt."""
+    from calls import CALLS_DIR
+    for f in sorted(glob.glob(os.path.join(CALLS_DIR, "*", "call.json")), reverse=True):
+        try:
+            call = json.load(open(f, encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        story = call.get("story") or {}
+        if call.get("id") == this_call or call.get("caller", "").lower() != caller.lower() or not story.get("questions"):
+            continue
+        q = story["questions"][0]
+        if q.get("telugu") and q.get("roman"):
+            return {"type": "prompt", "caller": caller, "telugu": q["telugu"], "roman": q["roman"], "english": q.get("english", ""),
+                    "context": f"Last call: {story.get('title') or 'your last call'}"}
+    return None
+
+
 def finish_call(captioner, args):
     """Turn the call into its story page and update the family dictionary."""
     if not captioner.recorder:
@@ -533,6 +563,11 @@ async def listen(args, captioner):
                 captioner.recorder.add_prompt(q)
             print(f"  [ask {args.caller}: {q['roman']}  ({q['english']})]", flush=True)
         captioner.prompter = StoryPrompter(captioner.decider, args.caller, on_prompt, cooldown_s=args.prompt_every)
+        starter = next_call_starter(args.caller, captioner.recorder.id if captioner.recorder else None)
+        if starter:  # a question the last call's story suggested, to open this one with
+            welcome.append(starter)
+            broadcast(starter)
+            print(f"  [to start: ask {args.caller}: {starter['roman']}  ({starter['english']})]", flush=True)
     captioner.speak_all = args.speak == "all"
     captioner.questions_only = args.speak == "questions"
     if not args.no_voice:  # load before audio starts, or the first seconds of the call are lost

@@ -69,7 +69,9 @@ let askTimer = null;
 // A question the grandkid can ask in Telugu when grandma pauses in a story.
 function showAsk(m) {
   const ask = document.getElementById("ask");
-  ask.querySelector(".label").textContent = "💬 Ask " + (m.caller || "her") + ":";
+  // m.context: the next-call starter ("Last call: ..."); m.about: something she just mentioned (topics.py)
+  ask.querySelector(".label").textContent = (m.context ? "💬 " + m.context + " · ask " : "💬 Ask ") + (m.caller || "her")
+    + (m.about ? " about " + m.about : "") + ":";
   ask.querySelector(".te").textContent = m.telugu;
   ask.querySelector(".roman").textContent = "“" + m.roman + "”";
   ask.querySelector(".meaning").textContent = m.english;

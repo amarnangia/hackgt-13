@@ -117,7 +117,7 @@ function render() {
 let askTimer = 0, cardTimer = 0;
 function showAsk(m) {
   const a = $("ask");
-  a.innerHTML = `<span class="eyebrow" style="color:var(--accent)">Ask</span><span class="te">${esc(m.telugu)}</span><span class="rom">“${esc(m.roman)}”</span><span class="en">${esc(m.english || "")}</span>`;
+  a.innerHTML = `<span class="eyebrow" style="color:var(--accent)">${m.context ? esc(m.context) + " · ask" : "Ask" + (m.about ? " about " + esc(m.about) : "")}</span><span class="te">${esc(m.telugu)}</span><span class="rom">“${esc(m.roman)}”</span><span class="en">${esc(m.english || "")}</span>`;
   a.hidden = false; $("prev").hidden = true; tell("line");
   clearTimeout(askTimer); askTimer = setTimeout(() => { a.hidden = true; $("prev").hidden = false; }, 25000);
 }

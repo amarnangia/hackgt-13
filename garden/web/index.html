@@ -959,7 +959,9 @@ function addAsk(m) {
   $("#s-empty")?.remove();
   const el = document.createElement("article");
   el.className = "ask";
-  el.innerHTML = `<div class="ask-h"><span class="eyebrow" style="color:var(--accent)">Ask ${esc(state.active?.name || m.caller || "her")}</span>
+  // m.context: the next-call starter ("Last call: ..."); m.about: something she just mentioned (topics.py)
+  const who = esc(state.active?.name || m.caller || "her"), about = m.about ? ` about ${esc(m.about)}` : "";
+  el.innerHTML = `<div class="ask-h"><span class="eyebrow" style="color:var(--accent)">${m.context ? `${esc(m.context)} · ask ${who}` : `Ask ${who}${about}`}</span>
       ${"speechSynthesis" in window ? `<button class="say" aria-label="Hear it">${icon("vol")}</button>` : ""}</div>
     <div class="ask-te te">${esc(m.telugu)}</div><div class="ask-roman">“${esc(m.roman)}”</div><div class="ask-en">${esc(m.english || "")}</div>`;
   el.querySelector(".say")?.addEventListener("click", (e) => {
@@ -1063,7 +1065,7 @@ function floatCard(c, ms) {
 function floatAsk(m) {
   const win = float.win; if (!win) return;
   const d = win.document, el = d.getElementById("fl-ask"), prev = d.getElementById("fl-prev");
-  el.innerHTML = `<span class="eyebrow" style="color:var(--accent)">Ask</span><span class="te">${esc(m.telugu)}</span><span class="rom">“${esc(m.roman)}”</span><span class="en">${esc(m.english || "")}</span>`;
+  el.innerHTML = `<span class="eyebrow" style="color:var(--accent)">${m.context ? esc(m.context) + " · ask" : "Ask" + (m.about ? " about " + esc(m.about) : "")}</span><span class="te">${esc(m.telugu)}</span><span class="rom">“${esc(m.roman)}”</span><span class="en">${esc(m.english || "")}</span>`;
   el.hidden = false; prev.hidden = true;
   clearTimeout(float.askTimer);
   float.askTimer = setTimeout(() => { el.hidden = true; prev.hidden = false; }, 25000);

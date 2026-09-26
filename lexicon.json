@@ -2194,6 +2194,1743 @@
    ],
    "category": "idiom",
    "note": "'Too much of anything is bad', a Sanskrit saying elders use"
+  },
+  {
+   "id": "gavvalu",
+   "forms": [
+    "గవ్వలు"
+   ],
+   "translate_as": "shell-shaped sweets",
+   "roman": "gavvalu",
+   "category": "food",
+   "note": "Little shell-shaped fried sweets coated in jaggery, made for festivals"
+  },
+  {
+   "id": "sunnundalu",
+   "forms": [
+    "సున్నుండలు",
+    "సున్నుండ"
+   ],
+   "translate_as": "urad dal laddus",
+   "roman": "sunnundalu",
+   "category": "food",
+   "note": "Laddus of roasted urad dal, jaggery and ghee; a classic Andhra sweet"
+  },
+  {
+   "id": "punugulu",
+   "forms": [
+    "పునుగులు"
+   ],
+   "translate_as": "punugulu fritters",
+   "roman": "punugulu",
+   "category": "food",
+   "note": "Crispy fried balls of dosa batter, a rainy-evening snack"
+  },
+  {
+   "id": "pulusu",
+   "forms": [
+    "పులుసు"
+   ],
+   "translate_as": "tamarind stew",
+   "roman": "pulusu",
+   "category": "food",
+   "note": "Tangy tamarind stew with vegetables or fish"
+  },
+  {
+   "id": "chepala_pulusu",
+   "forms": [
+    "చేపల పులుసు"
+   ],
+   "translate_as": "fish curry",
+   "roman": "chepala pulusu",
+   "category": "food",
+   "note": "Fish simmered in tangy tamarind gravy, a coastal Andhra favourite"
+  },
+  {
+   "id": "kodi_kura",
+   "forms": [
+    "కోడి కూర",
+    "చికెన్ కూర"
+   ],
+   "translate_as": "chicken curry",
+   "roman": "kodi kura",
+   "category": "food",
+   "note": "Spicy Andhra chicken curry"
+  },
+  {
+   "id": "gutti_vankaya",
+   "forms": [
+    "గుత్తి వంకాయ",
+    "గుత్తొంకాయ",
+    "గుత్తి వంకాయ కూర"
+   ],
+   "translate_as": "stuffed brinjal curry",
+   "roman": "gutti vankaya",
+   "category": "food",
+   "note": "Baby eggplants stuffed with a peanut-sesame masala; a wedding-feast classic"
+  },
+  {
+   "id": "bendakaya",
+   "forms": [
+    "బెండకాయ",
+    "బెండకాయలు",
+    "బెండకాయ వేపుడు"
+   ],
+   "translate_as": "okra",
+   "roman": "bendakaya",
+   "category": "food",
+   "note": "Okra (ladies' finger), often fried crisp"
+  },
+  {
+   "id": "munagakaya",
+   "forms": [
+    "మునగకాయ",
+    "మునక్కాయ",
+    "మునగకాయలు",
+    "మునక్కాయలు"
+   ],
+   "translate_as": "drumsticks",
+   "roman": "munagakaya",
+   "category": "food",
+   "note": "Drumstick (moringa) pods; you suck the inside out of them in sambar and pulusu"
+  },
+  {
+   "id": "dondakaya",
+   "forms": [
+    "దొండకాయ",
+    "దొండకాయలు"
+   ],
+   "translate_as": "ivy gourd",
+   "roman": "dondakaya",
+   "category": "food",
+   "note": "Ivy gourd, a crunchy little vegetable stir-fried Andhra style"
+  },
+  {
+   "id": "ulavacharu",
+   "forms": [
+    "ఉలవచారు"
+   ],
+   "translate_as": "horse gram soup",
+   "roman": "ulavacharu",
+   "category": "food",
+   "note": "Thick, smoky horse-gram soup, an Andhra delicacy"
+  },
+  {
+   "id": "pongali",
+   "forms": [
+    "పొంగలి",
+    "చక్కెర పొంగలి",
+    "చక్కర పొంగలి"
+   ],
+   "translate_as": "pongal",
+   "roman": "pongali",
+   "category": "food",
+   "note": "Rice and lentils cooked with ghee; made sweet with jaggery for festivals"
+  },
+  {
+   "id": "dibba_rotti",
+   "forms": [
+    "దిబ్బ రొట్టె",
+    "దిబ్బరొట్టె"
+   ],
+   "translate_as": "thick rice pancake",
+   "roman": "dibba rotti",
+   "category": "food",
+   "note": "A thick, crusty pancake of urad dal and rice"
+  },
+  {
+   "id": "kajjikayalu",
+   "forms": [
+    "కజ్జికాయలు",
+    "కజ్జికాయ"
+   ],
+   "translate_as": "sweet dumplings",
+   "roman": "kajjikayalu",
+   "category": "food",
+   "note": "Fried half-moon pastries stuffed with coconut and jaggery"
+  },
+  {
+   "id": "palakova",
+   "forms": [
+    "పాలకోవా",
+    "కోవా"
+   ],
+   "translate_as": "milk sweet",
+   "roman": "palakova",
+   "category": "food",
+   "note": "Soft fudge made by slowly cooking down milk"
+  },
+  {
+   "id": "bajji",
+   "forms": [
+    "మిరపకాయ బజ్జీ",
+    "మిరపకాయ బజ్జీలు",
+    "బజ్జీలు",
+    "బజ్జీ"
+   ],
+   "translate_as": "fritters",
+   "roman": "bajji",
+   "category": "food",
+   "note": "Chillies or vegetables dipped in gram-flour batter and fried; rainy-day snack"
+  },
+  {
+   "id": "garelu",
+   "forms": [
+    "గారెలు",
+    "గారె"
+   ],
+   "translate_as": "lentil doughnuts",
+   "roman": "garelu",
+   "category": "food",
+   "note": "Crispy urad-dal doughnuts, made for festivals and guests"
+  },
+  {
+   "id": "atukulu",
+   "forms": [
+    "అటుకులు"
+   ],
+   "translate_as": "flattened rice",
+   "roman": "atukulu",
+   "category": "food",
+   "note": "Flattened rice (poha), cooked with peanuts and onions"
+  },
+  {
+   "id": "taati_munjalu",
+   "forms": [
+    "తాటి ముంజలు",
+    "ముంజలు"
+   ],
+   "translate_as": "ice apples",
+   "roman": "taati munjalu",
+   "category": "food",
+   "note": "Cool, jelly-like palm fruit eaten in the summer heat"
+  },
+  {
+   "id": "ugadi_pachadi",
+   "forms": [
+    "ఉగాది పచ్చడి"
+   ],
+   "translate_as": "Ugadi chutney",
+   "roman": "ugadi pachadi",
+   "category": "food",
+   "note": "Six tastes in one bite (sweet, sour, bitter, spicy, salty, tangy): life's joys and sorrows, eaten on Ugadi"
+  },
+  {
+   "id": "panakam",
+   "forms": [
+    "పానకం"
+   ],
+   "translate_as": "jaggery drink",
+   "roman": "panakam",
+   "category": "food",
+   "note": "Cool jaggery, pepper and cardamom drink served on Sri Rama Navami"
+  },
+  {
+   "id": "majjiga",
+   "forms": [
+    "మజ్జిగ"
+   ],
+   "translate_as": "buttermilk",
+   "roman": "majjiga",
+   "category": "food",
+   "note": "Spiced buttermilk, the summer drink in every Telugu home"
+  },
+  {
+   "id": "karam_podi",
+   "forms": [
+    "కారప్పొడి",
+    "కారం పొడి"
+   ],
+   "translate_as": "spice powder",
+   "roman": "karam podi",
+   "category": "food",
+   "note": "Spicy lentil powder mixed into hot rice with ghee (\"gunpowder\")"
+  },
+  {
+   "id": "tiffin_box",
+   "forms": [
+    "టిఫిన్ బాక్స్",
+    "క్యారేజీ",
+    "క్యారేజ్"
+   ],
+   "translate_as": "lunch box",
+   "roman": "carriage",
+   "category": "culture",
+   "note": "Stacked steel lunch carrier sent to school and the office"
+  },
+  {
+   "id": "kattela_poyyi",
+   "forms": [
+    "కట్టెల పొయ్యి",
+    "కట్టెలపొయ్యి"
+   ],
+   "translate_as": "wood stove",
+   "roman": "kattela poyyi",
+   "category": "culture",
+   "note": "Wood-fire stove; grandmothers say food tasted better cooked on it"
+  },
+  {
+   "id": "bhogi",
+   "forms": [
+    "భోగి మంటలు",
+    "భోగి మంట",
+    "భోగికి",
+    "భోగి"
+   ],
+   "translate_as": "Bhogi",
+   "roman": "Bhogi",
+   "category": "festival",
+   "note": "First day of Sankranti: a dawn bonfire burns old things to welcome the new",
+   "translate_forms": {
+    "భోగి మంటలు": "Bhogi bonfires",
+    "భోగి మంట": "Bhogi bonfire",
+    "భోగికి": "for Bhogi"
+   }
+  },
+  {
+   "id": "bhogi_pallu",
+   "forms": [
+    "భోగి పళ్ళు",
+    "భోగిపళ్ళు",
+    "భోగి పండ్లు"
+   ],
+   "translate_as": "Bhogi fruits",
+   "roman": "bhogi pallu",
+   "category": "culture",
+   "note": "Jujube fruits and coins showered on children's heads at Bhogi as a blessing"
+  },
+  {
+   "id": "kanuma",
+   "forms": [
+    "కనుమ",
+    "కనుమ పండుగ"
+   ],
+   "translate_as": "Kanuma",
+   "roman": "Kanuma",
+   "category": "festival",
+   "note": "Third day of Sankranti, when families thank and decorate their cattle"
+  },
+  {
+   "id": "gangireddu",
+   "forms": [
+    "గంగిరెద్దు",
+    "గంగిరెద్దులు",
+    "గంగిరెద్దుల"
+   ],
+   "translate_as": "decorated bulls",
+   "roman": "gangireddu",
+   "category": "culture",
+   "note": "Bulls decked in colourful cloth that go house to house at Sankranti, nodding and bowing to music"
+  },
+  {
+   "id": "haridasu",
+   "forms": [
+    "హరిదాసు",
+    "హరిదాసులు"
+   ],
+   "translate_as": "Haridasu singer",
+   "roman": "haridasu",
+   "category": "culture",
+   "note": "A singer with a copper pot on his head who walks the streets at dawn during Sankranti month"
+  },
+  {
+   "id": "gobbemmalu",
+   "forms": [
+    "గొబ్బెమ్మలు",
+    "గొబ్బెమ్మ"
+   ],
+   "translate_as": "gobbemmalu",
+   "roman": "gobbemmalu",
+   "category": "culture",
+   "note": "Little cow-dung mounds topped with flowers, set on the muggulu at Sankranti"
+  },
+  {
+   "id": "bonalu",
+   "forms": [
+    "బోనాలు"
+   ],
+   "translate_as": "Bonalu",
+   "roman": "Bonalu",
+   "category": "festival",
+   "note": "Hyderabad's festival where women carry decorated pots of food to the goddess"
+  },
+  {
+   "id": "sri_rama_navami",
+   "forms": [
+    "శ్రీరామనవమి",
+    "శ్రీ రామ నవమి",
+    "రామనవమి",
+    "శ్రీరామనవమికి"
+   ],
+   "translate_as": "Sri Rama Navami",
+   "roman": "Sri Rama Navami",
+   "category": "festival",
+   "note": "Lord Rama's birthday, with panakam and vadapappu"
+  },
+  {
+   "id": "varalakshmi_vratam",
+   "forms": [
+    "వరలక్ష్మీ వ్రతం",
+    "వరలక్ష్మి వ్రతం",
+    "వరలక్ష్మీ వ్రతానికి"
+   ],
+   "translate_as": "Varalakshmi Vratam",
+   "roman": "Varalakshmi Vratam",
+   "category": "festival",
+   "note": "A puja women do to the goddess Lakshmi for the family's well-being"
+  },
+  {
+   "id": "rakhi",
+   "forms": [
+    "రాఖీ",
+    "రాఖీ పండుగ",
+    "రాఖీలు"
+   ],
+   "translate_as": "Rakhi",
+   "roman": "Rakhi",
+   "category": "festival",
+   "note": "Sisters tie a thread on their brothers' wrists; brothers promise to look after them"
+  },
+  {
+   "id": "krishnashtami",
+   "forms": [
+    "కృష్ణాష్టమి",
+    "కృష్ణాష్టమికి"
+   ],
+   "translate_as": "Krishnashtami",
+   "roman": "Krishnashtami",
+   "category": "festival",
+   "note": "Krishna's birthday; little footprints are drawn from the door to the puja room"
+  },
+  {
+   "id": "dasara",
+   "forms": [
+    "దసరా",
+    "దసరాకి",
+    "దసరా పండుగ"
+   ],
+   "translate_as": "Dasara",
+   "roman": "Dasara",
+   "category": "festival",
+   "note": "Ten-day festival of the goddess; kids get long school holidays"
+  },
+  {
+   "id": "holi",
+   "forms": [
+    "హోలీ",
+    "హోలీ పండుగ"
+   ],
+   "translate_as": "Holi",
+   "roman": "Holi",
+   "category": "festival",
+   "note": "Festival of colours"
+  },
+  {
+   "id": "karthika_masam",
+   "forms": [
+    "కార్తీక మాసం",
+    "కార్తీకమాసం",
+    "కార్తీక దీపం"
+   ],
+   "translate_as": "the month of Karthikam",
+   "roman": "Karthika masam",
+   "category": "festival",
+   "note": "A holy month of lamps: lamps floated on water, fasting and temple visits"
+  },
+  {
+   "id": "atla_taddi",
+   "forms": [
+    "అట్లతద్ది"
+   ],
+   "translate_as": "Atla Taddi",
+   "roman": "Atla Taddi",
+   "category": "festival",
+   "note": "Girls' festival of swings, dosas (atlu) and fasting"
+  },
+  {
+   "id": "deepam",
+   "forms": [
+    "దీపం",
+    "దీపాలు"
+   ],
+   "roman": "deepam",
+   "category": "culture",
+   "note": "Oil lamp, lit every evening at home and at the tulasi plant",
+   "substitute": false,
+   "match_english": [
+    "lamp",
+    "lamps"
+   ]
+  },
+  {
+   "id": "tholu_bommalata",
+   "forms": [
+    "తోలుబొమ్మలాట",
+    "తోలు బొమ్మలాట"
+   ],
+   "translate_as": "leather puppet show",
+   "roman": "tholu bommalata",
+   "category": "culture",
+   "note": "Andhra's shadow-puppet theatre: leather puppets telling Ramayana stories"
+  },
+  {
+   "id": "burrakatha",
+   "forms": [
+    "బుర్రకథ",
+    "బుర్ర కథ"
+   ],
+   "translate_as": "Burrakatha",
+   "roman": "burrakatha",
+   "category": "culture",
+   "note": "Storytelling with songs and drums by a trio of performers"
+  },
+  {
+   "id": "kolatam",
+   "forms": [
+    "కోలాటం"
+   ],
+   "translate_as": "stick dance",
+   "roman": "kolatam",
+   "category": "culture",
+   "note": "Folk dance with pairs of sticks clicked together in rhythm"
+  },
+  {
+   "id": "uyyala",
+   "forms": [
+    "ఉయ్యాల",
+    "ఉయ్యాలలో",
+    "ఉయ్యాల జంపాల"
+   ],
+   "translate_as": "swing",
+   "roman": "uyyala",
+   "category": "culture",
+   "note": "The swing hung from a tree or in the hall; 'uyyala jampala' is a lullaby"
+  },
+  {
+   "id": "mallepoolu",
+   "forms": [
+    "మల్లెపూలు",
+    "మల్లెపువ్వులు",
+    "మల్లెలు"
+   ],
+   "translate_as": "jasmine flowers",
+   "roman": "mallepoolu",
+   "category": "culture",
+   "note": "Jasmine strings worn in the hair every evening"
+  },
+  {
+   "id": "banti_poolu",
+   "forms": [
+    "బంతి పూలు",
+    "బంతిపూలు"
+   ],
+   "translate_as": "marigolds",
+   "roman": "banti poolu",
+   "category": "culture",
+   "note": "Marigolds, strung into garlands for festivals and doorways"
+  },
+  {
+   "id": "tamara",
+   "forms": [
+    "తామర పువ్వు",
+    "తామరపువ్వు",
+    "తామర పూలు"
+   ],
+   "translate_as": "lotus",
+   "roman": "tamara puvvu",
+   "category": "culture",
+   "note": "Lotus, the flower in temple ponds and in every goddess picture"
+  },
+  {
+   "id": "pasupu",
+   "forms": [
+    "పసుపు కుంకుమ",
+    "పసుపు కుంకుమలు",
+    "పసుపు కొమ్ములు",
+    "పసుపు రాసి",
+    "పసుపు పూసి",
+    "పసుపు రాసుకుని"
+   ],
+   "roman": "pasupu",
+   "category": "culture",
+   "note": "Turmeric: in cooking, on the doorstep, and on the bride before the wedding (పసుపు alone also means yellow)",
+   "substitute": false,
+   "match_english": [
+    "turmeric"
+   ]
+  },
+  {
+   "id": "kumkuma",
+   "forms": [
+    "కుంకుమ",
+    "కుంకుమ బొట్టు"
+   ],
+   "translate_as": "kumkum",
+   "roman": "kumkuma",
+   "category": "culture",
+   "note": "Red powder worn on the forehead; offered with turmeric as a blessing"
+  },
+  {
+   "id": "thoranam",
+   "forms": [
+    "తోరణం",
+    "తోరణాలు",
+    "మామిడి తోరణాలు"
+   ],
+   "translate_as": "mango-leaf garland",
+   "roman": "thoranam",
+   "category": "culture",
+   "note": "Mango leaves strung over the door for festivals and new beginnings"
+  },
+  {
+   "id": "vistari",
+   "forms": [
+    "విస్తరి",
+    "విస్తరాకు",
+    "అరిటాకు",
+    "అరటి ఆకు"
+   ],
+   "translate_as": "leaf plate",
+   "roman": "vistari",
+   "category": "culture",
+   "note": "Festival and wedding meals are served on a banana leaf or leaf plate"
+  },
+  {
+   "id": "kondapalli_bommalu",
+   "forms": [
+    "కొండపల్లి బొమ్మలు"
+   ],
+   "translate_as": "Kondapalli toys",
+   "roman": "Kondapalli bommalu",
+   "category": "culture",
+   "note": "Colourful wooden toys from Kondapalli village near Vijayawada"
+  },
+  {
+   "id": "etikoppaka",
+   "forms": [
+    "ఏటికొప్పాక బొమ్మలు",
+    "లక్క బొమ్మలు"
+   ],
+   "translate_as": "lacquer toys",
+   "roman": "Etikoppaka bommalu",
+   "category": "culture",
+   "note": "Smooth, bright lacquered wooden toys from Etikoppaka"
+  },
+  {
+   "id": "panchangam",
+   "forms": [
+    "పంచాంగం",
+    "పంచాంగ శ్రవణం"
+   ],
+   "translate_as": "almanac",
+   "roman": "panchangam",
+   "category": "culture",
+   "note": "The Telugu almanac, read aloud on Ugadi to foretell the year"
+  },
+  {
+   "id": "muhurtham",
+   "forms": [
+    "ముహూర్తం",
+    "మంచి ముహూర్తం"
+   ],
+   "translate_as": "auspicious time",
+   "roman": "muhurtham",
+   "category": "culture",
+   "note": "An auspicious time picked from the almanac for weddings, housewarmings and journeys"
+  },
+  {
+   "id": "gruhapravesham",
+   "forms": [
+    "గృహప్రవేశం",
+    "గృహప్రవేశానికి"
+   ],
+   "translate_as": "housewarming",
+   "roman": "gruhapravesham",
+   "category": "festival",
+   "note": "Housewarming: milk is boiled over for plenty, and the family enters at the auspicious time"
+  },
+  {
+   "id": "seemantham",
+   "forms": [
+    "సీమంతం"
+   ],
+   "translate_as": "baby shower",
+   "roman": "seemantham",
+   "category": "festival",
+   "note": "Traditional baby shower: glass bangles and blessings for the mother-to-be"
+  },
+  {
+   "id": "upanayanam",
+   "forms": [
+    "ఉపనయనం",
+    "ఒడుగు"
+   ],
+   "translate_as": "thread ceremony",
+   "roman": "upanayanam",
+   "category": "festival",
+   "note": "Sacred-thread ceremony for boys"
+  },
+  {
+   "id": "barasala",
+   "forms": [
+    "బారసాల"
+   ],
+   "translate_as": "naming ceremony",
+   "roman": "barasala",
+   "category": "festival",
+   "note": "A baby's naming ceremony, around the 21st day, with the baby in a cradle"
+  },
+  {
+   "id": "annaprasana",
+   "forms": [
+    "అన్నప్రాసన"
+   ],
+   "translate_as": "first rice ceremony",
+   "roman": "annaprasana",
+   "category": "festival",
+   "note": "A baby's first taste of rice, at about six months"
+  },
+  {
+   "id": "talambralu",
+   "forms": [
+    "తలంబ్రాలు"
+   ],
+   "translate_as": "wedding rice shower",
+   "roman": "talambralu",
+   "category": "culture",
+   "note": "At the wedding, bride and groom pour turmeric rice over each other's heads, laughing"
+  },
+  {
+   "id": "jeelakarra_bellam",
+   "forms": [
+    "జీలకర్ర బెల్లం"
+   ],
+   "translate_as": "cumin-jaggery blessing",
+   "roman": "jeelakarra bellam",
+   "category": "culture",
+   "note": "The wedding's key moment: cumin-jaggery paste placed on each other's heads"
+  },
+  {
+   "id": "mangalasutram",
+   "forms": [
+    "మంగళసూత్రం",
+    "తాళిబొట్టు"
+   ],
+   "translate_as": "mangalsutra",
+   "roman": "mangalasutram",
+   "category": "clothing",
+   "note": "The sacred necklace a groom ties at the wedding"
+  },
+  {
+   "id": "mettelu",
+   "forms": [
+    "మెట్టెలు"
+   ],
+   "translate_as": "toe rings",
+   "roman": "mettelu",
+   "category": "clothing",
+   "note": "Silver toe rings worn by married women"
+  },
+  {
+   "id": "pattilu",
+   "forms": [
+    "పట్టీలు",
+    "కాళ్ళ పట్టీలు",
+    "గజ్జెలు"
+   ],
+   "translate_as": "anklets",
+   "roman": "pattilu",
+   "category": "clothing",
+   "note": "Silver anklets that jingle as you walk"
+  },
+  {
+   "id": "pochampally",
+   "forms": [
+    "పోచంపల్లి",
+    "పోచంపల్లి చీర"
+   ],
+   "translate_as": "Pochampally",
+   "roman": "Pochampally",
+   "category": "clothing",
+   "note": "Pochampally ikat: silk woven in geometric patterns near Hyderabad"
+  },
+  {
+   "id": "kalamkari",
+   "forms": [
+    "కలంకారి"
+   ],
+   "translate_as": "Kalamkari",
+   "roman": "Kalamkari",
+   "category": "clothing",
+   "note": "Hand-painted or block-printed cloth telling stories from the epics"
+  },
+  {
+   "id": "poola_jada",
+   "forms": [
+    "పూలజడ",
+    "పూల జడ"
+   ],
+   "translate_as": "flower braid",
+   "roman": "poola jada",
+   "category": "clothing",
+   "note": "A braid covered in flowers, made for brides and little girls on festivals"
+  },
+  {
+   "id": "rolu",
+   "forms": [
+    "రోలు",
+    "రోకలి",
+    "రోట్లో",
+    "రోటి పచ్చడి"
+   ],
+   "translate_as": "grinding stone",
+   "roman": "rolu",
+   "category": "culture",
+   "note": "Stone mortar where chutneys were ground by hand"
+  },
+  {
+   "id": "nulaka_mancham",
+   "forms": [
+    "నులక మంచం",
+    "నవారు మంచం"
+   ],
+   "translate_as": "rope cot",
+   "roman": "nulaka mancham",
+   "category": "culture",
+   "note": "Rope cot, carried outside to sleep under the stars in summer"
+  },
+  {
+   "id": "godavari",
+   "forms": [
+    "గోదావరి",
+    "గోదారి",
+    "గోదావరిలో"
+   ],
+   "translate_as": "Godavari",
+   "roman": "Godavari",
+   "category": "place",
+   "note": "The great river of the Telugu states; Rajahmundry sits on its banks"
+  },
+  {
+   "id": "krishna_nadi",
+   "forms": [
+    "కృష్ణా నది",
+    "కృష్ణానది"
+   ],
+   "translate_as": "Krishna river",
+   "roman": "Krishna nadi",
+   "category": "place",
+   "note": "The river that flows past Vijayawada and Srisailam"
+  },
+  {
+   "id": "hyderabad",
+   "forms": [
+    "హైదరాబాద్",
+    "హైదరాబాదు",
+    "హైదరాబాదులో",
+    "హైదరాబాద్‌లో"
+   ],
+   "roman": "Hyderabad",
+   "category": "place",
+   "note": "Capital of Telangana: Charminar, biryani and the old city",
+   "substitute": false,
+   "match_english": [
+    "Hyderabad"
+   ]
+  },
+  {
+   "id": "vijayawada",
+   "forms": [
+    "విజయవాడ",
+    "బెజవాడ",
+    "విజయవాడలో"
+   ],
+   "roman": "Vijayawada",
+   "category": "place",
+   "note": "City on the Krishna river, home of the Kanaka Durga temple",
+   "substitute": false,
+   "match_english": [
+    "Vijayawada"
+   ]
+  },
+  {
+   "id": "vizag",
+   "forms": [
+    "వైజాగ్",
+    "విశాఖపట్నం",
+    "విశాఖ"
+   ],
+   "roman": "Vizag",
+   "category": "place",
+   "note": "Port city with beaches and hills on the Bay of Bengal",
+   "substitute": false,
+   "match_english": [
+    "Visakhapatnam",
+    "Vizag"
+   ]
+  },
+  {
+   "id": "araku",
+   "forms": [
+    "అరకు",
+    "అరకు లోయ"
+   ],
+   "translate_as": "Araku Valley",
+   "roman": "Araku",
+   "category": "place",
+   "note": "Misty coffee-growing valley in the Eastern Ghats"
+  },
+  {
+   "id": "srisailam",
+   "forms": [
+    "శ్రీశైలం"
+   ],
+   "translate_as": "Srisailam",
+   "roman": "Srisailam",
+   "category": "place",
+   "note": "Hill temple of Lord Shiva above the Krishna river"
+  },
+  {
+   "id": "tirupati",
+   "forms": [
+    "తిరుపతి",
+    "తిరుమల",
+    "తిరుపతికి",
+    "తిరుమలకి"
+   ],
+   "translate_as": "Tirupati",
+   "roman": "Tirupati",
+   "category": "place",
+   "note": "Hill temple of Lord Venkateswara; families go to offer their hair and bring back laddus"
+  },
+  {
+   "id": "bhadrachalam",
+   "forms": [
+    "భద్రాచలం"
+   ],
+   "translate_as": "Bhadrachalam",
+   "roman": "Bhadrachalam",
+   "category": "place",
+   "note": "Sri Rama temple town on the Godavari"
+  },
+  {
+   "id": "golconda",
+   "forms": [
+    "గోల్కొండ",
+    "గోలుకొండ"
+   ],
+   "translate_as": "Golconda",
+   "roman": "Golconda",
+   "category": "place",
+   "note": "Hilltop fort near Hyderabad, once famous for diamonds"
+  },
+  {
+   "id": "hussain_sagar",
+   "forms": [
+    "హుస్సేన్ సాగర్",
+    "ట్యాంక్ బండ్"
+   ],
+   "translate_as": "Hussain Sagar",
+   "roman": "Hussain Sagar",
+   "category": "place",
+   "note": "Lake in the middle of Hyderabad with a giant Buddha statue"
+  },
+  {
+   "id": "rajahmundry",
+   "forms": [
+    "రాజమండ్రి",
+    "రాజమహేంద్రవరం"
+   ],
+   "translate_as": "Rajahmundry",
+   "roman": "Rajahmundry",
+   "category": "place",
+   "note": "Town on the Godavari, known for its long river bridges"
+  },
+  {
+   "id": "warangal",
+   "forms": [
+    "వరంగల్",
+    "వరంగల్లు"
+   ],
+   "translate_as": "Warangal",
+   "roman": "Warangal",
+   "category": "place",
+   "note": "Old Kakatiya capital with a stone fort and the Thousand Pillar Temple"
+  },
+  {
+   "id": "palle",
+   "forms": [
+    "పల్లెటూరు",
+    "పల్లెటూర్లో",
+    "పల్లె"
+   ],
+   "translate_as": "village",
+   "roman": "palletooru",
+   "category": "place",
+   "note": "A village; many grandparents grew up in one"
+  },
+  {
+   "id": "daaba",
+   "forms": [
+    "డాబా మీద",
+    "డాబా"
+   ],
+   "translate_as": "rooftop terrace",
+   "roman": "daaba",
+   "category": "place",
+   "note": "Flat rooftop where families slept under the stars on summer nights"
+  },
+  {
+   "id": "cheruvu",
+   "forms": [
+    "చెరువు",
+    "చెరువులో",
+    "చెరువు గట్టు"
+   ],
+   "roman": "cheruvu",
+   "category": "place",
+   "note": "Village lake or pond where kids swam and buffaloes bathed",
+   "substitute": false,
+   "match_english": [
+    "pond",
+    "lake"
+   ]
+  },
+  {
+   "id": "rtc_bus",
+   "forms": [
+    "ఆర్టీసీ బస్సు",
+    "ఆర్టీసీ"
+   ],
+   "translate_as": "RTC bus",
+   "roman": "RTC bus",
+   "category": "vehicle",
+   "note": "The red state bus that goes to every village"
+  },
+  {
+   "id": "mamidi_chettu",
+   "forms": [
+    "మామిడి చెట్టు",
+    "మామిడిచెట్టు",
+    "మామిడి చెట్లు",
+    "మామిడి తోట",
+    "మామిడి తోటలో"
+   ],
+   "translate_as": "mango tree",
+   "roman": "mamidi chettu",
+   "category": "culture",
+   "note": "Mango tree; every village home seems to have one kids climbed",
+   "translate_forms": {
+    "మామిడి చెట్లు": "mango trees",
+    "మామిడి తోట": "mango orchard",
+    "మామిడి తోటలో": "in the mango orchard"
+   }
+  },
+  {
+   "id": "vepa",
+   "forms": [
+    "వేప చెట్టు",
+    "వేపచెట్టు",
+    "వేప పువ్వు",
+    "వేప"
+   ],
+   "translate_as": "neem tree",
+   "roman": "vepa",
+   "category": "culture",
+   "note": "Neem: its twigs were toothbrushes and its flowers go in Ugadi pachadi"
+  },
+  {
+   "id": "tulasi",
+   "forms": [
+    "తులసి కోట",
+    "తులసి"
+   ],
+   "translate_as": "holy basil",
+   "roman": "tulasi",
+   "category": "culture",
+   "note": "Holy basil, grown in a little altar in the courtyard and worshipped every morning"
+  },
+  {
+   "id": "chinta_chettu",
+   "forms": [
+    "చింత చెట్టు",
+    "చింతచెట్టు",
+    "చింతపండు"
+   ],
+   "translate_as": "tamarind",
+   "roman": "chinta",
+   "category": "culture",
+   "note": "Tamarind: the sour heart of pulihora and pulusu"
+  },
+  {
+   "id": "vamana_guntalu",
+   "forms": [
+    "వామన గుంటలు",
+    "వామనగుంటలు",
+    "ఒమన గుంటలు"
+   ],
+   "translate_as": "Vamana Guntalu",
+   "roman": "vamana guntalu",
+   "category": "culture",
+   "note": "A board game of 14 pits and seeds or shells, played by girls on the veranda"
+  },
+  {
+   "id": "ashta_chamma",
+   "forms": [
+    "అష్టా చమ్మా",
+    "అష్టాచమ్మా"
+   ],
+   "translate_as": "Ashta Chamma",
+   "roman": "ashta chamma",
+   "category": "culture",
+   "note": "A board game played with cowrie shells instead of dice"
+  },
+  {
+   "id": "gilli_danda",
+   "forms": [
+    "గిల్లీ దండా",
+    "బిళ్ళంగోడు",
+    "గోటీబిళ్ళ"
+   ],
+   "translate_as": "gilli danda",
+   "roman": "gilli danda",
+   "category": "culture",
+   "note": "Street game: hit a small wooden peg into the air with a stick"
+  },
+  {
+   "id": "kabaddi",
+   "forms": [
+    "కబడ్డీ"
+   ],
+   "translate_as": "kabaddi",
+   "roman": "kabaddi",
+   "category": "culture",
+   "note": "Tag-and-wrestle team game where you chant 'kabaddi' in a single breath"
+  },
+  {
+   "id": "carrom",
+   "forms": [
+    "క్యారమ్",
+    "క్యారం",
+    "క్యారమ్ బోర్డ్"
+   ],
+   "translate_as": "carrom",
+   "roman": "carrom",
+   "category": "culture",
+   "note": "Flick-the-striker board game played for hours in the summer holidays"
+  },
+  {
+   "id": "ntr",
+   "forms": [
+    "ఎన్టీఆర్",
+    "ఎన్టీ రామారావు",
+    "ఎన్.టి.ఆర్"
+   ],
+   "translate_as": "NTR",
+   "roman": "NTR",
+   "category": "culture",
+   "note": "N. T. Rama Rao, legendary film star who played gods and heroes (and became chief minister)"
+  },
+  {
+   "id": "anr",
+   "forms": [
+    "ఏఎన్నార్",
+    "నాగేశ్వరరావు",
+    "అక్కినేని"
+   ],
+   "translate_as": "ANR",
+   "roman": "ANR",
+   "category": "culture",
+   "note": "Akkineni Nageswara Rao, beloved film hero of the 1950s-70s"
+  },
+  {
+   "id": "ghantasala",
+   "forms": [
+    "ఘంటసాల"
+   ],
+   "translate_as": "Ghantasala",
+   "roman": "Ghantasala",
+   "category": "culture",
+   "note": "Legendary singer whose film songs every Telugu home knows by heart"
+  },
+  {
+   "id": "mayabazar",
+   "forms": [
+    "మాయాబజార్"
+   ],
+   "translate_as": "Mayabazar",
+   "roman": "Mayabazar",
+   "category": "culture",
+   "note": "1957 Telugu film classic every grandparent loves"
+  },
+  {
+   "id": "baahubali",
+   "forms": [
+    "బాహుబలి"
+   ],
+   "translate_as": "Baahubali",
+   "roman": "Baahubali",
+   "category": "culture",
+   "note": "Epic Telugu film blockbuster"
+  },
+  {
+   "id": "rrr",
+   "forms": [
+    "ఆర్ఆర్ఆర్",
+    "ట్రిపుల్ ఆర్",
+    "నాటు నాటు"
+   ],
+   "translate_as": "RRR",
+   "roman": "RRR",
+   "category": "culture",
+   "note": "Telugu blockbuster whose song 'Naatu Naatu' won an Oscar"
+  },
+  {
+   "id": "annamayya",
+   "forms": [
+    "అన్నమయ్య",
+    "అన్నమాచార్య"
+   ],
+   "translate_as": "Annamayya",
+   "roman": "Annamayya",
+   "category": "culture",
+   "note": "15th-century poet-saint who wrote thousands of songs to Lord Venkateswara"
+  },
+  {
+   "id": "tyagaraja",
+   "forms": [
+    "త్యాగరాజు",
+    "త్యాగరాజ"
+   ],
+   "translate_as": "Tyagaraja",
+   "roman": "Tyagaraja",
+   "category": "culture",
+   "note": "Great composer of Carnatic music; his songs are sung at every concert"
+  },
+  {
+   "id": "ramayanam",
+   "forms": [
+    "రామాయణం",
+    "రామాయణంలో"
+   ],
+   "translate_as": "the Ramayana",
+   "roman": "Ramayanam",
+   "category": "culture",
+   "note": "The epic of Rama and Sita; grandparents tell its stories at bedtime"
+  },
+  {
+   "id": "mahabharatam",
+   "forms": [
+    "మహాభారతం",
+    "మహాభారతంలో"
+   ],
+   "translate_as": "the Mahabharata",
+   "roman": "Mahabharatam",
+   "category": "culture",
+   "note": "The great epic of the Pandavas and Kauravas"
+  },
+  {
+   "id": "peddamma",
+   "forms": [
+    "పెద్దమ్మ"
+   ],
+   "translate_as": "aunt",
+   "roman": "peddamma",
+   "category": "family",
+   "note": "Mother's older sister (or father's older brother's wife)"
+  },
+  {
+   "id": "pedananna",
+   "forms": [
+    "పెదనాన్న",
+    "పెద్దనాన్న"
+   ],
+   "translate_as": "uncle",
+   "roman": "pedananna",
+   "category": "family",
+   "note": "Father's older brother (or mother's older sister's husband)"
+  },
+  {
+   "id": "atta",
+   "forms": [
+    "అత్తమ్మ",
+    "అత్త"
+   ],
+   "translate_as": "aunt",
+   "roman": "atta",
+   "category": "family",
+   "note": "Father's sister; also a mother-in-law"
+  },
+  {
+   "id": "vadina",
+   "forms": [
+    "వదిన",
+    "వదినా",
+    "వదినమ్మ"
+   ],
+   "translate_as": "sister-in-law",
+   "roman": "vadina",
+   "category": "family",
+   "note": "Older brother's wife"
+  },
+  {
+   "id": "maradalu",
+   "forms": [
+    "మరదలు"
+   ],
+   "translate_as": "sister-in-law",
+   "roman": "maradalu",
+   "category": "family",
+   "note": "Younger brother's wife; also a cousin who's a girl"
+  },
+  {
+   "id": "kodalu",
+   "forms": [
+    "కోడలు",
+    "కోడలికి"
+   ],
+   "translate_as": "daughter-in-law",
+   "roman": "kodalu",
+   "category": "family",
+   "note": "Daughter-in-law"
+  },
+  {
+   "id": "alludu",
+   "forms": [
+    "అల్లుడు",
+    "అల్లుడికి",
+    "అల్లుడు గారు"
+   ],
+   "translate_as": "son-in-law",
+   "roman": "alludu",
+   "category": "family",
+   "note": "Son-in-law, treated like royalty at Sankranti"
+  },
+  {
+   "id": "muttata",
+   "forms": [
+    "ముత్తాత",
+    "ముత్తాతయ్య"
+   ],
+   "translate_as": "great-grandfather",
+   "roman": "muttata",
+   "category": "family",
+   "note": "Great-grandfather"
+  },
+  {
+   "id": "muttavva",
+   "forms": [
+    "ముత్తవ్వ",
+    "ముత్తమ్మ",
+    "ముత్తాతమ్మ"
+   ],
+   "translate_as": "great-grandmother",
+   "roman": "muttavva",
+   "category": "family",
+   "note": "Great-grandmother"
+  },
+  {
+   "id": "chuttalu",
+   "forms": [
+    "చుట్టాలు",
+    "చుట్టాలకి",
+    "చుట్టాలందరూ"
+   ],
+   "translate_as": "relatives",
+   "roman": "chuttalu",
+   "category": "family",
+   "note": "Relatives: the big extended family that turns up for every festival"
+  },
+  {
+   "id": "chitti",
+   "forms": [
+    "చిట్టితల్లి",
+    "చిట్టి",
+    "చిన్నీ"
+   ],
+   "translate_as": "little darling",
+   "roman": "chitti",
+   "category": "family",
+   "note": "'Little darling', for a small child"
+  },
+  {
+   "id": "thalli",
+   "forms": [
+    "తల్లీ",
+    "అమ్మలు",
+    "అమ్మడు"
+   ],
+   "translate_as": "dear girl",
+   "roman": "thalli",
+   "category": "family",
+   "note": "'Thalli' (little mother) is how elders lovingly call a girl"
+  },
+  {
+   "id": "nayana",
+   "forms": [
+    "నాయనా",
+    "బాబూ"
+   ],
+   "translate_as": "dear boy",
+   "roman": "nayana",
+   "category": "family",
+   "note": "'Nayana' or 'babu': how elders lovingly call a boy"
+  },
+  {
+   "id": "chinnappudu",
+   "forms": [
+    "చిన్నప్పుడు",
+    "చిన్నతనంలో"
+   ],
+   "roman": "chinnappudu",
+   "category": "phrase",
+   "note": "'When I was little': the start of the best stories",
+   "substitute": false,
+   "match_english": [
+    "when I was little",
+    "when I was young",
+    "when I was a child",
+    "in my childhood",
+    "as a child",
+    "childhood"
+   ],
+   "ask": {
+    "telugu": "మీ చిన్నప్పుడు ఇంకా ఏం చేసేవారు?",
+    "roman": "Mee chinnappudu inka em chesevaaru?",
+    "english": "What else did you do when you were little?"
+   }
+  },
+  {
+   "id": "aa_rojullo",
+   "forms": [
+    "ఆ రోజుల్లో",
+    "ఆ రోజులు",
+    "ఆ కాలంలో",
+    "మా కాలంలో",
+    "మా రోజుల్లో"
+   ],
+   "roman": "aa rojullo",
+   "category": "phrase",
+   "note": "'In those days': she's about to tell you how life used to be",
+   "substitute": false,
+   "match_english": [
+    "in those days",
+    "those days",
+    "back then",
+    "in our time",
+    "in our days"
+   ],
+   "ask": {
+    "telugu": "ఆ రోజుల్లో జీవితం ఎలా ఉండేది?",
+    "roman": "Aa rojullo jeevitham ela undedi?",
+    "english": "What was life like in those days?"
+   }
+  },
+  {
+   "id": "katha",
+   "forms": [
+    "కథ",
+    "కథలు",
+    "కథ చెప్తా",
+    "కథ చెప్పు"
+   ],
+   "roman": "katha",
+   "category": "word",
+   "note": "Story. Ask her: 'Oka katha cheppandi' (tell me a story)",
+   "substitute": false,
+   "match_english": [
+    "story",
+    "stories"
+   ],
+   "ask": {
+    "telugu": "ఒక కథ చెప్పండి",
+    "roman": "Oka katha cheppandi",
+    "english": "Tell me a story"
+   }
+  },
+  {
+   "id": "paata",
+   "forms": [
+    "పాట",
+    "పాటలు",
+    "పాట పాడు"
+   ],
+   "roman": "paata",
+   "category": "word",
+   "note": "Song. Ask her: 'Oka paata paadandi' (sing me a song)",
+   "substitute": false,
+   "match_english": [
+    "song",
+    "songs"
+   ],
+   "ask": {
+    "telugu": "మీకు ఇష్టమైన పాట పాడండి",
+    "roman": "Meeku ishtamaina paata paadandi",
+    "english": "Sing me your favourite song"
+   }
+  },
+  {
+   "id": "gurthu",
+   "forms": [
+    "గుర్తుందా",
+    "గుర్తు ఉందా",
+    "జ్ఞాపకం",
+    "జ్ఞాపకాలు"
+   ],
+   "roman": "gurthu",
+   "category": "phrase",
+   "note": "'Do you remember?': a memory is coming",
+   "substitute": false,
+   "match_english": [
+    "remember",
+    "memory",
+    "memories"
+   ]
+  },
+  {
+   "id": "chudalani_undi",
+   "forms": [
+    "నిన్ను చూడాలని ఉంది",
+    "చూడాలని ఉంది",
+    "గుర్తొస్తున్నావు",
+    "గుర్తొచ్చావు"
+   ],
+   "roman": "chudalani undi",
+   "category": "phrase",
+   "note": "'I want to see you' / 'I keep thinking of you': how she says she misses you. Tell her you miss her too: 'Nenu kuda miss avutunna'",
+   "substitute": false,
+   "match_english": [
+    "want to see you",
+    "miss you",
+    "thinking of you",
+    "remembered you"
+   ]
+  },
+  {
+   "id": "chala_rojulaindi",
+   "forms": [
+    "చాలా రోజులైంది",
+    "చాలా రోజులయింది",
+    "ఎన్నాళ్ళయింది",
+    "చాలా రోజుల తర్వాత"
+   ],
+   "roman": "chala rojulaindi",
+   "category": "phrase",
+   "note": "'It's been so long!': she's been counting the days since you last talked",
+   "substitute": false,
+   "match_english": [
+    "it's been so long",
+    "been a long time",
+    "so many days",
+    "after so long"
+   ]
+  },
+  {
+   "id": "challaga",
+   "forms": [
+    "దేవుడు చల్లగా చూడాలి",
+    "చల్లగా ఉండు",
+    "చల్లగా ఉండాలి",
+    "చల్లగా ఉండండి"
+   ],
+   "roman": "challaga undu",
+   "category": "culture",
+   "note": "'May you stay cool and well': a grandmother's blessing",
+   "substitute": false,
+   "match_english": [
+    "bless you",
+    "god bless",
+    "stay well"
+   ]
+  },
+  {
+   "id": "santoshanga_undu",
+   "forms": [
+    "సంతోషంగా ఉండు",
+    "సంతోషంగా ఉండండి"
+   ],
+   "translate_as": "stay happy",
+   "roman": "santoshanga undu",
+   "category": "phrase",
+   "note": "'Stay happy': a blessing at the end of a call"
+  },
+  {
+   "id": "dhairyam",
+   "forms": [
+    "ధైర్యంగా ఉండు",
+    "ధైర్యం"
+   ],
+   "roman": "dhairyam",
+   "category": "phrase",
+   "note": "'Be brave': what elders say before exams and hard days",
+   "substitute": false,
+   "match_english": [
+    "be brave",
+    "courage",
+    "don't be afraid"
+   ]
+  },
+  {
+   "id": "bayati_tindi",
+   "forms": [
+    "బయటి తిండి తినకు",
+    "బయట తిండి తినకు",
+    "బయటి తిండి",
+    "బయట తిండి",
+    "హోటల్ తిండి"
+   ],
+   "translate_as": "outside food",
+   "roman": "bayati tindi",
+   "category": "phrase",
+   "note": "'Outside food': grandmas worry you eat restaurant food instead of home cooking",
+   "translate_forms": {
+    "బయటి తిండి తినకు": "don't eat outside food",
+    "బయట తిండి తినకు": "don't eat outside food"
+   }
+  },
+  {
+   "id": "pelli_eppudu",
+   "forms": [
+    "పెళ్ళి ఎప్పుడు",
+    "పెళ్లి ఎప్పుడు",
+    "పెళ్ళెప్పుడు"
+   ],
+   "roman": "pelli eppudu",
+   "category": "phrase",
+   "note": "Every Telugu grandparent's favourite question: 'When are you getting married?'",
+   "substitute": false,
+   "match_english": [
+    "when are you getting married"
+   ]
+  },
+  {
+   "id": "nerpistanu",
+   "forms": [
+    "నేర్పిస్తాను",
+    "నేర్పిస్తా"
+   ],
+   "roman": "nerpistanu",
+   "category": "phrase",
+   "note": "'I'll teach you': she wants to teach you something; say yes!",
+   "substitute": false,
+   "match_english": [
+    "I'll teach you",
+    "I will teach you"
+   ]
+  },
+  {
+   "id": "nippu_leka",
+   "forms": [
+    "నిప్పు లేనిదే పొగ రాదు",
+    "నిప్పు లేనిదే పొగ"
+   ],
+   "category": "idiom",
+   "note": "'No smoke without fire': rumours usually hold some truth"
+  },
+  {
+   "id": "chetulu_kalaka",
+   "forms": [
+    "చేతులు కాలాక ఆకులు పట్టుకున్నట్టు",
+    "చేతులు కాలాక ఆకులు"
+   ],
+   "category": "idiom",
+   "note": "'Grabbing leaves after your hands are burnt': acting only when it's too late"
+  },
+  {
+   "id": "illu_katti",
+   "forms": [
+    "ఇల్లు కట్టి చూడు పెళ్ళి చేసి చూడు",
+    "ఇల్లు కట్టి చూడు పెళ్లి చేసి చూడు",
+    "ఇల్లు కట్టి చూడు"
+   ],
+   "category": "idiom",
+   "note": "'Build a house, then plan a wedding': only then will you know how hard life is"
+  },
+  {
+   "id": "noru_manchidaite",
+   "forms": [
+    "నోరు మంచిదైతే ఊరు మంచిది",
+    "నోరు మంచిదైతే"
+   ],
+   "category": "idiom",
+   "note": "'If your words are kind, the whole village is kind': speak sweetly and people treat you well"
+  },
+  {
+   "id": "kukka_kaatu",
+   "forms": [
+    "కుక్క కాటుకు చెప్పు దెబ్బ"
+   ],
+   "category": "idiom",
+   "note": "'For a dog's bite, a slipper's blow': tit for tat"
+  },
+  {
+   "id": "aakali_ruchi",
+   "forms": [
+    "ఆకలి రుచి ఎరుగదు",
+    "ఆకలి రుచి ఎరుగదు నిద్ర సుఖమెరుగదు"
+   ],
+   "category": "idiom",
+   "note": "'Hunger doesn't know taste, sleep doesn't know comfort': when you really need something you aren't picky"
+  },
+  {
+   "id": "pamuku_palu",
+   "forms": [
+    "పాముకు పాలు పోసినట్టు"
+   ],
+   "category": "idiom",
+   "note": "'Like feeding milk to a snake': being kind to someone who will hurt you"
+  },
+  {
+   "id": "uttiki",
+   "forms": [
+    "ఉట్టికెక్కలేనమ్మ స్వర్గానికి ఎక్కుతుందా",
+    "ఉట్టికెక్కలేనమ్మ"
+   ],
+   "category": "idiom",
+   "note": "'Can't reach the hanging pot, but wants to climb to heaven': dreaming big without doing the small things first"
+  },
+  {
+   "id": "enta_chettuku",
+   "forms": [
+    "ఎంత చెట్టుకు అంత గాలి"
+   ],
+   "category": "idiom",
+   "note": "'The bigger the tree, the stronger the wind': bigger lives bring bigger troubles"
+  },
+  {
+   "id": "sita_emavutundi",
+   "forms": [
+    "రాముడికి సీత ఏమవుతుంది",
+    "సీత ఏమవుతుంది"
+   ],
+   "category": "idiom",
+   "note": "'Heard the whole Ramayana, then asked how Sita is related to Rama': missing the whole point"
+  },
+  {
+   "id": "adusu",
+   "forms": [
+    "అడుసు తొక్కనేల కాలు కడగనేల",
+    "అడుసు తొక్కనేల"
+   ],
+   "category": "idiom",
+   "note": "'Why step in the mud and then wash your feet?': avoid trouble instead of cleaning up after it"
+  },
+  {
+   "id": "pitta_koncham",
+   "forms": [
+    "పిట్ట కొంచెం కూత ఘనం"
+   ],
+   "category": "idiom",
+   "note": "'Small bird, big song': a little one with a big voice (said fondly about kids)"
+  },
+  {
+   "id": "medako_dolu",
+   "forms": [
+    "తా దూర సందు లేదు మెడకో డోలు",
+    "మెడకో డోలు"
+   ],
+   "category": "idiom",
+   "note": "'No room to squeeze through, yet a drum round the neck': taking on more when you can't handle what you have"
   }
  ],
  "en": [
@@ -2373,6 +4110,236 @@
    ],
    "category": "slang",
    "note": "'Touch grass' means go outside, you're online too much"
+  },
+  {
+   "id": "prepone",
+   "forms": [
+    "prepone",
+    "preponed"
+   ],
+   "category": "idiom",
+   "note": "Indian English: move something earlier (the opposite of postpone)"
+  },
+  {
+   "id": "timepass",
+   "forms": [
+    "timepass",
+    "time pass"
+   ],
+   "category": "idiom",
+   "note": "Indian English: something done just to pass the time"
+  },
+  {
+   "id": "cousin_brother",
+   "forms": [
+    "cousin brother",
+    "cousin sister"
+   ],
+   "category": "idiom",
+   "note": "Indian English for a cousin ('brother' or 'sister' says boy or girl)"
+  },
+  {
+   "id": "out_of_station",
+   "forms": [
+    "out of station"
+   ],
+   "category": "idiom",
+   "note": "Indian English: out of town, travelling"
+  },
+  {
+   "id": "do_the_needful",
+   "forms": [
+    "do the needful"
+   ],
+   "category": "idiom",
+   "note": "Indian English: please do what's needed"
+  },
+  {
+   "id": "good_name",
+   "forms": [
+    "good name"
+   ],
+   "category": "idiom",
+   "note": "'What is your good name?' just means 'What is your name?'"
+  },
+  {
+   "id": "take_tension",
+   "forms": [
+    "take tension",
+    "taking tension",
+    "don't take tension",
+    "no tension"
+   ],
+   "category": "idiom",
+   "note": "Indian English: 'Don't take tension' means don't stress, don't worry"
+  },
+  {
+   "id": "hotel_food",
+   "forms": [
+    "hotel food",
+    "eat in a hotel",
+    "ate in a hotel",
+    "go to a hotel"
+   ],
+   "category": "idiom",
+   "note": "In India a 'hotel' often means a restaurant"
+  },
+  {
+   "id": "itself",
+   "forms": [
+    "today itself",
+    "now itself",
+    "here itself",
+    "here only"
+   ],
+   "category": "idiom",
+   "note": "Indian English emphasis: 'today itself' means 'this very day'"
+  },
+  {
+   "id": "passed_out",
+   "forms": [
+    "passed out of",
+    "pass out of college",
+    "passed out from"
+   ],
+   "category": "idiom",
+   "note": "Indian English: 'passed out' of college means graduated (not fainted!)"
+  },
+  {
+   "id": "same_to_same",
+   "forms": [
+    "same to same"
+   ],
+   "category": "idiom",
+   "note": "Indian English: exactly the same"
+  },
+  {
+   "id": "mixie",
+   "forms": [
+    "mixie"
+   ],
+   "category": "idiom",
+   "note": "Indian English: a kitchen blender"
+  },
+  {
+   "id": "rent_free",
+   "forms": [
+    "rent free"
+   ],
+   "category": "slang",
+   "note": "'Living rent free in my head': I can't stop thinking about it"
+  },
+  {
+   "id": "delulu",
+   "forms": [
+    "delulu"
+   ],
+   "category": "slang",
+   "note": "'Delulu' is short for delusional, usually jokingly"
+  },
+  {
+   "id": "npc",
+   "forms": [
+    "npc"
+   ],
+   "category": "slang",
+   "note": "'NPC' (video-game extra): someone acting on autopilot"
+  },
+  {
+   "id": "glow_up",
+   "forms": [
+    "glow up",
+    "glow-up"
+   ],
+   "category": "slang",
+   "note": "A big change for the better in how someone looks or feels"
+  },
+  {
+   "id": "main_character",
+   "forms": [
+    "main character energy",
+    "main character"
+   ],
+   "category": "slang",
+   "note": "Acting like the star of your own movie"
+  },
+  {
+   "id": "the_ick",
+   "forms": [
+    "the ick"
+   ],
+   "category": "slang",
+   "note": "A sudden turn-off about someone"
+  },
+  {
+   "id": "spill_the_tea",
+   "forms": [
+    "spill the tea",
+    "spill the tea"
+   ],
+   "category": "slang",
+   "note": "'Spill the tea': tell me the gossip"
+  },
+  {
+   "id": "fomo",
+   "forms": [
+    "fomo"
+   ],
+   "category": "slang",
+   "note": "FOMO: fear of missing out"
+  },
+  {
+   "id": "cringe",
+   "forms": [
+    "cringe",
+    "so cringe"
+   ],
+   "category": "slang",
+   "note": "Awkward and embarrassing"
+  },
+  {
+   "id": "cooked",
+   "forms": [
+    "we're cooked",
+    "i'm cooked",
+    "im cooked",
+    "so cooked"
+   ],
+   "category": "slang",
+   "note": "'I'm cooked': I'm in big trouble / it's hopeless"
+  },
+  {
+   "id": "aura",
+   "forms": [
+    "aura points",
+    "aura"
+   ],
+   "category": "slang",
+   "note": "'Aura': how cool or impressive someone seems"
+  },
+  {
+   "id": "understood_assignment",
+   "forms": [
+    "understood the assignment"
+   ],
+   "category": "slang",
+   "note": "Did exactly what was needed, and did it well"
+  },
+  {
+   "id": "caught_4k",
+   "forms": [
+    "caught in 4k"
+   ],
+   "category": "slang",
+   "note": "Caught red-handed, with clear proof"
+  },
+  {
+   "id": "bestie",
+   "forms": [
+    "bestie"
+   ],
+   "category": "slang",
+   "note": "Best friend (or anyone you're being friendly to)"
   }
  ]
 }
