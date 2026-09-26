@@ -27,7 +27,7 @@ from muse import Translator, transcribe
 from decide import is_question
 from latency import LatencyTracker
 from lexicon import Lexicon, indic_share
-from progress import Progress
+from progress import KEEP_AT, Progress
 from pronouns import PronounResolver
 from translate_server import LocalTranslator
 
@@ -107,7 +107,7 @@ class Captioner:
     by id, so they still show in order.
     """
 
-    def __init__(self, lang, translator="local", learn_after=1, keep_known=True):
+    def __init__(self, lang, translator="local", keep_at=KEEP_AT, keep_known=True):
         self.translate = None
         if translator == "local":
             local = LocalTranslator(lang)
@@ -141,7 +141,7 @@ class Captioner:
         self.lang = lang
         self.pronouns = PronounResolver(lang)  # తను -> she or he, from who was mentioned before
         self.backup = None  # Muse Spark, created if the local translator fails mid-call
-        self.progress = Progress(self.lexicon, lang, learn_after=learn_after)  # words kept in Telugu
+        self.progress = Progress(self.lexicon, lang, keep_at=keep_at)  # how likely they know each word; known ones stay in Telugu
         self.known_at_start = {i for i in self.progress.entries if self.progress.known(i)}  # for the story page
         self.heard_at_start = dict(self.progress.heard)
         self.keep_known = keep_known  # off for --outgoing: the person you're calling doesn't know Telugu
@@ -223,7 +223,7 @@ class Captioner:
             if self.keep_known and route != "english" and not english.startswith("("):
                 # Words the listener knows stay in Telugu ("Today, Ammamma made pulihora"); the rest is English.
                 english, kept = self.progress.keep_known_words(english, hits)
-                self.progress.heard_words(hits)
+                self.progress.heard_words(hits, kept={k["id"] for k in kept})
             if self.garden and route != "english" and hits:
                 self._plant(hits)
             broadcast({"type": "english", "id": seg_id, "text": english, "route": route, "kept": kept})
@@ -308,6 +308,9 @@ class Captioner:
             print(f"Picture lookup failed: {type(e).__name__}: {e}", flush=True)
             return None
         if card:
+            for entry in hits if self.keep_known else []:  # seeing its picture helps them learn the word
+                if entry["id"] in card.get("lexicon_ids", []):
+                    self.progress.observe(entry["id"], "picture")
             # "id" is the picture's own id (Weave looks it up in the library); "line" says which line it belongs to
             broadcast({"type": "picture", **card, "line": seg_id})
             print(f"  [picture: {card['name']}]", flush=True)
@@ -447,7 +450,7 @@ def make_audio(args, loop, target):
 async def run(args):
     if args.reset_progress and os.path.exists("progress.json"):
         os.remove("progress.json")
-    captioner = Captioner(args.lang, args.translator, args.learn_after, keep_known=not args.outgoing)
+    captioner = Captioner(args.lang, args.translator, args.keep_at, keep_known=not args.outgoing)
 
     def on_message(msg):
         if msg.get("type") == "forget" and msg.get("id"):
@@ -463,8 +466,9 @@ async def run(args):
         await listen(args, captioner)
     finally:  # also on Ctrl+C
         print("\n" + captioner.latency.summary() + "\n(per-sentence log: latency_log.jsonl)", flush=True)
+        captioner.pool.shutdown(wait=True)  # the last lines count too
+        captioner.progress.finish()  # words still showing in Telugu, untapped: understood
         if captioner.garden_call:
-            captioner.pool.shutdown(wait=True)  # the last lines grow the garden too
             captioner.garden_call.__exit__(None, None, None)  # Weave's garden: no longer "on a call"
         finish_call(captioner, args)
 
@@ -670,8 +674,9 @@ def main():
     p.add_argument("--no-prompts", action="store_true", help="no live 'ask her' question suggestions")
     p.add_argument("--prompt-every", type=float, default=25, help="at most one 'ask her' prompt this many seconds apart")
     p.add_argument("--no-open", action="store_true", help="don't open the story page when the call ends")
-    p.add_argument("--learn-after", type=int, default=1,
-                   help="keep a word in Telugu after hearing it this many times (0 = keep every known word from the start)")
+    p.add_argument("--keep-at", type=float, default=KEEP_AT,
+                   help="keep a word in Telugu once it's this likely they know it, 0-1 (progress.py; lower = sooner, "
+                        "e.g. 0.4 for a demo keeps a word from its second mention)")
     p.add_argument("--reset-progress", action="store_true", help="forget which words you know (deletes progress.json)")
     p.add_argument("--speak", choices=["telugu", "questions", "all"], default=None,
                    help="telugu = voice what she says in Telugu, never her English; questions = only Telugu "

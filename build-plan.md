@@ -33,6 +33,7 @@ Times are rough estimates for one person.
 - **Engine: send and expire.** Send `curious` messages, drop duplicates, and let questions expire after about 60 s.
 - **Engine: answer clicks.** On an `ask` message, answer at once from the word list's note if the word is in the list; otherwise ask Muse Spark with the last 5 lines as context. Send `answer`, and cache answers for the rest of the call.
 - **Overlay:** show the questions, open the answer on click (Telugu word, pronunciation, 2–3 sentences), and show a loading state while the model answers.
+- **Feed the knowledge model** (`progress.py`): an `ask` for a word calls `observe(id, "asked")`, and showing the answer calls `observe(id, "answer")`. Don't suggest "What does ___ mean?" for words that are already 70% or more known.
 - **Check it:** on 30 real lines, count how often the 3 shown questions include the one a person would pick. Time the answers (instant from the list; about 1.5 s from the model).
 - **Done when** clicking "What is Bhogi?" during a call shows a correct, short answer within about 2 s.
 

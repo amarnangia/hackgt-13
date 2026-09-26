@@ -594,9 +594,9 @@ function ConnectionCard(c, live) {
 function growthNumbers() {
   const p = state.progress, g = state.garden;
   const days = g?.days?.length ? g.days.map((d) => d.heard) : [];
-  if (p?.met) return { real: true, met: p.met, known: p.known, hearings: p.hearings, days, learnAfter: p.learn_after,
+  if (p?.met) return { real: true, met: p.met, known: p.known, hearings: p.hearings, days, keepAt: p.keep_at,
                        kept: p.words.filter((w) => w.known) };
-  return { real: false, met: g?.totals?.phrases ?? 0, known: g?.totals?.bloom ?? 0, hearings: g?.totals?.heard ?? 0, days, learnAfter: 3,
+  return { real: false, met: g?.totals?.phrases ?? 0, known: g?.totals?.bloom ?? 0, hearings: g?.totals?.heard ?? 0, days, keepAt: 0.7,
            kept: (g?.plants || []).filter((x) => x.stage === "bloom" && !/vocative/.test(x.roman || "")).map((x) => ({ telugu: x.phrase, roman: x.roman, english: x.english })) };
 }
 function renderHome(live = false) {
@@ -1334,7 +1334,7 @@ function LearningProgress() {
     </div>
     <div class="lp-cell" style="margin-top:12px"><div style="display:flex;justify-content:space-between;align-items:baseline"><div class="eyebrow">Kept in Telugu for you</div><div class="mono">${pct}%</div></div>
       <div class="meter"><i style="width:${pct}%"></i></div>
-      <div class="muted" style="font-size:13px;margin-top:10px">Once you've heard a word ${g.learnAfter} times, Weave stops translating it and leaves it in Telugu.</div></div>
+      <div class="muted" style="font-size:13px;margin-top:10px">Weave estimates how likely you are to know each word from how often you've heard it, pictures you've seen, and the words you tap. Once it's ${Math.round((g.keepAt ?? 0.7) * 100)}% sure, it stops translating the word and leaves it in Telugu.</div></div>
     ${g.days.length ? `<div class="lp-cell" style="margin-top:12px"><div class="eyebrow">Words heard per day</div>
       <div class="spark">${g.days.map((d, i) => `<i class="${i === g.days.length - 1 ? "today" : ""}" style="height:${(d / max) * 100}%;animation-delay:${i * 25}ms" title="${d}"></i>`).join("")}</div></div>` : ""}
     ${g.kept.length ? `<div style="margin-top:20px"><div class="eyebrow" style="margin-bottom:6px">Words you know now</div>${g.kept.slice(0, 8).map((w) => VocabularyCard(w)).join("")}</div>` : ""}

@@ -19,13 +19,12 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(ROOT))
 from lexicon import Lexicon  # noqa: E402  (the translator's own word list and progress rules, so the numbers match)
-from progress import LEARN_AFTER as TRANSLATOR_LEARN_AFTER, Progress  # noqa: E402
+from progress import Progress  # noqa: E402
 # Team files the app reads. Anything else in the repo stays private.
 # calls/ is the story keeper's output (story pages, family dictionary, voice clips); it stays on this Mac.
 CALLS = re.compile(r"^/calls/[\w-]+(?:/[\w-]+){0,2}\.(?:html|m4a|json)$")
 # Where the story keeper saves calls (same setting as calls.py; tests point both at a temp folder)
 CALLS_ROOT = Path(os.environ.get("HACKGT_CALLS_DIR") or ROOT / "calls")
-LEARN_AFTER = TRANSLATOR_LEARN_AFTER  # progress.py's rule, not a copy of it (a stale 3 here showed "0 in Telugu")
 SHARED = re.compile(r"^/(images/(?:cache/)?[\w.-]+\.(?:jpg|jpeg|png|webp|json)|lexicon\.json|samples/call_script\.json)$")
 
 
@@ -57,9 +56,10 @@ def progress():
             continue
         known = tracker.known(key)  # exactly what the translator does: kept in Telugu or not
         words.append({"id": key, "telugu": e["forms"][0].strip(" ,."), "roman": e.get("roman") or key.replace("_", " "),
-                      "english": e.get("translate_as") or e.get("note", ""), "heard": n, "known": known})
+                      "english": e.get("translate_as") or e.get("note", ""), "heard": n, "known": known,
+                      "p": round(tracker.probability(key), 2)})
     return {"met": len(words), "known": sum(w["known"] for w in words), "hearings": sum(w["heard"] for w in words),
-            "learn_after": LEARN_AFTER, "words": words}
+            "keep_at": tracker.keep_at, "words": words}
 
 
 def calls():
