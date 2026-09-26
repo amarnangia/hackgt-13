@@ -14,7 +14,7 @@ import subprocess
 import threading
 import time
 import wave
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, TimeoutError, wait
 
 import numpy as np
 from websockets.datastructures import Headers
@@ -38,6 +38,7 @@ MAX_WAIT_WORDS = 20   # run-on speech with no punctuation: translate once this m
                       # mid-sentence when Muse left out punctuation and mistranslated; the translator handles long runs fine
 HOLD_BACK_WORDS = 3   # ...except the newest few, which Muse may still correct
 TRANSLATE_WORKERS = 3
+LOCAL_DEADLINE_S = 1.2  # after this, race Muse Spark against the local translator
 
 clients = set()
 on_client_message = None  # set by main(): handles clicks sent from the overlay
@@ -97,6 +98,7 @@ class Captioner:
             self.translate = Translator(lang)
             print("Translating with Muse Spark", flush=True)
         self.pool = ThreadPoolExecutor(max_workers=TRANSLATE_WORKERS)
+        self.race_pool = ThreadPoolExecutor(max_workers=TRANSLATE_WORKERS * 2)  # local vs Muse Spark when slow
         for _ in range(TRANSLATE_WORKERS):
             self.pool.submit(self.translate.warm_up)  # the first request pays for TLS setup (~3 s)
         self.next_id = 0
@@ -169,10 +171,7 @@ class Captioner:
             if route == "english":
                 english = sentence
             else:
-                try:
-                    english = self.translate(sentence)
-                except Exception as e:
-                    english = self._fallback_translate(sentence, e)
+                english = self._translate_in_time(sentence)
             full_english, kept = english, []
             if route != "english" and not english.startswith("("):
                 # Words the listener knows stay in Telugu ("Today, Ammamma made pulihora"); the rest is English.
@@ -194,6 +193,32 @@ class Captioner:
                     self.next_to_voice += 1
 
         self.pool.submit(work)
+
+    def _translate_in_time(self, sentence):
+        """Local translation normally takes ~0.3 s, but when the Mac is short on memory it can take ~10 s.
+        If it hasn't answered in LOCAL_DEADLINE_S, also ask Muse Spark and use whichever answers first."""
+        local = self.race_pool.submit(self.translate, sentence)
+        try:
+            return local.result(timeout=LOCAL_DEADLINE_S)
+        except TimeoutError:
+            pass
+        except Exception as e:
+            return self._fallback_translate(sentence, e)
+        if isinstance(self.translate, Translator):
+            return local.result()  # already on Muse Spark; nothing faster to try
+        if self.backup is None:
+            self.backup = Translator(self.lang)
+        remote = self.race_pool.submit(self.backup, sentence)
+        done, _ = wait([local, remote], return_when=FIRST_COMPLETED)
+        for f in done:
+            if not f.exception():
+                if f is remote:
+                    print("(local translator slow; used Muse Spark for this line)", flush=True)
+                return f.result()
+        try:
+            return (remote if local in done else local).result()
+        except Exception as e:
+            return f"(translation failed: {type(e).__name__})"
 
     def _fallback_translate(self, sentence, error):
         """The local translator died mid-call (e.g. its process was stopped): use Muse Spark for this line."""
