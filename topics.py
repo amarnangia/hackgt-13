@@ -74,6 +74,11 @@ def about(hits, picture=None, lexicon=None):
     """The question to suggest for this line, or None. `hits`: word-list entries in what she said; `picture`: the
     card that popped up (pictures.PictureFinder.card), which wins because it's what the grandkid is looking at."""
     by_id = {e["id"]: e for e in (lexicon or [])}
+    for h in hits:  # our hand-written questions are the best ones ("How did you and Thatayya meet?"): they come first
+        if h["id"] in SPECIAL:
+            te, ro = h["forms"][0].strip(" ,.^"), h.get("roman") or h["id"].replace("_", " ")
+            name = ro[:1].upper() + ro[1:]
+            return _fill(SPECIAL[h["id"]], te, ro, name, name, h["id"])
     if picture and picture.get("id") and not str(picture["id"]).startswith("web:"):
         key = picture["id"]
         # its Telugu name: the word she used, else the word list's entry for it, else the English name
@@ -92,8 +97,6 @@ def about(hits, picture=None, lexicon=None):
         name = ro[:1].upper() + ro[1:]
         if h.get("ask"):
             return {**h["ask"], "about": name, "key": h["id"]}
-        if h["id"] in SPECIAL:
-            return _fill(SPECIAL[h["id"]], te, ro, h.get("translate_as") or name, name, h["id"])
         if h["category"] == "idiom" and h.get("note"):
             return _fill(KIND["idiom"], te, ro, "", "this saying", h["id"])
         if h["id"] in RELATIVES:

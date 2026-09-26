@@ -41,7 +41,7 @@ Times are rough estimates for one person.
 - **Put one labelled test set in `tools/eval_laya.py`,** covering intent, topic, stem choice and question ranking.
 - **Report accuracy and time per decision,** next to Muse Spark doing the same job. Put the table in the README and on a slide.
 
-## 6. Demo and submission (about 3 h)
+## 6. Demo and submission (about 3 h) ✏️ drafted: demo.md (checked through the pipeline), writeup.md, README.md; still to do: record the video
 - **Script a 2–3 minute call** that triggers each part:
   - a greeting (vocab on greetings);
   - cooking (vocab switches to food, gavvalu picture, "What does gavvalu mean?");
