@@ -18,6 +18,7 @@ from websockets.datastructures import Headers
 from websockets.http11 import Response
 
 from muse import Translator, transcribe
+from translate_server import LocalTranslator
 
 PORT = int(__import__("os").environ.get("OVERLAY_PORT", 8765))
 CHUNK_MS = 80
@@ -70,8 +71,19 @@ class Captioner:
     by id, so they still show in order.
     """
 
-    def __init__(self, lang):
-        self.translate = Translator(lang)
+    def __init__(self, lang, translator="local"):
+        self.translate = None
+        if translator == "local":
+            local = LocalTranslator(lang)
+            if local.available():
+                self.translate = local
+                print("Translating locally with IndicTrans2 (translate_server.py)", flush=True)
+            else:
+                print("Local translator isn't running (start it with: .venv-translate/bin/python translate_server.py). "
+                      "Using Muse Spark instead.", flush=True)
+        if self.translate is None:
+            self.translate = Translator(lang)
+            print("Translating with Muse Spark", flush=True)
         self.pool = ThreadPoolExecutor(max_workers=TRANSLATE_WORKERS)
         for _ in range(TRANSLATE_WORKERS):
             self.pool.submit(self.translate.warm_up)  # the first request pays for TLS setup (~3 s)
@@ -177,7 +189,7 @@ def start_live_audio(args, loop, target):
 
 
 async def run(args):
-    captioner = Captioner(args.lang)
+    captioner = Captioner(args.lang, args.translator)
     loop = asyncio.get_running_loop()
     target = {"q": asyncio.Queue()}
     if not args.file:
@@ -208,6 +220,8 @@ async def run(args):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--lang", default="te", help="language code: te (Telugu), hi (Hindi), ta, kn, ml, bn, mr")
+    p.add_argument("--translator", choices=["local", "muse"], default="local",
+                   help="local = IndicTrans2 via translate_server.py (fast, same output every time); muse = Muse Spark")
     p.add_argument("--file", help="replay a 16/24 kHz mono wav instead of listening to the call")
     p.add_argument("--in", dest="inp", default="BlackHole")
     p.add_argument("--out", default=None)
