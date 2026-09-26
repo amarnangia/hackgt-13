@@ -14,6 +14,8 @@ import wave
 from concurrent.futures import ThreadPoolExecutor
 
 import numpy as np
+from websockets.datastructures import Headers
+from websockets.http11 import Response
 
 from muse import Translator, transcribe
 
@@ -48,11 +50,14 @@ def serve_overlay(conn, request):
     if request.headers.get("Upgrade", "").lower() == "websocket":
         return None
     with open("overlay.html", "rb") as f:
-        resp = conn.respond(http.HTTPStatus.OK, "")
-        resp.body = f.read()
-        resp.headers["Content-Type"] = "text/html; charset=utf-8"
-        resp.headers["Content-Length"] = str(len(resp.body))
-        return resp
+        body = f.read()
+    # Build the response directly: conn.respond() adds text/plain headers, and setting them again
+    # duplicates them, which Chrome rejects ("localhost sent an invalid response").
+    return Response(http.HTTPStatus.OK, "OK", Headers([
+        ("Content-Type", "text/html; charset=utf-8"),
+        ("Content-Length", str(len(body))),
+        ("Connection", "close"),
+    ]), body)
 
 
 class Captioner:
