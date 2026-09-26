@@ -17,6 +17,10 @@
 8. `hf auth login` and paste a read token from https://huggingface.co/settings/tokens (saved on your Mac, not in the repo).
 9. It needs its own virtualenv (IndicTrans2's model code needs transformers 4.51; the voice library needs 5.x):
    `python3 -m venv .venv-translate && .venv-translate/bin/pip install -r requirements-translate.txt`
+**Pictures (once, ~10 minutes)**
+
+`python tools/prefetch_pictures.py` downloads ~175 MB of pictures of ~2,000 Indian foods, festivals, places and more into `images/cache/` (gitignored), so picture pop-ups never wait on the web during a call. Anything else she mentions is looked up in the background and is instant the next time.
+
 **Run (one command)**
 
 10. `python subtitles.py --out "MacBook Air Speakers"` (or your headphones' name), then open http://localhost:8765.

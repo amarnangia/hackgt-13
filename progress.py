@@ -23,6 +23,10 @@ import time
 
 KEEP_AT = 0.7  # keep a word in Telugu once we're this sure they know it (--keep-at; lower it for a quick demo)
 UNDERSTOOD_S = 20  # shown in Telugu and not tapped for this long: they understood it
+# Hearing a word again seconds later isn't another chance to learn it (massed practice; spacing is what teaches), so
+# hearings this close together count once. Before this, "ee roju" and "ninna" said a few times in one call went from
+# 15% to "known" and were kept in Telugu for the rest of the call.
+MASSED_S = 45
 
 # Starting guess, before any evidence, by kind of word (start_known words: family words everyone knows)
 PRIOR = {"start_known": 0.95, "family": 0.35, "festival": 0.25, "phrase": 0.25, "food": 0.2, "place": 0.2, "clothing": 0.2,
@@ -71,6 +75,9 @@ class Progress:
         self.heard = saved.get("heard", {})  # times each word came up (for the story page and Weave)
         self.words = saved.get("words", {})  # id -> {"p": probability known, "t": when, "hl": half-life in days}
         self.pending = {}                    # kept in Telugu at this time; "understood" unless tapped soon
+        self.understood_now = set()          # "understood" counts once per word per call: not tapping a word you
+                                             # see ten times in a call isn't ten times the evidence
+        self.last_heard = {}                 # id -> when it last came up in this call (monotonic)
         for wid, n in self.heard.items():    # progress.json from before this model: replay the hearings
             if wid not in self.words and wid in self.entries:
                 for _ in range(n):
@@ -153,28 +160,33 @@ class Progress:
         Works because lexicon.json fixed that English before translating. Returns the new sentence and
         the kept words as [{id, telugu, english}] for the overlay.
         """
-        kept = []
+        swaps = []  # (start, end, Telugu, id, the English it replaces), every time it comes up
         for entry in hits:
             roman = entry.get("roman")
             if not roman or not self.known(entry["id"]):
                 continue
             # The fixed English from the substitution, or for words left to the translator, the English it may use.
             candidates = entry.get("match_english") or [entry.get("translate_as", "")]
-            match = None
             for gloss in sorted((g.rstrip(",") for g in candidates if g), key=len, reverse=True):
-                match = re.search(rf"(?<![A-Za-z]){re.escape(gloss)}(?![A-Za-z])", english, re.IGNORECASE)
-                if match:
+                matches = list(re.finditer(rf"(?<![A-Za-z]){re.escape(gloss)}(?![A-Za-z])", english, re.IGNORECASE))
+                if matches:
                     break
-            if not match:
+            else:
                 continue  # the translator rephrased it; leave the sentence as is
-            telugu = roman.rstrip(",")
-            if match.group(0)[:1].isupper():
-                telugu = telugu[:1].upper() + telugu[1:]
-            start = match.start()
-            if entry["id"].endswith("_vocative") and english[:start].lower().endswith("my "):
-                start -= 3  # "my dear" -> "Nanna", not "my Nanna"
-            english = english[:start] + telugu + english[match.end():]
-            kept.append({"id": entry["id"], "telugu": telugu, "english": match.group(0)})
+            for match in matches:
+                if any(a < match.end() and match.start() < b for a, b, *_ in swaps):
+                    continue  # part of another kept word
+                telugu = roman.rstrip(",")
+                if match.group(0)[:1].isupper():
+                    telugu = telugu[:1].upper() + telugu[1:]
+                begin = match.start()
+                if entry["id"].endswith("_vocative") and english[:begin].lower().endswith("my "):
+                    begin -= 3  # "my dear" -> "Nanna", not "my Nanna"
+                swaps.append((begin, match.end(), telugu, entry["id"], match.group(0)))
+        kept = []  # in the order they appear, which is how the overlay underlines them
+        for begin, end_, telugu, wid, matched in sorted(swaps, reverse=True):
+            english = english[:begin] + telugu + english[end_:]
+            kept.insert(0, {"id": wid, "telugu": telugu, "english": matched})
         return english, kept
 
     def heard_words(self, hits, kept=()):
@@ -187,9 +199,11 @@ class Progress:
                 if wid not in self.entries:
                     continue
                 self.heard[wid] = self.heard.get(wid, 0) + 1
-                self._learn(wid, "heard", save=False)
-                self._log(wid, "heard")
-                if wid in kept:
+                if now - self.last_heard.get(wid, -1e9) >= MASSED_S:
+                    self._learn(wid, "heard", save=False)
+                    self._log(wid, "heard")
+                self.last_heard[wid] = now
+                if wid in kept and wid not in self.understood_now:
                     self.pending.setdefault(wid, now)
             self._save()
 
@@ -199,8 +213,15 @@ class Progress:
         for wid, shown in list(self.pending.items()):
             if everything or now - shown >= UNDERSTOOD_S:
                 del self.pending[wid]
+                self.understood_now.add(wid)
                 self._evidence(wid, "understood")
                 self._log(wid, "understood")
+
+    def said(self, entry_ids):
+        """The grandkid said these words themselves (--two-way: heard on their microphone): strong evidence they know
+        them, and saying a word helps learn it. Once per word per line."""
+        for wid in dict.fromkeys(entry_ids):
+            self.observe(wid, "said")
 
     def forget(self, entry_id):
         """They tapped a kept word: they don't know it (yet). It's translated again until they learn it."""

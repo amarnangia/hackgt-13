@@ -16,6 +16,9 @@ import re
 from decide import is_question
 
 MAX_PER_LINE = 2
+# Which of her words most need a question, before any model: the word whose picture just popped up, then things and
+# sayings that only make sense with an explanation, then everyday phrases, family words and plain words.
+EXPLAIN_FIRST = {"idiom", "culture", "festival", "food", "place", "clothing", "vehicle"}
 
 RANK = {"type": "choice", "instructions": "A grandchild raised in America is listening to their grandmother from India. "
                                           "Which of these would they most want explained?"}
@@ -87,38 +90,82 @@ class Curious:
     def for_line(self, english, hits, picture=None, intent=None, known_before=None):
         """[{id, text, word, kind, answer?}] for this line, most worth asking first. `known_before`: the words they
         knew before this line (hearing it just now counts toward learning it, but they didn't know it then)."""
-        known = known_before if known_before is not None else {h["id"] for h in hits if self.progress.probability(h["id"]) >= self.keep_at}
         out = []
         reply = self.reply(english, intent)
         if reply:
             out.append(reply)
-        # Things she mentioned that they probably don't know yet
-        cands = [h for h in hits if worth_asking(h) and h["id"] not in self.asked and h["id"] not in known]
+        pic = self.about_picture(picture, hits)
+        if pic:
+            out.append(pic)
+        out += self.words(hits, known_before, english, MAX_PER_LINE - len(out), picture) or []
+        return out[:MAX_PER_LINE]
+
+    def candidates(self, hits, known_before=None):
+        """Things she mentioned worth a question that they probably don't know yet (and weren't asked about)."""
+        known = known_before if known_before is not None else {h["id"] for h in hits if self.progress.probability(h["id"]) >= self.keep_at}
+        return [h for h in hits if worth_asking(h) and h["id"] not in self.asked and h["id"] not in known]
+
+    def tier(self, h, picture=None):
+        return 0 if h["id"] in (picture or {}).get("lexicon_ids", []) else 1 if h.get("category") in EXPLAIN_FIRST else 2
+
+    def words_early(self, hits, known_before=None, limit=MAX_PER_LINE, picture=None):
+        """Questions about the words she used, from her Telugu alone, so they go out before the English is back (no
+        model call). Returns (questions, slots left for Laya): when more words tie for the last slots than there are
+        slots, Laya picks those once the English is here (words(..., english))."""
+        cands = sorted(self.candidates(hits, known_before), key=lambda h: (self.tier(h, picture), self.progress.probability(h["id"])))
+        if limit <= 0 or not cands:
+            return [], 0
+        if len(cands) <= limit or self.decider is None or self.tier(cands[limit - 1], picture) < self.tier(cands[limit], picture):
+            return self._questions(cands[:limit], picture), 0
+        decided = [h for h in cands[:limit] if self.tier(h, picture) < self.tier(cands[limit - 1], picture)]
+        return self._questions(decided, picture), limit - len(decided)
+
+    def words(self, hits, known_before=None, english=None, limit=MAX_PER_LINE, picture=None):
+        """Questions about the words she used, most worth asking first (Laya breaks ties, given the English)."""
+        cands = self.candidates(hits, known_before)
+        if limit <= 0 or not cands:
+            return []
+        return self._questions(self.rank(english, cands, need=limit, picture=picture)[:limit], picture)
+
+    def _questions(self, entries, picture=None):
         pic_words = set((picture or {}).get("lexicon_ids", []))
-        if picture and not pic_words & {h["id"] for h in hits} and f"pic:{picture['id']}" not in self.asked:
-            out.append({"id": f"pic:{picture['id']}", "text": f"What is {picture['name'].split(' (')[0]}?", "word": None, "kind": "thing",
-                        "answer": {"text": picture.get("description", ""), "roman": picture["name"]}})
-        for h in self.rank(english, cands)[:MAX_PER_LINE - len(out)]:
+        out = []
+        for h in entries:
             self.asked.add(h["id"])
             kind = "person" if h["id"] in pic_words and (picture or {}).get("kind") == "person" else None
             out.append({"id": h["id"], "word": h["id"], "text": stem(h, kind), "kind": h.get("category"),
                         "answer": {"text": h["note"], "telugu": h["forms"][0].strip(" ,.^"), "roman": (h.get("roman") or "").strip(" ,")}})
-        return out[:MAX_PER_LINE]
+        return out
 
-    def rank(self, english, cands):
-        """Most worth asking first: Laya picks when there's a choice; least known first otherwise."""
-        cands = sorted(cands, key=lambda h: self.progress.probability(h["id"]))
-        if len(cands) <= 1 or self.decider is None:
+    def about_picture(self, picture, hits):
+        """"What is ___?" for a picture of something that isn't one of her words (those get their own question)."""
+        if not picture or set(picture.get("lexicon_ids", [])) & {h["id"] for h in hits} or f"pic:{picture['id']}" in self.asked:
+            return None
+        self.asked.add(f"pic:{picture['id']}")
+        return {"id": f"pic:{picture['id']}", "text": f"What is {picture['name'].split(' (')[0]}?", "word": None, "kind": "thing",
+                "answer": {"text": picture.get("description", ""), "roman": picture["name"]}}
+
+    def rank(self, english, cands, need=MAX_PER_LINE, picture=None):
+        """Most worth asking first: by tier, then least known; Laya picks the best when more than `need` tie."""
+        cands = sorted(cands, key=lambda h: (self.tier(h, picture), self.progress.probability(h["id"])))
+        if len(cands) <= need or self.decider is None or english is None \
+                or self.tier(cands[need - 1], picture) < self.tier(cands[need], picture):
             return cands
-        options = {f"option{i}": f"{(h.get('roman') or h['forms'][0]).strip(' ,^')}: {h['note'][:80]}" for i, h in enumerate(cands[:4])}
-        best = cands[int(self.decider.choose(english, {**RANK, "criteria": options})[len("option"):])]
-        return [best] + [h for h in cands if h is not best]
+        cut = self.tier(cands[need - 1], picture)
+        head, ties = [h for h in cands if self.tier(h, picture) < cut], [h for h in cands if self.tier(h, picture) == cut]
+        options = {f"option{i}": f"{(h.get('roman') or h['forms'][0]).strip(' ,^')}: {h['note'][:80]}" for i, h in enumerate(ties[:4])}
+        best = ties[int(self.decider.choose(english, {**RANK, "criteria": options})[len("option"):])]
+        return head + [best] + [h for h in ties if h is not best]
 
     def reply(self, english, intent):
-        """When she asks the grandkid something: how to answer her in Telugu (Laya picks which kind of question)."""
-        if not (intent in ("question", "request") or is_question(english)):
-            return None
+        """When she asks the grandkid something: how to answer her in Telugu (Laya picks which kind of question).
+        `intent` may be a function, called only if the line isn't a plain question and has no reply keyword."""
         kind = next((k for k, pattern in REPLY_KEYWORDS if pattern.search(english)), None)
+        if not is_question(english) and not (kind == "okay" and callable(intent)):
+            if callable(intent):
+                intent = intent()
+            if intent not in ("question", "request"):
+                return None
         if kind is None:
             if self.decider is None:
                 return None

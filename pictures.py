@@ -1,8 +1,13 @@
 # Picture pop-ups: when a line mentions something the grandkid may not know (pulihora, a pattu saree, muggulu),
 # show a picture of it. Candidates come from the picture library (images/library.json, built by
 # tools/build_images.py) matched in the Telugu (via lexicon.json) or the English, plus other nouns in the English
-# line, which are looked up on Wikipedia live and cached. Laya picks which one, if any, needs a picture.
+# line, which are looked up on Wikipedia and cached. Laya picks which one, if any, needs a picture.
+#
+# Nothing here waits on the network during a call: a word that isn't in the cache yet is looked up in the background
+# and gets its picture the next time it comes up. tools/prefetch_pictures.py fills the cache ahead of time with
+# hundreds of Indian foods, festivals, places and people.
 import json
+import queue
 import os
 import re
 import threading
@@ -27,6 +32,11 @@ PICK = {
     "instructions": "A grandchild raised in America is listening to their grandmother from India. "
                     "Which of these things would they need to see a picture of to understand?",
 }
+PICK_FOR_HER = {
+    "type": "choice",
+    "instructions": "A grandmother in India is listening to her grandchild who lives in America. "
+                    "Which of these things would she need to see a picture of to understand?",
+}
 
 
 class PictureFinder:
@@ -46,7 +56,12 @@ class PictureFinder:
                                for a, iid in aliases]
         self.decider = decider  # decide.Decider (Laya); without it, the first library match wins
         self.shown = {}         # item id -> when it was last shown
+        self.shown_her = {}     # the same, for pictures of American things shown for her (--two-way)
         self.web_cache = self._load_web_cache()
+        self.cache_lock = threading.Lock()
+        self.to_fetch = queue.Queue()  # words to look up in the background (never while a line waits)
+        self.fetching = set()
+        threading.Thread(target=self._fetcher, daemon=True).start()
         self.nlp = None
 
     # ---------- candidates ----------
@@ -137,12 +152,54 @@ class PictureFinder:
             self.shown[key] = now
         return key
 
-    def _ask_laya(self, english, cands):
-        """Several candidates: Laya picks the one the grandkid most needs to see."""
+    def pick_from_words(self, lexicon_hits, known=lambda lexicon_id: False):
+        """Before the English is back: the picture for her words, when they name exactly one library thing the grandkid
+        doesn't know (gavvalu, Bhogi, NTR). Several (or none): None, and pick() decides with the English."""
+        now = time.monotonic()
+        items = []
+        for e in lexicon_hits:
+            iid = self.by_lexicon.get(e["id"])
+            if (iid and iid not in items and not known(e["id"]) and self.items[iid].get("region") != "us"
+                    and now - self.shown.get(iid, -1e9) > REPEAT_AFTER_S):
+                items.append(iid)
+        specific = [i for i in items if i not in GENERIC]
+        items = specific or items
+        if len(items) != 1:
+            return None
+        self.shown[items[0]] = now
+        return items[0]
+
+    def pick_for_her(self, english):
+        """The other way (--two-way): the American thing in what the grandkid said that she may never have seen
+        (Thanksgiving, s'mores, prom, a school bus), or None. American library items she'd know already have a Telugu
+        word in our list (mango, rice), so they don't count; other names come from the cache of American things
+        (tools/prefetch_pictures.py), never a live look-up. One: show it; several: Laya picks."""
+        now = time.monotonic()
+        fresh = lambda key: now - self.shown_her.get(key, -1e9) > REPEAT_AFTER_S
+        cands, covered = [], english
+        for pattern, iid in self.alias_patterns:
+            it = self.items[iid]
+            m = pattern.search(covered)
+            if m and it.get("region") == "us" and not it.get("lexicon_ids") and fresh(iid) and iid not in {c[0] for c in cands}:
+                cands.append((iid, it["name"], it.get("description", "")))
+                covered = covered[:m.start()] + " " * len(m.group(0)) + covered[m.end():]
+        for noun in self._nouns(covered):
+            name = self._cached_noun(noun, american=True)
+            hit = self.web_cache.get(name) if name else None
+            if hit and hit.get("american") and fresh("web:" + name) and "web:" + name not in {c[0] for c in cands}:
+                cands.append(("web:" + name, hit["name"], hit.get("description", "")))
+        if not cands:
+            return None
+        key = cands[0][0] if len(cands) == 1 else self._ask_laya(english, cands[:4], PICK_FOR_HER)
+        self.shown_her[key] = now
+        return key
+
+    def _ask_laya(self, english, cands, question=PICK):
+        """Several candidates: Laya picks the one the listener most needs to see."""
         if self.decider is None:
             return cands[0][0]
         criteria = {f"option{i}": (f"{label}: {desc[:80]}" if desc else label) for i, (key, label, desc) in enumerate(cands)}
-        answer = self.decider.choose(english, {**PICK, "criteria": criteria})
+        answer = self.decider.choose(english, {**question, "criteria": criteria})
         return cands[int(answer[len("option"):])][0]
 
     def _indian_thing(self, english, cand):
@@ -150,12 +207,16 @@ class PictureFinder:
         Without the summary Laya called boorelu and ulavacharu "everyday things": it has never seen them."""
         if self.decider is None:
             return False
-        card = self.card(cand[0])
+        card = self.card(cand[0])  # only what's cached; anything new is looked up in the background for next time
         if not card or not card.get("description"):
-            return False  # nothing on Wikipedia, so no picture to show anyway
-        answer = self.decider.choose(english, {"type": "choice", "instructions": f'In this sentence, what is "{cand[1]}"?',
-                                               "criteria": WHAT_IS_IT}, word=cand[1], wikipedia=card["description"])
-        return answer in ("indian_food", "indian_place", "indian_thing")
+            return False  # nothing on Wikipedia (or not looked up yet), so no picture to show now
+        hit = self.web_cache.get(card["noun"])
+        if hit.get("indian") is None:  # asked once per word, then remembered (prefetched ones come already answered)
+            answer = self.decider.choose(english, {"type": "choice", "instructions": f'In this sentence, what is "{cand[1]}"?',
+                                                   "criteria": WHAT_IS_IT}, word=cand[1], wikipedia=card["description"])
+            hit["indian"] = answer in ("indian_food", "indian_place", "indian_thing")
+            self._save_web_cache()
+        return hit["indian"]
 
     def _ordinary_english(self, phrase):
         if not hasattr(self, "_dictionary"):
@@ -168,18 +229,47 @@ class PictureFinder:
 
     # ---------- showing ----------
     def card(self, key):
-        """{name, description, image} for a library id, or for a web noun (may fetch from Wikipedia)."""
+        """{name, description, image} for a library id, or for a web noun from the cache (a noun that isn't cached is
+        queued for a background look-up, and this returns None)."""
         if not key.startswith("web:"):
             it = self.items[key]
             return {"id": key, "name": it["name"], "description": self.notes.get(key) or it.get("description", ""), "image": it["image"],
                     "category": it.get("category", ""), "kind": it.get("kind", it.get("category", "")),
                     "lexicon_ids": it.get("lexicon_ids", [])}
-        noun = key[4:]
-        if noun not in self.web_cache:
-            self.web_cache[noun] = self._fetch_web(noun)
-            self._save_web_cache()
+        noun = self._cached_noun(key[4:])
+        if noun is None:
+            self._queue(key[4:])
+            return None
         hit = self.web_cache[noun]
-        return {"id": key, **hit} if hit else None
+        return {"id": key, "noun": noun, **{k: v for k, v in hit.items() if k != "indian"}} if hit else None
+
+    def _cached_noun(self, noun, american=False):
+        """The cache key for a noun: itself, or for "bhogi bonfires" a word in it that's cached ("bhogi"). American
+        names are often plain English words ("pumpkin pie", "s'mores"), so american=True doesn't skip those."""
+        noun = noun.lower()
+        if noun in self.web_cache:
+            return noun
+        for w in noun.split():
+            if len(w) >= 4 and self.web_cache.get(w) and (american or not self._ordinary_english(w)):
+                return w
+        return None
+
+    def _queue(self, noun):
+        noun = noun.lower()
+        with self.cache_lock:
+            if noun in self.fetching:
+                return
+            self.fetching.add(noun)
+        self.to_fetch.put(noun)
+
+    def _fetcher(self):
+        while True:
+            noun = self.to_fetch.get()
+            hit = self._fetch_web(noun)
+            with self.cache_lock:
+                self.web_cache[noun] = hit
+                self.fetching.discard(noun)
+            self._save_web_cache()
 
     def _fetch_web(self, noun):
         import requests
@@ -212,8 +302,13 @@ class PictureFinder:
 
     def _load_web_cache(self):
         path = os.path.join(CACHE_DIR, "cache.json")
-        return json.load(open(path)) if os.path.exists(path) else {}
+        return json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {}
 
     def _save_web_cache(self):
         os.makedirs(CACHE_DIR, exist_ok=True)
-        json.dump(self.web_cache, open(os.path.join(CACHE_DIR, "cache.json"), "w"), indent=1)
+        with self.cache_lock:
+            data = json.dumps(self.web_cache, indent=1, ensure_ascii=False)
+        tmp = os.path.join(CACHE_DIR, "cache.json.tmp")
+        with open(tmp, "w", encoding="utf-8") as f:
+            f.write(data)
+        os.replace(tmp, os.path.join(CACHE_DIR, "cache.json"))

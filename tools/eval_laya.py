@@ -145,6 +145,15 @@ def main():
         intent_ok += d["intent"] == intent
         if got != topic or d["intent"] != intent:
             wrong.append((line, topic, f"{got} ({why})", intent, d["intent"]))
+    # What the live call actually spends (subtitles.py): Laya only for what the rules leave open, one question at a time
+    live = []
+    for line, topic, intent in LINES:
+        start = time.monotonic()
+        decider.intent(line)
+        if topic_of(line, [])[0] is None:
+            decider.topic(line)
+        live.append(time.monotonic() - start)
+    live.sort()
     held_ok, held_wrong = 0, []
     for telugu, english, topic in HELD_OUT:
         got, why = topic_of(english, lexicon.find(telugu, "te"), decider(english)["topic"])
@@ -172,6 +181,8 @@ def main():
     print(f"  reply kind, keywords + Laya >= {0.5}  {reply_ok}/{r} = {reply_ok / r:.0%}   (no reply offered when unsure)")
     print(f"  intent                  {intent_ok}/{n} = {intent_ok / n:.0%}   (question / request / statement, with decide.is_question)")
     print(f"  time                    median {times[n // 2] * 1000:.0f} ms, slowest {times[-1] * 1000:.0f} ms per line")
+    print(f"  time, as the call runs  median {live[n // 2] * 1000:.0f} ms, slowest {live[-1] * 1000:.0f} ms per line "
+          "(rules first; Laya asked only intent, and topic when the rules can't tell)")
     if a.muse:
         muse_compare(decider)
     if a.wrong:

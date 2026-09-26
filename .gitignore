@@ -22,3 +22,7 @@ images/cache/
 calls/
 tools/two_way_run/
 progress_settings.json
+# Firebase service-account keys (sync.py reads the path from FIREBASE_KEY in .env; keep the key outside the repo)
+*firebase-adminsdk*.json
+serviceAccountKey*.json
+firebase-key.json

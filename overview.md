@@ -35,9 +35,11 @@ Everything runs on one MacBook (tested on an M4 MacBook Air, 24 GB). Grandma nee
 | English on screen → her cloned voice starts | median 0.11–0.16 s | two runs of the sample call, 11/11 lines voiced |
 | Her sentence → her voice in English | median 0.54–0.69 s, max ~1 s | same runs |
 | Live draft captions | shown 2–3 s *before* she finishes | the draft test; final English 0.05 s after with drafts vs 0.14 s without (no slowdown) |
-| Laya's decisions per line | ~0.25 s (intent + category + topic in one pass); ~0.1 s per extra choice | `tools/eval_laya.py`; runs after the voice starts, so it adds nothing to what she hears |
+| Topic words, "Curious?" questions about her words, the picture of what she named, the "ask her" question | ~2–4 ms after her line is cut (was ~0.6–0.9 s) | `tools/check_decisions.py` on the demo lines; decided from her Telugu words before the English is back |
+| How to answer her question in Telugu | with the English (~0.3–0.4 s); keywords, else Laya ~70 ms | same |
+| Laya per line, as the call runs | median 52 ms, slowest 171 ms (was 240 ms) | `tools/eval_laya.py`; rules first, then one question at a time: intent (~45 ms), topic only when the rules can't tell (~95 ms). Asking several questions in one pass was *slower* on this Mac (intent + topic: 169 ms together vs 140 ms apart) |
 | "Curious?" answer | instant for word-list words; ~1.5 s from Muse Spark, then cached | the answer test |
-| Grandkid's English → Telugu speech for her (`--two-way`) | not timed on this Mac yet; the Telugu voice makes ~4 s of speech in ~0.6 s | `tools/check_two_way.py` passes 13/13 checks each way on Hasini's machine; ours needs the gated model |
+| Grandkid's English → Telugu speech for her (`--two-way`) | not timed on this Mac yet; the Telugu voice makes ~4 s of speech in ~0.6 s | `tools/check_two_way.py` passes 13/13 checks each way, on Hasini's Mac and on the M4 |
 | Story page after the call | ~30 s | real calls |
 
 **What made it faster** (each measured before and after):
@@ -109,6 +111,18 @@ Earlier Laya tests that shaped the design:
 **The knowledge model** (`progress.py`)
 - **Simulated histories:** pulihora is kept in Telugu on its 4th mention (2nd with `--keep-at 0.4`); tapping it drops it to 19%; forgetting over days works.
 - **The fitting tool,** on a simulated learner who learns twice as fast, recovered that learning rate (2.0).
+- **What counts as learning:** three hearings of *ninna* in a row count as one (0.15 → 0.32, not 0.56); a kept word
+  left untapped five times in a call counts once; a word the grandkid says on their own mic (`--two-way`) goes 0.20 → 0.85.
+
+**What gets translated**
+- **Her Telugu in English letters** ("Bangaram, pulihora tinnava?") went through untranslated, because IndicTrans2 only
+  reads Telugu script. Now Muse Spark translates it ("Sweetheart, did you eat pulihora?"); English with a Telugu word
+  or two gets the word list's English for that word instead, with no API call. Her words in English letters get cards,
+  pictures and questions too.
+- **Lines of only words they know** ("Sare, sare" once *sare* is learned) are captioned but not voiced: they understood her.
+- **Kept words** are kept every time they come up in a line, not just the first time.
+- **A word inside a longer phrase** is part of the phrase: *annam* in *annam tinnava?* no longer brings up a rice card
+  or "How do you make rice?".
 
 **Security**
 - **Engine:** websites (even WhatsApp's own page) are refused; our extension and local pages connect.
@@ -118,7 +132,7 @@ Earlier Laya tests that shaped the design:
 
 **Not tested yet**
 - The extension on a real WhatsApp or Instagram call (only the preview page).
-- `--two-way` on a real call on this Mac (needs BlackHole 16ch and the gated English → Telugu model).
+- `--two-way` on a real call (the scripted check passes on the M4; a live call needs BlackHole 16ch).
 - Instagram calls.
 - The iPhone app with `--lan`.
 - The knowledge model fitted to a real quiz.
@@ -133,6 +147,9 @@ Earlier Laya tests that shaped the design:
 - **Nothing personal is committed:** call recordings, story pages, voice samples, word progress, logs and the picture cache stay on the laptop.
 - **The API key** lives in `.env`, which isn't committed, and a pre-commit hook blocks keys. A key once pasted into chat should be rotated.
 - **The overlay** only appears when you turn it on, and its panels are extension pages the call site can't touch.
+- **Transcription can be switched off** from the overlay (`{"type": "transcribe", "on": false}`) or started off
+  (`--transcription-off`): no call audio reaches the speech service or the recordings until it's back on, and the call
+  plays at full volume. Tested by replaying a recording and switching it off for 16 s: nothing was transcribed in between.
 
 **Protecting data during tests**
 - Test runs use temporary folders for calls and the Weave database, and back up and restore word progress. We added this after a test run deleted early call reports.
@@ -144,7 +161,9 @@ Earlier Laya tests that shaped the design:
 - **Pictures:**
   - the same one never repeats within 5 minutes;
   - only for things an American kid might not know;
-  - Wikipedia only for words not in the dictionary.
+  - Wikipedia only for words not in the dictionary, and never while a line waits: a word that isn't cached yet is
+    looked up in the background and gets its picture the next time (`tools/prefetch_pictures.py` downloads ~2,000
+    Indian foods, festivals, places and more ahead of time).
 - **"Ask her" questions:** at most one every 25 s, never right after she asked you something, and each topic only once per call.
 - **"Curious?":**
   - no questions about words you already know or everyday words;
@@ -164,6 +183,7 @@ Earlier Laya tests that shaped the design:
 ```
 python tools/eval_laya.py --muse --wrong    # Laya vs rules vs Muse Spark
 python tools/fake_call.py                   # a pretend call for the overlay (preview: extension/dev.html)
+python tools/check_decisions.py             # what the overlay gets for each demo line, and how many ms after it's cut
 python subtitles.py --file samples/grandma_story.wav --out none --no-open   # the pipeline on a recording, with latency
 python tools/check_two_way.py              # both directions on a scripted call (needs the English -> Telugu model)
 python tools/fit_progress.py                # fit the knowledge model once there are quiz answers

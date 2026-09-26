@@ -80,18 +80,39 @@ TOPIC_KEYWORDS = {  # checked in this order: the more specific topics first
 TOPIC_PATTERNS = [(t, re.compile(rf"\b({p})\b", re.IGNORECASE)) for t, p in TOPIC_KEYWORDS.items()]
 
 
-def topic_of(english, hits, laya_topic=None):
-    """(topic, how it was decided): from her words' topics, else English keywords, else Laya's guess."""
+CONCRETE = {"food", "festival", "place", "clothing", "vehicle"}  # a thing she names says what she's on about
+
+
+def _word_votes(hits):
+    """Her words' topics, a concrete thing (avakaya, Bhogi) counting double: in "Grandma made mango pickle" the pickle
+    is the topic, not Grandma."""
     votes = {}
     for h in hits:
         if h.get("topic"):
-            votes[h["topic"]] = votes.get(h["topic"], 0) + 1
+            votes[h["topic"]] = votes.get(h["topic"], 0) + (2 if h.get("category") in CONCRETE else 1)
+    return votes
+
+
+def topic_of(english, hits, laya_topic=None):
+    """(topic, how it was decided): from her words' topics, else English keywords, else Laya's guess."""
+    votes = _word_votes(hits)
     if votes:
         return max(votes, key=votes.get), "words"
     for topic, pattern in TOPIC_PATTERNS:
-        if pattern.search(english):
+        if pattern.search(english or ""):
             return topic, "keywords"
     return laya_topic, "laya"
+
+
+def words_topic(hits):
+    """(topic, strength) from her words alone, before the English exists. Strength 2 (move the topic words at once)
+    when the words clearly agree: a concrete thing (gavvalu, Bhogi) or two words on one topic, outweighing the rest.
+    Strength 1 for a lone family or everyday word ("Amma used to say..."), which counts toward a move but doesn't make one."""
+    votes = _word_votes(hits)
+    if not votes:
+        return None, 0
+    top = max(votes, key=votes.get)
+    return top, 2 if votes[top] >= 2 and votes[top] > sum(votes.values()) - votes[top] else 1
 
 
 class Decider:
@@ -104,6 +125,19 @@ class Decider:
         self.agent = laya.load("convaiinnovations/laya", device=device)
         self.lock = threading.Lock()  # one model on one GPU; translation runs on several threads
         self("Hello, how are you?")   # warm up
+
+    # The live call asks Laya one question at a time, and only what the rules can't settle. Measured on this Mac (M4,
+    # MPS): intent 44 ms, topic 96 ms, all three questions in one pass 240 ms. Packing questions into one pass is
+    # *slower* than asking them one by one (intent + topic: 169 ms vs 140 ms), since every row is padded to the longest.
+    def intent(self, english):
+        """Question (by rule), request or statement (Laya): ~0 ms for questions, ~45 ms otherwise."""
+        if is_question(english):
+            return "question"
+        return "request" if self.choose(english, QUESTIONS["intent"]) == "request" else "statement"
+
+    def topic(self, english):
+        """Laya's guess at the topic (~95 ms); only for lines her words and the keywords don't settle."""
+        return self.choose(english, QUESTIONS["topic"])
 
     def choose(self, english, question, confidence=False, **context):
         """Ask Laya one choice question about an English line (plus any extra context); returns the criteria key,
