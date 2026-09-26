@@ -26,6 +26,7 @@ from muse import Translator, transcribe
 from latency import LatencyTracker
 from lexicon import Lexicon, indic_share
 from progress import Progress
+from pronouns import PronounResolver
 from translate_server import LocalTranslator
 
 PORT = int(os.environ.get("OVERLAY_PORT", 8765))
@@ -130,6 +131,7 @@ class Captioner:
         self.questions_only = False           # --speak questions: voice only questions/requests to you
         self.lexicon = Lexicon()
         self.lang = lang
+        self.pronouns = PronounResolver(lang)  # తను -> she or he, from who was mentioned before
         self.backup = None  # Muse Spark, created if the local translator fails mid-call
         self.progress = Progress(self.lexicon, lang, learn_after=learn_after)  # words kept in Telugu
         self.known_at_start = {i for i in self.progress.entries if self.progress.known(i)}  # for the story page
@@ -191,12 +193,13 @@ class Captioner:
         # native:  Telugu (or mostly) -> translated subtitle + English voice
         route = "english" if share == 0 else "mixed" if share < NATIVE_MIN_SHARE else "native"
         broadcast({"type": "original", "id": seg_id, "text": sentence, "route": route})
+        to_translate = self.pronouns(sentence)  # here, not in work(): it must see sentences in the order said
 
         def work():
             if route == "english":
                 english = sentence
             else:
-                english = self._translate_in_time(sentence)
+                english = self._translate_in_time(to_translate)
             full_english, kept = english, []
             hits = self.lexicon.find(sentence, self.lang)
             known_before = {h["id"] for h in hits if self.progress.known(h["id"])}  # before counting this hearing
