@@ -108,6 +108,20 @@ HELD_OUT = [
     ("ఎప్పుడు వస్తావు నాన్నా?", "When will you come, Nanna?", "plans"),
 ]
 
+# Her questions to the grandkid, by what she's asking (curious.py offers the matching reply in Telugu); "other" = no reply
+REPLY_LINES = [
+    ("Have you eaten?", "ate"), ("Did you eat dinner, dear?", "ate"), ("Have you had lunch yet?", "ate"),
+    ("Are you doing well?", "wellbeing"), ("How are you, Nanna?", "wellbeing"), ("Is everything okay there?", "wellbeing"),
+    ("How are your exams going?", "studies"), ("Are you studying well?", "studies"), ("When is your exam?", "studies"),
+    ("When will you come home?", "coming"), ("Will you come for Sankranti?", "coming"), ("Are you coming this summer?", "coming"),
+    ("What are you doing?", "doing"), ("What are you doing now?", "doing"),
+    ("Did you catch a cold?", "health"), ("Are you sleeping well?", "health"), ("Is your fever gone?", "health"),
+    ("Can you hear me?", "hear"), ("Can you hear me now?", "hear"),
+    ("Do you like pulihora?", "like"), ("Did you like the sweets I sent?", "like"),
+    ("Take care.", "okay"), ("Study well.", "okay"), ("Call me on Sunday.", "okay"),
+    ("Did you see the photos?", "other"), ("What is the weather there?", "other"), ("Your uncle bought a new car, did you know?", "other"),
+]
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -135,12 +149,25 @@ def main():
         held_ok += got == topic
         if got != topic:
             held_wrong.append((english, topic, f"{got} ({why})", "", ""))
-    n, h = len(LINES), len(HELD_OUT)
+    from curious import REPLY_KIND, Curious
+    curious = Curious(decider, None, 1.0)
+    laya_reply_ok = reply_ok = 0
+    for line, want in REPLY_LINES:
+        laya_reply_ok += decider.choose(line, REPLY_KIND) == want
+        curious.asked.clear()
+        got = curious.reply(line, "question")
+        got = got["id"].split(":")[1] if got else "other"
+        reply_ok += got == want
+        if got != want:
+            wrong.append((line, want, got, "", ""))
+    n, h, r = len(LINES), len(HELD_OUT), len(REPLY_LINES)
     times.sort()
     print(f"\n{n} lines, one Laya pass each (intent, category and topic together), on this Mac")
     print(f"  topic, Laya alone       {laya_ok}/{n} = {laya_ok / n:.0%}   (11 topics; chance is ~9%)")
     print(f"  topic, keywords + Laya  {topic_ok}/{n} = {topic_ok / n:.0%}   (decided by {how}; keywords written with these lines in view)")
     print(f"  topic, held-out call    {held_ok}/{h} = {held_ok / h:.0%}   (her words' topics + keywords + Laya, on lines not used to write the rules)")
+    print(f"  reply kind, Laya alone  {laya_reply_ok}/{r} = {laya_reply_ok / r:.0%}   (what she's asking, to offer the reply in Telugu)")
+    print(f"  reply kind, keywords + Laya >= {0.5}  {reply_ok}/{r} = {reply_ok / r:.0%}   (no reply offered when unsure)")
     print(f"  intent                  {intent_ok}/{n} = {intent_ok / n:.0%}   (question / request / statement, with decide.is_question)")
     print(f"  time                    median {times[n // 2] * 1000:.0f} ms, slowest {times[-1] * 1000:.0f} ms per line")
     if a.wrong:

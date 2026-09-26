@@ -148,6 +148,16 @@ forgetting added:
 | Answer a "Curious?" question | Meta Muse Spark | cloud, on click |
 | After the call: story page, summary, questions for next time | Meta Muse Spark | cloud |
 
+**Laya's measured accuracy** (`python tools/eval_laya.py`, on lines we wrote and labelled, plus a held-out sample call):
+
+| Decision | Laya alone | With rules first | Time on the Mac |
+|---|---|---|---|
+| Question, request or statement? | — | 97% | ~0.25 s for intent + category + topic together |
+| What is the line about? (11 topics) | 64% | 91%, and 9/10 on the held-out call | (same pass) |
+| What is she asking you? (for the reply in Telugu) | 78% | 96%, with no reply offered when Laya is unsure | ~0.07 s |
+
+The rules come first (her Telugu words' topics, clear keywords), and Laya decides the rest.
+
 **The pitch line for AI:** *"Generative models create; Laya decides."* Every sentence gets 4–5 fast decisions on the
 laptop (which questions, which topic, which picture, is she asking you something). The cloud LLM only runs when the
 grandkid actually clicks.

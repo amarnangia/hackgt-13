@@ -37,7 +37,9 @@ class PictureFinder:
         # Our own one-line notes read better than Wikipedia's first sentence ("Adhirasam, attarasalu,, kajjaya...")
         lexicon = json.load(open(os.path.join(HERE, "lexicon.json"), encoding="utf-8"))
         notes = {e["id"]: e.get("note") for lang, entries in lexicon.items() if not lang.startswith("_") for e in entries}
-        self.notes = {iid: notes[lid] for iid, it in self.items.items() for lid in it.get("lexicon_ids", []) if notes.get(lid)}
+        # the first linked word's note: Bhogi's picture explains Bhogi, not Bhogi fruits (its second word)
+        self.notes = {iid: next(notes[lid] for lid in it["lexicon_ids"] if notes.get(lid))
+                      for iid, it in self.items.items() if any(notes.get(lid) for lid in it.get("lexicon_ids", []))}
         aliases = sorted(((a.lower(), iid) for iid, it in self.items.items() for a in it.get("aliases", [])),
                          key=lambda x: -len(x[0]))
         self.alias_patterns = [(re.compile(rf"(?<![A-Za-z]){re.escape(a)}(?![A-Za-z])", re.IGNORECASE), iid)

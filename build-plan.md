@@ -27,7 +27,7 @@ Times are rough estimates for one person.
 - **Check it:** label 50 lines from `calls/*/call.json` with their topic and measure Laya's accuracy. Aim for at least 80%.
 - **Done when** a call starts on greetings, moves to food words when she talks about cooking, and doesn't flicker.
 
-## 4. Left, top: "Curious?" questions (about 4 h)
+## 4. Left, top: "Curious?" questions (about 4 h) ✅ built: curious.py (Laya ranks what to ask and recognizes her questions for the reply helper), LLM answers in subtitles.py
 - **Engine: candidates.** Build them from each line: word-list matches, proverbs, picture candidates, and the nouns `pictures.py` already finds.
 - **Engine: Laya picks the stem** for each candidate (what does ___ mean / what is ___ / who is ___ / why do people say ___), then ranks the candidates to keep the top 3. Also generate "How do I say ___ in Telugu?" from the reply the grandkid would likely give.
 - **Engine: send and expire.** Send `curious` messages, drop duplicates, and let questions expire after about 60 s.

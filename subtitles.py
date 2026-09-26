@@ -140,6 +140,7 @@ class Captioner:
         self.pictures = None                  # picture pop-ups (pictures.py), set by listen()
         self.recorder = None                  # the family story keeper (calls.py)
         self.prompter = None                  # live "ask her" prompts (prompts.py)
+        self.curious = None                   # the overlay's "Curious?" questions (curious.py), set by listen()
         self.topic, self.topic_votes = None, collections.deque(maxlen=3)  # what the conversation is about now
         self.topic_lock = threading.Lock()
         self.vocab = json.load(open(os.path.join(HERE, "vocab.json"), encoding="utf-8"))["topics"]
@@ -264,6 +265,15 @@ class Captioner:
             topic, _ = topic_of(full_english, hits, decision.get("topic") if decision else None)
             self._follow_topic(topic)
             picture = self._picture(seg_id, hits, full_english, known_before)
+            if self.curious and not english.startswith("("):
+                try:
+                    questions = self.curious.for_line(full_english, hits if route != "english" else [], picture,
+                                                      decision["intent"] if decision else None, known_before)
+                except Exception as e:
+                    print(f"(Curious? questions failed: {type(e).__name__}: {e})", flush=True)
+                    questions = []
+                if questions:
+                    broadcast({"type": "curious", "line": seg_id, "questions": questions})
             if self.prompter and route != "english":
                 import topics
                 self.prompter.offer(topics.about(hits, picture, self.lexicon.entries.get(self.lang)))
@@ -526,7 +536,7 @@ async def run(args):
             broadcast({"type": "answer", "id": wid, "text": entry.get("note") or entry.get("translate_as", ""),
                        "telugu": entry["forms"][0].strip(" ,.^"), "roman": (entry.get("roman") or "").strip(" ,")})
             captioner.progress.observe(entry["id"], "answer")
-        elif kind == "ask" and wid and msg.get("text"):
+        elif kind == "ask" and wid and msg.get("text") and not wid.startswith("reply:"):  # replies come with their answer
             def reply():  # anything else: Muse Spark, with the call so far (~1-2 s), off the WebSocket thread
                 a = captioner.answer(msg["text"], args.caller)
                 broadcast({"type": "answer", "id": wid, "text": (a or {}).get("text") or "Couldn't look that up right now.",
@@ -652,6 +662,9 @@ async def listen(args, captioner):
             welcome.append(starter)
             broadcast(starter)
             print(f"  [to start: ask {args.caller}: {starter['roman']}  ({starter['english']})]", flush=True)
+    if not args.outgoing:
+        from curious import Curious
+        captioner.curious = Curious(captioner.decider, captioner.progress, captioner.progress.keep_at)
     captioner.show_topic("greetings")  # calls start with hello; the words follow the conversation from there
     captioner.speak_all = args.speak == "all"
     captioner.questions_only = args.speak == "questions"

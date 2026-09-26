@@ -113,12 +113,18 @@ function addLocalQuestion(q) {
   left.questions.unshift({ ...q, at: Date.now() });
   left.questions = left.questions.slice(0, MAX_QUESTIONS);
 }
-function rememberSaid(card) {  // words she used this call, pinned above the topic words
-  if (!card.id || !card.telugu || left.said.some((w) => w.id === card.id)) return;
+function rememberSaid(card) {  // words she used this call, pinned above the topic words (not whole proverbs)
+  const key = (card.title || "").toLowerCase();
+  if (!card.id || !card.telugu || card.category === "idiom" || left.said.some((w) => w.id === card.id || w.roman.toLowerCase() === key)) return;
   left.said.unshift({ id: card.id, telugu: card.telugu, roman: card.title, english: card.english || card.note || "" });
   left.said = left.said.slice(0, 4);
 }
-function renderLeft() {
+// New questions push the list down; while the mouse is over the panel, hold it still so a click lands where you aimed.
+let leftHeld = false, leftPending = false;
+document.addEventListener("mouseover", () => { leftHeld = true; });
+document.documentElement.addEventListener("mouseleave", () => { leftHeld = false; if (leftPending) { leftPending = false; renderLeft(); } });
+function renderLeft(force = false) {
+  if (leftHeld && !force) { leftPending = true; return; }
   const now = Date.now();
   left.questions = left.questions.filter((q) => q.id === left.open || now - q.at < QUESTION_TTL_MS);
   const ask = left.ask ? `<section class="card ask ${left.ask.fresh ? "enter" : ""}">
@@ -136,8 +142,9 @@ function renderLeft() {
       <div class="w-en">${esc(w.english)}</div>
       <button class="hear" title="Hear it" data-hear="${esc(w.telugu)}" data-roman="${esc(w.roman)}" data-id="${esc(w.id || "")}">🔊</button>
     </div>`;
-  const saidIds = new Set(left.said.map((w) => w.id));
-  const words = [...left.said.map((w) => wordRow(w, true)), ...left.words.filter((w) => !saidIds.has(w.id)).map((w) => wordRow(w, false))].join("");
+  const said = new Set(left.said.flatMap((w) => [w.id, w.roman.toLowerCase().replace(/\?$/, "")]));
+  const words = [...left.said.map((w) => wordRow(w, true)),
+    ...left.words.filter((w) => !said.has(w.id) && !said.has(String(w.roman).toLowerCase().replace(/\?$/, ""))).map((w) => wordRow(w, false))].join("");
   root.innerHTML = `${ask}
     <section class="card section">
       <div class="head"><span class="eyebrow">Curious?</span></div>
@@ -163,7 +170,7 @@ root.addEventListener("click", (e) => {
       item.asked = true;
       send({ type: "ask", id: item.id, word: item.word || null, text: item.text });  // the engine answers (and learns you asked)
     }
-    renderLeft();
+    renderLeft(true);
     return;
   }
   const hear = e.target.closest(".hear");
@@ -264,14 +271,15 @@ function handleLeft(m) {
       left.engineQuestions = true;
       for (const q of (m.questions || []).slice().reverse()) {
         if (left.questions.some((x) => x.id === q.id)) continue;
-        left.questions.unshift({ id: q.id, text: q.text, word: q.word || null, at: Date.now() });
+        left.questions.unshift({ id: q.id, text: q.text, word: q.word || null, kind: q.kind, answer: q.answer || null, at: Date.now() });
       }
       left.questions = left.questions.slice(0, MAX_QUESTIONS);
       break;
     case "answer": {
       const q = left.questions.find((x) => x.id === m.id);
       if (q) q.answer = { text: m.text, telugu: m.telugu, roman: m.roman };
-      break;
+      renderLeft(true);  // an answer you're waiting for shows even while the list is held still
+      return;
     }
     case "topic":
       left.engineTopic = true;
