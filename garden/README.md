@@ -64,8 +64,6 @@ relays `subtitles.py` to the phone (`/api/live`), so `subtitles.py` doesn't need
 
 - `ios/`: SwiftUI app + home-screen widget ("Next call: ask how she makes పులిహోర").
   `cd garden/ios && xcodegen && open Weave.xcodeproj`, then run on a simulator or your phone.
-- `widget.js`: Scriptable version of the widget for phones without the app.
-- `dashboard.html`: the older web progress dashboard at http://localhost:8770.
 
 The phone reads live calls only if `subtitles.py` listens on the network (`serve(..., "0.0.0.0", ...)`);
 by default it listens on the laptop only, which is all the call UI needs.

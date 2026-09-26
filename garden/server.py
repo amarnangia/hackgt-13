@@ -1,6 +1,6 @@
-"""Serves the garden dashboard and a JSON API (for the dashboard, the phone widget and the overlay).
+"""Serves the Weave app and its JSON API (for the web app, the iPhone app and widget, and the overlay).
 
-GET  /              dashboard
+GET  /              redirects to /app
 GET  /app           the Weave connection app (live call + demo)
 GET  /api/garden    snapshot JSON
 GET  /api/progress   which words the translator keeps in Telugu (from the team's progress.json)
@@ -113,7 +113,9 @@ def make_handler(garden):
         def do_GET(self):
             path = self.path.split("?")[0]
             if path in ("/", "/index.html"):
-                self._send(200, (HERE / "dashboard.html").read_bytes(), "text/html; charset=utf-8")
+                self.send_response(302)
+                self.send_header("Location", "/app")
+                self.end_headers()
             elif path in ("/app", "/app/"):
                 self._send(200, (HERE / "web" / "index.html").read_bytes(), "text/html; charset=utf-8")
             elif path == "/api/garden":
@@ -192,7 +194,7 @@ def make_handler(garden):
 
 def serve(garden, port=8770):  # 8765 is subtitles.py's overlay
     server = ThreadingHTTPServer(("0.0.0.0", port), make_handler(garden))
-    print(f"garden dashboard:  http://localhost:{port}")
+    print(f"Weave:             http://localhost:{port}/app")
     print(f"phone widget URL:  http://{lan_ip()}:{port}   (phone must be on the same Wi-Fi)")
     try:
         server.serve_forever()

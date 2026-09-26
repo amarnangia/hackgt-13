@@ -82,7 +82,6 @@ struct Plant: Codable, Equatable, Identifiable, Hashable {
     var id: String { phrase }
 
     var stageEnum: Stage { Stage(rawValue: stage) ?? .seed }
-    var flower: Flower { Flower(category: category) }
     /// Romanization, unless it just repeats the English.
     var romanIfUseful: String? {
         guard let roman, roman.lowercased() != (english ?? "").lowercased() else { return nil }
@@ -103,22 +102,6 @@ enum Stage: String, CaseIterable, Identifiable {
     }
 }
 
-enum Flower: String {
-    case marigold, lotus, hibiscus, sunflower, morningGlory, rose, lavender, jasmine
-    init(category: String) {
-        switch category {
-        case "food": self = .marigold
-        case "place": self = .lotus
-        case "festival": self = .hibiscus
-        case "vehicle": self = .sunflower
-        case "clothing": self = .morningGlory
-        case "family": self = .rose
-        case "idiom", "slang": self = .lavender
-        default: self = .jasmine
-        }
-    }
-    var name: String { self == .morningGlory ? "morning glory" : rawValue }
-}
 
 extension DateFormatter {
     static let isoDay: DateFormatter = {

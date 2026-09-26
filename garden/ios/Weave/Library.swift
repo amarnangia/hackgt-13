@@ -15,9 +15,10 @@ extension Stage {
 extension Plant {
     /// Everything the word sheet needs: the team's lexicon and photos when we have them, the garden's own fields otherwise.
     var asWord: Word {
+        // The translator plants a word as its first Telugu form (garden.from_lexicon); find that entry again.
         let id = (roman ?? "").replacingOccurrences(of: " ", with: "_")
-        if !id.isEmpty, Knowledge.lexicon.contains(where: { $0.id == id }) {
-            var w = Knowledge.word(id)
+        if let e = Knowledge.lexicon.first(where: { e in e.forms.contains { $0.trimmingCharacters(in: CharacterSet(charactersIn: " ,.^")) == phrase } || e.id == id }) {
+            var w = Knowledge.word(e.id)
             w.telugu = phrase
             return w
         }

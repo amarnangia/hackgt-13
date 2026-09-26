@@ -1120,6 +1120,7 @@ async function awaitStory(s) {
     const fresh = calls?.find((c) => !known.has(c.id) && c.page);
     if (!fresh) continue;
     await loadData();  // progress and the family dictionary changed too
+    state.connections = peopleFromCalls(state.calls, (state.connections || []).filter((c) => c.added));
     if (state.session === s) s.ended = true;
     openSheet(StoryReady(fresh));
     return;
@@ -1136,7 +1137,7 @@ function StoryReady(call) {
     <div class="lp-grid" style="margin-top:14px"><div class="lp-cell"><div class="eyebrow">Lines</div><div class="stat-n">${call.lines}</div></div>
       <div class="lp-cell"><div class="eyebrow">Words</div><div class="stat-n">${call.words}</div></div>
       <div class="lp-cell"><div class="eyebrow">New</div><div class="stat-n">${call.new_words}</div></div></div>
-    <div class="wx-actions"><a class="btn primary" href="${esc(call.page)}" target="_blank" style="text-decoration:none">Open the story ↗</a><button class="btn ghost" id="sum-done">Done</button></div>`;
+    <div class="wx-actions"><button class="btn primary" data-open-call="${esc(call.id)}">Open the call</button><button class="btn ghost" id="sum-done">Done</button></div>`;
 }
 function onLive(s, m, side = "them") {
   if (state.session !== s) return;
@@ -1352,6 +1353,8 @@ document.addEventListener("click", (e) => {
   if (id === "m-growth") openSheet(LearningProgress());
   if (id === "m-mode") { closeSheet(); const c = state.active; if (state.session?.mode === "live") { history.replaceState(null, "", "?demo=1"); params.set("demo", "1"); } else { params.delete("demo"); history.replaceState(null, "", location.pathname); } startSession(c); }
   if (id === "m-new") { closeSheet(); onboard(true); }
+  const openId = e.target.closest("[data-open-call]")?.dataset.openCall;
+  if (openId) { const s = state.session; if (s) { state.leftLiveCall = true; endSession(true); } renderHome(); show("home"); openCall(openId); return; }
   if (id === "sum-done") { closeSheet(); const cv = $("#s-cv"); cv?.classList.add("connecting"); state.leftLiveCall = true; setTimeout(home, 420); }
 });
 function Summary() {

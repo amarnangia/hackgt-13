@@ -25,10 +25,15 @@ struct CallSummary: Codable, Identifiable, Hashable {
     var questions: [Question]?
     var has_audio: Bool?
 
+    /// calls.py writes local time to the minute ("2026-09-26T18:30"); accept seconds too.
     var date: Date? {
         guard let started else { return nil }
-        let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX"); f.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
-        return f.date(from: String(started.prefix(19)))
+        let f = DateFormatter(); f.locale = Locale(identifier: "en_US_POSIX")
+        for format in ["yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd'T'HH:mm"] {
+            f.dateFormat = format
+            if let d = f.date(from: String(started.prefix(format.count - 2))) { return d }
+        }
+        return nil
     }
     var minutes: Int { max(1, Int(((duration_s ?? 0) / 60).rounded())) }
     var whenLabel: String {

@@ -127,7 +127,7 @@ struct HomeView: View {
         .scrollIndicators(.hidden)
         .refreshable { await people.loadGrowth() }
         .background(Backdrop())
-        .fullScreenCover(item: $cover) { c in
+        .fullScreenCover(item: $cover, onDismiss: { Task { await people.loadGrowth() } }) { c in
             switch c {
             case .session(let partner):
                 SessionView(convo: Conversation(partner: partner)).environmentObject(people)
@@ -171,13 +171,25 @@ struct HomeView: View {
     /// When subtitles.py starts a call on the Mac, offer to join it (and open it right away the first time).
     private func watchForLiveCall() async {
         struct Status: Decodable { let live: Bool }
-        var opened = false
+        var opened = false, wasLive = false
         while !Task.isCancelled {
             let live = (try? await GardenClient.get("/api/live/status", as: Status.self, timeout: 3))?.live ?? false
             withAnimation { liveOnMac = live }
             if live, !opened, cover == nil { opened = true; cover = .session(people.partner) }
             if !live { opened = false }
+            if wasLive, !live { Task { await waitForSavedCall() } }
+            wasLive = live
             try? await Task.sleep(for: .seconds(3))
+        }
+    }
+
+    /// A call is saved a little after it ends (her voice clips, then the story). Keep checking until it shows up.
+    private func waitForSavedCall() async {
+        let before = Set(people.calls.map(\.id))
+        for _ in 0..<48 {
+            try? await Task.sleep(for: .seconds(5))
+            await people.loadGrowth()
+            if people.calls.contains(where: { !before.contains($0.id) }) { return }
         }
     }
 

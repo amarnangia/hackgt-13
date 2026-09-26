@@ -1,4 +1,4 @@
-"""Known-words garden: every phrase heard on a call is a plant. Feeds the dashboard and phone widget.
+"""Known words: every phrase heard on a call, and how well you know it. Feeds the Weave app and phone widget.
 
 Hearing a phrase waters it; tapping "?" on its subtitle cuts it back a stage.
     seed    growth < 3        -> dub it in English
@@ -22,13 +22,13 @@ from pathlib import Path
 DEFAULT_DB = Path(__file__).resolve().parent / "garden.db"
 SUBTITLE_AT, BLOOM_AT = 3, 8
 CATEGORIES = ("food", "vehicle", "place", "clothing", "festival", "family", "idiom", "slang", "none")  # lexicon.json categories
-FLOWER_FOR = {"culture": "festival", "phrase": "idiom"}  # lexicon.json's other categories; plain "word" is jasmine
+CATEGORY_FOR = {"culture": "festival", "phrase": "idiom"}  # lexicon.json categories the app groups with others
 
 
 def from_lexicon(entry):
     """heard() arguments for a lexicon.json entry, the way the translator finds words in what was said."""
     return dict(phrase=entry["forms"][0].strip(" ,.^"), english=(entry.get("translate_as") or entry.get("note") or "").strip(" ,") or None,
-                category=FLOWER_FOR.get(entry.get("category"), entry.get("category")), note=entry.get("note") or None,
+                category=CATEGORY_FOR.get(entry.get("category"), entry.get("category")), note=entry.get("note") or None,
                 roman=entry.get("roman") or entry["id"].replace("_", " "))
 
 
@@ -142,7 +142,7 @@ class Garden:
             added += 1
         return added
 
-    # --- reads (dashboard + widget) ---
+    # --- reads (the Weave app + widget) ---
 
     def snapshot(self, days=14):
         now = time.time()
