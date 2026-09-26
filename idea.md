@@ -133,9 +133,11 @@ forgetting added:
   4. Seen in Telugu and not tapped: 86%, and it's now remembered longer.
   5. If they tap it instead, it drops to 19% and is translated again.
 - **Where the signals come from.**
-  - Wired now: hearings, pictures, taps on kept words, and kept words left untapped.
-  - "Asked what it means" arrives with the "Curious?" panel: a click sends `ask`, and the engine records `asked`, then `answer`.
-  - "Said it themselves" needs the grandkid's mic (`--outgoing`) and a check for Telugu words in what they said.
+  - Wired now: hearings, pictures, taps on kept words, kept words left untapped, and "Curious?" clicks (`asked`, then `answer`).
+  - "Said it themselves": with `--two-way`, her words heard on the grandkid's own microphone (in Telugu script or English letters).
+  - Hearing a word again within 45 s counts as one hearing (massed repetition teaches little; spacing does), and
+    "left untapped" counts once per word per call, and only while an overlay page is open to tap it. Before this,
+    everyday words like *ninna* and *ee roju* reached "known" within one call.
 - **What it feeds.** The vocab panel shows words in the learning zone (30–70%) first. "Curious?" doesn't suggest words they probably know. Weave shows each word's probability.
 
 ## How AI is used
@@ -176,7 +178,14 @@ grandkid actually clicks.
     - `answer` `{id, text, telugu?, roman?}`
     - `draft` `{text}`: the English of what she's said so far, while she's mid-sentence
     - `roles` `{you, them, fixed}` (`--two-way`): who speaks which language (`te` / `en`), and whether it's settled or still a guess
-  - **From the overlay back to the engine:** `ask` `{id}` (a click on a question), `i_speak` `{lang}` (the language switch, `--two-way`) and the existing `forget` `{id}`.
+    - `transcribing` `{on}`: whether the call is being transcribed at all; sent to every page when it changes and when a page connects
+    - `picture` with `"for": "them"` (`--two-way`, on your side's page, :8767): an American thing you mentioned that she may
+      never have seen (Thanksgiving, s'mores, prom), to show her (e.g. on a shared screen). Same fields as other pictures.
+  - **From the overlay back to the engine:** `ask` `{id}` (a click on a question), `i_speak` `{lang}` (the language switch, `--two-way`), `transcribe` `{on: true|false}` (the transcription switch) and the existing `forget` `{id}`.
+  - **The transcription switch:** `{"type": "transcribe", "on": false}` from any overlay page stops sending the call's
+    audio to the speech service (it gets silence), stops recording it for the story page and the voice sample, drops
+    English lines still waiting to be spoken, and turns the original voices back up to full volume. `"on": true` resumes.
+    `subtitles.py --transcription-off` starts a call with it off.
 - **Same audio setup** for both apps. The call plays in Chrome, the Mac's output is BlackHole 2ch at 100%, and the engine listens to BlackHole. So Instagram web calls work the same way as WhatsApp Web.
 
 ## Both directions

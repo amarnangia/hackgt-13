@@ -5,13 +5,14 @@ struct HomeView: View {
     @State private var cover: Cover?
     @State private var sheet: HomeSheet?
     @State private var liveOnMac = false
+    @State private var liveWith: Connection?   // who the call on the Mac is with (subtitles.py --caller)
 
     // One cover and one sheet per view: SwiftUI only honours one of each.
     enum Cover: Identifiable { case session(Connection), newConnection
         var id: String { if case .session(let c) = self { return "s-" + c.id }; return "new" } }
     enum HomeSheet: Identifiable, Equatable {
-        case growth, settings, call(CallSummary)
-        var id: String { switch self { case .growth: "growth"; case .settings: "settings"; case .call(let c): "call-" + c.id } }
+        case growth, settings, call(CallSummary), voice
+        var id: String { switch self { case .growth: "growth"; case .settings: "settings"; case .call(let c): "call-" + c.id; case .voice: "voice" } }
     }
 
     var body: some View {
@@ -35,10 +36,10 @@ struct HomeView: View {
                 .reveal(1)
 
                 if liveOnMac {
-                    Button { cover = .session(people.partner) } label: {
+                    Button { cover = .session(liveWith ?? people.partner) } label: {
                         HStack(spacing: 10) {
                             Circle().fill(Theme.green).frame(width: 7, height: 7).shadow(color: Theme.green, radius: 4)
-                            Text("\(people.partner.name) is on a call now").font(Fonts.ui(15, .medium)).foregroundStyle(Theme.text)
+                            Text("\((liveWith ?? people.partner).name) is on a call now").font(Fonts.ui(15, .medium)).foregroundStyle(Theme.text)
                             Spacer()
                             Text("Join").font(Fonts.ui(14, .semibold)).foregroundStyle(Theme.accent)
                         }
@@ -49,6 +50,28 @@ struct HomeView: View {
                     .buttonStyle(Pressable())
                     .padding(.top, 20)
                     .transition(.opacity.combined(with: .offset(y: -6)))
+                }
+
+                // Until you have one: make your personalized voice (read a short script for about a minute).
+                if let me = people.me, !me.voice {
+                    Button { sheet = .voice } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "waveform").font(.system(size: 16, weight: .semibold)).foregroundStyle(Theme.accent)
+                                .frame(width: 38, height: 38).background(Theme.accent.opacity(0.14), in: .circle)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Record your voice").font(Fonts.ui(15, .medium)).foregroundStyle(Theme.text)
+                                Text("Read a short script for a minute, and your translations sound like you.").font(Fonts.ui(12)).foregroundStyle(Theme.text2)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.text3)
+                        }
+                        .padding(14)
+                        .background(Theme.surface, in: .rect(cornerRadius: Theme.radius))
+                        .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.border, lineWidth: 1))
+                    }
+                    .buttonStyle(Pressable())
+                    .padding(.top, 20)
+                    .reveal(2)
                 }
 
                 section("Your connections").reveal(2)
@@ -139,11 +162,12 @@ struct HomeView: View {
                 .environmentObject(people)
             }
         }
-        .sheet(item: $sheet) { s in
+        .sheet(item: $sheet, onDismiss: { Task { await people.loadFamily() } }) { s in
             Group {
                 switch s {
                 case .growth: GrowthSheet(partner: people.partner.name)
                 case .settings: SettingsView()
+                case .voice: VoiceSetupView(target: VoiceTarget(name: people.profileName ?? "You", isYou: true))
                 case .call(let call): CallView(summary: call)
                 }
             }
@@ -170,12 +194,15 @@ struct HomeView: View {
 
     /// When subtitles.py starts a call on the Mac, offer to join it (and open it right away the first time).
     private func watchForLiveCall() async {
-        struct Status: Decodable { let live: Bool }
+        struct Status: Decodable { let live: Bool; let caller: String? }
         var opened = false, wasLive = false
         while !Task.isCancelled {
-            let live = (try? await GardenClient.get("/api/live/status", as: Status.self, timeout: 3))?.live ?? false
-            withAnimation { liveOnMac = live }
-            if live, !opened, cover == nil { opened = true; cover = .session(people.partner) }
+            let status = try? await GardenClient.get("/api/live/status", as: Status.self, timeout: 3)
+            let live = status?.live ?? false
+            // Whoever the Mac says this call is with, not just the last person you called.
+            let with = status?.caller.map { people.connection(named: $0) }
+            withAnimation { liveOnMac = live; liveWith = live ? with : nil }
+            if live, !opened, cover == nil { opened = true; cover = .session(with ?? people.partner) }
             if !live { opened = false }
             if wasLive, !live { Task { await waitForSavedCall() } }
             wasLive = live
@@ -272,6 +299,7 @@ struct OnboardingView: View {
     @EnvironmentObject var people: People
     @Environment(\.dismiss) private var dismiss
     @State private var step = 0
+    @State private var me = ""
     @State private var mine = "en"
     @State private var theirs = "te"
     @State private var name = "Ammamma"
@@ -281,7 +309,7 @@ struct OnboardingView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 6) {
-                ForEach(0..<4, id: \.self) { i in
+                ForEach(0..<5, id: \.self) { i in
                     Capsule().fill(i <= step ? Theme.text : Theme.border2).frame(height: 3)
                         .animation(.spring(response: 0.4, dampingFraction: 0.9), value: step)
                 }
@@ -290,11 +318,12 @@ struct OnboardingView: View {
 
             Group {
                 switch step {
-                case 0: stepView("What language do you speak?", "Everything will reach you in this language.") { LanguageSelector(selected: $mine) }
-                case 1: stepView("Who are you talking with?", "Pick the language they speak.") { LanguageSelector(selected: $theirs, exclude: mine) }
-                case 2: stepView("What do you call them?", "The name you'd use on a call.") { nameStep }
+                case 0: stepView("Who are you?", "Pick your name, or add it. Weave uses it on calls, and for your own voice.") { PersonPicker(name: $me) }
+                case 1: stepView("What language do you speak?", "Everything will reach you in this language.") { LanguageSelector(selected: $mine) }
+                case 2: stepView("Who are you talking with?", "Pick the language they speak.") { LanguageSelector(selected: $theirs, exclude: mine) }
+                case 3: stepView("What do you call them?", "The name you'd use on a call.") { nameStep }
                 default: stepView("You and \(name).", "\(Language.name(theirs)) becomes \(Language.name(mine)) for you as \(name) speaks, and the words you learn stay in \(Language.name(theirs)).") {
-                    ConnectionVisualizer(you: people.profileName ?? "Saanvi", youLang: mine,
+                    ConnectionVisualizer(you: people.profileName ?? (me.isEmpty ? "You" : me), youLang: mine,
                                          partner: Connection(id: name.lowercased(), name: name, lang: theirs, last: .now),
                                          speaking: [], translating: false, connected: connected)
                         .padding(.top, 24)
@@ -318,23 +347,25 @@ struct OnboardingView: View {
                 }
                 Button { next() } label: {
                     HStack(spacing: 8) {
-                        Text(step == 3 ? "Start conversation" : "Continue")
-                        if step == 3 { Image(systemName: "arrow.right").font(.system(size: 14, weight: .semibold)) }
+                        Text(step == 4 ? "Start conversation" : "Continue")
+                        if step == 4 { Image(systemName: "arrow.right").font(.system(size: 14, weight: .semibold)) }
                     }
                     .font(Fonts.ui(16, .medium))
-                    .foregroundStyle(step == 3 ? Theme.onAccent : Theme.bg)
+                    .foregroundStyle(step == 4 ? Theme.onAccent : Theme.bg)
                     .frame(maxWidth: .infinity).frame(height: 52)
-                    .background(step == 3 ? Theme.accent : Theme.text, in: .rect(cornerRadius: 14))
-                    .shadow(color: Theme.accent.opacity(step == 3 ? 0.45 : 0), radius: 18, y: 8)
+                    .background(step == 4 ? Theme.accent : Theme.text, in: .rect(cornerRadius: 14))
+                    .shadow(color: Theme.accent.opacity(step == 4 ? 0.45 : 0), radius: 18, y: 8)
                 }
                 .buttonStyle(Pressable())
+                .disabled(step == 0 && me.trimmingCharacters(in: .whitespaces).isEmpty)
+                .opacity(step == 0 && me.trimmingCharacters(in: .whitespaces).isEmpty ? 0.4 : 1)
             }
             .padding(.bottom, 12)
         }
         .padding(.horizontal, 20)
         .background(Backdrop())
         .preferredColorScheme(.dark)
-        .onAppear { if isNew { step = 1; name = "Nanamma" } }
+        .onAppear { if isNew { step = 2; name = "Nanamma" } }
     }
 
     private func stepView<C: View>(_ title: String, _ sub: String, @ViewBuilder content: () -> C) -> some View {
@@ -356,13 +387,20 @@ struct OnboardingView: View {
                 .animation(.easeOut(duration: 0.2), value: nameFocused)
                 .onAppear { nameFocused = true }
                 .submitLabel(.next).onSubmit { next() }
-            FlowChips(options: ["Ammamma", "Nanamma", "Thatayya", "Amma", "Nanna", "Pinni"], selected: $name)
+            FlowChips(options: nameOptions, selected: $name)
         }
     }
 
+    /// The family on the Mac (not you) first, then the usual names.
+    private var nameOptions: [String] {
+        let family = (people.family ?? []).map(\.name).filter { Person.id(for: $0) != Person.id(for: people.profileName ?? me) }
+        var seen = Set<String>()
+        return Array((family + ["Ammamma", "Nanamma", "Thatayya", "Amma", "Nanna", "Pinni"]).filter { seen.insert(Person.id(for: $0)).inserted }.prefix(6))
+    }
+
     private func next() {
-        guard step == 3 else { withAnimation(.spring(response: 0.4, dampingFraction: 0.9)) { step += 1 }; return }
-        if people.profileName == nil { people.profileName = "Saanvi" }
+        guard step == 4 else { withAnimation(.spring(response: 0.4, dampingFraction: 0.9)) { step += 1 }; return }
+        if people.profileName == nil { people.becomes(me.trimmingCharacters(in: .whitespaces)) }
         people.myLang = mine
         let clean = name.trimmingCharacters(in: .whitespaces).isEmpty ? "Ammamma" : name.trimmingCharacters(in: .whitespaces)
         let c = people.connections.first { $0.name.lowercased() == clean.lowercased() } ?? Connection(id: clean.lowercased(), name: clean, lang: theirs, last: .now)
@@ -371,7 +409,7 @@ struct OnboardingView: View {
     }
 
     private func back() {
-        if step == 0 || (isNew && step == 1) { dismiss(); return }
+        if step == 0 || (isNew && step == 2) { dismiss(); return }
         withAnimation(.spring(response: 0.4, dampingFraction: 0.9)) { step -= 1 }
     }
 }

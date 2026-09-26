@@ -104,7 +104,7 @@ def main():
     try:
         run = subprocess.run([sys.executable, "subtitles.py", "--two-way", "--file", os.path.join(OUT, "them.wav"),
                               "--my-file", os.path.join(OUT, "me.wav"), "--out", "none", "--no-story", "--no-open",
-                              "--no-prompts", "--record-out", OUT], cwd=ROOT, capture_output=True, text=True,
+                              "--no-prompts", "--no-sync", "--record-out", OUT], cwd=ROOT, capture_output=True, text=True,
                              env={**os.environ, "OVERLAY_PORT": "8781"})
         rows = [json.loads(line) for line in open(log)]
     finally:

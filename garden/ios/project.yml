@@ -54,6 +54,7 @@ targets:
           NSAllowsArbitraryLoads: true
           NSAllowsLocalNetworking: true
         NSLocalNetworkUsageDescription: Weave reads your garden from the Mac running the call translator.
+        NSMicrophoneUsageDescription: Weave records you reading for a minute to make your personalized voice.
         CFBundleURLTypes:
           - CFBundleURLSchemes: [weave]
     entitlements:

@@ -60,6 +60,7 @@ struct MainTabs: View {
             HomeView().tag(0).tabItem { Label("Home", systemImage: "person.2") }
             WordsView().tag(1).tabItem { Label("Words", systemImage: "character.book.closed") }
             ProgressView_().tag(2).tabItem { Label("Progress", systemImage: "chart.bar") }
+            VoiceTab().tag(3).tabItem { Label("Voice", systemImage: "waveform") }
         }
         .task { await people.loadGrowth() }
         .sensoryFeedback(.selection, trigger: tab)

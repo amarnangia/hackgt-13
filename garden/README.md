@@ -54,6 +54,7 @@ relays `subtitles.py` to the phone (`/api/live`), so `subtitles.py` doesn't need
 
 - Simulator: works as is (`http://localhost:8770`).
 - Your iPhone: start the server with `python3 -m garden --lan` (it only answers this laptop otherwise, so nobody on shared Wi-Fi can read your calls), then in the app, avatar → Settings → type the "phone widget URL" it prints; same Wi-Fi. Use `--lan` only on a network you trust.
+- **Personalized voices:** avatar → Settings → Personalized voices → Record. The person reads for about a minute and agrees; the Mac (needs `ELEVENLABS_API_KEY` in `.env`) makes their ElevenLabs voice and shares it with the team's laptops through Firebase. `subtitles.py` then speaks in it whenever `--me` or `--caller` matches their name.
 - With no Mac it shows the last calls and words it saw. **Demo mode** in Settings shows sample words and the
   scripted call instead, for presenting without the Mac.
 

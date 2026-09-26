@@ -2,11 +2,13 @@
   "manifest_version": 3,
   "name": "Weave overlay",
   "version": "0.1.0",
-  "description": "Live Telugu → English captions, questions, words and pictures on top of the call in this tab. Turn it on with the toolbar button or Alt+Shift+W.",
+  "description": "Live English captions, questions, words and pictures on top of the call in this tab. Turn it on with the toolbar button or Alt+Shift+W.",
   "permissions": [
     "activeTab",
     "scripting",
-    "storage"
+    "storage",
+    "tabCapture",
+    "offscreen"
   ],
   "background": {
     "service_worker": "background.js"

@@ -53,6 +53,7 @@ final class People: ObservableObject {
     @Published var calls: [CallSummary] = []
     @Published var dictionary: [String: DictEntry] = [:]
     @Published var pendingSession: Connection?   // first run: open the call once home appears
+    @Published var family: [Person]?             // everyone, from the Mac (nil: it hasn't answered)
 
     private let defaults = GardenClient.defaults
 
@@ -88,6 +89,12 @@ final class People: ObservableObject {
         return out.sorted { $0.last > $1.last }
     }
 
+    /// Someone by name: the connection you already have with them, or a new one (Telugu, like the calls).
+    func connection(named name: String) -> Connection {
+        connections.first { $0.id == Person.id(for: name) }
+            ?? Connection(id: Person.id(for: name), name: name, lang: "te", last: .now)
+    }
+
     /// The person on a live call we haven't saved yet: the translator's own default caller.
     var partner: Connection { connections.first ?? Connection(id: "grandma", name: "Grandma", lang: "te", last: .now) }
 
@@ -101,11 +108,28 @@ final class People: ObservableObject {
         async let g = GardenClient.load()
         async let c = GardenClient.calls()
         async let d = GardenClient.dictionary()
+        async let f: Void = loadFamily()
         let (snap, src) = await g
         growth = snap; source = src
         calls = await c
         let dict = await d
         if !dict.isEmpty || src == .live { dictionary = dict }
+        await f
+    }
+
+    /// Who's who, from the Mac: for "who are you?" and whose voice is personalized.
+    func loadFamily() async {
+        if let f = await GardenClient.people() { family = f }
+    }
+
+    /// You, as the Mac knows you (nil until it answers or if you're new).
+    var me: Person? { family?.first { $0.id == Person.id(for: profileName ?? "") } }
+
+    /// "Who are you?" answered: remember it, and add you to the family on the Mac if you're new.
+    func becomes(_ name: String) {
+        profileName = name
+        guard family?.contains(where: { $0.id == Person.id(for: name) }) != true else { return }
+        Task { if let f = await GardenClient.addPerson(name) { family = f } }
     }
 
     /// Her voice saying this word, if the family dictionary has it.

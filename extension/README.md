@@ -3,19 +3,17 @@
 Puts Weave on top of the call in your Chrome tab (WhatsApp Web, Instagram, or any page) when you turn it on. The layout and message format are in
 [../idea.md](../idea.md).
 
-Weave keeps the faces in the middle of the call clear (design notes: [DESIGN.md](DESIGN.md)):
+Weave keeps the faces in the middle of the call clear, and shows English only (design notes: [DESIGN.md](DESIGN.md)):
 
-- **Orb (bottom center, above the call's buttons):** shows what Weave is doing (idle, listening, translating,
-  speaking). Click it to hide or show everything. Hover it for the words and pictures buttons, **⋯** (the two-way
-  "I speak English / తెలుగు" switch, and Hide) and the status.
-- **Captions (right above the orb):** her words and the English in a glass bubble while someone talks. Click a word
-  shown in Telugu if you don't know it.
-- **Ask her (top center):** a question to ask her, when the talk pauses.
-- **Words (middle left):** words for what you're talking about (the ones she said first) and "Curious?" questions;
-  click one for the answer, or hover a word to hear it.
-- **Pictures and meanings:** small bubbles that pop up above the captions. Hover one to see it; click to keep it.
-- **Two-way calls** (`subtitles.py --two-way`): the language switch in the ⋯ menu tells the engine which language you
-  speak, so it doesn't have to guess. It's remembered and sent again whenever the engine restarts.
+- **The line (bottom center, above the call's buttons):** vibrates with the call's sound. Turning Weave on also starts
+  listening to the tab (Chrome tab capture; the sound is played straight back, so you still hear the call). Click the
+  line to hide or show everything. Beside it: the words and pictures buttons, **Transcribe** (sends `transcribe` to
+  the engine and shows whatever the engine answers in `transcribing`) and **English / Telugu** (which language you speak).
+- **Captions (right above the line):** the English, in a glass bubble while someone talks. Click an underlined word if
+  you don't know it.
+- **Ask her (top center):** what to say and what it means, when the talk pauses.
+- **Words (top left):** a few words for what you're talking about, and questions; click one for the answer.
+- **Pictures and meanings (top right):** each with what it is. Click one to keep it.
 
 It connects to the Weave engine on this Mac at `ws://localhost:8765`: either `subtitles.py`, or `tools/fake_call.py`
 for a pretend call.

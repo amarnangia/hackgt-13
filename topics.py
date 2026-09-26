@@ -70,9 +70,10 @@ def _fill(template, te, ro, en, about, key):
     return {"telugu": t, "roman": r[:1].upper() + r[1:], "english": e, "about": about, "key": key}
 
 
-def about(hits, picture=None, lexicon=None):
+def about(hits, picture=None, lexicon=None, asking=False):
     """The question to suggest for this line, or None. `hits`: word-list entries in what she said; `picture`: the
-    card that popped up (pictures.PictureFinder.card), which wins because it's what the grandkid is looking at."""
+    card that popped up (pictures.PictureFinder.card), which wins because it's what the grandkid is looking at.
+    `asking`: she asked something, so a saying in it is her question ("annam tinnava?"), not a proverb to ask about."""
     by_id = {e["id"]: e for e in (lexicon or [])}
     for h in hits:  # our hand-written questions are the best ones ("How did you and Thatayya meet?"): they come first
         if h["id"] in SPECIAL:
@@ -97,7 +98,7 @@ def about(hits, picture=None, lexicon=None):
         name = ro[:1].upper() + ro[1:]
         if h.get("ask"):
             return {**h["ask"], "about": name, "key": h["id"]}
-        if h["category"] == "idiom" and h.get("note"):
+        if h["category"] == "idiom" and h.get("note") and not asking:
             return _fill(KIND["idiom"], te, ro, "", "this saying", h["id"])
         if h["id"] in RELATIVES:
             return _fill(KIND["relative"], te, name, name, name, h["id"])

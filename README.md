@@ -38,6 +38,9 @@ her phone ──WhatsApp──▶ Chrome on your laptop ──sound──▶ Bla
 | `garden/` | Weave's app and iPhone app: past calls, words learned |
 | `tools/eval_laya.py` | Laya's accuracy and speed, next to Muse Spark |
 | `tools/fake_call.py` | A pretend call for building the overlay without audio or models |
+| `tools/check_decisions.py` | The demo lines through the real engine without audio: what the overlay gets, and how fast |
+| `tools/prefetch_pictures.py` | Downloads pictures of ~2,000 Indian foods, festivals and places once, so pop-ups never wait on the web |
+| `eleven.py` | Personalized voices: someone reads for a minute in the iPhone app, the Mac makes an ElevenLabs voice, and their translations are spoken in it (Flash v2.5 for English, v3 Conversational for Telugu). Needs `ELEVENLABS_API_KEY` in `.env`; without it (or for anyone who hasn't recorded) Pocket TTS clones the voice locally as before |
 | `subtitles.py --two-way`, `roles.py` | Both directions in one app: works out who speaks Telugu; your English → Telugu (IndicTrans2 en→indic + Meta's MMS voice) into WhatsApp Web's mic; waits while the listener talks; drops echo |
 
 ## Run it
@@ -52,3 +55,4 @@ No call handy? Run `python tools/fake_call.py` instead of `subtitles.py`.
 - **The engine only talks to our own pages.** Its connection answers only the Weave extension and pages served from your laptop (`origins.py`), so other websites can't read the call.
 - **Nothing personal is committed.** Her voice, the call recordings, the story pages and your progress stay on your laptop and are kept out of git.
 - **Cloud models only get what they need:** Meta's models receive the call audio (for transcription) and text (for translation backup, stories and answers).
+- **Personalized voices are opt-in.** ElevenLabs gets a voice recording only when that person records one in the app and ticks the consent box, and then the text of their translated lines. Remove in Settings deletes it at ElevenLabs and on every laptop. The ElevenLabs key stays on the Mac.
