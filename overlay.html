@@ -27,6 +27,15 @@
   .kept { color: var(--accent); cursor: pointer; border-bottom: 1px dashed var(--accent); }
   .kept small { color: var(--muted); font-weight: 400; font-size: 0.6em; margin-left: 3px; }
   .hint { color: var(--muted); font-size: 12px; padding: 0 16px 8px; }
+  #popup { position: fixed; right: 16px; bottom: 16px; width: min(360px, calc(100vw - 32px)); background: var(--card);
+           border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.5); transform: translateY(140%);
+           transition: transform .35s ease; }
+  #popup.show { transform: translateY(0); }
+  #popup img { width: 100%; height: 220px; object-fit: cover; display: block; background: #000; }
+  #popup .body { padding: 12px 14px 14px; }
+  #popup .name { font-size: 22px; font-weight: 700; color: var(--accent); }
+  #popup .desc { color: var(--text); font-size: 15px; margin-top: 4px; }
+  .thumb { width: 64px; height: 48px; object-fit: cover; border-radius: 8px; vertical-align: middle; margin-right: 8px; }
   #live { padding: 0 16px 10px; color: var(--accent); font-size: 20px; min-height: 1.6em; }
 </style>
 </head>
@@ -35,6 +44,7 @@
 <div class="hint">Orange words stay in Telugu because you know them. Click one if you don't.</div>
 <div id="live"></div>
 <div id="lines"></div>
+<div id="popup"><img alt=""><div class="body"><div class="name"></div><div class="desc"></div></div></div>
 <script>
 const lines = document.getElementById("lines");
 const dot = document.getElementById("dot"), status = document.getElementById("status");
@@ -43,6 +53,28 @@ const byId = {};
 const ICONS = { food: "🍛", vehicle: "🛺", place: "🛕", clothing: "🥻", festival: "🪔", family: "👵", idiom: "💬", slang: "💬", phrase: "💬" };
 
 let socket = null;
+let popupTimer = null;
+
+// A picture of the thing grandma just mentioned, e.g. pulihora; also kept as a thumbnail on that line.
+function showPicture(m) {
+  const pop = document.getElementById("popup");
+  pop.querySelector("img").src = "/" + m.image;
+  pop.querySelector(".name").textContent = m.name;
+  pop.querySelector(".desc").textContent = m.description || "";
+  pop.classList.add("show");
+  clearTimeout(popupTimer);
+  popupTimer = setTimeout(() => pop.classList.remove("show"), 9000);
+  const el = byId[m.id];
+  if (el) {
+    const card = document.createElement("div"); card.className = "card";
+    const img = document.createElement("img"); img.className = "thumb"; img.src = "/" + m.image;
+    const b = document.createElement("b"); b.textContent = m.name;
+    card.append(img, b);
+    let box = el.querySelector(".cards");
+    if (!box) { box = document.createElement("div"); box.className = "cards"; el.append(box); }
+    box.prepend(card);
+  }
+}
 
 // Words kept in Telugu are highlighted with their English underneath; click one if you've forgotten it.
 function renderKept(en, text, kept) {
@@ -70,6 +102,7 @@ function connect() {
     const m = JSON.parse(e.data);
     if (m.type === "speaking") { dot.className = "dot speaking"; status.textContent = "someone is speaking…"; return; }
     if (m.type === "partial") { live.textContent = m.text; return; }
+    if (m.type === "picture") { showPicture(m); return; }
     if (m.type === "voice") { const el = byId[m.id]; if (el) el.querySelector(".en").prepend("🔊 "); return; }
     dot.className = "dot live"; status.textContent = "listening";
     let el = byId[m.id];

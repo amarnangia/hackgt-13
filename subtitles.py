@@ -27,6 +27,7 @@ from progress import Progress
 from translate_server import LocalTranslator
 
 PORT = int(os.environ.get("OVERLAY_PORT", 8765))
+HERE = os.path.dirname(os.path.abspath(__file__))
 CHUNK_MS = 80
 VOICE_SAMPLE = "caller_voice.wav"  # the caller's voice, saved locally (gitignored) and reused next call
 SAMPLE_RATE = 48000  # AudioLoop's rate
@@ -66,7 +67,15 @@ def ws_handler(conn):
 def serve_overlay(conn, request):
     if request.headers.get("Upgrade", "").lower() == "websocket":
         return None
-    with open("overlay.html", "rb") as f:
+    path = request.path.split("?")[0]
+    if path.startswith("/images/"):  # pictures for the pop-ups
+        file = os.path.realpath(os.path.join(HERE, path.lstrip("/")))
+        if not file.startswith(os.path.join(HERE, "images") + os.sep) or not os.path.isfile(file):
+            return conn.respond(http.HTTPStatus.NOT_FOUND, "not found")
+        body = open(file, "rb").read()
+        return Response(http.HTTPStatus.OK, "OK", Headers([("Content-Type", "image/jpeg"), ("Content-Length", str(len(body))),
+                                                            ("Cache-Control", "max-age=3600"), ("Connection", "close")]), body)
+    with open(os.path.join(HERE, "overlay.html"), "rb") as f:
         body = f.read()
     # Build the response directly: conn.respond() adds text/plain headers, and setting them again
     # duplicates them, which Chrome rejects ("localhost sent an invalid response").
@@ -108,6 +117,7 @@ class Captioner:
         self.dubber = None                    # set by listen() unless --no-voice
         self.sampler = None                   # collects the caller's voice for cloning
         self.decider = None                   # Laya, set by listen()
+        self.pictures = None                  # picture pop-ups (pictures.py), set by listen()
         self.speak_all = False                # --speak all: also voice lines she said (mostly) in English
         self.questions_only = False           # --speak questions: voice only questions/requests to you
         self.lexicon = Lexicon()
@@ -173,9 +183,10 @@ class Captioner:
             else:
                 english = self._translate_in_time(sentence)
             full_english, kept = english, []
+            hits = self.lexicon.find(sentence, self.lang)
+            known_before = {h["id"] for h in hits if self.progress.known(h["id"])}  # before counting this hearing
             if route != "english" and not english.startswith("("):
                 # Words the listener knows stay in Telugu ("Today, Ammamma made pulihora"); the rest is English.
-                hits = self.lexicon.find(sentence, self.lang)
                 english, kept = self.progress.keep_known_words(english, hits)
                 self.progress.heard_words(hits)
             broadcast({"type": "english", "id": seg_id, "text": english, "route": route, "kept": kept})
@@ -185,6 +196,7 @@ class Captioner:
             decision = self.decider(full_english) if self.decider and not english.startswith("(") else None
             broadcast({"type": "details", "id": seg_id,
                        "intent": decision["intent"] if decision else None, "cards": self._cards(sentence, decision)})
+            self._picture(seg_id, hits, full_english, known_before)
             row["laya"] = decision["seconds"] if decision else None
             with self.order_lock:
                 self.finished_lines[seg_id] = (english, marks, row, decision, route)
@@ -192,7 +204,14 @@ class Captioner:
                     self._voice(self.next_to_voice, *self.finished_lines.pop(self.next_to_voice))
                     self.next_to_voice += 1
 
-        self.pool.submit(work)
+        def work_logged():
+            try:
+                work()
+            except Exception:
+                import traceback
+                traceback.print_exc()  # thread-pool errors are otherwise silent
+
+        self.pool.submit(work_logged)
 
     def _translate_in_time(self, sentence):
         """Local translation normally takes ~0.3 s, but when the Mac is short on memory it can take ~10 s.
@@ -219,6 +238,21 @@ class Captioner:
             return (remote if local in done else local).result()
         except Exception as e:
             return f"(translation failed: {type(e).__name__})"
+
+    def _picture(self, seg_id, hits, english, known_before):
+        """Pop up a picture of the thing in this line the grandkid most likely doesn't know (Laya picks).
+        Words they knew before this line don't need one (so: a picture on first mention, the Telugu word after)."""
+        if not self.pictures or english.startswith("("):
+            return
+        try:
+            key = self.pictures.pick(english, hits, known=lambda lexicon_id: lexicon_id in known_before)
+            card = self.pictures.card(key) if key else None
+        except Exception as e:
+            print(f"Picture lookup failed: {type(e).__name__}: {e}", flush=True)
+            return
+        if card:
+            broadcast({"type": "picture", "id": seg_id, **card})
+            print(f"  [picture: {card['name']}]", flush=True)
 
     def _fallback_translate(self, sentence, error):
         """The local translator died mid-call (e.g. its process was stopped): use Muse Spark for this line."""
@@ -352,6 +386,9 @@ async def listen(args, captioner):
     print("Loading Laya...", flush=True)
     from decide import Decider
     captioner.decider = await loop.run_in_executor(None, Decider)
+    from pictures import PictureFinder
+    captioner.pictures = PictureFinder(captioner.decider)
+    await loop.run_in_executor(None, captioner.pictures._nouns, "warm up the noun finder")
     captioner.speak_all = args.speak == "all"
     captioner.questions_only = args.speak == "questions"
     if not args.no_voice:  # load before audio starts, or the first seconds of the call are lost

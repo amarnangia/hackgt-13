@@ -13,3 +13,4 @@ caller_voice.wav
 *.ogg
 *.mp3
 voices/
+images/cache/
