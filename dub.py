@@ -31,6 +31,8 @@ MAX_BEHIND_S = 3.0           # skip the voice (subtitle only) rather than fall f
 MAX_BEHIND_PRIORITY_S = 5.0  # questions/requests to you are still spoken up to this far behind
 BASE_SPEED, MAX_SPEED = 1.0, 1.3  # Kokoro: natural pace, speeding up smoothly as lines pile up
 CATCH_UP_S = 2.0                  # queued speech at which we reach MAX_SPEED
+MAX_CLONE_SPEED = 1.12            # the cloned voice has no speed control; playing it faster also raises the pitch a
+                                  # little, so it stays gentle (1.12 is ~2 semitones, still clearly her)
 CLAUSE_SPLIT = r"(?<=[,;:.!?])\s+"  # generate and start playing clause by clause
 
 
@@ -116,11 +118,12 @@ class Dubber:
             self.pocket._slice_flow_cache(self.clone_state, self.voice_frames)  # just her voice, no earlier sentences
             yield from self.pocket.generate_audio_stream(self.clone_state, clause)
 
-    def _clone_clips(self, text):
-        """Her voice, chunk by chunk as it's generated (~4x faster than real time, so playback doesn't run dry)."""
+    def _clone_clips(self, text, speed=1.0):
+        """Her voice, chunk by chunk as it's generated (~4x faster than real time, so playback doesn't run dry).
+        speed > 1 plays it a little faster (and slightly higher) to catch up when English lines are queuing."""
         for chunk in self._clone_raw(text):
             chunk = np.clip(np.asarray(chunk, dtype=np.float32).reshape(-1) * self.clone_gain, -1, 1)
-            yield to_48k(chunk, self.pocket.sample_rate)
+            yield to_48k(chunk, self.pocket.sample_rate * speed)
 
     def _worker(self):
         while True:
@@ -133,7 +136,8 @@ class Dubber:
                     print("English voice now sounds like the caller.", flush=True)
                     continue
                 if self.cloning:
-                    clips = self._clone_clips(text)
+                    behind = self.buffer.pending_seconds()
+                    clips = self._clone_clips(text, 1.0 + (MAX_CLONE_SPEED - 1.0) * min(1.0, behind / CATCH_UP_S))
                 else:
                     behind = self.buffer.pending_seconds()
                     clips = self._kokoro_clips(text, BASE_SPEED + (MAX_SPEED - BASE_SPEED) * min(1.0, behind / CATCH_UP_S))
