@@ -339,9 +339,13 @@ def make_audio(args, loop, target):
     else:
         out_dev = find_device(args.out, "output") if args.out else sd.default.device[1]
         out_name = sd.query_devices(out_dev)["name"]
-        if args.outgoing and (out_name == sd.query_devices(sd.default.device[1])["name"] or "BlackHole" not in out_name):
-            raise SystemExit(f"--outgoing sends the English to {out_name!r}, but it should go to a second virtual device "
-                             "(not the one the call plays into). Install it with: brew install --cask blackhole-16ch")
+        if args.outgoing and "BlackHole" not in out_name:
+            raise SystemExit(f"--outgoing sends the English to {out_name!r}, but it should go to a virtual mic. "
+                             "Install one with: brew install --cask blackhole-16ch")
+        if args.outgoing and out_name == sd.query_devices(sd.default.device[1])["name"]:
+            raise SystemExit(f"The Mac's sound output is {out_name}, the device the English goes into, so the call would "
+                             "hear itself. Set System Settings > Sound > Output to BlackHole 2ch (or your speakers/headphones); "
+                             f"pick {out_name} only as Chrome's microphone (chrome://settings/content/microphone).")
         if not args.outgoing and "BlackHole" in out_name:
             raise SystemExit("Output is BlackHole, so you'd hear nothing (and a live call would feed back into itself). "
                              'Pass --out "MacBook Air Speakers" or your headphones.')
