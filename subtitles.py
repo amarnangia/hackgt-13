@@ -28,6 +28,7 @@ from translate_server import LocalTranslator
 
 PORT = int(os.environ.get("OVERLAY_PORT", 8765))
 CHUNK_MS = 80
+VOICE_SAMPLE = "caller_voice.wav"  # the caller's voice, saved locally (gitignored) and reused next call
 SAMPLE_RATE = 48000  # AudioLoop's rate
 SENTENCE_END = re.compile(r"[.?!।]+")
 CLAUSE_END = re.compile(r"[,;]")
@@ -103,6 +104,7 @@ class Captioner:
         self.done = 0      # how many characters of it have been sent for translation
         self.latency = LatencyTracker()
         self.dubber = None                    # set by listen() unless --no-voice
+        self.sampler = None                   # collects the caller's voice for cloning
         self.decider = None                   # Laya, set by listen()
         self.speak_all = False                # --speak all: also voice lines she said (mostly) in English
         self.questions_only = False           # --speak questions: voice only questions/requests to you
@@ -114,6 +116,8 @@ class Captioner:
         self.next_to_voice, self.finished_lines = 1, {}
 
     def on_event(self, ev):
+        if self.sampler:
+            self.sampler.on_event(ev)
         kind = ev.get("type")
         if kind == "speechStart":
             self.partial, self.done = "", 0
@@ -244,6 +248,18 @@ def load_recording(path):
     return np.interp(np.arange(n) * rate / SAMPLE_RATE, np.arange(len(audio)), audio).astype(np.float32)
 
 
+def prepare_voice_sample(args):
+    """The caller's voice clip to clone: --voice-sample (any audio file, e.g. a WhatsApp voice note), else the one
+    saved from the last call, else None (learn it during this call)."""
+    if args.voice_sample:
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", args.voice_sample, "-ac", "1", "-ar", "24000",
+                        "-t", "20", VOICE_SAMPLE], check=True)
+        return VOICE_SAMPLE
+    if args.new_voice and os.path.exists(VOICE_SAMPLE):
+        os.remove(VOICE_SAMPLE)
+    return VOICE_SAMPLE if os.path.exists(VOICE_SAMPLE) else None
+
+
 def make_audio(args, loop, target):
     """Set up AudioLoop to play the call (or --file recording) through AudioLoop and copy it to Muse as 24 kHz 16-bit PCM.
 
@@ -270,12 +286,17 @@ def make_audio(args, loop, target):
         # 48 kHz -> 24 kHz by averaging pairs; batch 10 ms blocks into 80 ms frames.
         buf.append((mono48k.reshape(-1, 2).mean(axis=1) * 32767).clip(-32768, 32767).astype(np.int16))
         if len(buf) * 10 >= CHUNK_MS:
-            frame = np.concatenate(buf).tobytes()
+            pcm = np.concatenate(buf)
             buf.clear()
+            sampler = target.get("sampler")
             if target.get("fresh"):
                 target["fresh"] = False
                 target["latency"].audio_started(time.monotonic() - CHUNK_MS / 1000)  # frame start, not end
-            loop.call_soon_threadsafe(target["q"].put_nowait, frame)
+                if sampler:
+                    sampler.new_session()
+            if sampler:
+                sampler.add_frame(pcm)  # same audio Muse hears, to clone the caller's voice
+            loop.call_soon_threadsafe(target["q"].put_nowait, pcm.tobytes())
 
     return AudioLoop(in_dev, out_dev, on_audio=on_audio, source=source)
 
@@ -308,8 +329,16 @@ async def listen(args, captioner):
     captioner.questions_only = args.speak == "questions"
     if not args.no_voice:  # load before audio starts, or the first seconds of the call are lost
         print("Loading the English voice (Kokoro)...", flush=True)
-        from dub import Dubber
-        captioner.dubber = await loop.run_in_executor(None, Dubber, audio.voice)
+        from dub import Dubber, VoiceSampler
+        sample = prepare_voice_sample(args)
+        clone = args.voice == "clone"
+        captioner.dubber = await loop.run_in_executor(
+            None, lambda: Dubber(audio.voice, clone=clone, voice_sample=sample))
+        if clone and captioner.dubber.cloning:
+            print(f"English voice: the caller's voice from {sample}. (--new-voice to relearn it on this call)", flush=True)
+        elif clone:
+            print("English voice: stock voice until the caller has spoken ~10 s, then their own voice.", flush=True)
+            target["sampler"] = captioner.sampler = VoiceSampler(VOICE_SAMPLE, captioner.dubber.use_voice_sample)
     threading.Thread(target=audio.run, kwargs={"meter": False}, daemon=True).start()
     # Connect to Muse only once audio is actually flowing; a silent gap right after connecting makes it hang up.
     for _ in range(50):
@@ -377,6 +406,10 @@ def main():
     p.add_argument("--in", dest="inp", default="BlackHole")
     p.add_argument("--out", default=None, help='output device (default: system default); "none" = silent, with --file')
     p.add_argument("--no-voice", action="store_true", help="subtitles only, no English voice")
+    p.add_argument("--voice", choices=["clone", "stock"], default="clone",
+                   help="clone = the English sounds like the caller (learned from ~10 s of their speech); stock = Kokoro")
+    p.add_argument("--voice-sample", help="audio of the caller to clone right away, e.g. a WhatsApp voice note (.opus/.m4a/.wav)")
+    p.add_argument("--new-voice", action="store_true", help="relearn the caller's voice on this call (calling someone else)")
     p.add_argument("--learn-after", type=int, default=3,
                    help="keep a word in Telugu after hearing it this many times (0 = keep every known word from the start)")
     p.add_argument("--reset-progress", action="store_true", help="forget which words you know (deletes progress.json)")

@@ -7,3 +7,4 @@ __pycache__/
 *.log
 *.jsonl
 progress.json
+caller_voice.wav
