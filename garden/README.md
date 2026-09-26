@@ -26,6 +26,8 @@ Everything in this folder is a layer on top of the translator. It reads the team
    Drag it anywhere and resize it; the text scales. Tap an underlined word for its picture and meaning.
    Needs Chrome (it uses Document Picture-in-Picture); in other browsers use the full page.
 
+**The garden (http://localhost:8770) grows from real calls.** While `subtitles.py` runs, every Telugu word she says plants or waters its plant, and the header says *On a call · growing live* (click it for the live captions). Calls already saved in `calls/` are planted when the server starts, once each. *Call stories* at the bottom lists each call's story page and the family dictionary.
+
 **Weave opens the live call by itself** when `subtitles.py` starts (from the home screen; if you go back home during a call it stays there). When you stop `subtitles.py`, Weave shows the call's story (title, summary, stories, pictures, words) with a link to the full story page, and the home screen lists every saved call from `calls/`, newest first.
 
 The badge at the top says **LIVE** when it's reading `subtitles.py` (port 8765). If you open the page first,

@@ -15,13 +15,21 @@ Pipeline usage:
         # mode is "dub" | "subtitle" | "none" - how to present it *this* time
         g.asked("పులిహోర")                           # the "?" button
 """
-import os, sqlite3, time
+import json, os, sqlite3, time
 from contextlib import contextmanager
 from pathlib import Path
 
 DEFAULT_DB = Path(__file__).resolve().parent / "garden.db"
 SUBTITLE_AT, BLOOM_AT = 3, 8
 CATEGORIES = ("food", "vehicle", "place", "clothing", "festival", "family", "idiom", "slang", "none")  # lexicon.json categories
+FLOWER_FOR = {"culture": "festival", "phrase": "idiom"}  # lexicon.json's other categories; plain "word" is jasmine
+
+
+def from_lexicon(entry):
+    """heard() arguments for a lexicon.json entry, the way the translator finds words in what was said."""
+    return dict(phrase=entry["forms"][0].strip(" ,.^"), english=(entry.get("translate_as") or entry.get("note") or "").strip(" ,") or None,
+                category=FLOWER_FOR.get(entry.get("category"), entry.get("category")), note=entry.get("note") or None,
+                roman=entry.get("roman") or entry["id"].replace("_", " "))
 
 
 def stage(growth):
@@ -52,6 +60,7 @@ class Garden:
                     first_heard REAL, last_heard REAL, last_asked REAL);
                 CREATE TABLE IF NOT EXISTS events (ts REAL, phrase TEXT, kind TEXT);  -- heard | asked | sprouted | bloomed
                 CREATE TABLE IF NOT EXISTS calls (id INTEGER PRIMARY KEY, started REAL, ended REAL);
+                CREATE TABLE IF NOT EXISTS call_keys (key TEXT PRIMARY KEY);  -- story keeper call ids already counted
                 CREATE INDEX IF NOT EXISTS events_ts ON events(ts);
             """)
 
@@ -96,15 +105,42 @@ class Garden:
         return mode(row["growth"] if row else 0)
 
     @contextmanager
-    def call(self, started=None):
+    def call(self, started=None, key=None):
+        """key: the story keeper's call id (calls/<id>/), so import_calls() won't count this call again."""
         with self._conn() as c:
+            c.execute("UPDATE calls SET ended=started WHERE ended IS NULL")  # a call the translator never closed (it crashed)
             self._call_id = c.execute("INSERT INTO calls (started) VALUES (?)", (started or time.time(),)).lastrowid
+            if key:
+                c.execute("INSERT OR IGNORE INTO call_keys VALUES (?)", (key,))
         try:
             yield self
         finally:
             with self._conn() as c:
                 c.execute("UPDATE calls SET ended=? WHERE id=?", (time.time(), self._call_id))
             self._call_id = None
+
+    def import_calls(self, calls_dir, lexicon, lang="te"):
+        """Plant the words from calls the story keeper saved (calls/*/call.json) that aren't in the garden yet,
+        e.g. calls made before the translator fed the garden. Returns how many calls were added."""
+        added = 0
+        for f in sorted(Path(calls_dir).glob("*/call.json")):
+            try:
+                call = json.load(open(f, encoding="utf-8"))
+                start = time.mktime(time.strptime(call["started"][:16], "%Y-%m-%dT%H:%M"))
+            except (OSError, ValueError, KeyError):
+                continue
+            with self._conn() as c:
+                if c.execute("SELECT 1 FROM call_keys WHERE key=?", (call["id"],)).fetchone():
+                    continue
+                c.execute("INSERT INTO call_keys VALUES (?)", (call["id"],))
+                c.execute("INSERT INTO calls (started, ended) VALUES (?, ?)", (start, start + (call.get("duration_s") or 0)))
+            for i, line in enumerate(call.get("lines") or []):
+                if line.get("route") == "english":
+                    continue  # she said it in English: no Telugu words heard
+                for entry in lexicon.find(line.get("telugu", ""), lang):
+                    self.heard(**from_lexicon(entry), ts=start + (line.get("start_s") or i * 5))
+            added += 1
+        return added
 
     # --- reads (dashboard + widget) ---
 

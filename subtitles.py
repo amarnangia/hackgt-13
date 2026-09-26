@@ -130,6 +130,7 @@ class Captioner:
         self.pictures = None                  # picture pop-ups (pictures.py), set by listen()
         self.recorder = None                  # the family story keeper (calls.py)
         self.prompter = None                  # live "ask her" prompts (prompts.py)
+        self.garden = self.garden_call = None  # Weave's garden (garden/garden.db): each Telugu word heard grows a plant
         self.speak_all = False                # --speak all: also voice lines she said (mostly) in English
         self.questions_only = False           # --speak questions: voice only questions/requests to you
         self.lexicon = Lexicon()
@@ -142,6 +143,14 @@ class Captioner:
         self.keep_known = keep_known  # off for --outgoing: the person you're calling doesn't know Telugu
         self.order_lock = threading.Lock()    # translations finish out of order; the voice must not
         self.next_to_voice, self.finished_lines = 1, {}
+
+    def _plant(self, hits):
+        from garden import from_lexicon
+        try:
+            for entry in hits:
+                self.garden.heard(**from_lexicon(entry))
+        except Exception as e:  # the garden is a view; never let it stop the call
+            print(f"(garden not updated: {type(e).__name__}: {e})", flush=True)
 
     def on_event(self, ev):
         if self.sampler:
@@ -211,6 +220,8 @@ class Captioner:
                 # Words the listener knows stay in Telugu ("Today, Ammamma made pulihora"); the rest is English.
                 english, kept = self.progress.keep_known_words(english, hits)
                 self.progress.heard_words(hits)
+            if self.garden and route != "english" and hits:
+                self._plant(hits)
             broadcast({"type": "english", "id": seg_id, "text": english, "route": route, "kept": kept})
             row = self.latency.finished(marks, sentence, english)
             row["route"] = route
@@ -429,6 +440,10 @@ async def run(args):
     def on_message(msg):
         if msg.get("type") == "forget" and msg.get("id"):
             captioner.progress.forget(msg["id"])
+            entry = next((e for e in captioner.lexicon.entries.get(captioner.lang, []) if e["id"] == msg["id"]), None)
+            if captioner.garden and entry:
+                from garden import from_lexicon
+                captioner.garden.asked(from_lexicon(entry)["phrase"])  # the "?" in the garden: it gets more help again
             print(f"Marked '{msg['id']}' as not known; it will be translated again.", flush=True)
     global on_client_message
     on_client_message = on_message
@@ -436,6 +451,9 @@ async def run(args):
         await listen(args, captioner)
     finally:  # also on Ctrl+C
         print("\n" + captioner.latency.summary() + "\n(per-sentence log: latency_log.jsonl)", flush=True)
+        if captioner.garden_call:
+            captioner.pool.shutdown(wait=True)  # the last lines grow the garden too
+            captioner.garden_call.__exit__(None, None, None)  # Weave's garden: no longer "on a call"
         finish_call(captioner, args)
 
 
@@ -481,7 +499,7 @@ def finish_call(captioner, args):
     if not page:
         print("(nothing was said, so no story page)", flush=True)
         return
-    print(f"Story page:        {page}\nFamily dictionary: {os.path.join(HERE, 'calls', 'dictionary.html')}", flush=True)
+    print(f"Story page:        {page}\nFamily dictionary: {os.path.normpath(os.path.join(os.path.dirname(page), os.pardir, 'dictionary.html'))}", flush=True)
     if not args.no_open:
         subprocess.run(["open", page], check=False)
 
@@ -501,6 +519,11 @@ async def listen(args, captioner):
         target["recorder"] = captioner.recorder = CallRecorder(args.caller, record_audio=not args.no_record)
         print(f"Keeping this call's story in calls/{captioner.recorder.id}/"
               + ("" if not args.no_record else " (no audio: --no-record)"), flush=True)
+    if not args.outgoing:  # Weave's garden grows from her Telugu (python -m garden shows it)
+        from garden import Garden
+        captioner.garden = Garden()
+        captioner.garden_call = captioner.garden.call(key=captioner.recorder.id if captioner.recorder else None)
+        captioner.garden_call.__enter__()
     if not args.no_prompts:
         from prompts import StoryPrompter
 

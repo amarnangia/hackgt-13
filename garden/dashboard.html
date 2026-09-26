@@ -94,6 +94,15 @@ header { display: flex; justify-content: space-between; align-items: flex-end; g
 .feed .msg small { color: var(--muted); font-size: 12.5px; }
 .feed svg { flex: none; margin-top: 1px; }
 .muted { color: var(--muted); }
+.pill.live { text-decoration: none; }
+.stories li { padding: 0; }
+.stories a { display: flex; gap: 14px; align-items: center; padding: 11px 0; color: inherit; text-decoration: none; }
+.stories li:first-child a { padding-top: 0; }
+.stories a:hover b { text-decoration: underline; }
+.stories .pics { display: flex; gap: 4px; flex: none; }
+.stories img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; display: block; }
+.stories .msg { min-width: 0; }
+@media (max-width: 520px) { .stories .pics img:nth-child(n+2) { display: none; } }
 
 .beds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
 .beds h3 { font-size: 14px; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
@@ -203,6 +212,11 @@ header { display: flex; justify-content: space-between; align-items: flex-end; g
       <ul class="list feed" id="feed"></ul>
     </section>
   </div>
+
+  <section class="card">
+    <div class="head"><h2>Call stories</h2><span class="note" id="storiesNote"></span></div>
+    <ul class="list feed stories" id="stories"></ul>
+  </section>
 </div>
 <div id="tip" role="tooltip"></div>
 
@@ -384,7 +398,7 @@ const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
 
 function drawStatus(d) {
   const c = d.calls;
-  $("status").innerHTML = (c.live ? `<span class="pill live"><span class="dot"></span>On a call · growing live</span>` : c.last ? `<span class="pill">Last call ${ago(c.last, d.now)}</span>` : "")
+  $("status").innerHTML = (c.live ? `<a class="pill live" href="/app" title="Open the live captions"><span class="dot"></span>On a call · growing live</a>` : c.last ? `<span class="pill">Last call ${ago(c.last, d.now)}</span>` : "")
     + `<span class="pill">${plural(c.count, "call")} · ${c.minutes} min</span>`;
 }
 
@@ -466,6 +480,32 @@ function drawAll(d) {
   $("all").innerHTML = col("bloom", "Blooming") + col("sprout", "Sprouting") + col("seed", "Seeds");
 }
 
+// Each call the story keeper saved (calls/): its story page, her voice clips and the words from it.
+function drawStories(calls, now) {
+  $("storiesNote").innerHTML = hasDictionary ? `<a href="/calls/dictionary.html" target="_blank" style="color:inherit">family dictionary ↗</a>` : "";
+  $("stories").innerHTML = calls.length ? calls.map((c) => {
+    const started = new Date(c.started).getTime() / 1000, mins = Math.max(1, Math.round((c.duration_s || 0) / 60));
+    const pics = (c.pictures || []).slice(0, 3).map((p) => `<img src="/${esc(p)}" alt="">`).join("") || glyph("bloom", "family", 44);
+    const detail = c.stories?.length ? c.stories.join(" · ") : c.summary || `${plural(c.lines, "line")}`;
+    const words = `${plural(c.words, "word")}${c.new_words ? ` · ${c.new_words} new` : ""}`;
+    const inner = `<span class="pics">${pics}</span><span class="msg"><b>${esc(c.title)}</b><br><small>${esc(detail)}</small><br><small>${words}</small></span>
+      <span class="t">${isNaN(started) ? "" : ago(started, now)} · ${mins}m${c.page ? " ↗" : ""}</span>`;
+    return `<li>${c.page ? `<a href="${esc(c.page)}" target="_blank">${inner}</a>` : `<a>${inner}</a>`}</li>`;
+  }).join("") : `<li class="muted">After a call, its story (what she told you, her voice, the words) is kept here.</li>`;
+}
+let lastCalls = "", hasDictionary = false, callsAt = 0;
+async function tickStories() {
+  if (Date.now() - callsAt < 10000 && lastCalls) return;  // the story is written once, after each call
+  callsAt = Date.now();
+  try {
+    const text = await (await fetch("/api/calls", { cache: "no-store" })).text();
+    if (text === lastCalls) return;
+    lastCalls = text;
+    hasDictionary = await fetch("/calls/dictionary.html", { cache: "no-store" }).then((r) => r.ok).catch(() => false);
+    drawStories(JSON.parse(text), Date.now() / 1000);
+  } catch {}
+}
+
 // ---------- tooltip ----------
 const tip = $("tip");
 function showTip(e, html) { tip.innerHTML = html; tip.classList.add("on"); moveTip(e); }
@@ -493,6 +533,7 @@ async function tick() {
       drawScene(data); drawStatus(data); drawLegend(data); drawStats(data); drawChart(data); drawAlmost(data); drawFeed(data); drawAll(data);
       $("scene").setAttribute("aria-label", `Garden of ${data.totals.phrases} phrases: ${data.totals.bloom} blooming, ${data.totals.sprout} sprouting, ${data.totals.seed} seeds`);
     } else if (data) { drawStatus(data); drawFeed(data); }
+    tickStories();
   } catch (err) {
     $("status").innerHTML = `<span class="pill">Can't reach the garden server</span>`;
   }
