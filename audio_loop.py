@@ -18,6 +18,7 @@ SR = 48000
 BLOCK = 480  # 10 ms
 DUCK_LEVEL = 0.2   # call audio volume while the English voice is speaking
 RAMP_BLOCKS = 8    # fade over 80 ms so ducking doesn't click
+SOUND_LEVEL = 0.003  # above the digital silence BlackHole carries when nothing is playing into it
 
 
 def find_device(name, kind):
@@ -81,9 +82,12 @@ class AudioLoop:
         self.voice = VoiceBuffer()
         self.gain = original
         self.level = 0.0
+        self.last_sound = time.monotonic()  # when the input last had anything louder than SOUND_LEVEL
 
     def _mix(self, mono, frames):
         self.level = float(np.abs(mono).max()) if len(mono) else 0.0
+        if self.level > SOUND_LEVEL:
+            self.last_sound = time.monotonic()
         if self.on_audio:
             self.on_audio(mono.copy())
         # Move the call volume one step toward its target each block, fading within the block.

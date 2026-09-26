@@ -33,6 +33,7 @@ from translate_server import LocalTranslator
 PORT = int(os.environ.get("OVERLAY_PORT", 8765))
 HERE = os.path.dirname(os.path.abspath(__file__))
 CHUNK_MS = 80
+SILENCE_WARN_S = 15  # warn if the call has been silent this long
 VOICE_SAMPLE = "caller_voice.wav"  # the caller's voice, saved locally (gitignored) and reused next call
 MY_VOICE_SAMPLE = "my_voice.wav"    # --outgoing: your own voice, so the English you send sounds like you
 SAMPLE_RATE = 48000  # AudioLoop's rate
@@ -437,6 +438,37 @@ async def run(args):
         finish_call(captioner, args)
 
 
+def watch_call_audio(audio, args):
+    """Say so, in the terminal and on the overlay, when the call's sound isn't reaching the app. Otherwise a call can
+    run to the end with nothing picked up and only "nothing was said" to show for it."""
+    import sounddevice as sd
+
+    warned_silent = warned_volume = False
+    while True:
+        time.sleep(3)
+        quiet_for = time.monotonic() - audio.last_sound
+        if quiet_for > SILENCE_WARN_S and not warned_silent:
+            warned_silent = True
+            msg = (f"No sound from the call for {quiet_for:.0f} s. If she's talking: the Mac's output should be BlackHole 2ch "
+                   "at 100%, and in the WhatsApp Web call (⋯ > Settings) the speaker should be Default or BlackHole 2ch, "
+                   "not the MacBook speakers. Test with: python tools/blackhole_check.py 15")
+            print("\n⚠️  " + msg, flush=True)
+            broadcast({"type": "warning", "text": msg})
+        elif quiet_for < 1:
+            warned_silent = False
+        if not args.outgoing and "BlackHole" in sd.query_devices(sd.default.device[1])["name"]:
+            vol = subprocess.run(["osascript", "-e", "output volume of (get volume settings)"],
+                                 capture_output=True, text=True).stdout.strip()
+            if vol.isdigit() and int(vol) < 100 and not warned_volume:
+                warned_volume = True
+                msg = (f"The Mac volume is {vol}%. While BlackHole is the output, the volume keys turn down the call going "
+                       "into the app, not your speakers. Set it back to 100%.")
+                print("\n⚠️  " + msg, flush=True)
+                broadcast({"type": "warning", "text": msg})
+            elif vol == "100":
+                warned_volume = False
+
+
 def finish_call(captioner, args):
     """Turn the call into its story page and update the family dictionary."""
     if not captioner.recorder:
@@ -493,6 +525,8 @@ async def listen(args, captioner):
             print(f"English voice: stock voice until {who}voice is learned (~10 s of speech).", flush=True)
             target["sampler"] = captioner.sampler = VoiceSampler(args.voice_file, captioner.dubber.use_voice_sample)
     threading.Thread(target=audio.run, kwargs={"meter": False}, daemon=True).start()
+    if not args.file:
+        threading.Thread(target=watch_call_audio, args=(audio, args), daemon=True).start()
     # Connect to Muse only once audio is actually flowing; a silent gap right after connecting makes it hang up.
     for _ in range(50):
         if not target["q"].empty():

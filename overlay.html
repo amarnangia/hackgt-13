@@ -127,6 +127,7 @@ function connect() {
     if (m.type === "partial") { live.textContent = m.text; return; }
     if (m.type === "picture") { showPicture(m); return; }
     if (m.type === "prompt") { showAsk(m); return; }
+    if (m.type === "warning") { status.textContent = "⚠️ " + m.text; dot.className = "dot"; return; }
     if (m.type === "voice") { const el = byId[m.id]; if (el) el.querySelector(".en").prepend("🔊 "); return; }
     dot.className = "dot live"; status.textContent = "listening";
     let el = byId[m.id];
