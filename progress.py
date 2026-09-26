@@ -10,6 +10,10 @@
 #   - Forgetting: between calls p fades back toward the word's starting guess, with a half-life that doubles each
 #     time they show they still know it (spaced repetition) and halves when they don't.
 # A word is kept in Telugu once p >= KEEP_AT. Saved per person in progress.json (gitignored).
+#
+# The numbers below are sensible guesses. Every signal is also logged (progress_log.jsonl, gitignored), so
+# tools/quiz.py (which words do you actually know?) and tools/fit_progress.py (which settings predict that best?) can
+# tune them; Progress(..., prior_scale=, learn_scale=, evidence_scale=, half_life=) runs the model with other settings.
 import json
 import math
 import os
@@ -43,11 +47,27 @@ HALF_LIFE_DAYS, MIN_HALF_LIFE_DAYS, MAX_HALF_LIFE_DAYS = 7.0, 1.0, 60.0  # most 
 
 
 class Progress:
-    def __init__(self, lexicon, lang, path="progress.json", keep_at=KEEP_AT):
+    def __init__(self, lexicon, lang, path="progress.json", keep_at=KEEP_AT,
+                 prior_scale=1.0, learn_scale=1.0, evidence_scale=1.0, half_life=HALF_LIFE_DAYS):
+        """path=None: nothing is read, saved or logged (tools/fit_progress.py replaying a history). Settings saved by
+        tools/fit_progress.py --save (progress_settings.json next to progress.json) are used instead of the defaults."""
+        settings = os.path.join(os.path.dirname(os.path.abspath(path)), "progress_settings.json") if path else None
+        if settings and os.path.exists(settings):
+            fitted = json.load(open(settings))
+            prior_scale, learn_scale = fitted.get("prior_scale", prior_scale), fitted.get("learn_scale", learn_scale)
+            evidence_scale, half_life = fitted.get("evidence_scale", evidence_scale), fitted.get("half_life", half_life)
         self.path, self.keep_at, self.lang = path, keep_at, lang
+        self.log_path = os.path.splitext(path)[0] + "_log.jsonl" if path else None
         self.entries = {e["id"]: e for e in lexicon.entries.get(lang, []) if "roman" in e}
         self.lock = threading.Lock()
-        saved = json.load(open(path)) if os.path.exists(path) else {}
+        self.clock = time.time  # replaced when replaying a logged history
+        # the settings (scales of 1 = the numbers above)
+        self.priors = {k: min(0.99, v * prior_scale) for k, v in PRIOR.items()}
+        self.default_prior = min(0.99, DEFAULT_PRIOR * prior_scale)
+        self.learn = {k: min(0.95, v * learn_scale) for k, v in LEARN.items()}
+        self.evidence = {k: tuple(min(0.99, max(0.01, 0.5 + (x - 0.5) * evidence_scale)) for x in v) for k, v in EVIDENCE.items()}
+        self.half_life = half_life
+        saved = json.load(open(path)) if path and os.path.exists(path) else {}
         self.heard = saved.get("heard", {})  # times each word came up (for the story page and Weave)
         self.words = saved.get("words", {})  # id -> {"p": probability known, "t": when, "hl": half-life in days}
         self.pending = {}                    # kept in Telugu at this time; "understood" unless tapped soon
@@ -62,7 +82,7 @@ class Progress:
     # ---------- the model ----------
     def prior(self, entry_id):
         e = self.entries.get(entry_id, {})
-        return PRIOR["start_known"] if e.get("start_known") else PRIOR.get(e.get("category"), DEFAULT_PRIOR)
+        return self.priors["start_known"] if e.get("start_known") else self.priors.get(e.get("category"), self.default_prior)
 
     def probability(self, entry_id, now=None):
         """How likely they know it right now, forgetting included."""
@@ -73,24 +93,24 @@ class Progress:
             return prior
         if w["p"] <= prior:
             return w["p"]
-        days = ((now or time.time()) - w["t"]) / 86400
+        days = ((now or self.clock()) - w["t"]) / 86400
         return prior + (w["p"] - prior) * math.pow(0.5, days / w["hl"])
 
     def _state(self, entry_id):
         p = self.probability(entry_id)
-        w = self.words.setdefault(entry_id, {"p": p, "t": time.time(), "hl": HALF_LIFE_DAYS})
-        w["p"], w["t"] = p, time.time()
+        w = self.words.setdefault(entry_id, {"p": p, "t": self.clock(), "hl": self.half_life})
+        w["p"], w["t"] = p, self.clock()
         return w
 
     def _learn(self, entry_id, event, save=True):
         w = self._state(entry_id)
-        w["p"] = w["p"] + (1 - w["p"]) * LEARN[event]
+        w["p"] = w["p"] + (1 - w["p"]) * self.learn[event]
         if save:
             self._save()
 
     def _evidence(self, entry_id, event):
         w = self._state(entry_id)
-        if_known, if_not = EVIDENCE[event]
+        if_known, if_not = self.evidence[event]
         w["p"] = w["p"] * if_known / (w["p"] * if_known + (1 - w["p"]) * if_not)
         if if_known > if_not and w["p"] >= self.keep_at:  # showed they still know it: remember it longer
             w["hl"] = min(MAX_HALF_LIFE_DAYS, w["hl"] * 2)
@@ -102,11 +122,26 @@ class Progress:
         if entry_id not in self.entries:
             return
         with self.lock:
-            if event in EVIDENCE:
-                self._evidence(entry_id, event)
-            if event in LEARN:
-                self._learn(entry_id, event, save=False)
+            self._apply(entry_id, event)
+            self._log(entry_id, event)
             self._save()
+
+    def _apply(self, entry_id, event):
+        if event in EVIDENCE:
+            self._evidence(entry_id, event)
+        if event in LEARN:
+            self._learn(entry_id, event, save=False)
+
+    def replay(self, events):
+        """Run a logged history ([{"t", "id", "event"}], oldest first) through this model, at the logged times."""
+        for e in events:
+            if e["id"] in self.entries:
+                self.clock = lambda t=e["t"]: t
+                self._apply(e["id"], e["event"])
+                if e["event"] == "heard":
+                    self.heard[e["id"]] = self.heard.get(e["id"], 0) + 1
+        self.clock = time.time
+        return self
 
     def known(self, entry_id):
         return self.probability(entry_id) >= self.keep_at
@@ -153,6 +188,7 @@ class Progress:
                     continue
                 self.heard[wid] = self.heard.get(wid, 0) + 1
                 self._learn(wid, "heard", save=False)
+                self._log(wid, "heard")
                 if wid in kept:
                     self.pending.setdefault(wid, now)
             self._save()
@@ -164,6 +200,7 @@ class Progress:
             if everything or now - shown >= UNDERSTOOD_S:
                 del self.pending[wid]
                 self._evidence(wid, "understood")
+                self._log(wid, "understood")
 
     def forget(self, entry_id):
         """They tapped a kept word: they don't know it (yet). It's translated again until they learn it."""
@@ -171,6 +208,7 @@ class Progress:
             self.pending.pop(entry_id, None)
             if entry_id in self.entries:
                 self._evidence(entry_id, "forgot")
+                self._log(entry_id, "forgot")
                 self._save()
 
     def finish(self):
@@ -182,5 +220,11 @@ class Progress:
         """{id: probability} for every word with any evidence (Weave, the story page)."""
         return {wid: round(self.probability(wid), 3) for wid in self.words}
 
+    def _log(self, entry_id, event):
+        if self.log_path:
+            with open(self.log_path, "a") as f:
+                f.write(json.dumps({"t": round(self.clock(), 1), "id": entry_id, "event": event}) + "\n")
+
     def _save(self):
-        json.dump({"heard": self.heard, "words": self.words}, open(self.path, "w"), indent=1)
+        if self.path:
+            json.dump({"heard": self.heard, "words": self.words}, open(self.path, "w"), indent=1)
