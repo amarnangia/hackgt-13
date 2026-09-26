@@ -6,7 +6,7 @@ import os
 import re
 import threading
 
-LEARN_AFTER = 3
+LEARN_AFTER = 1  # keep a word in Telugu from its second hearing
 
 
 class Progress:

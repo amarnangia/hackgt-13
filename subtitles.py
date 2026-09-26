@@ -84,7 +84,7 @@ class Captioner:
     by id, so they still show in order.
     """
 
-    def __init__(self, lang, translator="local", learn_after=3):
+    def __init__(self, lang, translator="local", learn_after=1):
         self.translate = None
         if translator == "local":
             local = LocalTranslator(lang)
@@ -435,7 +435,7 @@ def main():
                    help="clone = the English sounds like the caller (learned from ~10 s of their speech); stock = Kokoro")
     p.add_argument("--voice-sample", help="audio of the caller to clone right away, e.g. a WhatsApp voice note (.opus/.m4a/.wav)")
     p.add_argument("--new-voice", action="store_true", help="relearn the caller's voice on this call (calling someone else)")
-    p.add_argument("--learn-after", type=int, default=3,
+    p.add_argument("--learn-after", type=int, default=1,
                    help="keep a word in Telugu after hearing it this many times (0 = keep every known word from the start)")
     p.add_argument("--reset-progress", action="store_true", help="forget which words you know (deletes progress.json)")
     p.add_argument("--speak", choices=["telugu", "questions", "all"], default="telugu",

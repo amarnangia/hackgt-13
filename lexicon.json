@@ -551,7 +551,8 @@
    },
    "roman": "avunu",
    "category": "phrase",
-   "note": "Yes"
+   "note": "Yes",
+   "start_known": true
   },
   {
    "id": "sare",
@@ -565,7 +566,8 @@
    },
    "roman": "sare",
    "category": "phrase",
-   "note": "Okay / alright"
+   "note": "Okay / alright",
+   "start_known": true
   },
   {
    "id": "jagratta",
@@ -667,7 +669,8 @@
    "substitute": false,
    "match_english": [
     "rice"
-   ]
+   ],
+   "start_known": true
   },
   {
    "id": "bhojanam",
@@ -1294,6 +1297,457 @@
    ],
    "category": "idiom",
    "note": "'What won't bend as a sapling won't bend as a tree': teach good habits while young"
+  },
+  {
+   "id": "ee_roju",
+   "forms": [
+    "ఈ రోజు",
+    "ఈరోజు",
+    "ఇవాళ",
+    "ఇవ్వాళ"
+   ],
+   "roman": "ee roju",
+   "substitute": false,
+   "match_english": [
+    "today"
+   ],
+   "category": "word",
+   "note": "Today"
+  },
+  {
+   "id": "ninna",
+   "forms": [
+    "నిన్న"
+   ],
+   "roman": "ninna",
+   "substitute": false,
+   "match_english": [
+    "yesterday"
+   ],
+   "category": "word",
+   "note": "Yesterday"
+  },
+  {
+   "id": "repu",
+   "forms": [
+    "రేపు"
+   ],
+   "roman": "repu",
+   "substitute": false,
+   "match_english": [
+    "tomorrow"
+   ],
+   "category": "word",
+   "note": "Tomorrow"
+  },
+  {
+   "id": "ippudu",
+   "forms": [
+    "ఇప్పుడు"
+   ],
+   "roman": "ippudu",
+   "substitute": false,
+   "match_english": [
+    "right now",
+    "now"
+   ],
+   "category": "word",
+   "note": "Now"
+  },
+  {
+   "id": "ikkada",
+   "forms": [
+    "ఇక్కడ"
+   ],
+   "roman": "ikkada",
+   "substitute": false,
+   "match_english": [
+    "here"
+   ],
+   "category": "word",
+   "note": "Here"
+  },
+  {
+   "id": "akkada",
+   "forms": [
+    "అక్కడ"
+   ],
+   "roman": "akkada",
+   "substitute": false,
+   "match_english": [
+    "there"
+   ],
+   "category": "word",
+   "note": "There"
+  },
+  {
+   "id": "manchi",
+   "forms": [
+    "మంచి"
+   ],
+   "roman": "manchi",
+   "substitute": false,
+   "match_english": [
+    "good",
+    "nice"
+   ],
+   "category": "word",
+   "note": "Good, nice"
+  },
+  {
+   "id": "kotta",
+   "forms": [
+    "కొత్త"
+   ],
+   "roman": "kotta",
+   "substitute": false,
+   "match_english": [
+    "new"
+   ],
+   "category": "word",
+   "note": "New"
+  },
+  {
+   "id": "pedda",
+   "forms": [
+    "పెద్ద"
+   ],
+   "roman": "pedda",
+   "substitute": false,
+   "match_english": [
+    "big",
+    "large"
+   ],
+   "category": "word",
+   "note": "Big"
+  },
+  {
+   "id": "chinna",
+   "forms": [
+    "చిన్న"
+   ],
+   "roman": "chinna",
+   "substitute": false,
+   "match_english": [
+    "small",
+    "little"
+   ],
+   "category": "word",
+   "note": "Small"
+  },
+  {
+   "id": "cinema",
+   "forms": [
+    "సినిమా",
+    "సినిమాకి",
+    "సినిమాలు"
+   ],
+   "roman": "cinema",
+   "substitute": false,
+   "match_english": [
+    "movies",
+    "movie",
+    "film",
+    "cinema"
+   ],
+   "category": "word",
+   "note": "Movie"
+  },
+  {
+   "id": "pani",
+   "forms": [
+    "పని",
+    "పనులు"
+   ],
+   "roman": "pani",
+   "substitute": false,
+   "match_english": [
+    "work"
+   ],
+   "category": "word",
+   "note": "Work, chores"
+  },
+  {
+   "id": "udyogam",
+   "forms": [
+    "ఉద్యోగం"
+   ],
+   "roman": "udyogam",
+   "substitute": false,
+   "match_english": [
+    "job"
+   ],
+   "category": "word",
+   "note": "Job"
+  },
+  {
+   "id": "dabbulu",
+   "forms": [
+    "డబ్బులు",
+    "డబ్బు"
+   ],
+   "roman": "dabbulu",
+   "substitute": false,
+   "match_english": [
+    "money"
+   ],
+   "category": "word",
+   "note": "Money"
+  },
+  {
+   "id": "pillalu",
+   "forms": [
+    "పిల్లలు",
+    "పిల్లల"
+   ],
+   "roman": "pillalu",
+   "substitute": false,
+   "match_english": [
+    "children",
+    "kids"
+   ],
+   "category": "word",
+   "note": "Children"
+  },
+  {
+   "id": "snehitulu",
+   "forms": [
+    "స్నేహితులు",
+    "ఫ్రెండ్స్"
+   ],
+   "roman": "snehitulu",
+   "substitute": false,
+   "match_english": [
+    "friends",
+    "friend"
+   ],
+   "category": "word",
+   "note": "Friends"
+  },
+  {
+   "id": "kukka",
+   "forms": [
+    "కుక్క"
+   ],
+   "roman": "kukka",
+   "substitute": false,
+   "match_english": [
+    "dog"
+   ],
+   "category": "word",
+   "note": "Dog"
+  },
+  {
+   "id": "pilli",
+   "forms": [
+    "పిల్లి"
+   ],
+   "roman": "pilli",
+   "substitute": false,
+   "match_english": [
+    "cat"
+   ],
+   "category": "word",
+   "note": "Cat"
+  },
+  {
+   "id": "puvvulu",
+   "forms": [
+    "పువ్వులు",
+    "పూలు"
+   ],
+   "roman": "puvvulu",
+   "substitute": false,
+   "match_english": [
+    "flowers"
+   ],
+   "category": "word",
+   "note": "Flowers"
+  },
+  {
+   "id": "chettu",
+   "forms": [
+    "చెట్టు",
+    "చెట్లు"
+   ],
+   "roman": "chettu",
+   "substitute": false,
+   "match_english": [
+    "trees",
+    "tree"
+   ],
+   "category": "word",
+   "note": "Tree"
+  },
+  {
+   "id": "nidra",
+   "forms": [
+    "నిద్ర"
+   ],
+   "roman": "nidra",
+   "substitute": false,
+   "match_english": [
+    "sleep"
+   ],
+   "category": "word",
+   "note": "Sleep"
+  },
+  {
+   "id": "aakali",
+   "forms": [
+    "ఆకలి",
+    "ఆకలిగా",
+    "ఆకలేస్తోంది"
+   ],
+   "roman": "aakali",
+   "substitute": false,
+   "match_english": [
+    "hungry",
+    "hunger"
+   ],
+   "category": "word",
+   "note": "Hungry"
+  },
+  {
+   "id": "kaalu",
+   "forms": [
+    "కాలు",
+    "కాళ్ళు"
+   ],
+   "roman": "kaalu",
+   "substitute": false,
+   "match_english": [
+    "legs",
+    "leg"
+   ],
+   "category": "word",
+   "note": "Leg"
+  },
+  {
+   "id": "tala",
+   "forms": [
+    "తల",
+    "తలనొప్పి"
+   ],
+   "roman": "tala",
+   "substitute": false,
+   "match_english": [
+    "head"
+   ],
+   "category": "word",
+   "note": "Head"
+  },
+  {
+   "id": "kallu",
+   "forms": [
+    "కళ్ళు",
+    "కళ్లు"
+   ],
+   "roman": "kallu",
+   "substitute": false,
+   "match_english": [
+    "eyes"
+   ],
+   "category": "word",
+   "note": "Eyes"
+  },
+  {
+   "id": "batalu",
+   "forms": [
+    "బట్టలు"
+   ],
+   "roman": "battalu",
+   "substitute": false,
+   "match_english": [
+    "clothes"
+   ],
+   "category": "word",
+   "note": "Clothes"
+  },
+  {
+   "id": "bandi",
+   "forms": [
+    "బండి"
+   ],
+   "roman": "bandi",
+   "substitute": false,
+   "match_english": [
+    "vehicle",
+    "car",
+    "bike",
+    "scooter"
+   ],
+   "category": "word",
+   "note": "Vehicle (car, bike or scooter)"
+  },
+  {
+   "id": "ooru_word",
+   "forms": [
+    "ఊరు",
+    "ఊర్లో",
+    "ఊరికి"
+   ],
+   "roman": "ooru",
+   "substitute": false,
+   "match_english": [
+    "hometown",
+    "village",
+    "town"
+   ],
+   "category": "word",
+   "note": "Hometown / village"
+  },
+  {
+   "id": "vaaram",
+   "forms": [
+    "వారం"
+   ],
+   "roman": "vaaram",
+   "substitute": false,
+   "match_english": [
+    "week"
+   ],
+   "category": "word",
+   "note": "Week"
+  },
+  {
+   "id": "nela",
+   "forms": [
+    "నెల"
+   ],
+   "roman": "nela",
+   "substitute": false,
+   "match_english": [
+    "month"
+   ],
+   "category": "word",
+   "note": "Month"
+  },
+  {
+   "id": "samvatsaram",
+   "forms": [
+    "సంవత్సరం"
+   ],
+   "roman": "samvatsaram",
+   "substitute": false,
+   "match_english": [
+    "year"
+   ],
+   "category": "word",
+   "note": "Year"
+  },
+  {
+   "id": "prema",
+   "forms": [
+    "ప్రేమ"
+   ],
+   "roman": "prema",
+   "substitute": false,
+   "match_english": [
+    "love"
+   ],
+   "category": "word",
+   "note": "Love"
   }
  ],
  "en": [
