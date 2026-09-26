@@ -36,7 +36,7 @@
     {"id": "vinayaka_chavithi", "forms": ["వినాయక చవితి", "వినాయకచవితి"], "translate_as": "Vinayaka Chavithi", "category": "festival", "note": "Ganesha's birthday, with clay idols and sweets"},
     {"id": "bathukamma", "forms": ["బతుకమ్మ"], "translate_as": "Bathukamma", "category": "festival", "note": "Telangana flower festival celebrated by women"},
 
-    {"id": "nanna_vocative", "forms": ["నాన్నా,", "నాన్న,"], "translate_as": "dear,", "category": "family", "note": "'Nanna' literally means dad, but elders also use it affectionately for a son or grandson"},
+    {"id": "nanna_vocative", "forms": ["నాన్నా,", "నాన్న,", "Nanna,", "Nannaa,"], "translate_as": "dear,", "category": "family", "note": "'Nanna' literally means dad, but elders also use it affectionately for a son or grandson"},
     {"id": "ammamma", "forms": ["అమ్మమ్మ"], "translate_as": "grandma", "category": "family", "note": "Mother's mother"},
     {"id": "nanamma", "forms": ["నానమ్మ", "బామ్మ"], "translate_as": "grandma", "category": "family", "note": "Father's mother"},
     {"id": "thatayya", "forms": ["తాతయ్య", "తాత"], "translate_as": "grandpa", "category": "family", "note": "Grandfather"},

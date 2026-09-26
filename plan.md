@@ -17,13 +17,12 @@
 8. `hf auth login` and paste a read token from https://huggingface.co/settings/tokens (saved on your Mac, not in the repo).
 9. It needs its own virtualenv (IndicTrans2's model code needs transformers 4.51; the voice library needs 5.x):
    `python3 -m venv .venv-translate && .venv-translate/bin/pip install -r requirements-translate.txt`
-10. In its own terminal, leave this running: `.venv-translate/bin/python translate_server.py` (first start downloads ~4 GB).
+**Run (one command)**
 
-**Run**
-
-11. `python subtitles.py --out "MacBook Air Speakers"` (or your headphones' name), then open http://localhost:8765.
+10. `python subtitles.py --out "MacBook Air Speakers"` (or your headphones' name), then open http://localhost:8765.
+    - It starts the local translator in the background (~12 s; the first run downloads ~4 GB) and stops it when you quit. Its log is `translate_server.log`.
     - No call handy? `python subtitles.py --file samples/telugu_grandma.wav`
-    - If the translator isn't running it falls back to Muse Spark automatically; force it with `--translator muse`.
+    - If the translator can't start it falls back to Muse Spark automatically; force it with `--translator muse`.
 
 What we learned the hard way:
 - **The WhatsApp Mac app plays straight to the speakers** and ignores the Mac's output setting. BlackHole stays silent and there's no BlackHole option in its menu. Chrome follows the Mac's output setting, so WhatsApp Web works.

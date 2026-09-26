@@ -5,9 +5,12 @@
 # The offline Whisper version of this file is in git history (commit d111471).
 import argparse
 import asyncio
+import atexit
 import http
 import json
+import os
 import re
+import subprocess
 import threading
 import time
 import wave
@@ -20,7 +23,7 @@ from websockets.http11 import Response
 from muse import Translator, transcribe
 from translate_server import LocalTranslator
 
-PORT = int(__import__("os").environ.get("OVERLAY_PORT", 8765))
+PORT = int(os.environ.get("OVERLAY_PORT", 8765))
 CHUNK_MS = 80
 SENTENCE_END = re.compile(r"[.?!।]+")
 CLAUSE_END = re.compile(r"[,;]")
@@ -217,6 +220,28 @@ async def run(args):
             return
 
 
+def start_translator(lang):
+    """Start translate_server.py in its own virtualenv unless it's already running; stop it when we exit."""
+    if LocalTranslator(lang).available():
+        return  # already running, e.g. in another terminal
+    python = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".venv-translate", "bin", "python")
+    if not os.path.exists(python):
+        print("No .venv-translate yet (see Setup in plan.md), so translation will use Muse Spark.", flush=True)
+        return
+    log = open("translate_server.log", "w")
+    proc = subprocess.Popen([python, "translate_server.py"], stdout=log, stderr=subprocess.STDOUT,
+                            env={**os.environ, "HF_HUB_DISABLE_PROGRESS_BARS": "1"})
+    atexit.register(proc.terminate)
+    print("Starting the local translator (the first run downloads ~4 GB)...", end="", flush=True)
+    while not LocalTranslator(lang).available():
+        if proc.poll() is not None:
+            print(" it crashed; see translate_server.log. Using Muse Spark instead.", flush=True)
+            return
+        time.sleep(1)
+        print(".", end="", flush=True)
+    print(" ready.", flush=True)
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--lang", default="te", help="language code: te (Telugu), hi (Hindi), ta, kn, ml, bn, mr")
@@ -226,6 +251,9 @@ def main():
     p.add_argument("--in", dest="inp", default="BlackHole")
     p.add_argument("--out", default=None)
     args = p.parse_args()
+
+    if args.translator == "local":
+        start_translator(args.lang)
 
     from websockets.sync.server import serve
     server = serve(ws_handler, "localhost", PORT, process_request=serve_overlay)
