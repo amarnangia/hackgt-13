@@ -3,126 +3,144 @@ import SwiftUI
 
 struct ProgressTab: View {
     @EnvironmentObject var model: GardenModel
+    @Binding var selected: Plant?
     @State private var picked: Date?
 
     var body: some View {
         let snap = model.snapshot
         NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
-                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())], spacing: 12) {
-                        StatTile(value: "\(snap.totals.heard)", label: "Words heard", symbol: "waveform", color: Theme.leaf)
-                        StatTile(value: "\(snap.totals.phrases)", label: "Words met", symbol: "sparkles", color: Theme.marigold)
-                        StatTile(value: "\(snap.calls.count)", label: "Calls", symbol: "phone.fill", color: .blue)
-                        StatTile(value: "\(snap.calls.minutes)", label: "Minutes listening", symbol: "clock.fill", color: .purple)
+                VStack(alignment: .leading, spacing: 12) {
+                    Grid(horizontalSpacing: 12, verticalSpacing: 12) {
+                        GridRow { stat("\(snap.totals.bloom)", "Known", "of \(snap.totals.phrases) words"); stat("\(snap.streak)", "Streak", snap.streak == 1 ? "day" : "days") }
+                        GridRow { stat("\(snap.totals.heard)", "Hearings", "across all calls"); stat("\(snap.calls.minutes)", "Minutes", "\(snap.calls.count) calls") }
                     }
                     chart(snap)
-                    JourneyCard(snap: snap)
+                    stages(snap)
                     milestones(snap)
                 }
-                .padding(16)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 32)
             }
-            .background(Theme.background)
+            .scrollIndicators(.hidden)
+            .background(Theme.bg)
             .navigationTitle("Progress")
+            .toolbarBackground(Theme.bg, for: .navigationBar)
+        }
+    }
+
+    private func stat(_ value: String, _ label: String, _ sub: String) -> some View {
+        Panel(padding: 16) {
+            Eyebrow(label)
+            Text(value).font(.system(size: 30, weight: .semibold)).monospacedDigit().tracking(-0.8).foregroundStyle(Theme.ink)
+                .contentTransition(.numericText()).padding(.top, 8)
+            Text(sub).font(.system(size: 12)).foregroundStyle(Theme.ink2)
         }
     }
 
     private func chart(_ snap: GardenSnapshot) -> some View {
-        let pickedDay = picked.flatMap { p in snap.days.first { Calendar.current.isDate($0.day, inSameDayAs: p) } }
+        let day = picked.flatMap { p in snap.days.first { Calendar.current.isDate($0.day, inSameDayAs: p) } }
         let week = snap.days.suffix(7).reduce(0) { $0 + $1.heard }
-        return Card {
-            VStack(alignment: .leading, spacing: 12) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(pickedDay.map { $0.day.formatted(.dateTime.weekday(.wide).month().day()) } ?? "Last 14 days")
-                        .font(.subheadline.weight(.semibold)).foregroundStyle(Theme.ink2)
-                    Text(pickedDay.map { "\($0.heard) words heard" } ?? "\(week) words this week").font(Theme.title(24))
-                    if let d = pickedDay, d.bloomed + d.new > 0 {
-                        Text([d.new > 0 ? "\(d.new) new seeds" : nil, d.bloomed > 0 ? "\(d.bloomed) bloomed" : nil].compactMap { $0 }.joined(separator: " · "))
-                            .font(.footnote).foregroundStyle(Theme.ink2)
-                    }
-                }
-                .animation(.snappy, value: pickedDay?.date)
-                Chart(snap.days) { d in
-                    BarMark(x: .value("Day", d.day, unit: .day), y: .value("Heard", d.heard), width: .ratio(0.62))
-                        .foregroundStyle(Theme.leaf.gradient)
-                        .cornerRadius(5)
-                        .opacity(pickedDay == nil || pickedDay?.date == d.date ? 1 : 0.35)
-                        .annotation(position: .top, spacing: 3) {
-                            if d.bloomed > 0 {
-                                PlantIcon(plant: .example(.bloom), flowerOnly: true).frame(width: 14, height: 14)
-                            }
-                        }
-                }
-                .chartXSelection(value: $picked)
-                .chartXAxis {
-                    AxisMarks(values: .stride(by: .day, count: 2)) { _ in
-                        AxisValueLabel(format: .dateTime.day(), centered: true)
-                    }
-                }
-                .chartYAxis { AxisMarks(position: .leading) { _ in AxisGridLine().foregroundStyle(Theme.line); AxisValueLabel() } }
-                .frame(height: 200)
-                Text("A flower marks a day a word bloomed. Touch the chart for details.").font(.caption).foregroundStyle(Theme.ink2)
+        return Panel {
+            Eyebrow(day.map { $0.day.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()) } ?? "Last 14 days")
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text("\(day?.heard ?? week)").font(.system(size: 26, weight: .semibold)).monospacedDigit().tracking(-0.8)
+                Text(day == nil ? "words heard this week" : "words heard").font(.system(size: 14)).foregroundStyle(Theme.ink2)
             }
+            .foregroundStyle(Theme.ink)
+            .padding(.top, 6)
+            .animation(.easeOut(duration: 0.2), value: day?.date)
+            Chart(snap.days) { d in
+                BarMark(x: .value("Day", d.day, unit: .day), y: .value("Heard", d.heard), width: .ratio(0.6))
+                    .foregroundStyle(day == nil || day?.date == d.date ? Theme.accent : Theme.accent.opacity(0.3))
+                    .cornerRadius(3)
+                if d.bloomed > 0 {
+                    PointMark(x: .value("Day", d.day, unit: .day), y: .value("Heard", d.heard))
+                        .symbolSize(18).foregroundStyle(Theme.ink)
+                        .offset(y: -9)
+                }
+            }
+            .chartXSelection(value: $picked)
+            .chartXAxis {
+                AxisMarks(values: .stride(by: .day, count: 2)) { _ in
+                    AxisValueLabel(format: .dateTime.day(), centered: true).foregroundStyle(Theme.muted)
+                }
+            }
+            .chartYAxis {
+                AxisMarks(position: .trailing, values: .automatic(desiredCount: 3)) { _ in
+                    AxisGridLine().foregroundStyle(Theme.border)
+                    AxisValueLabel().foregroundStyle(Theme.muted)
+                }
+            }
+            .frame(height: 170)
+            .padding(.top, 14)
+            HStack(spacing: 6) {
+                Circle().fill(Theme.ink).frame(width: 5, height: 5)
+                Text("A word became known that day").font(.system(size: 12)).foregroundStyle(Theme.muted)
+            }
+            .padding(.top, 12)
+        }
+    }
+
+    private func stages(_ snap: GardenSnapshot) -> some View {
+        let t = snap.thresholds
+        let rows: [(Stage, String)] = [(.seed, "Heard under \(t.subtitle)×"), (.sprout, "\(t.subtitle)–\(t.bloom - 1)×"), (.bloom, "\(t.bloom)× or more")]
+        return Panel(padding: 0) {
+            Eyebrow("How words move").padding([.horizontal, .top], 20).padding(.bottom, 6)
+            ForEach(Array(rows.enumerated()), id: \.offset) { i, row in
+                if i > 0 { Rectangle().fill(Theme.border).frame(height: 1).padding(.leading, 50) }
+                HStack(spacing: 16) {
+                    RoundedRectangle(cornerRadius: 4).fill(row.0.fill).frame(width: 14, height: 14)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(row.0.label).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.ink)
+                        Text("\(row.1) · \(row.0.meaning)").font(.system(size: 13)).foregroundStyle(Theme.ink2)
+                    }
+                }
+                .padding(.horizontal, 20).padding(.vertical, 12)
+            }
+            Text("Tapping “I didn't catch this one” moves a word back a step.")
+                .font(.system(size: 12)).foregroundStyle(Theme.muted)
+                .padding(.horizontal, 20).padding(.top, 4).padding(.bottom, 18)
         }
     }
 
     private func milestones(_ snap: GardenSnapshot) -> some View {
-        let events = snap.recent.filter { $0.kind != "heard" }
-        return Card {
-            VStack(alignment: .leading, spacing: 14) {
-                Text("Milestones").font(Theme.title(20))
-                if events.isEmpty { Text("Blooms and sprouts will show up here.").font(.subheadline).foregroundStyle(Theme.ink2) }
-                ForEach(events.prefix(8)) { e in EventRow(event: e, plant: snap.plant(e.phrase), now: snap.now) }
+        let events = snap.recent.filter { $0.kind != "heard" }.prefix(8)
+        return Panel(padding: 0) {
+            Eyebrow("Milestones").padding([.horizontal, .top], 20).padding(.bottom, 6)
+            if events.isEmpty {
+                Text("Words you learn will show up here.").font(.system(size: 14)).foregroundStyle(Theme.ink2)
+                    .padding(.horizontal, 20).padding(.bottom, 18)
             }
+            ForEach(Array(events.enumerated()), id: \.element.id) { i, e in
+                if i > 0 { Rectangle().fill(Theme.border).frame(height: 1).padding(.leading, 64) }
+                Button { selected = snap.plant(e.phrase) } label: { EventRow(event: e, now: snap.now) }.buttonStyle(Pressable())
+            }
+            Spacer().frame(height: 6)
         }
     }
 }
 
-struct StatTile: View {
-    let value: String
-    let label: String
-    let symbol: String
-    let color: Color
+struct EventRow: View {
+    let event: GardenSnapshot.Event
+    let now: Double
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: symbol).font(.system(size: 15, weight: .semibold)).foregroundStyle(color)
-                .frame(width: 32, height: 32).background(color.opacity(0.14), in: .rect(cornerRadius: 10))
-            Text(value).font(Theme.title(28)).contentTransition(.numericText())
-            Text(label).font(.caption.weight(.semibold)).foregroundStyle(Theme.ink2)
+        HStack(spacing: 14) {
+            Image(systemName: icon).font(.system(size: 13, weight: .semibold)).foregroundStyle(event.kind == "bloomed" ? Theme.accent : Theme.ink2)
+                .frame(width: 30, height: 30)
+                .background(event.kind == "bloomed" ? Theme.accent.opacity(0.1) : Theme.raised, in: .rect(cornerRadius: 9))
+            (Text(event.phrase).fontWeight(.semibold).foregroundColor(Theme.ink) + Text(" " + verb).foregroundColor(Theme.ink2))
+                .font(.system(size: 15)).lineLimit(1)
+            Spacer(minLength: 8)
+            Text(timeAgo(event.ts, now: now)).font(.system(size: 12)).monospacedDigit().foregroundStyle(Theme.muted)
         }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.card, in: .rect(cornerRadius: 22))
-        .overlay(RoundedRectangle(cornerRadius: 22).stroke(Theme.line, lineWidth: 1))
+        .padding(.horizontal, 20).padding(.vertical, 11)
+        .contentShape(Rectangle())
     }
-}
-
-/// How a word moves from seed to bloom.
-struct JourneyCard: View {
-    let snap: GardenSnapshot
-    var body: some View {
-        let t = snap.thresholds
-        Card {
-            VStack(alignment: .leading, spacing: 14) {
-                Text("How words grow").font(Theme.title(20))
-                ForEach(Stage.allCases.reversed()) { s in
-                    HStack(spacing: 14) {
-                        PlantIcon(plant: .example(s), flowerOnly: s == .bloom).frame(width: 40, height: 40)
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(s.title).font(.subheadline.weight(.bold))
-                            Text("\(range(s, t)) · \(s.meaning)").font(.caption).foregroundStyle(Theme.ink2)
-                        }
-                    }
-                }
-                Text("Tap “I didn't catch that” on a word and it goes back a stage.").font(.caption).foregroundStyle(Theme.ink2)
-            }
-        }
+    private var icon: String {
+        switch event.kind { case "bloomed": "checkmark"; case "sprouted": "arrow.up.right"; case "asked": "arrow.uturn.backward"; default: "waveform" }
     }
-    func range(_ s: Stage, _ t: GardenSnapshot.Thresholds) -> String {
-        switch s {
-        case .seed: "Heard under \(t.subtitle)×"
-        case .sprout: "\(t.subtitle)–\(t.bloom - 1)×"
-        case .bloom: "\(t.bloom)× or more"
-        }
+    private var verb: String {
+        switch event.kind { case "bloomed": "is now known"; case "sprouted": "moved to learning"; case "asked": "needs more help"; default: "heard" }
     }
 }

@@ -9,105 +9,79 @@ struct WordDetail: View {
     var body: some View {
         let t = model.snapshot.thresholds
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                // the plant on its own little patch of garden
-                TimelineView(.animation(minimumInterval: 1 / 30)) { tl in
-                    Canvas { ctx, size in
-                        let sky = SkyPalette.at(hour: currentHour(tl.date))
-                        ctx.fill(Path(CGRect(origin: .zero, size: size)),
-                                 with: .linearGradient(Gradient(colors: [sky.skyTop.color, sky.skyBottom.color]), startPoint: .zero, endPoint: CGPoint(x: 0, y: size.height * 0.75)))
-                        ctx.fill(GardenPainter.hill(w: size.width, h: size.height, y: size.height * 0.72, amp: 10, shift: 0.2), with: .color(sky.hillFront.color))
-                        ctx.fill(Path(CGRect(x: 0, y: size.height * 0.8, width: size.width, height: size.height * 0.2)), with: .color(sky.groundTop.color))
-                        var c = ctx
-                        let s = size.height * 0.72 / (GardenPainter.height(of: plant) + 10)
-                        c.translateBy(x: size.width / 2, y: size.height * 0.9)
-                        c.scaleBy(x: s, y: s)
-                        GardenPainter.drawPlant(c, plant, sway: sin(tl.date.timeIntervalSinceReferenceDate * 0.9) * 0.03, lean: 0, soil: sky.soil.color)
-                    }
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 6) {
+                    RoundedRectangle(cornerRadius: 2.5).fill(plant.stageEnum.fill).frame(width: 10, height: 10)
+                    Eyebrow(plant.stageEnum.label, color: plant.stageEnum == .bloom ? Theme.accent : Theme.muted)
                 }
-                .frame(height: 210)
-                .clipShape(.rect(cornerRadius: 26))
+                .padding(.top, 8)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Label(plant.stageEnum.title, systemImage: plant.stageEnum.symbol)
-                            .font(.caption.weight(.bold)).foregroundStyle(plant.stageEnum.color)
-                            .padding(.horizontal, 10).padding(.vertical, 5).background(plant.stageEnum.color.opacity(0.14), in: .capsule)
-                        if plant.stageEnum == .bloom {
-                            Text(plant.flower.name).font(.caption.weight(.semibold)).foregroundStyle(Theme.ink2)
-                        }
+                    Text(plant.phrase).font(.system(size: 42, weight: .bold)).tracking(-1).foregroundStyle(Theme.ink)
+                        .minimumScaleFactor(0.6).lineLimit(2)
+                    if let roman = plant.romanIfUseful {
+                        Text(roman).font(.system(size: 17)).italic().foregroundStyle(Theme.ink2)
                     }
-                    Text(plant.phrase).font(.system(size: 40, weight: .bold)).padding(.top, 6)
-                    if let roman = plant.romanIfUseful { Text(roman).font(.title3).italic().foregroundStyle(Theme.ink2) }
-                    if let en = plant.english { Text(en).font(Theme.title(24)).padding(.top, 2) }
+                    if let en = plant.english {
+                        Text(en).font(.system(size: 22, weight: .semibold)).tracking(-0.4).foregroundStyle(Theme.ink).padding(.top, 6)
+                    }
                 }
+                .padding(.bottom, 8)
 
                 if let note = plant.note {
-                    HStack(alignment: .top, spacing: 10) {
-                        Image(systemName: "text.quote").foregroundStyle(Theme.marigold)
-                        Text(note).font(.callout)
+                    Panel(padding: 16) {
+                        Eyebrow("Meaning")
+                        Text(note).font(.system(size: 15)).foregroundStyle(Theme.ink).padding(.top, 6)
                     }
-                    .padding(14).frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Theme.cardRaised, in: .rect(cornerRadius: 18))
                 }
 
-                GrowthTrack(plant: plant, t: t)
-
-                HStack(spacing: 12) {
-                    Image(systemName: plant.stageEnum == .seed ? "speaker.wave.2.fill" : plant.stageEnum == .sprout ? "captions.bubble.fill" : "ear.fill")
-                        .foregroundStyle(plant.stageEnum.color).frame(width: 36, height: 36)
-                        .background(plant.stageEnum.color.opacity(0.14), in: .rect(cornerRadius: 12))
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text("On your next call").font(.caption.weight(.semibold)).foregroundStyle(Theme.ink2)
-                        Text(plant.stageEnum.meaning).font(.subheadline.weight(.semibold))
+                Panel(padding: 16) {
+                    HStack(alignment: .firstTextBaseline) {
+                        Eyebrow("Heard")
+                        Spacer()
+                        Text(plant.toNext == 0 ? "Known" : "\(plant.toNext) more to \(plant.stageEnum == .seed ? "learning" : "known")")
+                            .font(.system(size: 12, weight: .semibold)).foregroundStyle(Theme.accent)
                     }
+                    Text("\(plant.heard)×").font(.system(size: 26, weight: .semibold)).monospacedDigit().tracking(-0.6)
+                        .foregroundStyle(Theme.ink).padding(.top, 6)
+                    GrowthBar(growth: plant.growth, total: t.bloom, height: 6).padding(.top, 12)
+                    HStack {
+                        Text("New"); Spacer(); Text("Learning"); Spacer(); Text("Known")
+                    }
+                    .font(.system(size: 11, weight: .medium)).foregroundStyle(Theme.muted).padding(.top, 8)
+                }
+
+                Panel(padding: 16) {
+                    Eyebrow("On your next call")
+                    Text(plant.stageEnum.meaning).font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.ink).padding(.top, 6)
                 }
 
                 Button {
                     sending = true
                     Task { await model.asked(plant); sending = false; dismiss() }
                 } label: {
-                    Label(sending ? "Sending…" : "I didn't catch this one", systemImage: "drop.fill")
-                        .font(.headline).frame(maxWidth: .infinity).frame(height: 50)
+                    HStack(spacing: 8) {
+                        if sending { ProgressView().controlSize(.small) } else { Image(systemName: "arrow.uturn.backward").font(.system(size: 13, weight: .bold)) }
+                        Text("I didn't catch this one").font(.system(size: 16, weight: .semibold))
+                    }
+                    .foregroundStyle(canAsk ? Theme.ink : Theme.muted)
+                    .frame(maxWidth: .infinity).frame(height: 52)
+                    .background(Theme.surface, in: .rect(cornerRadius: Theme.radius))
+                    .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.border, lineWidth: 1))
                 }
-                .buttonStyle(.borderedProminent).tint(.blue).buttonBorderShape(.roundedRectangle(radius: 16))
-                .disabled(model.source != .live || sending || plant.growth == 0)
+                .buttonStyle(Pressable())
+                .disabled(!canAsk)
+                .padding(.top, 4)
                 if model.source != .live {
-                    Text("Connect to the garden on your Mac to send this.").font(.caption).foregroundStyle(Theme.ink2).frame(maxWidth: .infinity)
+                    Text("Connect to Weave on your Mac to send this.").font(.system(size: 12)).foregroundStyle(Theme.muted)
+                        .frame(maxWidth: .infinity)
                 }
             }
             .padding(20)
         }
-        .background(Theme.background)
+        .scrollIndicators(.hidden)
+        .background(Theme.bg)
     }
-}
 
-/// Eight steps from seed to bloom, with the current one filled.
-struct GrowthTrack: View {
-    let plant: Plant
-    let t: GardenSnapshot.Thresholds
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("Heard \(plant.heard)×").font(.headline)
-                Spacer()
-                Text(plant.toNext == 0 ? "In full bloom" : "\(plant.toNext) more to \(plant.stageEnum == .seed ? "sprout" : "bloom")")
-                    .font(.subheadline.weight(.semibold)).foregroundStyle(plant.stageEnum.color)
-            }
-            HStack(spacing: 4) {
-                ForEach(0..<t.bloom, id: \.self) { i in
-                    let on = i < plant.growth
-                    let stage: Stage = i < t.subtitle ? .seed : i < t.bloom - 1 ? .sprout : .bloom
-                    RoundedRectangle(cornerRadius: 4).fill(on ? AnyShapeStyle(stage.color.gradient) : AnyShapeStyle(Theme.cardRaised)).frame(height: 10)
-                }
-            }
-            HStack {
-                Text("Seed"); Spacer(); Text("Sprout").padding(.trailing, 40); Spacer(); Text("Bloom")
-            }
-            .font(.caption2.weight(.semibold)).foregroundStyle(Theme.ink2)
-        }
-        .padding(16)
-        .background(Theme.card, in: .rect(cornerRadius: 20))
-        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Theme.line, lineWidth: 1))
-    }
+    private var canAsk: Bool { model.source == .live && !sending && plant.growth > 0 }
 }

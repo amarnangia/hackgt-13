@@ -7,6 +7,7 @@ final class GardenModel: ObservableObject {
     @Published private(set) var source: GardenClient.Source = .demo
     @Published private(set) var grown: [String: Double] = [:]      // phrase -> when it last grew (reference-date seconds)
     @Published var celebration: Plant?                             // just bloomed: shown as a banner
+    @Published private(set) var rotation = Int(Date().timeIntervalSince1970 / 10800)  // which conversation starters lead
     private var polling: Task<Void, Never>?
     private var lastWidgetReload = Date.distantPast
 
@@ -46,6 +47,10 @@ final class GardenModel: ObservableObject {
             lastWidgetReload = Date()
             WidgetCenter.shared.reloadAllTimelines()
         }
+    }
+
+    func shuffle() {
+        rotation += 1
     }
 
     func asked(_ plant: Plant) async {
