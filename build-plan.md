@@ -58,7 +58,7 @@ Times are rough estimates for one person.
 - **If time is short,** cut Instagram, then the hear-it button, then the "How do I say" stem.
 
 ## To do (after the steps above)
-- **Tune how strongly each signal counts toward knowing a word** (`progress.py`). The priors, learning chances, evidence weights, the 7-day half-life and the 70% threshold are sensible guesses, not measured.
+- ✅ tooling built (`tools/quiz.py`, `tools/fit_progress.py --save`); needs real calls + a quiz to fit. **Tune how strongly each signal counts toward knowing a word** (`progress.py`). The priors, learning chances, evidence weights, the 7-day half-life and the 70% threshold are sensible guesses, not measured.
   - Record every signal with a timestamp during test calls.
   - Afterwards, quiz the grandkid on the words (knows / doesn't).
   - Fit the weights to those answers, e.g. with a small grid search that maximises log-likelihood.
