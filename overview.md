@@ -10,6 +10,7 @@ A Mac app that runs **alongside a live WhatsApp call on the laptop (WhatsApp Web
 - **It learns what you know:** the app keeps track of words and phrases you've heard. The more often you've heard one, the less it gets translated. It goes from dubbed, to subtitled only, to left alone. Over time the call becomes more Hindi and less English, so you learn the language just by talking to family.
 - **Slang and idiom explainer:** when someone says something that isn't literal ("that was fire", "no cap", or a Hindi *muhavara*), a small card explains what it means.
 - **Cultural image cards:** when a relative mentions something concrete, like a food (gajar ka halwa), a vehicle (rickshaw), a place (mandir) or a festival (Diwali), a picture of it appears on screen. The image set covers Indian and American things, so it helps both sides.
+- **Ask her about it:** when she mentions something with a picture or card (gavvalu, Bhogi, Thatayya, a proverb, NTR), a question in simple Telugu appears at her next pause that turns it into a story: *"Gavvalu ela chestaru? Naaku nerpistara?"* (How do you make gavvalu? Will you teach me?). The next call opens with a question the last call's story page suggested.
 
 ## Where Laya fits
 [Laya](https://laya.convaiinnovations.com/) is an open-source model from Convai Innovations that makes fast decisions without writing any text. You give it a sentence and typed questions, and it returns choices and probabilities. We run it locally on the Mac, so it costs nothing per call, and it makes the split-second calls for each sentence:

@@ -33,10 +33,15 @@ MAX_STALE_S = 10.0           # a line held back (the listener was talking) is dr
 GEN_LOCK = threading.Lock()  # --two-way runs two Dubbers; MLX generation isn't safe from two threads at once
 BASE_SPEED, MAX_SPEED = 1.0, 1.3  # Kokoro: natural pace, speeding up smoothly as lines pile up
 CATCH_UP_S = 2.0                  # queued speech at which we reach MAX_SPEED
+MAX_CLONE_SPEED = 1.12            # the cloned voice has no speed control; playing it faster also raises the pitch a
+                                  # little, so it stays gentle (1.12 is ~2 semitones, still clearly her)
 CLAUSE_SPLIT = r"(?<=[,;:.!?])\s+"  # generate and start playing clause by clause
 
 
-def normalize(audio, target_rms=0.08, peak=0.9):
+TARGET_RMS = 0.08  # speaking level of the English voice
+
+
+def normalize(audio, target_rms=TARGET_RMS, peak=0.9):
     """The clone copies the recording's volume too, and call audio is quiet; bring each clause to a steady level."""
     rms = float(np.sqrt(np.mean(audio ** 2))) if len(audio) else 0.0
     if rms < 1e-4:
@@ -67,6 +72,7 @@ class Dubber:
             self.kokoro = load_model(KOKORO_MODEL)
             list(self._kokoro_clips("Hello, there.", BASE_SPEED))  # the first generation takes ~4 s; do it now
         self.jobs = queue.Queue()
+        self.epoch = 0  # bumped by cancel(): a line being generated stops adding audio
         threading.Thread(target=self._worker, daemon=True).start()
 
     @property
@@ -90,7 +96,8 @@ class Dubber:
         return True
 
     def cancel(self):
-        """Drop lines not yet generated (the listener interrupted; what's queued is stale)."""
+        """Drop lines not yet generated, and stop the one being generated (the listener interrupted)."""
+        self.epoch += 1
         try:
             while True:
                 self.jobs.get_nowait()
@@ -107,7 +114,15 @@ class Dubber:
         # Generating appends each sentence to this state; unless we cut it back to just the voice before every
         # sentence, the model "remembers" earlier sentences and stops almost immediately (0.2 s clips).
         self.voice_frames = self.pocket._get_flow_cache_num_frames(self.clone_state)
-        list(self._clone_clips("Okay."))  # warm up
+        # The clone copies the recording's volume (call audio is quiet). Work out the boost once, from a calibration
+        # sentence, so each chunk can play as soon as it's generated instead of waiting for the whole phrase to be
+        # normalized (that wait held the voice back ~0.2-0.8 s).
+        self.clone_gain = 1.0
+        calibration = [np.asarray(c).reshape(-1) for c in self._clone_raw("Hello, how are you doing today? I hope you are well.")]
+        sample = np.concatenate(calibration)
+        rms, peak = float(np.sqrt(np.mean(sample ** 2))), float(np.abs(sample).max())
+        if rms > 1e-4:
+            self.clone_gain = min(TARGET_RMS / rms, 0.9 / max(peak, 1e-6))
 
     @staticmethod
     def _locked(clips):
@@ -123,16 +138,22 @@ class Dubber:
         for r in self.kokoro.generate(text, voice=self.voice, speed=speed, lang_code="a", split_pattern=CLAUSE_SPLIT):
             yield to_48k(r.audio, 24000)
 
-    def _clone_clips(self, text):
+    def _clone_raw(self, text):
         for clause in (c for c in re.split(CLAUSE_SPLIT, text) if c.strip()):
-            self.pocket._slice_flow_cache(self.clone_state, self.voice_frames)
-            chunks = [np.asarray(c).reshape(-1) for c in self.pocket.generate_audio_stream(self.clone_state, clause)]
-            if chunks:
-                yield to_48k(normalize(np.concatenate(chunks)), self.pocket.sample_rate)
+            self.pocket._slice_flow_cache(self.clone_state, self.voice_frames)  # just her voice, no earlier sentences
+            yield from self.pocket.generate_audio_stream(self.clone_state, clause)
+
+    def _clone_clips(self, text, speed=1.0):
+        """Her voice, chunk by chunk as it's generated (~4x faster than real time, so playback doesn't run dry).
+        speed > 1 plays it a little faster (and slightly higher) to catch up when English lines are queuing."""
+        for chunk in self._clone_raw(text):
+            chunk = np.clip(np.asarray(chunk, dtype=np.float32).reshape(-1) * self.clone_gain, -1, 1)
+            yield to_48k(chunk, self.pocket.sample_rate * speed)
 
     def _worker(self):
         while True:
             kind, text, (on_start, deadline) = self.jobs.get()
+            epoch = self.epoch
             try:
                 if kind == "sample":
                     with GEN_LOCK:
@@ -147,12 +168,16 @@ class Dubber:
                     samples, rate = self.indic_voice(text)  # the translate server's CPU voice, no GPU lock needed
                     clips = iter([to_48k(normalize(samples.astype(np.float32) / 32768), rate)])
                 elif self.cloning:
-                    clips = self._locked(self._clone_clips(text))
+                    behind = self.buffer.pending_seconds()
+                    clips = self._locked(self._clone_clips(
+                        text, 1.0 + (MAX_CLONE_SPEED - 1.0) * min(1.0, behind / CATCH_UP_S)))
                 else:
                     behind = self.buffer.pending_seconds()
                     clips = self._locked(self._kokoro_clips(
                         text, BASE_SPEED + (MAX_SPEED - BASE_SPEED) * min(1.0, behind / CATCH_UP_S)))
                 for clip in clips:
+                    if self.epoch != epoch:
+                        break  # interrupted mid-line: the rest isn't wanted
                     self.buffer.push(clip, on_start, deadline if on_start else None)  # only a line's start can expire
                     on_start = None  # only the first clause marks "voice started"
             except Exception as e:

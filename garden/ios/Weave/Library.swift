@@ -15,14 +15,43 @@ extension Stage {
 extension Plant {
     /// Everything the word sheet needs: the team's lexicon and photos when we have them, the garden's own fields otherwise.
     var asWord: Word {
+        // The translator plants a word as its first Telugu form (garden.from_lexicon); find that entry again.
         let id = (roman ?? "").replacingOccurrences(of: " ", with: "_")
-        if !id.isEmpty, Knowledge.lexicon.contains(where: { $0.id == id }) {
-            var w = Knowledge.word(id)
+        if let e = Knowledge.lexicon.first(where: { e in e.forms.contains { $0.trimmingCharacters(in: CharacterSet(charactersIn: " ,.^")) == phrase } || e.id == id }) {
+            var w = Knowledge.word(e.id)
             w.telugu = phrase
             return w
         }
         return Word(key: phrase, telugu: phrase, roman: roman, english: english ?? "", note: note, description: nil,
                     image: nil, category: category, pictureName: nil)
+    }
+}
+
+/// One word in the dictionary: from the family dictionary when there is one (real calls, her voice), else the garden.
+struct WordItem: Identifiable {
+    let id: String
+    let word: Word
+    let stage: Stage
+    let progress: Int        // 0...8 toward known
+    let times: Int
+    let voice: String?       // her voice saying it
+}
+
+extension People {
+    var wordItems: [WordItem] {
+        if !dictionary.isEmpty {
+            return dictionary.map { id, e in
+                var w = Knowledge.lexicon.contains { $0.id == id } ? Knowledge.word(id)
+                    : Word(key: id, telugu: e.telugu, roman: e.roman, english: e.english ?? "", note: e.note, description: nil, image: nil, category: e.category ?? "word", pictureName: nil)
+                w.telugu = e.telugu ?? w.telugu; w.roman = e.roman ?? w.roman
+                if let en = e.english, !en.isEmpty { w.english = en }
+                let stage: Stage = e.status == "known" ? .bloom : e.status == "learning" ? .sprout : .seed
+                return WordItem(id: id, word: w, stage: stage, progress: stage == .bloom ? 8 : min(7, e.times ?? 0), times: e.times ?? 0, voice: voice(for: id))
+            }
+            .sorted { ($0.stage == .bloom ? 0 : $0.stage == .sprout ? 1 : 2, -$0.times) < ($1.stage == .bloom ? 0 : $1.stage == .sprout ? 1 : 2, -$1.times) }
+        }
+        return (growth ?? .empty).plants.sorted { ($0.growth, $0.heard) > ($1.growth, $1.heard) }
+            .map { p in WordItem(id: p.id, word: p.asWord, stage: p.stageEnum, progress: p.growth, times: p.heard, voice: voice(for: p.asWord.key)) }
     }
 }
 
@@ -38,26 +67,26 @@ struct WordsView: View {
     enum Filter: String, CaseIterable, Identifiable { case all = "All", known = "Known", learning = "Learning", new = "New", saved = "Saved"; var id: String { rawValue } }
 
     var body: some View {
-        let snap = people.growth ?? .sample
-        let plants = snap.plants
-            .filter { p in
+        let all = people.wordItems
+        let items = all
+            .filter { i in
                 switch filter {
                 case .all: true
-                case .known: p.stageEnum == .bloom
-                case .learning: p.stageEnum == .sprout
-                case .new: p.stageEnum == .seed
+                case .known: i.stage == .bloom
+                case .learning: i.stage == .sprout
+                case .new: i.stage == .seed
                 case .saved: false
                 }
             }
-            .filter { query.isEmpty || [$0.phrase, $0.english ?? "", $0.roman ?? ""].contains { $0.localizedCaseInsensitiveContains(query) } }
-            .sorted { ($0.growth, $0.heard) > ($1.growth, $1.heard) }
+            .filter { query.isEmpty || [$0.word.telugu ?? "", $0.word.english, $0.word.roman ?? ""].contains { $0.localizedCaseInsensitiveContains(query) } }
         let saved = people.vocab.filter { query.isEmpty || [$0.telugu ?? "", $0.english, $0.roman ?? ""].contains { $0.localizedCaseInsensitiveContains(query) } }
 
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Words").font(Fonts.ui(32, .medium)).tracking(-1.1).foregroundStyle(Theme.text)
-                    Text("Every word from your calls with Ammamma.").font(Fonts.ui(15)).foregroundStyle(Theme.text2)
+                    Text(people.dictionary.isEmpty ? "Every word from your calls." : "Your family dictionary: every word from your calls, in her voice.")
+                        .font(Fonts.ui(15)).foregroundStyle(Theme.text2)
                 }
                 .padding(.top, 16)
                 .reveal(0)
@@ -72,18 +101,19 @@ struct WordsView: View {
                 .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.border, lineWidth: 1))
                 .reveal(1)
 
-                segmented(snap).reveal(2)
+                segmented(all).reveal(2)
 
                 if filter == .saved {
                     if saved.isEmpty {
                         empty("Tap a highlighted word during a call, then “Add to vocabulary”.")
                     } else {
-                        list(saved.map { v in (v.id, Knowledge.lexicon.contains { $0.id == v.key } ? Knowledge.word(v.key) : Word(key: v.key, telugu: v.telugu, roman: v.roman, english: v.english, note: nil, description: nil, image: v.image, category: "word", pictureName: nil), nil as Plant?) })
+                        list(saved.map { v in WordItem(id: v.id, word: Knowledge.lexicon.contains { $0.id == v.key } ? Knowledge.word(v.key) : Word(key: v.key, telugu: v.telugu, roman: v.roman, english: v.english, note: nil, description: nil, image: v.image, category: "word", pictureName: nil),
+                                                    stage: .seed, progress: -1, times: 0, voice: people.voice(for: v.key)) })
                     }
-                } else if plants.isEmpty {
-                    empty(query.isEmpty ? "Words you hear on calls show up here." : "No words match “\(query)”.")
+                } else if items.isEmpty {
+                    empty(!query.isEmpty ? "No words match “\(query)”." : people.source == .offline ? "Connect to Weave on your Mac in Settings to see your words." : "Words from your calls show up here.")
                 } else {
-                    list(plants.map { ($0.id, $0.asWord, $0) })
+                    list(items)
                 }
             }
             .padding(.horizontal, 20)
@@ -92,16 +122,18 @@ struct WordsView: View {
         }
         .scrollIndicators(.hidden)
         .scrollDismissesKeyboard(.immediately)
+        .refreshable { await people.loadGrowth() }
         .background(Backdrop())
         .sheet(item: $open) { w in
-            WordSheet(word: w, line: nil, partnerName: "Ammamma", live: false) { people.save(w) } forget: {}
+            WordSheet(word: w, line: nil, partnerName: people.partner.name, live: false) { people.save(w) } forget: {}
                 .environmentObject(people)
                 .presentationDetents([.large]).presentationBackground(Theme.bg2).presentationCornerRadius(24)
         }
     }
 
-    private func segmented(_ snap: GardenSnapshot) -> some View {
-        let counts: [Filter: Int] = [.all: snap.totals.phrases, .known: snap.totals.bloom, .learning: snap.totals.sprout, .new: snap.totals.seed, .saved: people.vocab.count]
+    private func segmented(_ all: [WordItem]) -> some View {
+        let counts: [Filter: Int] = [.all: all.count, .known: all.filter { $0.stage == .bloom }.count, .learning: all.filter { $0.stage == .sprout }.count,
+                                     .new: all.filter { $0.stage == .seed }.count, .saved: people.vocab.count]
         return ScrollView(.horizontal) {
             HStack(spacing: 2) {
                 ForEach(Filter.allCases) { f in
@@ -134,11 +166,11 @@ struct WordsView: View {
         .scrollIndicators(.hidden)
     }
 
-    private func list(_ rows: [(String, Word, Plant?)]) -> some View {
+    private func list(_ rows: [WordItem]) -> some View {
         VStack(spacing: 0) {
-            ForEach(Array(rows.enumerated()), id: \.element.0) { i, row in
+            ForEach(Array(rows.enumerated()), id: \.element.id) { i, row in
                 if i > 0 { Rectangle().fill(Theme.border).frame(height: 1).padding(.leading, 16) }
-                Button { open = row.1 } label: { WordRow(word: row.1, plant: row.2) }.buttonStyle(RowStyle())
+                Button { open = row.word } label: { WordRow(item: row) }.buttonStyle(RowStyle())
             }
         }
         .background(Theme.surface, in: .rect(cornerRadius: Theme.radius))
@@ -153,14 +185,14 @@ struct WordsView: View {
 }
 
 struct WordRow: View {
-    let word: Word
-    let plant: Plant?
+    let item: WordItem
     var body: some View {
+        let word = item.word
         HStack(spacing: 14) {
             if word.image != nil {
                 WordImage(path: word.image).frame(width: 40, height: 40).clipShape(.rect(cornerRadius: 10))
             } else {
-                RoundedRectangle(cornerRadius: 10).fill(plant?.stageEnum.tint ?? Theme.surface2).frame(width: 40, height: 40)
+                RoundedRectangle(cornerRadius: 10).fill(item.progress >= 0 ? item.stage.tint : Theme.surface2).frame(width: 40, height: 40)
                     .overlay(Text(String((word.telugu ?? word.english).prefix(1))).font(Fonts.telugu(17, .medium)).foregroundStyle(Theme.text))
             }
             VStack(alignment: .leading, spacing: 2) {
@@ -169,12 +201,13 @@ struct WordRow: View {
                     .font(Fonts.ui(13)).foregroundStyle(Theme.text2).lineLimit(1)
             }
             Spacer(minLength: 8)
-            if let plant {
+            if item.progress >= 0 {
                 VStack(alignment: .trailing, spacing: 6) {
-                    Text(plant.stageEnum.label).font(Fonts.mono(10.5)).foregroundStyle(plant.stageEnum == .bloom ? Theme.accent : Theme.text3)
-                    SegmentBar(filled: plant.growth).frame(width: 56)
+                    Text(item.stage.label).font(Fonts.mono(10.5)).foregroundStyle(item.stage == .bloom ? Theme.accent : Theme.text3)
+                    SegmentBar(filled: item.progress).frame(width: 56)
                 }
             }
+            if let v = item.voice { VoiceButton(path: v, size: 30) }
         }
         .padding(.horizontal, 16).padding(.vertical, 12)
         .contentShape(Rectangle())
@@ -204,9 +237,16 @@ struct ProgressView_: View {
     @State private var open: Word?
 
     var body: some View {
-        let snap = people.growth ?? .sample
+        let snap = people.growth ?? .empty
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
+                if snap.totals.phrases == 0 {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Progress").font(Fonts.ui(32, .medium)).tracking(-1.1).foregroundStyle(Theme.text)
+                        Text(people.source == .offline ? "Connect to Weave on your Mac in Settings." : "Your progress starts with your first call.").font(Fonts.ui(15)).foregroundStyle(Theme.text2)
+                    }
+                    .padding(.top, 16)
+                } else {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Progress").font(Fonts.ui(32, .medium)).tracking(-1.1).foregroundStyle(Theme.text)
                     Text("\(snap.totals.bloom) words you understand without help.").font(Fonts.ui(15)).foregroundStyle(Theme.text2)
@@ -224,14 +264,16 @@ struct ProgressView_: View {
                 weave(snap).reveal(3)
                 stages(snap).reveal(4)
                 milestones(snap).reveal(5)
+                }
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 32)
         }
         .scrollIndicators(.hidden)
+        .refreshable { await people.loadGrowth() }
         .background(Backdrop())
         .sheet(item: $open) { w in
-            WordSheet(word: w, line: nil, partnerName: "Ammamma", live: false) { people.save(w) } forget: {}
+            WordSheet(word: w, line: nil, partnerName: people.partner.name, live: false) { people.save(w) } forget: {}
                 .environmentObject(people)
                 .presentationDetents([.large]).presentationBackground(Theme.bg2).presentationCornerRadius(24)
         }

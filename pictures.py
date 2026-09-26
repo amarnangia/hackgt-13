@@ -170,7 +170,8 @@ class PictureFinder:
         if not key.startswith("web:"):
             it = self.items[key]
             return {"id": key, "name": it["name"], "description": self.notes.get(key) or it.get("description", ""), "image": it["image"],
-                    "category": it.get("category", "")}
+                    "category": it.get("category", ""), "kind": it.get("kind", it.get("category", "")),
+                    "lexicon_ids": it.get("lexicon_ids", [])}
         noun = key[4:]
         if noun not in self.web_cache:
             self.web_cache[noun] = self._fetch_web(noun)

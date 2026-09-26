@@ -15,7 +15,8 @@
     "pulihora"
    ],
    "wikipedia": "Pulihora",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "pesarattu": {
    "title": "Pesarattu",
@@ -33,7 +34,8 @@
     "pesarattu"
    ],
    "wikipedia": "Pesarattu",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "dosa": {
    "title": "Dosa (food)",
@@ -50,7 +52,8 @@
     "dosa"
    ],
    "wikipedia": "Dosa (food)",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "idli": {
    "title": "Idli",
@@ -67,7 +70,8 @@
     "idli"
    ],
    "wikipedia": "Idli",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "upma": {
    "title": "Upma",
@@ -83,7 +87,8 @@
     "upma"
    ],
    "wikipedia": "Upma",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "dal": {
    "title": "Dal",
@@ -102,7 +107,8 @@
     "pappu"
    ],
    "wikipedia": "Dal",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "sambar": {
    "title": "Sambar (dish)",
@@ -118,7 +124,8 @@
     "sambar"
    ],
    "wikipedia": "Sambar (dish)",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "curd_rice": {
    "title": "Curd rice",
@@ -135,7 +142,8 @@
     "perugu_annam"
    ],
    "wikipedia": "Curd rice",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "avakaya": {
    "title": "Avakaya",
@@ -152,7 +160,8 @@
     "avakaya"
    ],
    "wikipedia": "Avakaya",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "gongura": {
    "title": "Gongura",
@@ -170,7 +179,8 @@
     "gongura"
    ],
    "wikipedia": "Gongura",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "biryani": {
    "title": "Hyderabadi biryani",
@@ -186,7 +196,8 @@
     "biryani"
    ],
    "wikipedia": "Hyderabadi biryani",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "laddu": {
    "title": "Laddu",
@@ -205,7 +216,8 @@
     "laddu"
    ],
    "wikipedia": "Laddu",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "ariselu": {
    "title": "Adhirasam",
@@ -222,7 +234,8 @@
     "ariselu"
    ],
    "wikipedia": "Ariselu",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "bobbatlu": {
    "title": "Puran poli",
@@ -240,7 +253,8 @@
     "bobbatlu"
    ],
    "wikipedia": "Puran poli",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "chapati": {
    "title": "Chapati",
@@ -259,7 +273,8 @@
     "chapati"
    ],
    "wikipedia": "Chapati",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "payasam": {
    "title": "Kheer",
@@ -277,7 +292,8 @@
     "payasam"
    ],
    "wikipedia": "Kheer",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "murukku": {
    "title": "Murukku",
@@ -295,7 +311,8 @@
     "jantikalu"
    ],
    "wikipedia": "Murukku",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "pongal_dish": {
    "title": "Pongal (dish)",
@@ -307,9 +324,12 @@
    "aliases": [
     "pongal"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "pongali"
+   ],
    "wikipedia": "Pongal (dish)",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "vada": {
    "title": "Medu vada",
@@ -324,9 +344,12 @@
     "vadai",
     "garelu"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "garelu"
+   ],
    "wikipedia": "Medu vada",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "pani_puri": {
    "title": "Panipuri",
@@ -342,7 +365,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Panipuri",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "samosa": {
    "title": "Samosa",
@@ -357,7 +381,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Samosa",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "jalebi": {
    "title": "Jalebi",
@@ -372,7 +397,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Jalebi",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "gulab_jamun": {
    "title": "Gulab jamun",
@@ -386,7 +412,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Gulab jamun",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "paneer": {
    "title": "Paneer",
@@ -400,7 +427,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Paneer",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "paneer_curry": {
    "title": "Palak paneer",
@@ -415,7 +443,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Palak paneer",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "chole": {
    "title": "Chole bhature",
@@ -431,7 +460,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Chole bhature",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "paratha": {
    "title": "Paratha",
@@ -446,7 +476,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Paratha",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "naan": {
    "title": "Naan",
@@ -460,7 +491,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Naan",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "indian_pickle": {
    "title": "South Asian pickle",
@@ -475,7 +507,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "South Asian pickle",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "chutney": {
    "title": "Chutney",
@@ -492,7 +525,8 @@
     "pachadi"
    ],
    "wikipedia": "Chutney",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "papadum": {
    "title": "Papadam",
@@ -508,7 +542,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Papadam",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "halwa": {
    "title": "Gajar ka halwa",
@@ -524,7 +559,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Gajar ka halwa",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "mysore_pak": {
    "title": "Mysore pak",
@@ -538,7 +574,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Mysore pak",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "kaju_katli": {
    "title": "Kaju katli",
@@ -553,7 +590,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Kaju katli",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "lassi": {
    "title": "Lassi",
@@ -567,7 +605,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Lassi",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "chai": {
    "title": "Masala chai",
@@ -583,7 +622,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Masala chai",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "filter_coffee": {
    "title": "Indian filter coffee",
@@ -597,7 +637,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Indian filter coffee",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "coconut_water": {
    "title": "Coconut water",
@@ -614,7 +655,8 @@
     "kobbari"
    ],
    "wikipedia": "Coconut water",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "jaggery": {
    "title": "Jaggery",
@@ -630,7 +672,8 @@
     "bellam"
    ],
    "wikipedia": "Jaggery",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "mango": {
    "title": "Mango",
@@ -648,7 +691,8 @@
     "mamidi"
    ],
    "wikipedia": "Mango",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "banana": {
    "title": "Banana",
@@ -665,7 +709,8 @@
     "arati"
    ],
    "wikipedia": "Banana",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "jackfruit": {
    "title": "Jackfruit",
@@ -679,7 +724,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Jackfruit",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "guava": {
    "title": "Guava",
@@ -694,7 +740,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Guava",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "sugarcane": {
    "title": "Sugarcane juice",
@@ -709,7 +756,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Sugarcane juice",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "pav_bhaji": {
    "title": "Pav bhaji",
@@ -723,7 +771,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Pav bhaji",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "uttapam": {
    "title": "Uttapam",
@@ -738,7 +787,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Uttapam",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "poha": {
    "title": "Flattened rice",
@@ -751,9 +801,12 @@
     "poha",
     "atukulu"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "atukulu"
+   ],
    "wikipedia": "Poha (rice)",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "pakora": {
    "title": "Pakora",
@@ -769,9 +822,12 @@
     "bajjis",
     "mirchi bajji"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "bajji"
+   ],
    "wikipedia": "Pakora",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "kulfi": {
    "title": "Kulfi",
@@ -785,7 +841,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Kulfi",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "prasadam": {
    "title": "Prasada",
@@ -802,7 +859,8 @@
     "prasadam"
    ],
    "wikipedia": "Prasada",
-   "region": "in"
+   "region": "in",
+   "kind": "memory"
   },
   "pulao": {
    "title": "Pilaf",
@@ -817,7 +875,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Pilaf",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "tamarind": {
    "title": "Tamarind",
@@ -829,9 +888,12 @@
    "aliases": [
     "tamarind"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "chinta_chettu"
+   ],
    "wikipedia": "Tamarind",
-   "region": "in"
+   "region": "in",
+   "kind": "nature"
   },
   "curry_leaves": {
    "title": "Curry tree",
@@ -845,7 +907,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Curry tree",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "ragi": {
    "title": "Finger millet",
@@ -861,7 +924,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Finger millet",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "thali": {
    "title": "Thali",
@@ -879,7 +943,8 @@
     "bhojanam"
    ],
    "wikipedia": "Thali",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "rice": {
    "title": "Cooked rice",
@@ -896,7 +961,8 @@
     "annam"
    ],
    "wikipedia": "Cooked rice",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "curry": {
    "title": "Curry",
@@ -913,7 +979,8 @@
     "kura"
    ],
    "wikipedia": "Curry",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "auto": {
    "title": "Auto rickshaw",
@@ -931,7 +998,8 @@
     "auto"
    ],
    "wikipedia": "Auto rickshaw",
-   "region": "in"
+   "region": "in",
+   "kind": "vehicle"
   },
   "rickshaw": {
    "title": "Cycle rickshaw",
@@ -948,7 +1016,8 @@
     "rickshaw"
    ],
    "wikipedia": "Cycle rickshaw",
-   "region": "in"
+   "region": "in",
+   "kind": "vehicle"
   },
   "bullock_cart": {
    "title": "Bullock cart",
@@ -963,7 +1032,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Bullock cart",
-   "region": "in"
+   "region": "in",
+   "kind": "vehicle"
   },
   "scooter": {
    "title": "Scooter (motorcycle)",
@@ -978,7 +1048,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Motor scooter",
-   "region": "us"
+   "region": "us",
+   "kind": "vehicle"
   },
   "gopuram": {
    "title": "Gopuram",
@@ -993,7 +1064,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Gopuram",
-   "region": "in"
+   "region": "in",
+   "kind": "place"
   },
   "paddy_field": {
    "title": "Paddy field",
@@ -1011,7 +1083,8 @@
     "polam"
    ],
    "wikipedia": "Paddy field",
-   "region": "in"
+   "region": "in",
+   "kind": "place"
   },
   "well": {
    "title": "Well",
@@ -1026,7 +1099,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Water well",
-   "region": "in"
+   "region": "in",
+   "kind": "nature"
   },
   "tulsi": {
    "title": "Ocimum tenuiflorum",
@@ -1040,9 +1114,12 @@
     "holy basil",
     "tulasi"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "tulasi"
+   ],
    "wikipedia": "Ocimum tenuiflorum",
-   "region": "in"
+   "region": "in",
+   "kind": "nature"
   },
   "banyan": {
    "title": "Banyan",
@@ -1057,7 +1134,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Banyan",
-   "region": "in"
+   "region": "in",
+   "kind": "nature"
   },
   "neem": {
    "title": "Azadirachta indica",
@@ -1070,9 +1148,12 @@
     "neem",
     "neem tree"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "vepa"
+   ],
    "wikipedia": "Azadirachta indica",
-   "region": "in"
+   "region": "in",
+   "kind": "nature"
   },
   "coconut_tree": {
    "title": "Coconut",
@@ -1088,7 +1169,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Coconut",
-   "region": "us"
+   "region": "us",
+   "kind": "nature"
   },
   "cow": {
    "title": "Zebu",
@@ -1105,7 +1187,8 @@
     "aavu"
    ],
    "wikipedia": "Zebu",
-   "region": "us"
+   "region": "us",
+   "kind": "place"
   },
   "buffalo": {
    "title": "Water buffalo",
@@ -1120,7 +1203,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Water buffalo",
-   "region": "in"
+   "region": "in",
+   "kind": "nature"
   },
   "peacock": {
    "title": "Indian peafowl",
@@ -1135,7 +1219,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Indian peafowl",
-   "region": "in"
+   "region": "in",
+   "kind": "nature"
   },
   "charminar": {
    "title": "Charminar",
@@ -1149,7 +1234,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Charminar",
-   "region": "in"
+   "region": "in",
+   "kind": "place"
   },
   "tirupati": {
    "title": "Venkateswara Temple, Tirumala",
@@ -1162,9 +1248,12 @@
     "tirupati",
     "tirumala"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "tirupati"
+   ],
    "wikipedia": "Venkateswara Temple, Tirumala",
-   "region": "in"
+   "region": "in",
+   "kind": "place"
   },
   "saree": {
    "title": "Sari",
@@ -1183,7 +1272,8 @@
     "saree"
    ],
    "wikipedia": "Sari",
-   "region": "in"
+   "region": "in",
+   "kind": "clothing"
   },
   "silk_saree": {
    "title": "Kanchipuram silk sari",
@@ -1201,7 +1291,8 @@
     "pattu_cheera"
    ],
    "wikipedia": "Kanchipuram silk sari",
-   "region": "in"
+   "region": "in",
+   "kind": "clothing"
   },
   "kurta": {
    "title": "Kurta",
@@ -1216,7 +1307,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Kurta",
-   "region": "in"
+   "region": "in",
+   "kind": "clothing"
   },
   "lungi": {
    "title": "Lungi",
@@ -1230,7 +1322,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Lungi",
-   "region": "in"
+   "region": "in",
+   "kind": "clothing"
   },
   "bangles": {
    "title": "Bangle",
@@ -1247,7 +1340,8 @@
     "gajulu"
    ],
    "wikipedia": "Bangle",
-   "region": "in"
+   "region": "in",
+   "kind": "clothing"
   },
   "bindi": {
    "title": "Bindi",
@@ -1264,7 +1358,8 @@
     "bottu"
    ],
    "wikipedia": "Bindi",
-   "region": "in"
+   "region": "in",
+   "kind": "clothing"
   },
   "mangalsutra": {
    "title": "Mangalasutra",
@@ -1277,9 +1372,12 @@
     "mangalsutra",
     "thali chain"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "mangalasutram"
+   ],
    "wikipedia": "Mangalsutra",
-   "region": "in"
+   "region": "in",
+   "kind": "memory"
   },
   "anklet": {
    "title": "Anklet",
@@ -1293,9 +1391,12 @@
     "anklet",
     "payal"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "pattilu"
+   ],
    "wikipedia": "Anklet",
-   "region": "in"
+   "region": "in",
+   "kind": "clothing"
   },
   "mehndi": {
    "title": "Mehndi",
@@ -1310,7 +1411,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Mehndi",
-   "region": "in"
+   "region": "in",
+   "kind": "clothing"
   },
   "sankranti": {
    "title": "Makar Sankranti",
@@ -1327,7 +1429,8 @@
     "sankranti"
    ],
    "wikipedia": "Makar Sankranti",
-   "region": "in"
+   "region": "in",
+   "kind": "festival"
   },
   "ugadi": {
    "title": "Ugadi",
@@ -1337,13 +1440,16 @@
    "name": "Ugadi",
    "category": "festival",
    "aliases": [
-    "ugadi"
+    "ugadi",
+    "ugadi pachadi"
    ],
    "lexicon_ids": [
-    "ugadi"
+    "ugadi",
+    "ugadi_pachadi"
    ],
    "wikipedia": "Ugadi",
-   "region": "in"
+   "region": "in",
+   "kind": "festival"
   },
   "diwali": {
    "title": "Diwali",
@@ -1360,7 +1466,8 @@
     "diwali"
    ],
    "wikipedia": "Diwali",
-   "region": "in"
+   "region": "in",
+   "kind": "festival"
   },
   "ganesh_chaturthi": {
    "title": "Ganesh Chaturthi",
@@ -1378,7 +1485,8 @@
     "vinayaka_chavithi"
    ],
    "wikipedia": "Ganesh Chaturthi",
-   "region": "in"
+   "region": "in",
+   "kind": "festival"
   },
   "bathukamma": {
    "title": "Bathukamma",
@@ -1394,7 +1502,8 @@
     "bathukamma"
    ],
    "wikipedia": "Bathukamma",
-   "region": "in"
+   "region": "in",
+   "kind": "festival"
   },
   "dussehra": {
    "title": "Vijayadashami",
@@ -1408,9 +1517,12 @@
     "dasara",
     "vijayadashami"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "dasara"
+   ],
    "wikipedia": "Vijayadashami",
-   "region": "in"
+   "region": "in",
+   "kind": "festival"
   },
   "pongal_festival": {
    "title": "Pongal (festival)",
@@ -1424,7 +1536,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Thai Pongal",
-   "region": "in"
+   "region": "in",
+   "kind": "festival"
   },
   "kite": {
    "title": "Kite",
@@ -1441,7 +1554,8 @@
     "galipatam"
    ],
    "wikipedia": "Kite",
-   "region": "in"
+   "region": "in",
+   "kind": "game"
   },
   "diya": {
    "title": "Diya (lamp)",
@@ -1456,9 +1570,13 @@
     "oil lamp",
     "oil lamps"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "deepam",
+    "karthika_masam"
+   ],
    "wikipedia": "Diya (lamp)",
-   "region": "in"
+   "region": "in",
+   "kind": "memory"
   },
   "puja": {
    "title": "Puja (Hinduism)",
@@ -1475,7 +1593,8 @@
     "puja"
    ],
    "wikipedia": "Puja (Hinduism)",
-   "region": "in"
+   "region": "in",
+   "kind": "memory"
   },
   "aarti": {
    "title": "Arti (Hinduism)",
@@ -1490,7 +1609,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Arti (Hinduism)",
-   "region": "in"
+   "region": "in",
+   "kind": "memory"
   },
   "rangoli": {
    "title": "Kolam",
@@ -1509,7 +1629,8 @@
     "muggu"
    ],
    "wikipedia": "Kolam",
-   "region": "in"
+   "region": "in",
+   "kind": "festival"
   },
   "veena": {
    "title": "Saraswati veena",
@@ -1523,7 +1644,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Saraswati veena",
-   "region": "in"
+   "region": "in",
+   "kind": "art"
   },
   "kuchipudi": {
    "title": "Kuchipudi",
@@ -1538,7 +1660,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Kuchipudi",
-   "region": "in"
+   "region": "in",
+   "kind": "art"
   },
   "bharatanatyam": {
    "title": "Bharatanatyam",
@@ -1552,7 +1675,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Bharatanatyam",
-   "region": "in"
+   "region": "in",
+   "kind": "art"
   },
   "carnatic": {
    "title": "Carnatic music",
@@ -1567,7 +1691,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Carnatic music",
-   "region": "in"
+   "region": "in",
+   "kind": "art"
   },
   "cricket": {
    "title": "Cricket",
@@ -1581,7 +1706,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Cricket",
-   "region": "in"
+   "region": "in",
+   "kind": "game"
   },
   "pressure_cooker": {
    "title": "Pressure cooker",
@@ -1595,7 +1721,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Pressure cooking",
-   "region": "in"
+   "region": "in",
+   "kind": "household"
   },
   "tawa": {
    "title": "Tava",
@@ -1611,7 +1738,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Tava",
-   "region": "in"
+   "region": "in",
+   "kind": "household"
   },
   "steel_tumbler": {
    "title": "Indian filter coffee",
@@ -1626,7 +1754,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Dabarah",
-   "region": "in"
+   "region": "in",
+   "kind": "household"
   },
   "mortar_pestle": {
    "title": "Mortar and pestle",
@@ -1640,9 +1769,12 @@
     "grinding stone",
     "rolu"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "rolu"
+   ],
    "wikipedia": "Mortar and pestle",
-   "region": "in"
+   "region": "in",
+   "kind": "household"
   },
   "charpoy": {
    "title": "Charpai",
@@ -1655,9 +1787,12 @@
     "charpoy",
     "rope cot"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "nulaka_mancham"
+   ],
    "wikipedia": "Charpai",
-   "region": "in"
+   "region": "in",
+   "kind": "household"
   },
   "jhoola": {
    "title": "Swing (seat)",
@@ -1671,9 +1806,12 @@
     "uyyala",
     "swing seat"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "uyyala"
+   ],
    "wikipedia": "Swing (seat)",
-   "region": "in"
+   "region": "in",
+   "kind": "household"
   },
   "rangoli_powder": {
    "title": "Rangoli",
@@ -1687,7 +1825,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Rangoli",
-   "region": "in"
+   "region": "in",
+   "kind": "memory"
   },
   "thanksgiving": {
    "title": "Thanksgiving (United States)",
@@ -1701,7 +1840,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Thanksgiving (United States)",
-   "region": "us"
+   "region": "us",
+   "kind": "festival"
   },
   "halloween": {
    "title": "Halloween",
@@ -1717,7 +1857,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Halloween",
-   "region": "us"
+   "region": "us",
+   "kind": "festival"
   },
   "christmas_tree": {
    "title": "Christmas tree",
@@ -1732,7 +1873,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Christmas tree",
-   "region": "us"
+   "region": "us",
+   "kind": "festival"
   },
   "fourth_of_july": {
    "title": "Independence Day (United States)",
@@ -1748,7 +1890,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Independence Day (United States)",
-   "region": "us"
+   "region": "us",
+   "kind": "festival"
   },
   "hamburger": {
    "title": "Hamburger",
@@ -1764,7 +1907,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Hamburger",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "pizza": {
    "title": "Pizza",
@@ -1779,7 +1923,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Pizza",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "hot_dog": {
    "title": "Hot dog",
@@ -1794,7 +1939,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Hot dog",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "mac_and_cheese": {
    "title": "Macaroni and cheese",
@@ -1809,7 +1955,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Macaroni and cheese",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "pancake": {
    "title": "Pancake",
@@ -1824,7 +1971,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Pancake",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "bagel": {
    "title": "Bagel",
@@ -1839,7 +1987,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Bagel",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "taco": {
    "title": "Taco",
@@ -1854,7 +2003,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Taco",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "burrito": {
    "title": "Burrito",
@@ -1869,7 +2019,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Burrito",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "pbj": {
    "title": "Peanut butter and jelly sandwich",
@@ -1885,7 +2036,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Peanut butter and jelly sandwich",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "smores": {
    "title": "S'more",
@@ -1900,7 +2052,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "S'more",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "apple_pie": {
    "title": "Apple pie",
@@ -1914,7 +2067,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Apple pie",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "pumpkin_pie": {
    "title": "Pumpkin pie",
@@ -1928,7 +2082,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Pumpkin pie",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "cereal": {
    "title": "Breakfast cereal",
@@ -1942,7 +2097,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Breakfast cereal",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "turkey_dinner": {
    "title": "Turkey as food",
@@ -1956,7 +2112,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Turkey as food",
-   "region": "us"
+   "region": "us",
+   "kind": "food"
   },
   "baseball": {
    "title": "Baseball",
@@ -1970,7 +2127,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Baseball",
-   "region": "us"
+   "region": "us",
+   "kind": "festival"
   },
   "american_football": {
    "title": "American football",
@@ -1985,7 +2143,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "American football",
-   "region": "us"
+   "region": "us",
+   "kind": "festival"
   },
   "basketball": {
    "title": "Basketball",
@@ -1999,7 +2158,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Basketball",
-   "region": "us"
+   "region": "us",
+   "kind": "festival"
   },
   "snow": {
    "title": "Snow",
@@ -2014,7 +2174,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Snow",
-   "region": "us"
+   "region": "us",
+   "kind": "place"
   },
   "snowman": {
    "title": "Snowman",
@@ -2028,7 +2189,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Snowman",
-   "region": "us"
+   "region": "us",
+   "kind": "place"
   },
   "school_bus": {
    "title": "School bus",
@@ -2042,7 +2204,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "School bus",
-   "region": "us"
+   "region": "us",
+   "kind": "vehicle"
   },
   "subway": {
    "title": "New York City Subway",
@@ -2056,7 +2219,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "New York City Subway",
-   "region": "us"
+   "region": "us",
+   "kind": "vehicle"
   },
   "prom": {
    "title": "Prom",
@@ -2070,7 +2234,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Prom",
-   "region": "us"
+   "region": "us",
+   "kind": "festival"
   },
   "hiking": {
    "title": "Hiking",
@@ -2085,7 +2250,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Hiking",
-   "region": "us"
+   "region": "us",
+   "kind": "place"
   },
   "ghee": {
    "title": "Ghee",
@@ -2101,7 +2267,8 @@
     "neyyi"
    ],
    "wikipedia": "Ghee",
-   "region": "in"
+   "region": "in",
+   "kind": "food"
   },
   "half_saree": {
    "title": "Langa voni",
@@ -2119,7 +2286,8 @@
     "langa_voni"
    ],
    "wikipedia": "Half saree",
-   "region": "in"
+   "region": "in",
+   "kind": "clothing"
   },
   "holi": {
    "title": "Holi",
@@ -2131,9 +2299,12 @@
    "aliases": [
     "holi"
    ],
-   "lexicon_ids": [],
+   "lexicon_ids": [
+    "holi"
+   ],
    "wikipedia": "Holi",
-   "region": "in"
+   "region": "in",
+   "kind": "festival"
   },
   "wedding": {
    "title": "Hindu wedding",
@@ -2150,7 +2321,8 @@
     "pelli"
    ],
    "wikipedia": "Hindu wedding",
-   "region": "in"
+   "region": "in",
+   "kind": "festival"
   },
   "golu": {
    "title": "Golu (festival)",
@@ -2166,7 +2338,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Bommai Kolu",
-   "region": "in"
+   "region": "in",
+   "kind": "festival"
   },
   "high_school": {
    "title": "Secondary school",
@@ -2180,7 +2353,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "High school",
-   "region": "us"
+   "region": "us",
+   "kind": "place"
   },
   "indian_train": {
    "title": "Rail transport in India",
@@ -2196,7 +2370,8 @@
     "railu"
    ],
    "wikipedia": "Rail transport in India",
-   "region": "in"
+   "region": "in",
+   "kind": "memory"
   },
   "temple": {
    "title": "Thousand Pillar Temple",
@@ -2213,7 +2388,8 @@
     "temple"
    ],
    "wikipedia": "Thousand Pillar Temple",
-   "region": "in"
+   "region": "in",
+   "kind": "place"
   },
   "village_market": {
    "title": "Haat bazaar",
@@ -2232,7 +2408,8 @@
     "santa"
    ],
    "wikipedia": "Haat bazaar",
-   "region": "in"
+   "region": "in",
+   "kind": "memory"
   },
   "monsoon": {
    "title": "Monsoon",
@@ -2249,7 +2426,8 @@
     "vana"
    ],
    "wikipedia": "Monsoon",
-   "region": "in"
+   "region": "in",
+   "kind": "memory"
   },
   "dhoti": {
    "title": "Veshti",
@@ -2267,7 +2445,8 @@
     "pancha"
    ],
    "wikipedia": "Veshti",
-   "region": "in"
+   "region": "in",
+   "kind": "clothing"
   },
   "college_campus": {
    "title": "Harvard Yard",
@@ -2283,7 +2462,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Harvard Yard",
-   "region": "us"
+   "region": "us",
+   "kind": "place"
   },
   "skiing": {
    "title": "Skiing",
@@ -2298,7 +2478,8 @@
    ],
    "lexicon_ids": [],
    "wikipedia": "Skiing",
-   "region": "us"
+   "region": "us",
+   "kind": "place"
   },
   "poornalu": {
    "title": "Poornalu",
@@ -2316,7 +2497,8 @@
    "lexicon_ids": [
     "boorelu"
    ],
-   "wikipedia": "Poornalu"
+   "wikipedia": "Poornalu",
+   "kind": "food"
   },
   "pootharekulu": {
    "title": "Pootharekulu",
@@ -2331,7 +2513,8 @@
     "paper sweet"
    ],
    "lexicon_ids": [],
-   "wikipedia": "Pootharekulu"
+   "wikipedia": "Pootharekulu",
+   "kind": "food"
   },
   "kakinada_kaja": {
    "title": "Kakinada Kaja",
@@ -2346,7 +2529,8 @@
     "kakinada kaja"
    ],
    "lexicon_ids": [],
-   "wikipedia": "Kakinada Kaja"
+   "wikipedia": "Kakinada Kaja",
+   "kind": "food"
   },
   "sakinalu": {
    "title": "Sakinalu",
@@ -2360,7 +2544,8 @@
     "sakinalu"
    ],
    "lexicon_ids": [],
-   "wikipedia": "Sakinalu"
+   "wikipedia": "Sakinalu",
+   "kind": "food"
   },
   "bonda": {
    "title": "Bonda (snack)",
@@ -2375,7 +2560,1143 @@
     "bondas"
    ],
    "lexicon_ids": [],
-   "wikipedia": "Bonda (snack)"
+   "wikipedia": "Bonda (snack)",
+   "kind": "food"
+  },
+  "gavvalu": {
+   "title": "Sweet shells",
+   "description": "Sweet shells or gavvalu is one of the typical Indian sweets made in Andhra Pradesh, India.",
+   "image": "images/gavvalu.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Sweet_shells",
+   "name": "Gavvalu",
+   "category": "food",
+   "kind": "food",
+   "region": "in",
+   "aliases": [
+    "gavvalu"
+   ],
+   "lexicon_ids": [
+    "gavvalu"
+   ],
+   "wikipedia": "Gavvalu"
+  },
+  "punugulu": {
+   "title": "Punugulu",
+   "description": "Punugulu (transl.",
+   "image": "images/punugulu.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Punugulu",
+   "name": "Punugulu",
+   "category": "food",
+   "kind": "food",
+   "region": "in",
+   "aliases": [
+    "punugulu"
+   ],
+   "lexicon_ids": [
+    "punugulu"
+   ],
+   "wikipedia": "Punugulu"
+  },
+  "okra": {
+   "title": "Okra",
+   "description": "Okra, Abelmoschus esculentus, known in some English-speaking countries as lady's fingers, is a flowering plant in the mallow family native to West Africa.",
+   "image": "images/okra.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Okra",
+   "name": "Bendakaya (okra)",
+   "category": "food",
+   "kind": "food",
+   "region": "in",
+   "aliases": [
+    "okra",
+    "ladies' finger",
+    "bhindi"
+   ],
+   "lexicon_ids": [
+    "bendakaya"
+   ],
+   "wikipedia": "Okra"
+  },
+  "drumstick": {
+   "title": "Moringa oleifera",
+   "description": "Moringa oleifera is a short-lived, fast-growing, drought-resistant tree of the family Moringaceae, native to northern India and used extensively in South and Southeast Asia.",
+   "image": "images/drumstick.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Moringa_oleifera",
+   "name": "Munagakaya (drumstick)",
+   "category": "food",
+   "kind": "food",
+   "region": "in",
+   "aliases": [
+    "drumsticks",
+    "drumstick",
+    "moringa"
+   ],
+   "lexicon_ids": [
+    "munagakaya"
+   ],
+   "wikipedia": "Moringa oleifera"
+  },
+  "ivy_gourd": {
+   "title": "Coccinia grandis",
+   "description": "Coccinia grandis, the ivy gourd, also known as scarlet gourd, or Tindora, is a tropical vine.",
+   "image": "images/ivy_gourd.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Coccinia_grandis",
+   "name": "Dondakaya (ivy gourd)",
+   "category": "food",
+   "kind": "food",
+   "region": "in",
+   "aliases": [
+    "ivy gourd",
+    "tindora",
+    "dondakaya"
+   ],
+   "lexicon_ids": [
+    "dondakaya"
+   ],
+   "wikipedia": "Coccinia grandis"
+  },
+  "panakam": {
+   "title": "Panakam",
+   "description": "Panakam, also spelled Panaka and Panagam, is a traditional beverage originating in South India.",
+   "image": "images/panakam.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Panakam",
+   "name": "Panakam",
+   "category": "food",
+   "kind": "food",
+   "region": "in",
+   "aliases": [
+    "panakam"
+   ],
+   "lexicon_ids": [
+    "panakam"
+   ],
+   "wikipedia": "Panakam"
+  },
+  "buttermilk": {
+   "title": "Chaas",
+   "description": "Chaas is a curd-based drink popular across the Indian subcontinent.",
+   "image": "images/buttermilk.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Chaas",
+   "name": "Majjiga (buttermilk)",
+   "category": "food",
+   "kind": "food",
+   "region": "in",
+   "aliases": [
+    "buttermilk",
+    "majjiga",
+    "chaas"
+   ],
+   "lexicon_ids": [
+    "majjiga"
+   ],
+   "wikipedia": "Chaas"
+  },
+  "gunpowder": {
+   "title": "Chutney",
+   "description": "A chutney is a condiment associated with cuisines of the Indian subcontinent.",
+   "image": "images/gunpowder.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Chutney",
+   "name": "Karam podi",
+   "category": "food",
+   "kind": "food",
+   "region": "in",
+   "aliases": [
+    "gunpowder",
+    "karam podi",
+    "podi",
+    "spice powder"
+   ],
+   "lexicon_ids": [
+    "karam_podi"
+   ],
+   "wikipedia": "Chutney powder"
+  },
+  "ice_apple": {
+   "title": "Borassus flabellifer",
+   "description": "Borassus flabellifer, also known as palmyra palm, is a fan palm native to tropical and sub-tropical regions of South Asia and Southeast Asia.",
+   "image": "images/ice_apple.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Borassus_flabellifer",
+   "name": "Taati munjalu (ice apple)",
+   "category": "food",
+   "kind": "food",
+   "region": "in",
+   "aliases": [
+    "ice apple",
+    "ice apples",
+    "munjalu",
+    "palm fruit"
+   ],
+   "lexicon_ids": [
+    "taati_munjalu"
+   ],
+   "wikipedia": "Borassus flabellifer"
+  },
+  "tiffin_carrier": {
+   "title": "Tiffin carrier",
+   "description": "Tiffin carriers or dabbas are a kind of lunch box used widely in Asia and the Caribbean for tiffin meals.",
+   "image": "images/tiffin_carrier.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Tiffin_carrier",
+   "name": "Tiffin carrier",
+   "category": "place",
+   "kind": "household",
+   "region": "in",
+   "aliases": [
+    "tiffin carrier",
+    "tiffin box",
+    "lunch carrier"
+   ],
+   "lexicon_ids": [
+    "tiffin_box"
+   ],
+   "wikipedia": "Tiffin carrier"
+  },
+  "godavari": {
+   "title": "Godavari River",
+   "description": "The Godavari is India's second longest river after the Ganges River, and drains the third largest basin in India, covering about 10% of the total geographical area.",
+   "image": "images/godavari.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Godavari_River",
+   "name": "Godavari river",
+   "category": "place",
+   "kind": "place",
+   "region": "in",
+   "aliases": [
+    "godavari"
+   ],
+   "lexicon_ids": [
+    "godavari"
+   ],
+   "wikipedia": "Godavari River"
+  },
+  "krishna_river": {
+   "title": "Krishna River",
+   "description": "The Krishnā River in the Deccan Plateau is the third-longest in India, after the Ganga and Godavari.",
+   "image": "images/krishna_river.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Krishna_River",
+   "name": "Krishna river",
+   "category": "place",
+   "kind": "place",
+   "region": "in",
+   "aliases": [
+    "krishna river"
+   ],
+   "lexicon_ids": [
+    "krishna_nadi"
+   ],
+   "wikipedia": "Krishna River"
+  },
+  "hyderabad": {
+   "title": "Hyderabad",
+   "description": "Hyderabad is the capital and largest city of the Indian state of Telangana.",
+   "image": "images/hyderabad.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Hyderabad",
+   "name": "Hyderabad",
+   "category": "place",
+   "kind": "place",
+   "region": "in",
+   "aliases": [
+    "hyderabad"
+   ],
+   "lexicon_ids": [
+    "hyderabad"
+   ],
+   "wikipedia": "Hyderabad"
+  },
+  "kanaka_durga": {
+   "title": "Kanaka Durga Temple",
+   "description": "Kanaka Durga Temple, officially known as Sri Durga Malleswara Swamyvarla Devasthanam, is a Hindu temple dedicated to Kanaka Durga.",
+   "image": "images/kanaka_durga.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kanaka_Durga_Temple",
+   "name": "Kanaka Durga temple",
+   "category": "place",
+   "kind": "place",
+   "region": "in",
+   "aliases": [
+    "kanaka durga",
+    "durga temple",
+    "vijayawada"
+   ],
+   "lexicon_ids": [
+    "vijayawada"
+   ],
+   "wikipedia": "Kanaka Durga Temple"
+  },
+  "visakhapatnam": {
+   "title": "RK Beach",
+   "description": "Ramakrishna Beach also known as R K Beach is situated on the east coast of Bay of Bengal in Visakhapatnam, Andhra Pradesh.",
+   "image": "images/visakhapatnam.jpg",
+   "credit": "https://en.wikipedia.org/wiki/RK_Beach",
+   "name": "Vizag (RK Beach)",
+   "category": "place",
+   "kind": "place",
+   "region": "in",
+   "aliases": [
+    "visakhapatnam",
+    "vizag"
+   ],
+   "lexicon_ids": [
+    "vizag"
+   ],
+   "wikipedia": "RK Beach"
+  },
+  "araku": {
+   "title": "Araku Valley",
+   "description": "Araku Valley is a hill station in the Alluri Sitharama Raju district of Andhra Pradesh, India, located 111 km from Visakhapatnam.",
+   "image": "images/araku.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Araku_Valley",
+   "name": "Araku Valley",
+   "category": "place",
+   "kind": "place",
+   "region": "in",
+   "aliases": [
+    "araku",
+    "araku valley"
+   ],
+   "lexicon_ids": [
+    "araku"
+   ],
+   "wikipedia": "Araku Valley"
+  },
+  "srisailam": {
+   "title": "Mallikarjuna Temple, Srisailam",
+   "description": "Mallikarjuna Swamy Temple or Srisailam Temple is a Hindu temple dedicated to the deities Shiva and Parvati, located at Srisailam, Nandyal district in the Indian state of Andhra Pradesh.",
+   "image": "images/srisailam.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Mallikarjuna_Temple%2C_Srisailam",
+   "name": "Srisailam temple",
+   "category": "place",
+   "kind": "place",
+   "region": "in",
+   "aliases": [
+    "srisailam"
+   ],
+   "lexicon_ids": [
+    "srisailam"
+   ],
+   "wikipedia": "Mallikarjuna Temple, Srisailam"
+  },
+  "golconda": {
+   "title": "Golconda",
+   "description": "Golconda is a fortified citadel and ruined city located on the western outskirts of Hyderabad, Telangana, India.",
+   "image": "images/golconda.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Golconda",
+   "name": "Golconda fort",
+   "category": "place",
+   "kind": "place",
+   "region": "in",
+   "aliases": [
+    "golconda",
+    "golconda fort"
+   ],
+   "lexicon_ids": [
+    "golconda"
+   ],
+   "wikipedia": "Golconda Fort"
+  },
+  "hussain_sagar": {
+   "title": "Hussain Sagar",
+   "description": "Hussain Sagar is a heart-shaped lake in Hyderabad, Telangana, India, built by Ibrahim Quli Qutb Shah in 1562.",
+   "image": "images/hussain_sagar.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Hussain_Sagar",
+   "name": "Hussain Sagar",
+   "category": "place",
+   "kind": "place",
+   "region": "in",
+   "aliases": [
+    "hussain sagar",
+    "tank bund"
+   ],
+   "lexicon_ids": [
+    "hussain_sagar"
+   ],
+   "wikipedia": "Hussain Sagar"
+  },
+  "rajahmundry": {
+   "title": "Rajamahendravaram",
+   "description": "Rajamahendravaram (the city of King Mahendra), also known as Rajahmundry, is a city in the Indian state of Andhra Pradesh and the district headquarters of the East Godavari district.",
+   "image": "images/rajahmundry.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Rajamahendravaram",
+   "name": "Rajahmundry",
+   "category": "place",
+   "kind": "place",
+   "region": "in",
+   "aliases": [
+    "rajahmundry",
+    "rajamahendravaram"
+   ],
+   "lexicon_ids": [
+    "rajahmundry"
+   ],
+   "wikipedia": "Rajahmundry"
+  },
+  "warangal_fort": {
+   "title": "Warangal Fort",
+   "description": "Warangal Fort is located in Warangal District, Telangana, India.",
+   "image": "images/warangal_fort.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Warangal_Fort",
+   "name": "Warangal fort",
+   "category": "place",
+   "kind": "place",
+   "region": "in",
+   "aliases": [
+    "warangal"
+   ],
+   "lexicon_ids": [
+    "warangal"
+   ],
+   "wikipedia": "Warangal Fort"
+  },
+  "mango_tree": {
+   "title": "Mangifera indica",
+   "description": "Mangifera indica, commonly known as the mango after its fruit, is an evergreen species of flowering plant in the family Anacardiaceae.",
+   "image": "images/mango_tree.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Mangifera_indica",
+   "name": "Mango tree (mamidi chettu)",
+   "category": "place",
+   "kind": "nature",
+   "region": "in",
+   "aliases": [
+    "mango tree",
+    "mango trees",
+    "mango grove",
+    "mango orchard"
+   ],
+   "lexicon_ids": [
+    "mamidi_chettu"
+   ],
+   "wikipedia": "Mangifera indica"
+  },
+  "jasmine": {
+   "title": "Jasminum sambac",
+   "description": "Jasminum sambac is a species of jasmine native to Bhutan and India.",
+   "image": "images/jasmine.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Jasminum_sambac",
+   "name": "Mallepoolu (jasmine)",
+   "category": "place",
+   "kind": "nature",
+   "region": "in",
+   "aliases": [
+    "jasmine",
+    "jasmine flowers",
+    "mallepoolu"
+   ],
+   "lexicon_ids": [
+    "mallepoolu"
+   ],
+   "wikipedia": "Jasminum sambac"
+  },
+  "marigold": {
+   "title": "Tagetes erecta",
+   "description": "Tagetes erecta, the Aztec marigold, Mexican marigold, big marigold, cempaxochitl or cempasúchil, is a species of flowering plant in the genus Tagetes native to Mexico and Central America.",
+   "image": "images/marigold.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Tagetes_erecta",
+   "name": "Banti poolu (marigold)",
+   "category": "place",
+   "kind": "nature",
+   "region": "in",
+   "aliases": [
+    "marigold",
+    "marigolds",
+    "marigold garland"
+   ],
+   "lexicon_ids": [
+    "banti_poolu"
+   ],
+   "wikipedia": "Tagetes erecta"
+  },
+  "lotus": {
+   "title": "Nelumbo nucifera",
+   "description": "Nelumbo nucifera, also known as Padma or Kamala, sacred lotus, pink lotus, Indian lotus, or simply lotus, is one of two extant species of aquatic plant in the family Nelumbonaceae.",
+   "image": "images/lotus.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Nelumbo_nucifera",
+   "name": "Lotus (tamara puvvu)",
+   "category": "place",
+   "kind": "nature",
+   "region": "in",
+   "aliases": [
+    "lotus",
+    "lotuses",
+    "lotus flower"
+   ],
+   "lexicon_ids": [
+    "tamara"
+   ],
+   "wikipedia": "Nelumbo nucifera"
+  },
+  "bhogi": {
+   "title": "Bhogi",
+   "description": "Bhogi is the first day of the four-day Sankranti festival.",
+   "image": "images/bhogi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Bhogi",
+   "name": "Bhogi",
+   "category": "festival",
+   "kind": "festival",
+   "region": "in",
+   "aliases": [
+    "bhogi",
+    "bhogi bonfire"
+   ],
+   "lexicon_ids": [
+    "bhogi",
+    "bhogi_pallu"
+   ],
+   "wikipedia": "Bhogi"
+  },
+  "bonalu": {
+   "title": "Bonalu",
+   "description": "Bonalu is one of the most prominent Hindu festivals of Telangana, dedicated to Goddess Mahakali.",
+   "image": "images/bonalu.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Bonalu",
+   "name": "Bonalu",
+   "category": "festival",
+   "kind": "festival",
+   "region": "in",
+   "aliases": [
+    "bonalu"
+   ],
+   "lexicon_ids": [
+    "bonalu"
+   ],
+   "wikipedia": "Bonalu"
+  },
+  "rama_navami": {
+   "title": "Rama Navami",
+   "description": "Rama Navami is a Hindu festival that celebrates the birth of Rama, a revered deity in Hinduism, also known as the seventh avatar of Vishnu.",
+   "image": "images/rama_navami.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Rama_Navami",
+   "name": "Sri Rama Navami",
+   "category": "festival",
+   "kind": "festival",
+   "region": "in",
+   "aliases": [
+    "sri rama navami",
+    "rama navami",
+    "ram navami"
+   ],
+   "lexicon_ids": [
+    "sri_rama_navami"
+   ],
+   "wikipedia": "Rama Navami"
+  },
+  "varalakshmi": {
+   "title": "Varalakshmi Vratam",
+   "description": "Varalakshmi Vratam is a Hindu observance to propitiate the goddess of prosperity, Lakshmi.",
+   "image": "images/varalakshmi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Varalakshmi_Vratam",
+   "name": "Varalakshmi Vratam",
+   "category": "festival",
+   "kind": "festival",
+   "region": "in",
+   "aliases": [
+    "varalakshmi vratam",
+    "varalakshmi puja"
+   ],
+   "lexicon_ids": [
+    "varalakshmi_vratam"
+   ],
+   "wikipedia": "Varalakshmi Vratam"
+  },
+  "rakhi": {
+   "title": "Raksha Bandhan",
+   "description": "Raksha Bandhan is a popular and traditionally Hindu annual rite or ceremony that is central to a festival of the same name celebrated in South Asia, and among people around the world influenced by Hindu culture.",
+   "image": "images/rakhi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Raksha_Bandhan",
+   "name": "Rakhi",
+   "category": "festival",
+   "kind": "festival",
+   "region": "in",
+   "aliases": [
+    "rakhi",
+    "raksha bandhan"
+   ],
+   "lexicon_ids": [
+    "rakhi"
+   ],
+   "wikipedia": "Raksha Bandhan"
+  },
+  "janmashtami": {
+   "title": "Krishna Janmashtami",
+   "description": "Krishna Janmashtami, also known simply as Krishnashtami, Janmashtami, or Gokulashtami, is an annual Hindu festival that celebrates the birth of Krishna, the eighth avatar of Vishnu.",
+   "image": "images/janmashtami.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Krishna_Janmashtami",
+   "name": "Krishnashtami",
+   "category": "festival",
+   "kind": "festival",
+   "region": "in",
+   "aliases": [
+    "janmashtami",
+    "krishnashtami",
+    "gokulashtami"
+   ],
+   "lexicon_ids": [
+    "krishnashtami"
+   ],
+   "wikipedia": "Krishna Janmashtami"
+  },
+  "tholu_bommalata": {
+   "title": "Tholu bommalata",
+   "description": "Tholu bommalata is the shadow puppet theatre tradition of the state of Andhra Pradesh in India with roots dating back to 3rd century BCE.",
+   "image": "images/tholu_bommalata.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Tholu_bommalata",
+   "name": "Tholu bommalata",
+   "category": "festival",
+   "kind": "show",
+   "region": "in",
+   "aliases": [
+    "tholu bommalata",
+    "shadow puppets",
+    "leather puppets",
+    "puppet show"
+   ],
+   "lexicon_ids": [
+    "tholu_bommalata"
+   ],
+   "wikipedia": "Tholu bommalata"
+  },
+  "burrakatha": {
+   "title": "Burra katha",
+   "description": "Burra Katha or Burrakatha, is an oral storytelling technique in the Jangam Katha tradition, performed in the villages of Andhra Pradesh and Telangana in India.",
+   "image": "images/burrakatha.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Burra_katha",
+   "name": "Burra katha",
+   "category": "festival",
+   "kind": "show",
+   "region": "in",
+   "aliases": [
+    "burrakatha",
+    "burra katha"
+   ],
+   "lexicon_ids": [
+    "burrakatha"
+   ],
+   "wikipedia": "Burra katha"
+  },
+  "kolatam": {
+   "title": "Kolattam",
+   "description": "Kolattam is an ancient folk dance practiced mainly in Tamil Nadu and Kerala.",
+   "image": "images/kolatam.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kolattam",
+   "name": "Kolattam",
+   "category": "festival",
+   "kind": "art",
+   "region": "in",
+   "aliases": [
+    "kolatam",
+    "kolattam",
+    "stick dance"
+   ],
+   "lexicon_ids": [
+    "kolatam"
+   ],
+   "wikipedia": "Kolattam"
+  },
+  "kumkum": {
+   "title": "Kumkuma",
+   "description": "Kumkuma is a powder used for social and religious markings in India.",
+   "image": "images/kumkum.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kumkuma",
+   "name": "Kumkuma",
+   "category": "festival",
+   "kind": "memory",
+   "region": "in",
+   "aliases": [
+    "kumkum",
+    "kumkuma"
+   ],
+   "lexicon_ids": [
+    "kumkuma"
+   ],
+   "wikipedia": "Kumkuma"
+  },
+  "turmeric": {
+   "title": "Turmeric",
+   "description": "Turmeric, or Curcuma longa, is a flowering plant in the ginger family Zingiberaceae.",
+   "image": "images/turmeric.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Turmeric",
+   "name": "Pasupu (turmeric)",
+   "category": "food",
+   "kind": "memory",
+   "region": "in",
+   "aliases": [
+    "turmeric",
+    "pasupu"
+   ],
+   "lexicon_ids": [
+    "pasupu"
+   ],
+   "wikipedia": "Turmeric"
+  },
+  "banana_leaf": {
+   "title": "Banana leaf",
+   "description": "The banana leaf is the leaf of the banana plant, which may produce up to 40 leaves in a growing cycle.",
+   "image": "images/banana_leaf.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Banana_leaf",
+   "name": "Meal on a banana leaf",
+   "category": "food",
+   "kind": "memory",
+   "region": "in",
+   "aliases": [
+    "banana leaf",
+    "banana leaves",
+    "leaf plate"
+   ],
+   "lexicon_ids": [
+    "vistari"
+   ],
+   "wikipedia": "Banana leaf"
+  },
+  "kondapalli": {
+   "title": "Kondapalli toys",
+   "description": "Kondapalli toys are toys made of wood in Kondapalli of Krishna district, Vijayawada in the Indian state of Andhra Pradesh.",
+   "image": "images/kondapalli.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kondapalli_toys",
+   "name": "Kondapalli toys",
+   "category": "festival",
+   "kind": "household",
+   "region": "in",
+   "aliases": [
+    "kondapalli toys",
+    "kondapalli bommalu"
+   ],
+   "lexicon_ids": [
+    "kondapalli_bommalu"
+   ],
+   "wikipedia": "Kondapalli toys"
+  },
+  "panchangam": {
+   "title": "Panchangam",
+   "description": "A panchāngam is a Hindu calendar and almanac, which follows traditional units of Hindu timekeeping, and presents important dates and their calculations in a tabulated form.",
+   "image": "images/panchangam.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Panchangam",
+   "name": "Panchangam",
+   "category": "festival",
+   "kind": "household",
+   "region": "in",
+   "aliases": [
+    "panchangam",
+    "almanac"
+   ],
+   "lexicon_ids": [
+    "panchangam"
+   ],
+   "wikipedia": "Panchangam"
+  },
+  "griha_pravesh": {
+   "title": "Grihapravesha",
+   "description": "Grihapravesha is a Hindu traditional housewarming ceremony performed when moving into a new home.",
+   "image": "images/griha_pravesh.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Grihapravesha",
+   "name": "Gruhapravesham (housewarming)",
+   "category": "festival",
+   "kind": "ceremony",
+   "region": "in",
+   "aliases": [
+    "housewarming",
+    "griha pravesham",
+    "gruhapravesham"
+   ],
+   "lexicon_ids": [
+    "gruhapravesham"
+   ],
+   "wikipedia": "Griha Pravesh"
+  },
+  "upanayanam": {
+   "title": "Upanayana",
+   "description": "Upanayana is a Hindu educational sacrament, one of the traditional saṃskāras or rites of passage that marked the acceptance of a student by a preceptor, such as a guru or acharya, and an individual's initiation into a school in Hinduism.",
+   "image": "images/upanayanam.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Upanayana",
+   "name": "Upanayanam (thread ceremony)",
+   "category": "festival",
+   "kind": "ceremony",
+   "region": "in",
+   "aliases": [
+    "upanayanam",
+    "thread ceremony",
+    "sacred thread"
+   ],
+   "lexicon_ids": [
+    "upanayanam"
+   ],
+   "wikipedia": "Upanayana"
+  },
+  "annaprashana": {
+   "title": "Annaprashana",
+   "description": "The annaprashana, also known as annaprashana vidhi or annaprashanam, is a Hindu rite of passage (Saṃskāra) that marks an infant's first intake of food other than milk.",
+   "image": "images/annaprashana.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Annaprashana",
+   "name": "Annaprasana (first rice)",
+   "category": "festival",
+   "kind": "ceremony",
+   "region": "in",
+   "aliases": [
+    "annaprasana",
+    "annaprashana",
+    "first rice ceremony"
+   ],
+   "lexicon_ids": [
+    "annaprasana"
+   ],
+   "wikipedia": "Annaprashana"
+  },
+  "ramayana": {
+   "title": "Ramayana",
+   "description": "The Ramayana, also known as the Valmiki Ramayana, as traditionally attributed to Valmiki, is a Hindu smriti epic poem from ancient India.",
+   "image": "images/ramayana.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Ramayana",
+   "name": "Ramayanam",
+   "category": "festival",
+   "kind": "epic",
+   "region": "in",
+   "aliases": [
+    "ramayana",
+    "ramayanam"
+   ],
+   "lexicon_ids": [
+    "ramayanam"
+   ],
+   "wikipedia": "Ramayana"
+  },
+  "mahabharata": {
+   "title": "Mahabharata",
+   "description": "The Mahābhārata is one of the two major Sanskrit epics of ancient India revered in Hinduism, the other being the Ramayana.",
+   "image": "images/mahabharata.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Mahabharata",
+   "name": "Mahabharatam",
+   "category": "festival",
+   "kind": "epic",
+   "region": "in",
+   "aliases": [
+    "mahabharata",
+    "mahabharatam"
+   ],
+   "lexicon_ids": [
+    "mahabharatam"
+   ],
+   "wikipedia": "Mahabharata"
+  },
+  "annamacharya": {
+   "title": "Annamacharya",
+   "description": "Tallapaka Annamacharya, also known as Annamayya, was a Telugu composer and Hindu saint.",
+   "image": "images/annamacharya.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Annamacharya",
+   "name": "Annamayya",
+   "category": "festival",
+   "kind": "person",
+   "region": "in",
+   "aliases": [
+    "annamayya",
+    "annamacharya"
+   ],
+   "lexicon_ids": [
+    "annamayya"
+   ],
+   "wikipedia": "Annamacharya"
+  },
+  "tyagaraja": {
+   "title": "Tyagaraja",
+   "description": "Sadguru Sri Tyāgarāja Swāmi, also known as Tyāgayya, and in full as Kākarla Tyāgabraḥmaṁ, was a composer of Carnatic Music, a form of Indian Classical Music.",
+   "image": "images/tyagaraja.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Tyagaraja",
+   "name": "Tyagaraja",
+   "category": "festival",
+   "kind": "person",
+   "region": "in",
+   "aliases": [
+    "tyagaraja",
+    "thyagaraja"
+   ],
+   "lexicon_ids": [
+    "tyagaraja"
+   ],
+   "wikipedia": "Tyagaraja"
+  },
+  "ghantasala": {
+   "title": "Ghantasala (musician)",
+   "description": "Ghantasala Venkateswara Rao, known mononymously by his surname Ghantasala, was an Indian playback singer and film composer known for his works predominantly in Telugu and Kannada cinema and also in Tamil, Malayalam, Tulu and Hindi language films.",
+   "image": "images/ghantasala.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Ghantasala_(musician)",
+   "name": "Ghantasala",
+   "category": "festival",
+   "kind": "person",
+   "region": "in",
+   "aliases": [
+    "ghantasala"
+   ],
+   "lexicon_ids": [
+    "ghantasala"
+   ],
+   "wikipedia": "Ghantasala (musician)"
+  },
+  "ntr": {
+   "title": "N. T. Rama Rao",
+   "description": "Nandamuri Taraka Rama Rao, often referred to by his initials NTR, was an Indian actor, film director, film producer, screenwriter, film editor, philanthropist, and politician who served as the chief minister of Andhra Pradesh over three terms for seven years.",
+   "image": "images/ntr.jpg",
+   "credit": "https://en.wikipedia.org/wiki/N._T._Rama_Rao",
+   "name": "NTR",
+   "category": "festival",
+   "kind": "person",
+   "region": "in",
+   "aliases": [
+    "ntr",
+    "n. t. rama rao",
+    "nt rama rao"
+   ],
+   "lexicon_ids": [
+    "ntr"
+   ],
+   "wikipedia": "N. T. Rama Rao"
+  },
+  "anr": {
+   "title": "Akkineni Nageswara Rao",
+   "description": "Akkineni Nageswara Rao, known as ANR, was an Indian actor and film producer in Telugu cinema.",
+   "image": "images/anr.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Akkineni_Nageswara_Rao",
+   "name": "ANR",
+   "category": "festival",
+   "kind": "person",
+   "region": "in",
+   "aliases": [
+    "anr",
+    "nageswara rao",
+    "akkineni"
+   ],
+   "lexicon_ids": [
+    "anr"
+   ],
+   "wikipedia": "Akkineni Nageswara Rao"
+  },
+  "mayabazar": {
+   "title": "Mayabazar",
+   "description": "Mayabazar is a 1957 Indian Hindu mythological film directed by K.",
+   "image": "images/mayabazar.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Mayabazar",
+   "name": "Mayabazar",
+   "category": "festival",
+   "kind": "film",
+   "region": "in",
+   "aliases": [
+    "mayabazar",
+    "maya bazaar"
+   ],
+   "lexicon_ids": [
+    "mayabazar"
+   ],
+   "wikipedia": "Mayabazar"
+  },
+  "baahubali": {
+   "title": "Baahubali: The Beginning",
+   "description": "Baahubali: The Beginning is a 2015 Indian epic action film co-written and directed by S.",
+   "image": "images/baahubali.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Baahubali%3A_The_Beginning",
+   "name": "Baahubali",
+   "category": "festival",
+   "kind": "film",
+   "region": "in",
+   "aliases": [
+    "baahubali",
+    "bahubali"
+   ],
+   "lexicon_ids": [
+    "baahubali"
+   ],
+   "wikipedia": "Baahubali: The Beginning"
+  },
+  "rrr": {
+   "title": "RRR",
+   "description": "RRR is a 2022 Indian Telugu-language epic period action drama film directed by S.",
+   "image": "images/rrr.jpg",
+   "credit": "https://en.wikipedia.org/wiki/RRR",
+   "name": "RRR",
+   "category": "festival",
+   "kind": "film",
+   "region": "in",
+   "aliases": [
+    "rrr",
+    "naatu naatu"
+   ],
+   "lexicon_ids": [
+    "rrr"
+   ],
+   "wikipedia": "RRR (film)"
+  },
+  "pallanguzhi": {
+   "title": "Pallanguzhi",
+   "description": "Pallanguli, or Pallankuli, is a traditional ancient mancala game played in South India, especially Tamil Nadu and Kerala.",
+   "image": "images/pallanguzhi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Pallanguzhi",
+   "name": "Vamana guntalu",
+   "category": "festival",
+   "kind": "game",
+   "region": "in",
+   "aliases": [
+    "pallanguzhi",
+    "vamana guntalu",
+    "mancala"
+   ],
+   "lexicon_ids": [
+    "vamana_guntalu"
+   ],
+   "wikipedia": "Pallanguzhi"
+  },
+  "ashta_chamma": {
+   "title": "Chowka bhara",
+   "description": "Chowka Bara or Ashta Chamma is a two- or four-player board game from India.",
+   "image": "images/ashta_chamma.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Chowka_bhara",
+   "name": "Ashta chamma",
+   "category": "festival",
+   "kind": "game",
+   "region": "in",
+   "aliases": [
+    "ashta chamma",
+    "chowka bhara"
+   ],
+   "lexicon_ids": [
+    "ashta_chamma"
+   ],
+   "wikipedia": "Chowka bhara"
+  },
+  "gilli_danda": {
+   "title": "Gillidanda",
+   "description": "Gillidanda is an ancient sport originating from the Indian subcontinent that is still widely played throughout South Asia.",
+   "image": "images/gilli_danda.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Gillidanda",
+   "name": "Gilli danda",
+   "category": "festival",
+   "kind": "game",
+   "region": "in",
+   "aliases": [
+    "gilli danda",
+    "gilli-danda",
+    "billamgodu"
+   ],
+   "lexicon_ids": [
+    "gilli_danda"
+   ],
+   "wikipedia": "Gilli-danda"
+  },
+  "kabaddi": {
+   "title": "Kabaddi",
+   "description": "Kabaddi is a contact sport played between two teams of seven players each.",
+   "image": "images/kabaddi.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kabaddi",
+   "name": "Kabaddi",
+   "category": "festival",
+   "kind": "game",
+   "region": "in",
+   "aliases": [
+    "kabaddi"
+   ],
+   "lexicon_ids": [
+    "kabaddi"
+   ],
+   "wikipedia": "Kabaddi"
+  },
+  "carrom": {
+   "title": "Carrom",
+   "description": "Carrom is a tabletop game of Indian origin in which players flip or flick discs, attempting to knock them to the corners of the board, in a similar fashion to billiards.",
+   "image": "images/carrom.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Carrom",
+   "name": "Carrom",
+   "category": "festival",
+   "kind": "game",
+   "region": "in",
+   "aliases": [
+    "carrom",
+    "carrom board"
+   ],
+   "lexicon_ids": [
+    "carrom"
+   ],
+   "wikipedia": "Carrom"
+  },
+  "pochampally": {
+   "title": "Pochampally sari",
+   "description": "Pochampally sari or Pochampalli ikat is a saree made in Bhoodan Pochampally, Yadadri Bhuvanagiri district, Telangana State, India.",
+   "image": "images/pochampally.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Pochampally_sari",
+   "name": "Pochampally ikat",
+   "category": "clothing",
+   "kind": "clothing",
+   "region": "in",
+   "aliases": [
+    "pochampally",
+    "ikat"
+   ],
+   "lexicon_ids": [
+    "pochampally"
+   ],
+   "wikipedia": "Pochampally Saree"
+  },
+  "kalamkari": {
+   "title": "Kalamkari",
+   "description": "Kalamkari, also commonly spelled as qalamkari, is an ancient textile printing art, that originated in the Indian state of Andhra Pradesh.",
+   "image": "images/kalamkari.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kalamkari",
+   "name": "Kalamkari",
+   "category": "clothing",
+   "kind": "clothing",
+   "region": "in",
+   "aliases": [
+    "kalamkari"
+   ],
+   "lexicon_ids": [
+    "kalamkari"
+   ],
+   "wikipedia": "Kalamkari"
+  },
+  "toe_ring": {
+   "title": "Toe ring",
+   "description": "A toe ring is a ring made out of metals and non-metals worn on any of the toes.",
+   "image": "images/toe_ring.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Toe_ring",
+   "name": "Mettelu (toe rings)",
+   "category": "clothing",
+   "kind": "memory",
+   "region": "in",
+   "aliases": [
+    "toe ring",
+    "toe rings",
+    "mettelu"
+   ],
+   "lexicon_ids": [
+    "mettelu"
+   ],
+   "wikipedia": "Toe ring"
+  },
+  "kajjikayalu": {
+   "title": "Kajjikayalu",
+   "description": "Kajjikayalu is a traditional Indian deep fried sweet pastry from the state of Andhra Pradesh.",
+   "image": "images/kajjikayalu.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Kajjikayalu",
+   "name": "Kajjikayalu",
+   "category": "food",
+   "kind": "food",
+   "region": "in",
+   "aliases": [
+    "kajjikayalu",
+    "kajjikaya",
+    "gujiya",
+    "karanji"
+   ],
+   "lexicon_ids": [
+    "kajjikayalu"
+   ],
+   "wikipedia": "Kajjikayalu"
+  },
+  "bhadrachalam": {
+   "title": "Sita Ramachandraswamy Temple, Bhadrachalam",
+   "description": "The Sri Sita Ramachandraswamy Temple is a Hindu Temple dedicated to Rama, a prominent avatar of the god Vishnu.",
+   "image": "images/bhadrachalam.jpg",
+   "credit": "https://en.wikipedia.org/wiki/Sita_Ramachandraswamy_Temple%2C_Bhadrachalam",
+   "name": "Bhadrachalam temple",
+   "category": "place",
+   "kind": "place",
+   "region": "in",
+   "aliases": [
+    "bhadrachalam"
+   ],
+   "lexicon_ids": [
+    "bhadrachalam"
+   ],
+   "wikipedia": "Sita Ramachandraswamy Temple, Bhadrachalam"
   }
  },
  "_about": "Built by tools/build_images.py. Pictures and descriptions from Wikipedia (see each item's credit link)."

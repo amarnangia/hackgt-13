@@ -20,6 +20,7 @@ DUCK_LEVEL = 0.2   # call audio volume while the English voice is speaking
 RAMP_BLOCKS = 8    # a full-scale volume change takes 80 ms, so ducking doesn't click
 FADE_OUT_S = 0.3   # an interrupted translation fades out over this long
 LOUD = 0.01        # output peak above which the speakers count as making sound (walkie-talkie mode)
+SOUND_LEVEL = 0.003  # above the digital silence BlackHole carries when nothing is playing into it
 
 
 def find_device(name, kind):
@@ -112,6 +113,7 @@ class AudioLoop:
         self.voice = VoiceBuffer()
         self.gain = original
         self.level = 0.0
+        self.last_sound = time.monotonic()  # when the input last had anything louder than SOUND_LEVEL
 
     def set_original(self, level):
         """Change the between-lines volume (e.g. 1.0 while someone speaks the listener's own language)."""
@@ -125,6 +127,8 @@ class AudioLoop:
         if self.gate and self.gate():
             mono = np.zeros_like(mono)
         self.level = float(np.abs(mono).max()) if len(mono) else 0.0
+        if self.level > SOUND_LEVEL:
+            self.last_sound = time.monotonic()
         if self.on_audio:
             self.on_audio(mono.copy())
         held = bool(self.hold and self.hold()) and not self.voice.fading  # a fade-out always finishes at once

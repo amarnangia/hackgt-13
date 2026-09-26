@@ -22,7 +22,8 @@ import wave
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CALLS_DIR = os.path.join(HERE, "calls")
+# HACKGT_CALLS_DIR sends a run's pages somewhere else (tests use a temp folder so they never touch real calls).
+CALLS_DIR = os.environ.get("HACKGT_CALLS_DIR") or os.path.join(HERE, "calls")
 SR = 24000
 CLIP_PAD_S = (0.35, 0.45)  # a little before and after each line, so clips don't start mid-word
 

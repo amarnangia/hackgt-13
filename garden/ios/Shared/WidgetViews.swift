@@ -7,6 +7,9 @@ struct GardenEntry: TimelineEntry {
     let date: Date
     let snapshot: GardenSnapshot
     let source: GardenClient.Source
+    /// What to ask next call, written by the story keeper from her stories last time (newest call that has them).
+    var questions: [Question] = []
+    var caller: String? = nil
     /// Changes every 3 hours, so the suggestion rotates through the day but stays put between refreshes.
     var rotation: Int { Int(date.timeIntervalSince1970 / 10800) }
 }
@@ -20,11 +23,22 @@ struct GardenWidgetView: View {
     private var snap: GardenSnapshot { entry.snapshot }
     private var starters: [Starter] { Starters.make(snap, rotation: entry.rotation) }
     private var lastCall: String? { Starters.lastCall(snap, now: entry.date.timeIntervalSince1970) }
+    /// A real question from her last call, rotating through the day.
+    private var ask: Question? { entry.questions.isEmpty ? nil : entry.questions[entry.rotation % entry.questions.count] }
+
+    /// "Ask" + her words in Telugu, how to say them, and what they mean.
+    private func askView(_ q: Question, size: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            if let te = q.telugu { Text(te).font(Fonts.telugu(size, .medium)).foregroundStyle(Theme.text).lineLimit(2).minimumScaleFactor(0.7) }
+            if let r = q.roman { Text("“\(r)”").font(Fonts.serif(size * 0.72, italic: true)).foregroundStyle(Theme.accent).lineLimit(2) }
+            if let en = q.english { Text(en).font(Fonts.ui(max(11, size * 0.55))).foregroundStyle(Theme.text2).lineLimit(2) }
+        }
+    }
 
     var body: some View {
         switch family {
         case .accessoryInline:
-            Text(starters.first.map { "Ask about \($0.word)" } ?? "Call family today")
+            Text(ask?.roman.map { "Ask “\($0)”" } ?? starters.first.map { "Ask about \($0.word)" } ?? "Call family today")
                 .containerBackground(for: .widget) { Color.clear }
         case .accessoryCircular:
             ZStack {
@@ -39,7 +53,9 @@ struct GardenWidgetView: View {
         case .accessoryRectangular:
             VStack(alignment: .leading, spacing: 1) {
                 Text("NEXT CALL").font(.system(size: 11, weight: .bold)).tracking(0.6).widgetAccentable()
-                if let s = starters.first {
+                if let q = ask {
+                    Text(q.roman.map { "Ask “\($0)”" } ?? q.english ?? "").font(.system(size: 14)).lineLimit(2)
+                } else if let s = starters.first {
                     (Text(s.before + " ") + Text(s.word).bold() + Text(s.after)).font(.system(size: 14)).lineLimit(2)
                 } else { Text("Call family today").font(.system(size: 14, weight: .semibold)) }
             }
@@ -60,7 +76,9 @@ struct GardenWidgetView: View {
         VStack(alignment: .leading, spacing: 0) {
             label
             Spacer(minLength: 8)
-            if let s = starters.first {
+            if let q = ask {
+                askView(q, size: 19)
+            } else if let s = starters.first {
                 sentence(s, size: 17).lineLimit(4).minimumScaleFactor(0.85)
                 if let g = s.gloss { Text(g).font(Fonts.ui(12)).foregroundStyle(Theme.text2).lineLimit(1).padding(.top, 4) }
             } else { empty }
@@ -73,9 +91,11 @@ struct GardenWidgetView: View {
     private var medium: some View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 6) { label; if let s = starters.first { topicChip(s) } }
+                HStack(spacing: 6) { label; if ask == nil, let s = starters.first { topicChip(s) } }
                 Spacer(minLength: 6)
-                if let s = starters.first {
+                if let q = ask {
+                    askView(q, size: 22)
+                } else if let s = starters.first {
                     sentence(s, size: 20).lineLimit(3).minimumScaleFactor(0.85)
                     if let g = s.gloss { Text(g).font(Fonts.ui(12)).foregroundStyle(Theme.text2).lineLimit(1).padding(.top, 4) }
                 } else { empty }
@@ -105,12 +125,24 @@ struct GardenWidgetView: View {
                 Spacer()
                 if let lastCall { Text(lastCall).font(Fonts.mono(10, .regular)).foregroundStyle(Theme.text3) }
             }
-            if let s = starters.first {
+            if let q = ask {
+                Text("From her stories last call").font(Fonts.ui(12)).foregroundStyle(Theme.text3).padding(.top, 14)
+                askView(q, size: 26).padding(.top, 8)
+            } else if let s = starters.first {
                 topicChip(s).padding(.top, 14)
                 sentence(s, size: 26).lineLimit(3).minimumScaleFactor(0.8).padding(.top, 8)
                 if let g = s.gloss { Text(g).font(Fonts.ui(13)).foregroundStyle(Theme.text2).padding(.top, 4) }
             } else { empty.padding(.top, 14) }
-            if starters.count > 1 {
+            if ask != nil, entry.questions.count > 1 {
+                Eyebrow("Also ask").padding(.top, 18)
+                ForEach(Array(entry.questions.filter { $0 != ask }.prefix(2).enumerated()), id: \.offset) { _, q in
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text(q.telugu ?? q.roman ?? "").font(Fonts.telugu(15, .medium)).foregroundStyle(Theme.text).lineLimit(1)
+                        Text(q.english ?? "").font(Fonts.ui(12)).foregroundStyle(Theme.text2).lineLimit(1)
+                    }
+                    .padding(.vertical, 6)
+                }
+            } else if starters.count > 1 {
                 Eyebrow("Also ask").padding(.top, 18)
                 VStack(spacing: 0) {
                     ForEach(Array(starters.dropFirst().enumerated()), id: \.element.id) { i, s in

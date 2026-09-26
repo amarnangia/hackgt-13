@@ -38,6 +38,9 @@ struct WordSheet: View {
                         Eyebrow("\(word.categoryLabel)\(word.telugu != nil ? " · Telugu" : "")")
                         Text(word.telugu ?? word.english.capitalized).font(Fonts.telugu(34, .medium)).foregroundStyle(Theme.text).padding(.top, 4)
                         if let roman = word.roman { Text(roman).font(Fonts.serif(18, italic: true)).foregroundStyle(Theme.text2) }
+                        if people.voice(for: word.key) != nil {
+                            Label("Her voice, from your call", systemImage: "waveform").font(Fonts.ui(12)).foregroundStyle(Theme.accent).padding(.top, 2)
+                        }
                     }
                     Spacer()
                     if word.telugu != nil {
@@ -60,11 +63,13 @@ struct WordSheet: View {
                     Text(d).font(Fonts.ui(14)).foregroundStyle(Theme.text2).padding(.top, 6).reveal(2)
                 }
 
-                if let line {
+                let example = people.dictionary[word.key]
+                if line != nil || example?.example_te != nil {
                     VStack(alignment: .leading, spacing: 6) {
                         Eyebrow("As \(partnerName) said it")
-                        Text(line.original).font(Fonts.telugu(15)).foregroundStyle(Theme.text2).padding(.top, 4)
-                        if !line.translation.isEmpty { Text(line.translation).font(Fonts.serif(17)).foregroundStyle(Theme.text) }
+                        Text(line?.original ?? example?.example_te ?? "").font(Fonts.telugu(15)).foregroundStyle(Theme.text2).padding(.top, 4)
+                        let en = line?.translation ?? example?.example_en ?? ""
+                        if !en.isEmpty { Text(en).font(Fonts.serif(17)).foregroundStyle(Theme.text) }
                     }
                     .padding(16)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -111,7 +116,14 @@ struct WordSheet: View {
         .onAppear { added = people.vocab.contains { $0.key == word.key } }
     }
 
+    /// Her voice if the family dictionary has it; the phone's voice only as a stand-in.
     private func say() {
+        if let path = people.voice(for: word.key) {
+            VoicePlayer.shared.toggle(path)
+            speaking = true
+            Task { try? await Task.sleep(for: .seconds(1.6)); speaking = false }
+            return
+        }
         Self.synth.stopSpeaking(at: .immediate)
         let voice = AVSpeechSynthesisVoice(language: "te-IN")
         let u = AVSpeechUtterance(string: voice != nil ? (word.telugu ?? word.english) : (word.roman ?? word.english))

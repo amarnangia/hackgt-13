@@ -5,14 +5,11 @@ Everything in this folder is a layer on top of the translator. It reads the team
 
 ## During a call (the laptop)
 
-### Captions right on top of the call (Chrome extension, set up once)
+### On top of the call (Chrome extension)
 
-1. Chrome → `chrome://extensions` → turn on **Developer mode** (top right) → **Load unpacked** → pick `garden/extension`.
-2. That's it. Whenever web.whatsapp.com is open, a small "Weave · Waiting for subtitles.py" pill sits over it.
-   Start `python subtitles.py` and it opens into a caption bar over the call by itself: her Telugu as she speaks,
-   the English, pictures and "Ask" prompts (and your side too with `--outgoing`). Drag it by its top edge, resize it
-   from the corner, "–" tucks it away until her next line. It only needs `subtitles.py`, not the garden server.
-3. After pulling new code, press the ↻ on the extension's card in `chrome://extensions`.
+The overlay moved to [`extension/`](../extension/README.md) at the top of the repo: captions, "Curious?" questions,
+topic words, pictures and meanings on top of the call, turned on with its toolbar button or Alt+Shift+W. (The old
+caption bar that lived here was replaced by it.)
 
 ### The full app (optional, next to the call)
 
@@ -25,6 +22,10 @@ Everything in this folder is a layer on top of the translator. It reads the team
    the WhatsApp window: her Telugu as she speaks, the English under it, pictures, and "Ask Ammamma" prompts.
    Drag it anywhere and resize it; the text scales. Tap an underlined word for its picture and meaning.
    Needs Chrome (it uses Document Picture-in-Picture); in other browsers use the full page.
+
+**The garden (http://localhost:8770) grows from real calls.** While `subtitles.py` runs, every Telugu word she says plants or waters its plant, and the header says *On a call · growing live* (click it for the live captions). Calls already saved in `calls/` are planted when the server starts, once each. *Call stories* at the bottom lists each call's story page and the family dictionary.
+
+**Weave opens the live call by itself** when `subtitles.py` starts (from the home screen; if you go back home during a call it stays there). When you stop `subtitles.py`, Weave shows the call's story (title, summary, stories, pictures, words) with a link to the full story page, and the home screen lists every saved call from `calls/`, newest first.
 
 The badge at the top says **LIVE** when it's reading `subtitles.py` (port 8765). If you open the page first,
 it plays a demo call and switches to the live call by itself once `subtitles.py` starts.
@@ -39,16 +40,27 @@ What it shows, from the pipeline's WebSocket messages:
 
 overlay.html at http://localhost:8765 still works; both can be open at once.
 
-Try it without the translator: `python3 -m garden --demo`, then http://localhost:8770/app
+Try it without the translator: `python3 -m garden --demo`, then http://localhost:8770/app?demo=1
+(without `?demo=1` the app waits for a real call instead of playing the scripted one)
 (`?demo=1` forces the demo call, `?reset=1` shows onboarding again, `?floatpreview=1` draws the
 floating window inside the page, for browsers without Picture-in-Picture).
+
+## On the phone (iPhone app)
+
+Everything comes from the Mac running `python3 -m garden`: the people you've called, each saved call with its story
+and **her voice on every line**, the family dictionary (her voice saying each word), your progress, and the
+"ask next time" questions (also on the home-screen widget). During a call the app shows it live: the Weave server
+relays `subtitles.py` to the phone (`/api/live`), so `subtitles.py` doesn't need to change.
+
+- Simulator: works as is (`http://localhost:8770`).
+- Your iPhone: in the app, avatar → Settings → type the "phone widget URL" `python3 -m garden` prints; same Wi-Fi.
+- With no Mac it shows the last calls and words it saw. **Demo mode** in Settings shows sample words and the
+  scripted call instead, for presenting without the Mac.
 
 ## Between calls (the phone)
 
 - `ios/`: SwiftUI app + home-screen widget ("Next call: ask how she makes పులిహోర").
   `cd garden/ios && xcodegen && open Weave.xcodeproj`, then run on a simulator or your phone.
-- `widget.js`: Scriptable version of the widget for phones without the app.
-- `dashboard.html`: the older web progress dashboard at http://localhost:8770.
 
 The phone reads live calls only if `subtitles.py` listens on the network (`serve(..., "0.0.0.0", ...)`);
 by default it listens on the laptop only, which is all the call UI needs.

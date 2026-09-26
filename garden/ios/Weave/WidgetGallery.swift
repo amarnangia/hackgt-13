@@ -3,11 +3,12 @@ import WidgetKit
 
 /// How the home-screen widgets look, without a home screen. Open with -widgetGallery 1.
 struct WidgetGallery: View {
-    @State private var snap: GardenSnapshot = .sample
-    @State private var source: GardenClient.Source = .demo
+    @State private var snap: GardenSnapshot = .empty
+    @State private var source: GardenClient.Source = .offline
+    @State private var questions: [Question] = []
 
     var body: some View {
-        let entry = GardenEntry(date: .now, snapshot: snap, source: source)
+        let entry = GardenEntry(date: .now, snapshot: snap, source: source, questions: questions)
         ScrollView {
             VStack(spacing: 16) {
                 tile(.systemLarge, entry, CGSize(width: 356, height: 376))
@@ -26,7 +27,10 @@ struct WidgetGallery: View {
         }
         .background(LinearGradient(colors: [Color(hex: 0x2b3a55), Color(hex: 0x1a1f2b)], startPoint: .top, endPoint: .bottom))
         .ignoresSafeArea()
-        .task { let (s, src) = await GardenClient.load(); snap = s; source = src }
+        .task {
+            let (s, src) = await GardenClient.load(); snap = s; source = src
+            questions = await GardenClient.calls().first { !($0.questions ?? []).isEmpty }?.questions ?? []
+        }
     }
 
     func tile(_ f: WidgetFamily, _ e: GardenEntry, _ size: CGSize) -> some View {

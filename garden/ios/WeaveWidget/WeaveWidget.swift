@@ -12,10 +12,12 @@ struct GardenProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<GardenEntry>) -> Void) {
         Task {
             let (s, src) = await GardenClient.load()
+            let call = await GardenClient.calls().first { !($0.questions ?? []).isEmpty }
+            let qs = call?.questions ?? []
             // Now, then at each 3-hour mark, so the suggested topic rotates even if a refresh is late.
             let block = 10800.0, next = (Date.now.timeIntervalSince1970 / block).rounded(.down) * block + block
-            let entries = [GardenEntry(date: .now, snapshot: s, source: src)]
-                + (0..<4).map { GardenEntry(date: Date(timeIntervalSince1970: next + Double($0) * block), snapshot: s, source: src) }
+            let entries = [GardenEntry(date: .now, snapshot: s, source: src, questions: qs, caller: call?.caller)]
+                + (0..<4).map { GardenEntry(date: Date(timeIntervalSince1970: next + Double($0) * block), snapshot: s, source: src, questions: qs, caller: call?.caller) }
             completion(Timeline(entries: entries, policy: .after(.now.addingTimeInterval(15 * 60))))
         }
     }

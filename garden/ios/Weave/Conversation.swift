@@ -125,7 +125,7 @@ struct WordImage: View {
 @MainActor
 final class Conversation: ObservableObject {
     enum Who { case you, them }
-    enum Mode { case demo, live }
+    enum Mode { case waiting, live, demo }
 
     struct Line: Identifiable {
         let id: String
@@ -146,7 +146,7 @@ final class Conversation: ObservableObject {
     @Published private(set) var lines: [Line] = []
     @Published private(set) var speaking: Set<Who> = []
     @Published private(set) var translating = 0
-    @Published private(set) var mode: Mode = .demo
+    @Published private(set) var mode: Mode = .waiting
     @Published private(set) var connected = false
     @Published private(set) var seen: [String: Word] = [:]
     @Published var savedThisCall = 0
@@ -154,29 +154,26 @@ final class Conversation: ObservableObject {
     let partner: Connection
     let started = Date()
     private var task: Task<Void, Never>?
-    private var socket: URLSessionWebSocketTask?
     private var replies: [String] = []
 
     init(partner: Connection) { self.partner = partner }
 
+    /// The live call from the Mac. The scripted call only when demo mode is on in Settings.
     func start(forceDemo: Bool = false) {
         task = Task {
-            try? await Task.sleep(for: .milliseconds(700))
-            withAnimation(.spring(response: 0.55, dampingFraction: 0.85)) { connected = true }
-            if !forceDemo, await connectLive() {
-                mode = .live
-                await receiveLive()
-            } else {
+            if forceDemo {
+                try? await Task.sleep(for: .milliseconds(700))
                 mode = .demo
+                withAnimation(.spring(response: 0.55, dampingFraction: 0.85)) { connected = true }
                 await runDemo()
+            } else {
+                await runLive()
             }
         }
     }
 
     func stop() {
         task?.cancel()
-        socket?.cancel(with: .normalClosure, reason: nil)
-        socket = nil
     }
 
     func holdToTalk(_ on: Bool) {
@@ -184,9 +181,14 @@ final class Conversation: ObservableObject {
         if !on, mode == .demo, !replies.isEmpty { Task { await youSay(replies.removeFirst(), alreadySpoke: true) } }
     }
 
-    /// The "I didn't know this" button: the pipeline goes back to translating that word.
+    /// The "I didn't know this" button: the Mac passes it to subtitles.py, which translates that word again.
     func forget(_ key: String) {
-        socket?.send(.string(#"{"type":"forget","id":"\#(key)"}"#)) { _ in }
+        guard let url = GardenClient.url("api/forget") else { return }
+        var req = URLRequest(url: url, timeoutInterval: 4)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try? JSONSerialization.data(withJSONObject: ["id": key])
+        Task { _ = try? await URLSession.shared.data(for: req) }
     }
 
     // MARK: state helpers
@@ -308,89 +310,103 @@ final class Conversation: ObservableObject {
         await type(text, into: i, original: true, perSecond: 55)
     }
 
-    // MARK: live
+    // MARK: live (subtitles.py's messages, relayed by the Weave server on the Mac as /api/live)
 
-    private func liveURL() -> URL? {
-        guard let host = URL(string: GardenClient.serverURL)?.host else { return nil }
-        return URL(string: "ws://\(host):8765")
-    }
-
-    private func connectLive() async -> Bool {
-        guard let url = liveURL() else { return false }
-        let ws = URLSession.shared.webSocketTask(with: url)
-        ws.resume()
-        let ok = await withTaskGroup(of: Bool.self) { group in
-            group.addTask { await withCheckedContinuation { c in ws.sendPing { c.resume(returning: $0 == nil) } } }
-            group.addTask { try? await Task.sleep(for: .seconds(1.5)); return false }
-            let first = await group.next() ?? false
-            group.cancelAll()
-            return first
+    private func setLive(_ on: Bool) {
+        withAnimation(.spring(response: 0.55, dampingFraction: 0.85)) {
+            mode = on ? .live : .waiting
+            connected = on
         }
-        if ok { socket = ws } else { ws.cancel() }
-        return ok
+        if !on { speaking = [] }
     }
 
-    private func receiveLive() async {
-        var partial: Int?
-        while let ws = socket, !Task.isCancelled {
-            guard let msg = try? await ws.receive() else { break }
-            guard case .string(let text) = msg, let data = text.data(using: .utf8),
-                  let m = try? JSONSerialization.jsonObject(with: data) as? [String: Any], let type = m["type"] as? String else { continue }
-            let id = (m["id"] as? Int).map(String.init) ?? (m["id"] as? String) ?? ""
-            switch type {
-            case "speaking":
-                setSpeaking(.them, true)
-                if partial == nil { partial = add(.them, lang: partner.lang) }
-            case "partial":
-                let t = m["text"] as? String ?? ""
-                guard !t.isEmpty else { continue }
-                if partial == nil { partial = add(.them, lang: partner.lang) }
-                lines[partial!].original = t
-                lines[partial!].typing = true
-            case "original":
-                setSpeaking(.them, false)
-                let i: Int
-                if let p = partial {
-                    i = p
-                    lines[i] = Line(id: id, who: .them, lang: partner.lang)
-                } else { i = add(.them, lang: partner.lang, id: id) }
-                partial = nil
-                lines[i].original = m["text"] as? String ?? ""
-                if m["route"] as? String == "english" { lines[i].lang = "en" } else { lines[i].pending = true; setTranslating(+1) }
-            case "english":
-                guard let i = index(id) else { continue }
-                if lines[i].pending { lines[i].pending = false; setTranslating(-1) }
-                if m["route"] as? String == "english" { continue }
-                let english = m["text"] as? String ?? ""
-                let kept = (m["kept"] as? [[String: Any]] ?? []).compactMap { k -> (String, String)? in
-                    guard let key = k["id"] as? String, let t = k["telugu"] as? String else { return nil }
-                    return (key, t)
+    private func runLive() async {
+        guard let url = GardenClient.url("api/live") else { return }
+        while !Task.isCancelled {
+            do {
+                var req = URLRequest(url: url)
+                req.timeoutInterval = 24 * 3600
+                let (bytes, resp) = try await URLSession.shared.bytes(for: req)
+                guard (resp as? HTTPURLResponse)?.statusCode == 200 else { throw URLError(.badServerResponse) }
+                for try await line in bytes.lines {
+                    guard line.hasPrefix("data: "), let data = line.dropFirst(6).data(using: .utf8),
+                          let m = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { continue }
+                    handle(m)
                 }
-                let original = lines[i].original
-                Task {
-                    await self.type(english, into: i, original: false, perSecond: 90)
-                    self.attachWords(i, telugu: original, english: english)
-                    if !kept.isEmpty {
-                        withAnimation { self.lines[i].matches = Array((kept.map { (key: $0.0, text: $0.1) } + self.lines[i].matches).prefix(3)) }
-                        for k in kept { self.seen[k.0] = Knowledge.word(k.0) }
-                    }
-                }
-            case "details":
-                guard let i = index(id) else { continue }
-                if let intent = m["intent"] as? String, intent == "question" || intent == "request" {
-                    lines[i].tag = intent == "question" ? "Asked you" : "Request"
-                }
-            case "picture":
-                let i = index(id) ?? lines.lastIndex { $0.who == .them }
-                guard let i, let key = m["id"] as? String else { continue }
-                if Knowledge.library[key] != nil {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.88)) { lines[i].visual = key }
-                    seen[key] = Knowledge.word(key)
-                }
-            case "voice":
-                if let i = index(id) { lines[i].voiced = true }
-            default: break
+            } catch {}
+            setLive(false)
+            try? await Task.sleep(for: .seconds(3))
+        }
+    }
+
+    private var partials: [Who: Int] = [:]
+    private func key(_ who: Who, _ id: Any?) -> String {
+        "\(who == .you ? "you" : "them"):" + ((id as? Int).map(String.init) ?? (id as? String) ?? "")
+    }
+
+    private func handle(_ m: [String: Any]) {
+        guard let type = m["type"] as? String else { return }
+        let who: Who = (m["side"] as? String) == "you" ? .you : .them
+        switch type {
+        case "status":
+            setLive(m["live"] as? Bool ?? false)
+        case "connected":
+            if who == .them { setLive(true) }
+        case "disconnected":
+            if who == .them { setLive(false) }
+        case "speaking":
+            if mode != .live { setLive(true) }
+            setSpeaking(who, true)
+            if partials[who] == nil { partials[who] = add(who, lang: partner.lang) }
+        case "partial":
+            let t = m["text"] as? String ?? ""
+            guard !t.isEmpty else { return }
+            if partials[who] == nil { partials[who] = add(who, lang: partner.lang) }
+            lines[partials[who]!].original = t
+            lines[partials[who]!].typing = true
+        case "original":
+            setSpeaking(who, false)
+            let id = key(who, m["id"])
+            let i: Int
+            if let p = partials[who] { i = p; lines[i] = Line(id: id, who: who, lang: partner.lang) } else { i = add(who, lang: partner.lang, id: id) }
+            partials[who] = nil
+            lines[i].original = m["text"] as? String ?? ""
+            if m["route"] as? String == "english" { lines[i].lang = "en" } else { lines[i].pending = true; setTranslating(+1) }
+        case "english":
+            guard let i = index(key(who, m["id"])) else { return }
+            if lines[i].pending { lines[i].pending = false; setTranslating(-1) }
+            if m["route"] as? String == "english" { return }
+            let english = m["text"] as? String ?? ""
+            let kept = (m["kept"] as? [[String: Any]] ?? []).compactMap { k -> (String, String)? in
+                guard let wid = k["id"] as? String, let t = k["telugu"] as? String else { return nil }
+                return (wid, t)
             }
+            let original = lines[i].original
+            Task {
+                await self.type(english, into: i, original: false, perSecond: 90)
+                guard who == .them else { return }
+                self.attachWords(i, telugu: original, english: english)
+                if !kept.isEmpty {
+                    withAnimation { self.lines[i].matches = Array((kept.map { (key: $0.0, text: $0.1) } + self.lines[i].matches).prefix(3)) }
+                    for k in kept { self.seen[k.0] = Knowledge.word(k.0) }
+                }
+            }
+        case "details":
+            guard who == .them, let i = index(key(who, m["id"])) else { return }
+            if let intent = m["intent"] as? String, intent == "question" || intent == "request" {
+                lines[i].tag = intent == "question" ? "Asked you" : "Request"
+            }
+        case "picture":
+            // Pictures say which line they belong to ("line"); their "id" is the picture's own.
+            let i = index(key(who, m["line"] ?? m["id"])) ?? lines.lastIndex { $0.who == who }
+            guard let i, let pic = m["id"] as? String else { return }
+            if Knowledge.library[pic] != nil {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.88)) { lines[i].visual = pic }
+                seen[pic] = Knowledge.word(pic)
+            }
+        case "voice":
+            if let i = index(key(who, m["id"])) { lines[i].voiced = true }
+        default: break
         }
     }
 }

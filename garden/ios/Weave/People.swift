@@ -45,9 +45,13 @@ struct VocabItem: Identifiable, Codable, Hashable {
 final class People: ObservableObject {
     @Published var profileName: String? { didSet { save() } }
     @Published var myLang = "en" { didSet { save() } }
-    @Published var connections: [Connection] { didSet { save() } }
+    /// People you added yourself (onboarding). Everyone else comes from the calls on the Mac.
+    @Published var added: [Connection] { didSet { save() } }
     @Published var vocab: [VocabItem] { didSet { save() } }
     @Published var growth: GardenSnapshot?
+    @Published var source: GardenClient.Source = .offline
+    @Published var calls: [CallSummary] = []
+    @Published var dictionary: [String: DictEntry] = [:]
     @Published var pendingSession: Connection?   // first run: open the call once home appears
 
     private let defaults = GardenClient.defaults
@@ -56,11 +60,7 @@ final class People: ObservableObject {
         let d = GardenClient.defaults
         profileName = d.string(forKey: "profileName") ?? UserDefaults.standard.string(forKey: "profileName")  // -profileName Saanvi
         myLang = d.string(forKey: "myLang") ?? "en"
-        connections = d.data(forKey: "connections").flatMap { try? JSONDecoder().decode([Connection].self, from: $0) } ?? [
-            Connection(id: "ammamma", name: "Ammamma", lang: "te", last: .now.addingTimeInterval(-2 * 3600)),
-            Connection(id: "thatayya", name: "Thatayya", lang: "te", last: .now.addingTimeInterval(-3 * 86400)),
-            Connection(id: "pinni", name: "Pinni", lang: "te", last: .now.addingTimeInterval(-6 * 86400)),
-        ]
+        added = d.data(forKey: "addedConnections").flatMap { try? JSONDecoder().decode([Connection].self, from: $0) } ?? []
         vocab = d.data(forKey: "vocab").flatMap { try? JSONDecoder().decode([VocabItem].self, from: $0) } ?? []
         if UserDefaults.standard.bool(forKey: "resetOnboarding") { profileName = nil }
     }
@@ -68,7 +68,7 @@ final class People: ObservableObject {
     private func save() {
         defaults.set(profileName, forKey: "profileName")
         defaults.set(myLang, forKey: "myLang")
-        defaults.set(try? JSONEncoder().encode(connections), forKey: "connections")
+        defaults.set(try? JSONEncoder().encode(added), forKey: "addedConnections")
         defaults.set(try? JSONEncoder().encode(vocab), forKey: "vocab")
     }
 
@@ -77,19 +77,42 @@ final class People: ObservableObject {
         vocab.insert(VocabItem(key: w.key, telugu: w.telugu, roman: w.roman, english: w.english, image: w.image), at: 0)
     }
 
+    /// Whoever the translator has been run for (subtitles.py --caller), newest call first, plus people you added.
+    var connections: [Connection] {
+        var seen = Set<String>(), out: [Connection] = []
+        for c in calls {
+            let id = c.caller.lowercased().replacingOccurrences(of: " ", with: "-")
+            if seen.insert(id).inserted { out.append(Connection(id: id, name: c.caller, lang: "te", last: c.date ?? .now)) }
+        }
+        for c in added where seen.insert(c.id).inserted { out.append(c) }
+        return out.sorted { $0.last > $1.last }
+    }
+
+    /// The person on a live call we haven't saved yet: the translator's own default caller.
+    var partner: Connection { connections.first ?? Connection(id: "grandma", name: "Grandma", lang: "te", last: .now) }
+
     func touch(_ c: Connection) {
-        if let i = connections.firstIndex(where: { $0.id == c.id }) { connections[i].last = .now }
-        else { connections.insert(c, at: 0) }
+        guard !calls.contains(where: { $0.caller.lowercased() == c.name.lowercased() }) else { return }
+        if let i = added.firstIndex(where: { $0.id == c.id }) { added[i].last = .now } else { added.insert(c, at: 0) }
     }
 
+    /// Everything from the Mac: the garden, the saved calls and the family dictionary.
     func loadGrowth() async {
-        let (snap, _) = await GardenClient.load()
-        growth = snap
+        async let g = GardenClient.load()
+        async let c = GardenClient.calls()
+        async let d = GardenClient.dictionary()
+        let (snap, src) = await g
+        growth = snap; source = src
+        calls = await c
+        let dict = await d
+        if !dict.isEmpty || src == .live { dictionary = dict }
     }
 
-    /// Numbers for "Your language growth"; the Mac's garden when reachable, else the bundled sample.
+    /// Her voice saying this word, if the family dictionary has it.
+    func voice(for key: String) -> String? { dictionary[key]?.clip.map { "calls/" + $0 } }
+
     var numbers: (newWords: Int, phrases: Int, known: Int, total: Int, hearings: Int, days: [Int]) {
-        let g = growth ?? .sample
+        let g = growth ?? .empty
         let week = g.days.suffix(7).reduce(0) { $0 + $1.new }
         let phrases = g.plants.filter { $0.stageEnum == .bloom && ["idiom", "family", "none"].contains($0.category) }.count
         return (week, phrases, g.totals.bloom, g.totals.phrases, g.totals.heard, g.days.map(\.heard))

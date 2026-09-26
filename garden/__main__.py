@@ -1,4 +1,5 @@
-"""python -m garden            serve the real garden (garden/garden.db) at http://localhost:8770
+"""python -m garden            serve the real garden (garden/garden.db) at http://localhost:8770; subtitles.py grows it
+                            during calls, and calls saved in calls/ that it hasn't seen are planted at startup
 python -m garden --demo     serve a demo garden: two weeks of fake calls using the words in lexicon.json,
                             plus a live fake call that keeps growing it
 """
@@ -66,6 +67,11 @@ def main():
             threading.Thread(target=live_call, args=(g, phrases), daemon=True).start()
     else:
         g = Garden()
+        from lexicon import Lexicon  # importing .server put the repo on the path
+        from .server import CALLS_ROOT
+        added = g.import_calls(CALLS_ROOT, Lexicon())  # calls saved before the translator fed the garden
+        if added:
+            print(f"planted the words from {added} saved call{'s' * (added != 1)}")
     serve(g, a.port)
 
 

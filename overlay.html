@@ -69,7 +69,9 @@ let askTimer = null;
 // A question the grandkid can ask in Telugu when grandma pauses in a story.
 function showAsk(m) {
   const ask = document.getElementById("ask");
-  ask.querySelector(".label").textContent = "💬 Ask " + (m.caller || "her") + ":";
+  // m.context: the next-call starter ("Last call: ..."); m.about: something she just mentioned (topics.py)
+  ask.querySelector(".label").textContent = (m.context ? "💬 " + m.context + " · ask " : "💬 Ask ") + (m.caller || "her")
+    + (m.about ? " about " + m.about : "") + ":";
   ask.querySelector(".te").textContent = m.telugu;
   ask.querySelector(".roman").textContent = "“" + m.roman + "”";
   ask.querySelector(".meaning").textContent = m.english;
@@ -87,7 +89,7 @@ function showPicture(m) {
   pop.classList.add("show");
   clearTimeout(popupTimer);
   popupTimer = setTimeout(() => pop.classList.remove("show"), 9000);
-  const el = byId[m.id];
+  const el = byId[m.line ?? m.id];
   if (el) {
     const card = document.createElement("div"); card.className = "card";
     const img = document.createElement("img"); img.className = "thumb"; img.src = "/" + m.image;
@@ -127,6 +129,7 @@ function connect() {
     if (m.type === "partial") { live.textContent = m.text; return; }
     if (m.type === "picture") { showPicture(m); return; }
     if (m.type === "prompt") { showAsk(m); return; }
+    if (m.type === "warning") { status.textContent = "⚠️ " + m.text; dot.className = "dot"; return; }
     if (m.type === "voice") { const el = byId[m.id]; if (el) el.querySelector(".en").prepend("🔊 "); return; }
     dot.className = "dot live"; status.textContent = "listening";
     let el = byId[m.id];

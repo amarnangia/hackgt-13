@@ -24,12 +24,12 @@ struct SessionView: View {
                 .contentTransition(.opacity).animation(.easeOut(duration: 0.25), value: nowLine)
                 .padding(.top, 2).padding(.bottom, 8)
             LiveTranscript(convo: convo) { word, line in openWord = WordContext(word: word, line: line) }
-            SessionControls(voiceOn: $voiceOn, saved: convo.savedThisCall, talk: convo.holdToTalk,
+            SessionControls(mode: convo.mode, voiceOn: $voiceOn, saved: convo.savedThisCall, talk: convo.holdToTalk,
                             growth: { sheet = .growth }, end: { sheet = .summary })
                 .padding(.horizontal, 20)
         }
         .background(Backdrop())
-        .onAppear { convo.start(forceDemo: forceDemo || UserDefaults.standard.bool(forKey: "demo")); people.touch(convo.partner) }
+        .onAppear { convo.start(forceDemo: forceDemo || GardenClient.demoMode) }
         .onDisappear { convo.stop() }
         .sheet(item: $openWord) { ctx in
             WordSheet(word: ctx.word, line: ctx.line, partnerName: convo.partner.name, live: convo.mode == .live) {
@@ -67,7 +67,8 @@ struct SessionView: View {
         if convo.speaking.contains(.them) && convo.speaking.contains(.you) { return "Both speaking" }
         if convo.speaking.contains(.them) { return "\(convo.partner.name) is speaking" }
         if convo.speaking.contains(.you) { return "You're speaking" }
-        return convo.connected ? "Listening" : "Connecting to \(convo.partner.name)…"
+        if convo.mode == .waiting { return "Waiting for the call" }
+        return "Listening"
     }
 }
 
@@ -95,7 +96,7 @@ struct ConnectionHeader: View {
             HStack(spacing: 8) {
                 Circle().fill(convo.connected ? Theme.accent : Theme.text3).frame(width: 6, height: 6)
                     .overlay(Circle().stroke(Theme.accent.opacity(convo.connected ? 0.25 : 0), lineWidth: 3))
-                Text(convo.connected ? "Connected" : "Connecting").font(Fonts.ui(14, .medium)).foregroundStyle(Theme.text)
+                Text(convo.mode == .waiting ? "Waiting" : "Connected").font(Fonts.ui(14, .medium)).foregroundStyle(Theme.text)
                     .contentTransition(.opacity)
                 TimelineView(.periodic(from: .now, by: 1)) { t in
                     let s = Int(t.date.timeIntervalSince(convo.started))
@@ -104,7 +105,7 @@ struct ConnectionHeader: View {
             }
             .animation(.easeOut(duration: 0.3), value: convo.connected)
             Spacer()
-            Text(convo.mode == .live ? "LIVE" : "DEMO").font(Fonts.mono(10.5)).tracking(0.8)
+            Text(convo.mode == .live ? "LIVE" : convo.mode == .demo ? "DEMO" : "WAITING").font(Fonts.mono(10.5)).tracking(0.8)
                 .foregroundStyle(convo.mode == .live ? Theme.accent : Theme.text3)
                 .padding(.horizontal, 9).frame(height: 24)
                 .overlay(Capsule().strokeBorder(convo.mode == .live ? Theme.accent.opacity(0.35) : Theme.border, lineWidth: 1))
@@ -282,7 +283,9 @@ struct LiveTranscript: View {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     if convo.lines.isEmpty {
-                        Text("When \(convo.partner.name) speaks, it appears here in English.")
+                        Text(convo.mode == .waiting
+                             ? "Waiting for the call.\nStart subtitles.py and call \(convo.partner.name) on WhatsApp Web. This connects by itself."
+                             : "When \(convo.partner.name) speaks, it appears here in English.")
                             .font(Fonts.ui(14)).foregroundStyle(Theme.text3).multilineTextAlignment(.center)
                             .frame(maxWidth: .infinity).padding(.top, 60)
                     }
@@ -417,6 +420,7 @@ struct Translating: View {
 // MARK: - controls
 
 struct SessionControls: View {
+    let mode: Conversation.Mode
     @Binding var voiceOn: Bool
     let saved: Int
     let talk: (Bool) -> Void
@@ -426,6 +430,17 @@ struct SessionControls: View {
 
     var body: some View {
         HStack(spacing: 10) {
+            if mode != .demo {
+                // A real call: nothing to press, the captions come from the call itself.
+                HStack(spacing: 10) {
+                    Circle().fill(mode == .live ? Theme.accent : Theme.text3).frame(width: 7, height: 7)
+                    Text(mode == .live ? "Captions from the call" : "Waiting for subtitles.py").font(Fonts.ui(15, .medium))
+                }
+                .foregroundStyle(mode == .live ? Theme.text : Theme.text3)
+                .frame(maxWidth: .infinity).frame(height: 52)
+                .background(mode == .live ? Theme.accent.opacity(0.08) : Theme.surface, in: .rect(cornerRadius: 16))
+                .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(mode == .live ? Theme.accent.opacity(0.3) : Theme.border, lineWidth: 1))
+            } else {
             HStack(spacing: 10) {
                 Image(systemName: "mic").font(.system(size: 15, weight: .medium))
                 Text(holding ? "Listening to you…" : "Hold to talk").font(Fonts.ui(15, .medium)).contentTransition(.opacity)
@@ -440,9 +455,7 @@ struct SessionControls: View {
                 .onChanged { _ in if !holding { holding = true; talk(true); UIImpactFeedbackGenerator(style: .soft).impactOccurred() } }
                 .onEnded { _ in holding = false; talk(false) })
             .animation(.easeOut(duration: 0.2), value: holding)
-
-            DockButton(symbol: voiceOn ? "speaker.wave.2" : "speaker.slash", selected: voiceOn) { voiceOn.toggle() }
-                .sensoryFeedback(.selection, trigger: voiceOn)
+            }
             DockButton(symbol: "book", selected: false, action: growth)
                 .overlay(alignment: .topTrailing) {
                     Text("\(saved)").font(.system(size: 10, weight: .semibold)).foregroundStyle(.white)
