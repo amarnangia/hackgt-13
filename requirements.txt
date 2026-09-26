@@ -10,3 +10,4 @@ num2words
 spacy
 phonemizer
 soundfile
+sentencepiece
