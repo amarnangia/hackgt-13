@@ -21,6 +21,7 @@ from websockets.datastructures import Headers
 from websockets.http11 import Response
 
 from muse import Translator, transcribe
+from latency import LatencyTracker
 from translate_server import LocalTranslator
 
 PORT = int(os.environ.get("OVERLAY_PORT", 8765))
@@ -28,7 +29,7 @@ CHUNK_MS = 80
 SENTENCE_END = re.compile(r"[.?!।]+")
 CLAUSE_END = re.compile(r"[,;]")
 MIN_CLAUSE_WORDS = 5  # Muse often joins sentences with commas; cut there once a clause is long enough to translate well
-MAX_WAIT_WORDS = 7    # run-on speech with no punctuation: translate once this many words are waiting...
+MAX_WAIT_WORDS = 12   # run-on speech with no punctuation: translate once this many words are waiting (fewer hurt quality)
 HOLD_BACK_WORDS = 2   # ...except the newest few, which Muse may still correct
 TRANSLATE_WORKERS = 3
 
@@ -93,17 +94,17 @@ class Captioner:
         self.next_id = 0
         self.partial = ""  # latest cumulative transcript for the current turn
         self.done = 0      # how many characters of it have been sent for translation
-        self.waiting_since = None  # when the oldest untranslated word appeared
+        self.latency = LatencyTracker()
 
     def on_event(self, ev):
         kind = ev.get("type")
         if kind == "speechStart":
-            self.partial, self.done, self.waiting_since = "", 0, None
+            self.partial, self.done = "", 0
+            self.latency.new_turn()
             broadcast({"type": "speaking"})
         elif kind == "transcript" and not ev.get("final"):
             self.partial = ev["transcript"]
-            if self.waiting_since is None and self.partial[self.done:].strip():
-                self.waiting_since = time.monotonic()
+            self.latency.on_partial(self.partial, ev.get("audioProcessedMs"))
             self._cut(final=False)
             broadcast({"type": "partial", "text": self.partial[self.done:].strip()})
         elif kind == "speechEnd":
@@ -121,7 +122,7 @@ class Captioner:
             is_sentence = bool(SENTENCE_END.search(piece[-1:])) or end == len(rest) and final
             if not piece or (not is_sentence and len(piece.split()) < MIN_CLAUSE_WORDS):
                 continue  # short clause: keep it and send it together with what follows
-            self._submit(piece)
+            self._submit(piece, self.done + end)
             start = end
         self.done += start
 
@@ -129,31 +130,28 @@ class Captioner:
         words = list(re.finditer(r"\S+", self.partial[self.done:]))
         if not final and len(words) >= MAX_WAIT_WORDS:
             cut = self.done + words[-HOLD_BACK_WORDS - 1].end()
-            self._submit(self.partial[self.done:cut].strip())
+            self._submit(self.partial[self.done:cut].strip(), cut)
             self.done = cut
 
-    def _submit(self, sentence):
+    def _submit(self, sentence, end_offset):
         self.next_id += 1
-        seg_id, cut_at = self.next_id, time.monotonic()
-        waited = cut_at - (self.waiting_since or cut_at)
-        self.waiting_since = None if not self.partial[self.done:].strip() else cut_at
+        seg_id = self.next_id
+        marks = self.latency.piece_cut(end_offset)
         broadcast({"type": "original", "id": seg_id, "text": sentence})
 
         def work():
-            start = time.monotonic()
             try:
                 english = self.translate(sentence)
             except Exception as e:
                 english = f"(translation failed: {type(e).__name__})"
             broadcast({"type": "english", "id": seg_id, "text": english})
-            now = time.monotonic()
-            print(f"[first word -> English {waited + now - cut_at:.1f}s | waiting for words {waited:.1f}s, "
-                  f"queue {start - cut_at:.1f}s, translate {now - start:.1f}s] {sentence}  ->  {english}", flush=True)
+            row = self.latency.finished(marks, sentence, english)
+            print(f"{LatencyTracker.line(row)} {sentence}  ->  {english}", flush=True)
 
         self.pool.submit(work)
 
 
-async def file_audio(path, audio_q):
+async def file_audio(path, audio_q, latency):
     """Send a recording at real-time pace, like a live call (Muse rejects audio sent much faster)."""
     with wave.open(path) as w:
         rate, pcm = w.getframerate(), w.readframes(w.getnframes())
@@ -161,6 +159,7 @@ async def file_audio(path, audio_q):
     pcm += b"\0" * (rate * 2 * 2)  # 2 s of trailing silence lets Muse close the last utterance
     size = rate * 2 * CHUNK_MS // 1000
     start = time.monotonic()
+    latency.audio_started(start)  # audio position 0 = now; Muse's audioProcessedMs counts from here
     for i in range(0, len(pcm), size):
         await audio_q.put(pcm[i:i + size])
         await asyncio.sleep(max(0, start + (i + size) / (rate * 2) - time.monotonic()))
@@ -170,7 +169,8 @@ async def file_audio(path, audio_q):
 def start_live_audio(args, loop, target):
     """Pass call audio through to the speakers (audio_loop.py) and copy it to Muse as 24 kHz 16-bit PCM.
 
-    `target["q"]` is the queue of the current Muse session; it is swapped on reconnect.
+    `target["q"]` is the queue of the current Muse session; it is swapped on reconnect. The latency clock
+    starts when the first frame of a session is captured (frames queue up while Muse connects).
     """
     import sounddevice as sd
     from audio_loop import AudioLoop, find_device
@@ -185,6 +185,9 @@ def start_live_audio(args, loop, target):
         if len(buf) * 10 >= CHUNK_MS:
             frame = np.concatenate(buf).tobytes()
             buf.clear()
+            if target.get("fresh"):
+                target["fresh"] = False
+                target["latency"].audio_started(time.monotonic() - CHUNK_MS / 1000)  # frame start, not end
             loop.call_soon_threadsafe(target["q"].put_nowait, frame)
 
     audio = AudioLoop(in_dev, out_dev, on_audio=on_audio)
@@ -193,15 +196,23 @@ def start_live_audio(args, loop, target):
 
 async def run(args):
     captioner = Captioner(args.lang, args.translator)
+    try:
+        await listen(args, captioner)
+    finally:  # also on Ctrl+C
+        print("\n" + captioner.latency.summary() + "\n(per-sentence log: latency_log.jsonl)", flush=True)
+
+
+async def listen(args, captioner):
     loop = asyncio.get_running_loop()
-    target = {"q": asyncio.Queue()}
+    target = {"q": asyncio.Queue(), "latency": captioner.latency}
     if not args.file:
         start_live_audio(args, loop, target)
     while True:
         audio_q = target["q"] = asyncio.Queue()
+        target["fresh"] = True
         if args.file:
             encoding = "PCM_24KHZ" if wave.open(args.file).getframerate() == 24000 else "PCM_16KHZ"
-            feeder = asyncio.create_task(file_audio(args.file, audio_q))
+            feeder = asyncio.create_task(file_audio(args.file, audio_q, captioner.latency))
         else:
             encoding = "PCM_24KHZ"
         try:

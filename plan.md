@@ -30,6 +30,20 @@ What we learned the hard way:
 - The terminal app running the script needs microphone permission. The VS Code terminal worked for us.
 - **Raw translation models mangle cultural words** ("My mother was a widow" for *grandma made pulihora*, "car" for *auto*). `lexicon.json` swaps known words for fixed plain English *before* translating, which fixed every case we tried. Add words there; the translator reloads it on save. Use plain English in `translate_as` ("tamarind rice", not "pulihora"): an English name right before a Telugu verb gets read as a person's name.
 
+## Latency (measured)
+`subtitles.py` prints each sentence's delay by stage, a p50/p90/max table when you quit, and appends every sentence to `latency_log.jsonl` (gitignored). Measured on the M4 with `--file samples/telugu_two_turns.wav`, local translator, 12 sentences over two runs:
+
+| Stage | p50 | p90 | max |
+|---|---|---|---|
+| speech-to-text (Muse, after the word was spoken) | ~0.00 s | 0.03 s | 0.03 s |
+| waiting to split into a sentence | 0.00 s | 0.00 s | 0.00 s |
+| translate (IndicTrans2 + lexicon) | 0.37–0.41 s | 0.45–0.47 s | 0.57 s |
+| **spoken → English on screen** | **0.36–0.44 s** | **0.45–0.50 s** | **0.57 s** |
+
+"Spoken" is when the last word of the sentence was said: capture time of the first audio frame plus Muse's `audioProcessedMs` for the update that first contained that word (checked against the recording: last word at 9.2 s, Muse reported 9.28 s). A live call adds network jitter on top. With Muse Spark instead of the local translator, translate was ~0.8–1.5 s.
+
+Splitting run-on speech every 7 words made translations worse ("My daddy's for"), so pieces now wait for punctuation, a pause, or 12 words.
+
 ## Architecture
 
 ```
