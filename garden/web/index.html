@@ -444,19 +444,15 @@ const state = {
 };
 const DEFAULT_CONNECTIONS = [
   { id: "ammamma", name: "Ammamma", lang: "te", last: Date.now() - 2 * 3600e3, recent: true },
-  { id: "thatayya", name: "Thatayya", lang: "te", last: Date.now() - 3 * 86400e3 },
-  { id: "pinni", name: "Pinni", lang: "te", last: Date.now() - 6 * 86400e3 },
 ];
-const RECENT = [
-  { who: "ammamma", topic: "Sankranti plans, pulihora, your exam", when: "Yesterday", mins: 18 },
-  { who: "thatayya", topic: "The paddy field, the new tractor", when: "Tue", mins: 9 },
-  { who: "ammamma", topic: "Diwali sweets, cousins visiting", when: "Sun", mins: 24 },
-];
+// Sample connections from earlier versions; dropped unless you added them yourself.
+const SAMPLE_CONNECTION_IDS = new Set(["thatayya", "pinni"]);
 
 async function loadData() {
   const get = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
-  const [lex, lib, script, garden, progress] = await Promise.all([get("/lexicon.json"), get("/images/library.json"), get("/samples/call_script.json"), get("/api/garden"), get("/api/progress")]);
+  const [lex, lib, script, garden, progress, calls] = await Promise.all([get("/lexicon.json"), get("/images/library.json"), get("/samples/call_script.json"), get("/api/garden"), get("/api/progress"), get("/api/calls")]);
   state.progress = progress;
+  state.calls = calls || [];  // real calls saved by the story keeper (calls/), newest first
   state.hasDictionary = await fetch("/calls/dictionary.html", { method: "HEAD" }).then((r) => r.ok).catch(() => false);
   if (lex) state.lexicon = Object.entries(lex).filter(([k]) => !k.startsWith("_")).flatMap(([lang, items]) => items.map((e) => ({ ...e, lang })));
   if (lib) state.library = lib.items || lib;
@@ -552,7 +548,7 @@ function renderOnboard() {
     if (!state.profile) { state.profile = { name: "Saanvi", lang: ob.mine }; store.set("profile", state.profile); }
     const id = ob.name.toLowerCase().replace(/\W+/g, "-");
     let c = state.connections.find((x) => x.id === id);
-    if (!c) { c = { id, name: ob.name, lang: ob.theirs, last: Date.now() }; state.connections.unshift(c); }
+    if (!c) { c = { id, name: ob.name, lang: ob.theirs, last: Date.now(), added: true }; state.connections.unshift(c); }
     store.set("connections", state.connections);
     startSession(c);
   };
@@ -597,10 +593,9 @@ function renderHome(live = false) {
       <div><div class="eyebrow">In Telugu</div><div class="stat-n">${g.known}<small>/ ${g.met}</small></div></div>
       <div><div class="eyebrow">Hearings</div><div class="stat-n">${g.hearings}</div></div>
     </button>
-    <div class="section-h rise" style="--d:7"><span class="eyebrow">Recent conversations</span></div>
-    <div class="list rise" style="--d:8">${RECENT.map((r) => { const c = byId[r.who] || { name: r.who, lang: "te" }; return `
-      <button class="row" data-conn="${r.who}"><span class="avatar ${c.lang === "te" ? "te" : ""}" style="--size:40px">${avatarText(c)}</span>
-        <span class="t"><b>${esc(c.name)}</b><div>${esc(r.topic)}</div></span><span class="when mono">${r.when} · ${r.mins}m</span></button>`; }).join("")}</div>
+    <div class="section-h rise" style="--d:7"><span class="eyebrow">Your calls</span></div>
+    ${state.calls?.length ? `<div class="list rise" style="--d:8">${state.calls.map(CallRow).join("")}</div>`
+      : `<div class="list rise" style="--d:8"><div class="row" style="cursor:default"><span class="t"><div>Your calls will appear here, each with its story, her voice and the words you heard.</div></span></div></div>`}
   </div></div>`;
   const root = $("#v-home");
   root.querySelectorAll("[data-conn]").forEach((b) => b.onclick = () => startSession(state.connections.find((c) => c.id === b.dataset.conn) || state.connections[0]));
@@ -608,7 +603,43 @@ function renderHome(live = false) {
   $("#growth").onclick = () => openSheet(LearningProgress());
   $("#growth-more") && ($("#growth-more").onclick = () => openSheet(LearningProgress()));
 }
-function home() { if (state.session) endSession(true); renderHome(); show("home"); probeLive().then((live) => live && current === "home" && renderHome(true)); }
+/* A saved call: its story title, when, how long, and the pictures that came up. Opens the full story page. */
+function whenLabel(iso) {
+  const d = new Date(iso); if (isNaN(d)) return "";
+  const days = Math.floor((new Date().setHours(0, 0, 0, 0) - new Date(d).setHours(0, 0, 0, 0)) / 86400e3);
+  const time = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  return days <= 0 ? `Today ${time}` : days === 1 ? "Yesterday" : days < 7 ? d.toLocaleDateString([], { weekday: "short" }) : d.toLocaleDateString([], { month: "short", day: "numeric" });
+}
+function CallRow(call) {
+  const c = state.connections.find((x) => x.name.toLowerCase() === (call.caller || "").toLowerCase()) || { name: call.caller, lang: "te" };
+  const mins = Math.max(1, Math.round((call.duration_s || 0) / 60));
+  const detail = call.stories?.length ? call.stories.join(" · ") : `${call.lines} lines · ${call.words} words${call.new_words ? ` (${call.new_words} new)` : ""}`;
+  const pics = (call.pictures || []).slice(0, 3).map((p) => `<img src="/${esc(p)}" alt="" style="width:34px;height:34px;object-fit:cover;border-radius:8px;margin-left:4px">`).join("");
+  return `<a class="row" href="${esc(call.page || "#")}" target="_blank" style="text-decoration:none;color:inherit">
+    <span class="avatar ${c.lang === "te" ? "te" : ""}" style="--size:40px">${avatarText(c)}</span>
+    <span class="t"><b>${esc(call.title)}</b><div>${esc(detail)}</div></span>
+    <span style="display:flex;align-items:center">${pics}<span class="when mono" style="margin-left:10px">${whenLabel(call.started)} · ${mins}m</span></span></a>`;
+}
+/* When the translator starts a call, open it here by itself: the home screen alone never shows a live call. */
+function watchForLiveCall() {
+  clearInterval(state.homeWatch);
+  state.homeWatch = setInterval(async () => {
+    if (current !== "home") return clearInterval(state.homeWatch);
+    const live = await probeLive();
+    if (!live) { state.leftLiveCall = false; return; }
+    if (state.leftLiveCall || params.has("demo")) return;  // you went back home from this call: stay home
+    clearInterval(state.homeWatch);
+    const c = state.connections[0];
+    toast(`Live call · opening ${c.name}'s call`, "arrow");
+    startSession(c);
+  }, 2500);
+}
+function home() {
+  if (state.session?.mode === "live" && !state.session.ended) state.leftLiveCall = true;
+  if (state.session) endSession(true);
+  renderHome(); show("home"); watchForLiveCall();
+  probeLive().then((live) => live && current === "home" && renderHome(true));
+}
 
 /* ---------- connection visual ---------- */
 function Participant(p, side, isYou) {
@@ -797,7 +828,10 @@ function addLine(who, id, { lang, translated = false }) {
   scrollDown();
   return line;
 }
-function scrollDown() { const list = $("#s-lines"); if (list) list.scrollTo({ top: list.scrollHeight, behavior: "smooth" }); }
+// Chrome doesn't run smooth scrolling on a tab you're not looking at (Weave behind the WhatsApp tab), so the call
+// would sit at its first lines. Jump instead when hidden, and catch up when you come back to the tab.
+function scrollDown() { const list = $("#s-lines"); if (list) list.scrollTo({ top: list.scrollHeight, behavior: document.hidden ? "auto" : "smooth" }); }
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { const list = $("#s-lines"); if (list) list.scrollTop = list.scrollHeight; } });
 async function typeInto(el, text, cps = 60, s = state.session) {
   el.classList.add("caret"); el.textContent = "";
   const chars = [...text];
@@ -973,13 +1007,50 @@ function connectLive(s) {
     const t = setTimeout(() => { ws.close(); resolve(false); }, 1500);
     ws.onerror = () => { clearTimeout(t); resolve(false); };
     ws.onopen = () => { clearTimeout(t); s.ws = ws; resolve(true); ws.onclose = onDrop; };
-    const onDrop = () => { if (state.session === s && !s.ended && s.mode === "live") { setState("Reconnecting"); $("#s-dot").classList.remove("on"); setTimeout(() => connectLive(s).then((ok) => ok && (setState("Connected"), $("#s-dot").classList.add("on"))), 1500); } };
+    const onDrop = () => {
+      if (state.session === s && !s.ended && s.mode === "live") {
+        setState("Reconnecting"); $("#s-dot").classList.remove("on");
+        awaitStory(s);  // the translator stopped: the call's story page is being written
+        setTimeout(() => connectLive(s).then((ok) => ok && (setState("Connected"), $("#s-dot").classList.add("on"))), 1500);
+      }
+    };
     ws.onmessage = (e) => onLive(s, JSON.parse(e.data));
   });
+}
+/* After the call: the translator writes the story page (~10-30 s after you stop it). Show it here when it's ready. */
+async function awaitStory(s) {
+  if (s.awaitingStory) return;
+  s.awaitingStory = true;
+  const known = new Set((state.calls || []).map((c) => c.id));
+  toast("Call ended · writing the call's story", "book");
+  for (let i = 0; i < 60; i++) {  // up to ~2 minutes
+    await new Promise((r) => setTimeout(r, 2000));
+    const calls = await fetch("/api/calls").then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    const fresh = calls?.find((c) => !known.has(c.id) && c.page);
+    if (!fresh) continue;
+    await loadData();  // progress and the family dictionary changed too
+    if (state.session === s) s.ended = true;
+    openSheet(StoryReady(fresh));
+    return;
+  }
+  s.awaitingStory = false;
+}
+function StoryReady(call) {
+  const mins = Math.max(1, Math.round((call.duration_s || 0) / 60));
+  const pics = (call.pictures || []).map((p) => `<img src="/${esc(p)}" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:10px;margin:0 6px 6px 0">`).join("");
+  return `<div class="eyebrow">Call saved · ${mins} min</div><h2>${esc(call.title)}</h2>
+    ${call.summary ? `<p class="muted" style="font-size:15px;line-height:1.5">${esc(call.summary)}</p>` : ""}
+    ${call.stories?.length ? `<div class="eyebrow" style="margin-top:14px">Stories</div><ul style="margin:6px 0 0 18px">${call.stories.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}
+    ${pics ? `<div style="margin-top:14px">${pics}</div>` : ""}
+    <div class="lp-grid" style="margin-top:14px"><div class="lp-cell"><div class="eyebrow">Lines</div><div class="stat-n">${call.lines}</div></div>
+      <div class="lp-cell"><div class="eyebrow">Words</div><div class="stat-n">${call.words}</div></div>
+      <div class="lp-cell"><div class="eyebrow">New</div><div class="stat-n">${call.new_words}</div></div></div>
+    <div class="wx-actions"><a class="btn primary" href="${esc(call.page)}" target="_blank" style="text-decoration:none">Open the story ↗</a><button class="btn ghost" id="sum-done">Done</button></div>`;
 }
 function onLive(s, m, side = "them") {
   if (state.session !== s) return;
   if (m.type === "prompt") { addAsk(m); return; }
+  if (m.type === "warning") { setNow("⚠️ " + (m.text.split(". ")[0] || m.text), true); toast(m.text.split(". ")[0], "vol"); return; }
   const lang = state.active.lang, pk = "partial_" + side, key = (id) => `${side}:${id}`;
   const newLine = (id) => addLine(side, id, { lang, translated: side === "you" });
   if (m.type === "speaking") { speaking(side, true); s[pk] = s[pk] || newLine("partial-" + Date.now()); return; }
@@ -999,7 +1070,8 @@ function onLive(s, m, side = "them") {
     translating(+1); line.translating = true;
     return;
   }
-  const line = s.byId[key(m.id)] || (m.type === "picture" ? s.lines.filter((l) => l.who === side).at(-1) : null);
+  // Picture messages carry the picture's own id; the line they belong to is in m.line.
+  const line = s.byId[key(m.type === "picture" && m.line != null ? m.line : m.id)] || (m.type === "picture" ? s.lines.filter((l) => l.who === side).at(-1) : null);
   if (!line) return;
   if (m.type === "english") {
     if (line.translating) { translating(-1); line.translating = false; }
@@ -1197,7 +1269,7 @@ document.addEventListener("click", (e) => {
   if (id === "m-growth") openSheet(LearningProgress());
   if (id === "m-mode") { closeSheet(); const c = state.active; if (state.session?.mode === "live") { history.replaceState(null, "", "?demo=1"); params.set("demo", "1"); } else { params.delete("demo"); history.replaceState(null, "", location.pathname); } startSession(c); }
   if (id === "m-new") { closeSheet(); onboard(true); }
-  if (id === "sum-done") { closeSheet(); const cv = $("#s-cv"); cv?.classList.add("connecting"); setTimeout(home, 420); }
+  if (id === "sum-done") { closeSheet(); const cv = $("#s-cv"); cv?.classList.add("connecting"); state.leftLiveCall = true; setTimeout(home, 420); }
 });
 function Summary() {
   const s = state.session; const mins = Math.max(1, Math.round((Date.now() - s.started) / 60000));
@@ -1236,6 +1308,9 @@ if (params.has("still")) document.head.insertAdjacentHTML("beforeend", "<style>*
   await loadData();
   if (params.has("reset")) { localStorage.clear(); state.profile = null; state.vocab = []; state.connections = null; }
   if (!state.connections) { state.connections = DEFAULT_CONNECTIONS; store.set("connections", state.connections); }
+  state.connections = state.connections.filter((c) => c.added || !SAMPLE_CONNECTION_IDS.has(c.id));
+  if (!state.connections.length) state.connections = DEFAULT_CONNECTIONS;
+  store.set("connections", state.connections);
   if (!state.profile && params.get("view")) state.profile = { name: "Saanvi", lang: "en" };
   const start = params.get("view");
   if (!state.profile && start !== "home" && start !== "session") onboard(false);

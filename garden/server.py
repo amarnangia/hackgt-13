@@ -4,20 +4,26 @@ GET  /              dashboard
 GET  /app           the Weave connection app (live call + demo)
 GET  /api/garden    snapshot JSON
 GET  /api/progress   which words the translator keeps in Telugu (from the team's progress.json)
+GET  /api/calls      the calls saved by the story keeper (calls/*/call.json), newest first
 GET  /images/..., /lexicon.json, /samples/call_script.json, /calls/...   the team's files, read only
 POST /api/heard     {"phrase", "english"?, "category"?, "note"?, "roman"?}  -> {"mode"}
 POST /api/asked     {"phrase"}
 """
-import json, mimetypes, re, socket
+import json, mimetypes, os, re, socket, sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
+sys.path.insert(0, str(ROOT))
+from lexicon import Lexicon  # noqa: E402  (the translator's own word list and progress rules, so the numbers match)
+from progress import LEARN_AFTER as TRANSLATOR_LEARN_AFTER, Progress  # noqa: E402
 # Team files the app reads. Anything else in the repo stays private.
 # calls/ is the story keeper's output (story pages, family dictionary, voice clips); it stays on this Mac.
 CALLS = re.compile(r"^/calls/[\w-]+(?:/[\w-]+){0,2}\.(?:html|m4a|json)$")
-LEARN_AFTER = 3  # progress.py: a word is kept in Telugu once it has come up this many times
+# Where the story keeper saves calls (same setting as calls.py; tests point both at a temp folder)
+CALLS_ROOT = Path(os.environ.get("HACKGT_CALLS_DIR") or ROOT / "calls")
+LEARN_AFTER = TRANSLATOR_LEARN_AFTER  # progress.py's rule, not a copy of it (a stale 3 here showed "0 in Telugu")
 SHARED = re.compile(r"^/(images/(?:cache/)?[\w.-]+\.(?:jpg|jpeg|png|webp|json)|lexicon\.json|samples/call_script\.json)$")
 
 
@@ -36,21 +42,44 @@ def progress():
     """Real learning numbers from the translator's progress.json, or None before the first call."""
     try:
         saved = json.load(open(ROOT / "progress.json", encoding="utf-8"))
-        lex = json.load(open(ROOT / "lexicon.json", encoding="utf-8"))
+        lexicon = Lexicon()
+        tracker = Progress(lexicon, "te", path=str(ROOT / "progress.json"))
     except (OSError, ValueError):
         return None
     heard = saved.get("heard", {})
-    entries = {e["id"]: e for lang, items in lex.items() if not lang.startswith("_") for e in items}
+    entries = {e["id"]: e for items in lexicon.entries.values() for e in items}
     words = []
     for key, n in sorted(heard.items(), key=lambda kv: -kv[1]):
         e = entries.get(key)
         if not e or n <= 0:
             continue
-        known = n >= LEARN_AFTER  # progress.py resets the count to 0 when you say you forgot it
+        known = tracker.known(key)  # exactly what the translator does: kept in Telugu or not
         words.append({"id": key, "telugu": e["forms"][0].strip(" ,."), "roman": e.get("roman") or key.replace("_", " "),
                       "english": e.get("translate_as") or e.get("note", ""), "heard": n, "known": known})
     return {"met": len(words), "known": sum(w["known"] for w in words), "hearings": sum(w["heard"] for w in words),
             "learn_after": LEARN_AFTER, "words": words}
+
+
+def calls():
+    """The calls the story keeper saved, newest first, with what the home screen and call list need."""
+    out = []
+    for f in sorted(CALLS_ROOT.glob("*/call.json"), reverse=True):
+        try:
+            c = json.load(open(f, encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        story = c.get("story") or {}
+        words = c.get("words") or []
+        out.append({
+            "id": c["id"], "caller": c.get("caller", "Grandma"), "started": c.get("started"),
+            "duration_s": c.get("duration_s", 0), "title": story.get("title") or f"Call with {c.get('caller', 'Grandma')}",
+            "summary": story.get("summary", ""), "stories": [s.get("title") for s in story.get("stories") or []],
+            "lines": len(c.get("lines") or []), "words": len(words),
+            "new_words": sum(1 for w in words if w.get("status") == "new"),
+            "pictures": [p["image"] for p in (l.get("picture") for l in c.get("lines") or []) if p and p.get("image")][:6],
+            "page": f"/calls/{c['id']}/index.html" if (f.parent / "index.html").exists() else None,
+        })
+    return out
 
 
 def make_handler(garden):
@@ -82,11 +111,14 @@ def make_handler(garden):
                 self._send(200, garden.snapshot())
             elif path == "/api/progress":
                 self._send(200, progress() or {"met": 0})
-            elif (SHARED.match(path) or CALLS.match(path)) and (ROOT / path[1:]).is_file():
+            elif path == "/api/calls":
+                self._send(200, calls())
+            elif (SHARED.match(path) and (ROOT / path[1:]).is_file()) or (CALLS.match(path) and (CALLS_ROOT / path[len("/calls/"):]).is_file()):
+                file = ROOT / path[1:] if SHARED.match(path) else CALLS_ROOT / path[len("/calls/"):]
                 ctype = "audio/mp4" if path.endswith(".m4a") else mimetypes.guess_type(path)[0] or "application/octet-stream"
                 if ctype == "text/html":
                     ctype = "text/html; charset=utf-8"
-                self._send(200, (ROOT / path[1:]).read_bytes(), ctype + ("; charset=utf-8" if ctype.endswith("json") else ""))
+                self._send(200, file.read_bytes(), ctype + ("; charset=utf-8" if ctype.endswith("json") else ""))
             else:
                 self._send(404, {"error": "not found"})
 

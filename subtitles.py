@@ -289,7 +289,8 @@ class Captioner:
             print(f"Picture lookup failed: {type(e).__name__}: {e}", flush=True)
             return None
         if card:
-            broadcast({"type": "picture", "id": seg_id, **card})
+            # "id" is the picture's own id (Weave looks it up in the library); "line" says which line it belongs to
+            broadcast({"type": "picture", **card, "line": seg_id})
             print(f"  [picture: {card['name']}]", flush=True)
         return card
 

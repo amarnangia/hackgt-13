@@ -87,7 +87,7 @@ function showPicture(m) {
   pop.classList.add("show");
   clearTimeout(popupTimer);
   popupTimer = setTimeout(() => pop.classList.remove("show"), 9000);
-  const el = byId[m.id];
+  const el = byId[m.line ?? m.id];
   if (el) {
     const card = document.createElement("div"); card.className = "card";
     const img = document.createElement("img"); img.className = "thumb"; img.src = "/" + m.image;

@@ -26,6 +26,8 @@ Everything in this folder is a layer on top of the translator. It reads the team
    Drag it anywhere and resize it; the text scales. Tap an underlined word for its picture and meaning.
    Needs Chrome (it uses Document Picture-in-Picture); in other browsers use the full page.
 
+**Weave opens the live call by itself** when `subtitles.py` starts (from the home screen; if you go back home during a call it stays there). When you stop `subtitles.py`, Weave shows the call's story (title, summary, stories, pictures, words) with a link to the full story page, and the home screen lists every saved call from `calls/`, newest first.
+
 The badge at the top says **LIVE** when it's reading `subtitles.py` (port 8765). If you open the page first,
 it plays a demo call and switches to the live call by itself once `subtitles.py` starts.
 

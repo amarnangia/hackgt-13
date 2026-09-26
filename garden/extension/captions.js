@@ -64,7 +64,7 @@ function handle(side, m) {
     if (m.route === "english") { l.english = true; } else { l.pending = true; translating(+1); }
     return render();
   }
-  const l = st.byKey[key(m.id)] || (m.type === "picture" ? st.lines.filter((x) => x.side === side).at(-1) : null);
+  const l = st.byKey[key(m.type === "picture" && m.line != null ? m.line : m.id)] || (m.type === "picture" ? st.lines.filter((x) => x.side === side).at(-1) : null);
   if (!l) return;
   if (m.type === "english") {
     if (l.pending) { l.pending = false; translating(-1); }
