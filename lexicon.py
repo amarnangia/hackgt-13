@@ -35,6 +35,8 @@ class Lexicon:
         """Replace known words with their fixed English so the translator can't get them wrong."""
         for pattern, form, entry in self._patterns.get(lang, []):
             # Inflected forms carry their own grammar: ఆటోలో is "in an auto-rickshaw", not just "auto-rickshaw".
+            if entry.get("substitute") is False:
+                continue  # the translator already knows this word; substituting it garbled sentences
             english = entry.get("translate_forms", {}).get(form, entry.get("translate_as"))
             if english:
                 text = pattern.sub(english, text)

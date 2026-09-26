@@ -1,61 +1,1350 @@
 {
-  "_about": "`roman` is the Telugu word (romanized) kept in the English sentence once the listener knows it; `start_known` words are kept from the start. Hard-coded words and phrases. `forms` are the spellings to match (put inflected forms like ఆటోలో too; a leading ^ means only at the start of what was said). `translate_as` replaces the match before translation so it always comes out the same (use plain English the grandkid understands; the card shows the Telugu name and picture); `translate_forms` overrides it per inflected form (ఆటోలో -> in an auto-rickshaw). `category` drives image cards (food, vehicle, place, clothing, festival) and explanation cards (family, idiom, slang). `note` is the one-line explanation shown on the card.",
-  "te": [
-    {"id": "pulihora", "forms": ["పులిహోర", "పులిహోరా"], "translate_as": "tamarind rice", "roman": "pulihora", "category": "food", "note": "Tangy tamarind rice, a festival and temple favourite"},
-    {"id": "pesarattu", "forms": ["పెసరట్టు"], "translate_as": "green gram dosa", "roman": "pesarattu", "category": "food", "note": "Green moong dal dosa, often eaten with ginger chutney"},
-    {"id": "dosa", "forms": ["దోసె", "దోశ", "దోసెలు"], "translate_as": "dosa", "category": "food", "note": "Thin crispy rice-and-lentil crepe"},
-    {"id": "idli", "forms": ["ఇడ్లీ", "ఇడ్లీలు"], "translate_as": "idli", "category": "food", "note": "Soft steamed rice cakes"},
-    {"id": "upma", "forms": ["ఉప్మా"], "translate_as": "upma", "roman": "upma", "category": "food", "note": "Savoury semolina breakfast"},
-    {"id": "pappu", "forms": ["పప్పు అన్నం", "పప్పన్నం", "పప్పు"], "translate_as": "dal", "translate_forms": {"పప్పు అన్నం": "dal rice", "పప్పన్నం": "dal rice"}, "roman": "pappu", "category": "food", "note": "Everyday lentil dal"},
-    {"id": "sambar", "forms": ["సాంబార్", "సాంబారు"], "translate_as": "sambar", "category": "food", "note": "Lentil and vegetable stew with tamarind"},
-    {"id": "rasam", "forms": ["రసం"], "translate_as": "rasam", "category": "food", "note": "Thin peppery tamarind soup"},
-    {"id": "perugu_annam", "forms": ["పెరుగు అన్నం", "పెరుగన్నం"], "translate_as": "curd rice", "roman": "perugu annam", "category": "food", "note": "Rice mixed with yogurt, the comfort food that ends a meal"},
-    {"id": "avakaya", "forms": ["ఆవకాయ"], "translate_as": "mango pickle", "roman": "avakaya", "category": "food", "note": "Spicy raw-mango pickle, made every summer"},
-    {"id": "gongura", "forms": ["గోంగూర"], "translate_as": "sorrel leaves", "roman": "gongura", "category": "food", "note": "Sour sorrel leaves, famous in Andhra pickles and curries"},
-    {"id": "biryani", "forms": ["బిర్యానీ"], "translate_as": "biryani", "category": "food", "note": "Spiced layered rice with meat or vegetables"},
-    {"id": "laddu", "forms": ["లడ్డు", "లడ్డూ", "లడ్డూలు"], "translate_as": "laddus", "roman": "laddu", "category": "food", "note": "Round sweet made for festivals and temples"},
-    {"id": "ariselu", "forms": ["అరిసెలు"], "translate_as": "rice sweets", "roman": "ariselu", "category": "food", "note": "Fried rice-flour and jaggery sweet made for Sankranti"},
-    {"id": "bobbatlu", "forms": ["బొబ్బట్లు"], "translate_as": "sweet flatbread", "roman": "bobbatlu", "category": "food", "note": "Sweet flatbread stuffed with lentils and jaggery"},
-    {"id": "chapati", "forms": ["చపాతీ", "చపాతీలు"], "translate_as": "chapati", "category": "food", "note": "Soft whole-wheat flatbread"},
-
-    {"id": "auto", "forms": ["ఆటోలో", "ఆటోలొ", "ఆటో"], "translate_as": "auto-rickshaw", "translate_forms": {"ఆటోలో": "in an auto-rickshaw", "ఆటోలొ": "in an auto-rickshaw"}, "roman": "auto", "category": "vehicle", "note": "Three-wheeled taxi, the usual way to get around town"},
-    {"id": "rickshaw", "forms": ["రిక్షాలో", "రిక్షా"], "translate_as": "rickshaw", "translate_forms": {"రిక్షాలో": "in a rickshaw"}, "category": "vehicle", "note": "Pedal or hand-pulled passenger cart"},
-
-    {"id": "temple", "forms": ["గుడికి", "గుడిలో", "గుడి"], "translate_as": "temple", "translate_forms": {"గుడికి": "to the temple", "గుడిలో": "at the temple"}, "roman": "gudi", "category": "place", "note": "Local Hindu temple"},
-    {"id": "polam", "forms": ["పొలానికి", "పొలంలో", "పొలం"], "translate_as": "farm field", "translate_forms": {"పొలానికి": "to the farm field", "పొలంలో": "in the farm field"}, "roman": "polam", "category": "place", "note": "The family's paddy or crop field"},
-    {"id": "santa", "forms": ["సంతకి", "సంతలో", "సంత"], "translate_as": "weekly village market", "translate_forms": {"సంతకి": "to the weekly village market", "సంతలో": "at the weekly village market"}, "roman": "santa", "category": "place", "note": "Open-air market held on one day each week"},
-    {"id": "ooru", "forms": ["ఊరికి", "ఊర్లో", "ఊరు"], "category": "place", "note": "The family's native village or town"},
-
-    {"id": "saree", "forms": ["చీరలో", "చీర", "చీరలు"], "translate_as": "saree", "translate_forms": {"చీరలో": "in a saree", "చీరలు": "sarees"}, "roman": "cheera", "category": "clothing", "note": "Long draped cloth worn by women"},
-    {"id": "pancha", "forms": ["పంచె", "పంచ"], "translate_as": "pancha (dhoti)", "roman": "pancha", "category": "clothing", "note": "White cloth wrapped at the waist, worn by men"},
-    {"id": "langa_voni", "forms": ["లంగా వోణీ", "లంగావోణి"], "translate_as": "langa voni (half-saree)", "roman": "langa voni", "category": "clothing", "note": "Skirt, blouse and drape worn by girls"},
-
-    {"id": "sankranti", "forms": ["సంక్రాంతికి", "సంక్రాంతి"], "translate_as": "Sankranti", "translate_forms": {"సంక్రాంతికి": "for Sankranti"}, "category": "festival", "note": "January harvest festival: kites, rangoli and ariselu"},
-    {"id": "ugadi", "forms": ["ఉగాదికి", "ఉగాది"], "translate_as": "Ugadi", "translate_forms": {"ఉగాదికి": "for Ugadi"}, "category": "festival", "note": "Telugu New Year, celebrated with ugadi pachadi"},
-    {"id": "diwali", "forms": ["దీపావళికి", "దీపావళి"], "translate_as": "Diwali", "translate_forms": {"దీపావళికి": "for Diwali"}, "category": "festival", "note": "Festival of lights with lamps, sweets and fireworks"},
-    {"id": "vinayaka_chavithi", "forms": ["వినాయక చవితి", "వినాయకచవితి"], "translate_as": "Vinayaka Chavithi", "category": "festival", "note": "Ganesha's birthday, with clay idols and sweets"},
-    {"id": "bathukamma", "forms": ["బతుకమ్మ"], "translate_as": "Bathukamma", "category": "festival", "note": "Telangana flower festival celebrated by women"},
-
-    {"id": "nanna_vocative", "forms": ["నాన్నా,", "నాన్న,", "నాన్నా.", "నాన్న.", "నాన్నా!", "నాన్న!", "నాన్నా?", "నాన్న?", "Nanna,", "Nannaa,", "^నాన్నా", "^నాన్న"], "translate_as": "dear,", "translate_forms": {"^నాన్నా": "dear,", "^నాన్న": "dear,", "నాన్నా.": "dear.", "నాన్న.": "dear.", "నాన్నా!": "dear!", "నాన్న!": "dear!", "నాన్నా?": "dear?", "నాన్న?": "dear?"}, "roman": "Nanna,", "start_known": true, "category": "family", "note": "'Nanna' literally means dad, but elders also use it affectionately for a son or grandson"},
-    {"id": "amma", "forms": ["అమ్మా,", "అమ్మ"], "translate_as": "mom", "roman": "Amma", "start_known": true, "category": "family", "note": "Mother"},
-    {"id": "ammamma", "forms": ["అమ్మమ్మ"], "translate_as": "grandma", "roman": "Ammamma", "start_known": true, "category": "family", "note": "Mother's mother"},
-    {"id": "nanamma", "forms": ["నానమ్మ", "బామ్మ"], "translate_as": "grandma", "roman": "Nanamma", "start_known": true, "category": "family", "note": "Father's mother"},
-    {"id": "thatayya", "forms": ["తాతయ్య", "తాత"], "translate_as": "grandpa", "roman": "Thatayya", "start_known": true, "category": "family", "note": "Grandfather"},
-    {"id": "mamayya", "forms": ["మామయ్య"], "translate_as": "uncle", "roman": "Mamayya", "category": "family", "note": "Mother's brother"},
-    {"id": "attayya", "forms": ["అత్తయ్య"], "translate_as": "aunt", "roman": "Attayya", "category": "family", "note": "Father's sister"},
-
-    {"id": "bagunnava", "forms": ["బాగున్నావా", "బాగున్నారా"], "translate_as": "are you doing well", "roman": "bagunnava", "category": "phrase", "note": "'Are you doing well?', the usual Telugu greeting"},
-    {"id": "annam_tinnava", "forms": ["అన్నం తిన్నావా", "భోజనం చేశావా"], "translate_as": "have you eaten", "roman": "annam tinnava", "category": "idiom", "note": "'Did you eat?' is how Telugu elders say 'How are you? I care about you.'"},
-    {"id": "andani_draksha", "forms": ["అందని ద్రాక్ష పుల్లన"], "category": "idiom", "note": "'Grapes out of reach are sour': pretending you didn't want what you couldn't get"},
-    {"id": "alasyam_amrutham", "forms": ["ఆలస్యం అమృతం విషం"], "category": "idiom", "note": "'Delay turns nectar into poison': don't put off good things"},
-    {"id": "chettu_kinda", "forms": ["చెట్టు పేరు చెప్పి కాయలు అమ్ముకోవడం"], "category": "idiom", "note": "'Selling fruit by naming the tree': cashing in on someone else's reputation"}
-  ],
-  "en": [
-    {"id": "fire", "forms": ["was fire", "is fire", "so fire"], "category": "slang", "note": "'Fire' means amazing or excellent"},
-    {"id": "no_cap", "forms": ["no cap"], "category": "slang", "note": "'No cap' means 'no lie, I'm serious'"},
-    {"id": "bombed", "forms": ["bombed"], "category": "slang", "note": "'Bombed' a test means did very badly"},
-    {"id": "im_dead", "forms": ["i'm dead", "im dead", "i'm so dead"], "category": "slang", "note": "Either 'that's hilarious' or 'I'm in big trouble', depending on context"},
-    {"id": "lowkey", "forms": ["lowkey"], "category": "slang", "note": "'Lowkey' means 'a little' or 'secretly'"},
-    {"id": "slay", "forms": ["slay", "slayed"], "category": "slang", "note": "Did something really well"}
-  ]
+ "_about": "`roman` is the Telugu word (romanized) kept in the English sentence once the listener knows it; `start_known` words are kept from the start. Hard-coded words and phrases. `forms` are the spellings to match (put inflected forms like ఆటోలో too; a leading ^ means only at the start of what was said). `translate_as` replaces the match before translation so it always comes out the same (use plain English the grandkid understands; the card shows the Telugu name and picture); `translate_forms` overrides it per inflected form (ఆటోలో -> in an auto-rickshaw). `category` drives image cards (food, vehicle, place, clothing, festival) and explanation cards (family, idiom, slang). `note` is the one-line explanation shown on the card. `substitute: false` leaves a word for the translator (it already knows it) and `match_english` lists the English it may use.",
+ "te": [
+  {
+   "id": "pulihora",
+   "forms": [
+    "పులిహోర",
+    "పులిహోరా",
+    "పులిహార"
+   ],
+   "translate_as": "tamarind rice",
+   "roman": "pulihora",
+   "category": "food",
+   "note": "Tangy tamarind rice, a festival and temple favourite"
+  },
+  {
+   "id": "pesarattu",
+   "forms": [
+    "పెసరట్టు"
+   ],
+   "translate_as": "green gram dosa",
+   "roman": "pesarattu",
+   "category": "food",
+   "note": "Green moong dal dosa, often eaten with ginger chutney"
+  },
+  {
+   "id": "dosa",
+   "forms": [
+    "దోసె",
+    "దోశ",
+    "దోసెలు"
+   ],
+   "translate_as": "dosa",
+   "category": "food",
+   "note": "Thin crispy rice-and-lentil crepe"
+  },
+  {
+   "id": "idli",
+   "forms": [
+    "ఇడ్లీ",
+    "ఇడ్లీలు"
+   ],
+   "translate_as": "idli",
+   "category": "food",
+   "note": "Soft steamed rice cakes"
+  },
+  {
+   "id": "upma",
+   "forms": [
+    "ఉప్మా"
+   ],
+   "translate_as": "upma",
+   "roman": "upma",
+   "category": "food",
+   "note": "Savoury semolina breakfast"
+  },
+  {
+   "id": "pappu",
+   "forms": [
+    "పప్పు అన్నం",
+    "పప్పన్నం",
+    "పప్పు"
+   ],
+   "translate_as": "dal",
+   "translate_forms": {
+    "పప్పు అన్నం": "dal rice",
+    "పప్పన్నం": "dal rice"
+   },
+   "roman": "pappu",
+   "category": "food",
+   "note": "Everyday lentil dal"
+  },
+  {
+   "id": "sambar",
+   "forms": [
+    "సాంబార్",
+    "సాంబారు"
+   ],
+   "translate_as": "sambar",
+   "category": "food",
+   "note": "Lentil and vegetable stew with tamarind"
+  },
+  {
+   "id": "rasam",
+   "forms": [
+    "రసం"
+   ],
+   "translate_as": "rasam",
+   "category": "food",
+   "note": "Thin peppery tamarind soup"
+  },
+  {
+   "id": "perugu_annam",
+   "forms": [
+    "పెరుగు అన్నం",
+    "పెరుగన్నం",
+    "పెరుగుఅన్నం"
+   ],
+   "translate_as": "curd rice",
+   "roman": "perugu annam",
+   "category": "food",
+   "note": "Rice mixed with yogurt, the comfort food that ends a meal"
+  },
+  {
+   "id": "avakaya",
+   "forms": [
+    "ఆవకాయ పెట్టారు",
+    "ఆవకాయ పెట్టాను",
+    "ఆవకాయ పెట్టాము",
+    "ఆవకాయ పెట్టింది",
+    "ఆవకాయ పచ్చడి పెట్టింది",
+    "ఆవకాయ",
+    "ఆవకాయి",
+    "ఆవకాయ పచ్చడి",
+    "ఆవకాయని"
+   ],
+   "translate_as": "mango pickle",
+   "roman": "avakaya",
+   "category": "food",
+   "note": "Spicy raw-mango pickle, made every summer",
+   "translate_forms": {
+    "ఆవకాయ పచ్చడి": "mango pickle",
+    "ఆవకాయ పచ్చడి పెట్టింది": "made mango pickle",
+    "ఆవకాయ పెట్టింది": "made mango pickle",
+    "ఆవకాయ పెట్టాము": "we made mango pickle",
+    "ఆవకాయ పెట్టాను": "I made mango pickle",
+    "ఆవకాయ పెట్టారు": "made mango pickle"
+   }
+  },
+  {
+   "id": "gongura",
+   "forms": [
+    "గోంగూర",
+    "గోంగూర పచ్చడి",
+    "గోంగూరా",
+    "గోమ్గూర",
+    "గోమ్గూరా"
+   ],
+   "translate_as": "sorrel leaves",
+   "roman": "gongura",
+   "category": "food",
+   "note": "Sour sorrel leaves, famous in Andhra pickles and curries"
+  },
+  {
+   "id": "biryani",
+   "forms": [
+    "బిర్యానీ"
+   ],
+   "translate_as": "biryani",
+   "category": "food",
+   "note": "Spiced layered rice with meat or vegetables"
+  },
+  {
+   "id": "laddu",
+   "forms": [
+    "లడ్డు",
+    "లడ్డూ",
+    "లడ్డూలు",
+    "లడ్లు"
+   ],
+   "translate_as": "laddus",
+   "roman": "laddu",
+   "category": "food",
+   "note": "Round sweet made for festivals and temples"
+  },
+  {
+   "id": "ariselu",
+   "forms": [
+    "అరిసెలు",
+    "అరిశెలు"
+   ],
+   "translate_as": "rice sweets",
+   "roman": "ariselu",
+   "category": "food",
+   "note": "Fried rice-flour and jaggery sweet made for Sankranti"
+  },
+  {
+   "id": "bobbatlu",
+   "forms": [
+    "బొబ్బట్లు"
+   ],
+   "translate_as": "sweet flatbread",
+   "roman": "bobbatlu",
+   "category": "food",
+   "note": "Sweet flatbread stuffed with lentils and jaggery"
+  },
+  {
+   "id": "chapati",
+   "forms": [
+    "చపాతీ",
+    "చపాతీలు"
+   ],
+   "translate_as": "chapati",
+   "category": "food",
+   "note": "Soft whole-wheat flatbread"
+  },
+  {
+   "id": "auto",
+   "forms": [
+    "ఆటోలో",
+    "ఆటోలొ",
+    "ఆటో",
+    "ఆటోకి"
+   ],
+   "translate_as": "auto-rickshaw",
+   "translate_forms": {
+    "ఆటోలో": "in an auto-rickshaw",
+    "ఆటోలొ": "in an auto-rickshaw",
+    "ఆటోకి": "for the auto-rickshaw"
+   },
+   "roman": "auto",
+   "category": "vehicle",
+   "note": "Three-wheeled taxi, the usual way to get around town"
+  },
+  {
+   "id": "rickshaw",
+   "forms": [
+    "రిక్షాలో",
+    "రిక్షా"
+   ],
+   "translate_as": "rickshaw",
+   "translate_forms": {
+    "రిక్షాలో": "in a rickshaw"
+   },
+   "category": "vehicle",
+   "note": "Pedal or hand-pulled passenger cart"
+  },
+  {
+   "id": "temple",
+   "forms": [
+    "గుడికి",
+    "గుడిలో",
+    "గుడి",
+    "గుళ్ళో",
+    "గుడిలొ"
+   ],
+   "translate_as": "temple",
+   "translate_forms": {
+    "గుడికి": "to the temple",
+    "గుడిలో": "at the temple",
+    "గుళ్ళో": "at the temple",
+    "గుడిలొ": "at the temple"
+   },
+   "roman": "gudi",
+   "category": "place",
+   "note": "Local Hindu temple"
+  },
+  {
+   "id": "polam",
+   "forms": [
+    "పొలానికి",
+    "పొలంలో",
+    "పొలం"
+   ],
+   "translate_as": "farm field",
+   "translate_forms": {
+    "పొలానికి": "to the farm field",
+    "పొలంలో": "in the farm field"
+   },
+   "roman": "polam",
+   "category": "place",
+   "note": "The family's paddy or crop field"
+  },
+  {
+   "id": "santa",
+   "forms": [
+    "సంతకి",
+    "సంతలో",
+    "సంత"
+   ],
+   "translate_as": "weekly village market",
+   "translate_forms": {
+    "సంతకి": "to the weekly village market",
+    "సంతలో": "at the weekly village market"
+   },
+   "roman": "santa",
+   "category": "place",
+   "note": "Open-air market held on one day each week"
+  },
+  {
+   "id": "ooru",
+   "forms": [
+    "ఊరికి",
+    "ఊర్లో",
+    "ఊరు"
+   ],
+   "category": "place",
+   "note": "The family's native village or town"
+  },
+  {
+   "id": "saree",
+   "forms": [
+    "చీరలో",
+    "చీర",
+    "చీరలు",
+    "చీరె",
+    "చీరెలు"
+   ],
+   "translate_as": "saree",
+   "translate_forms": {
+    "చీరలో": "in a saree",
+    "చీరలు": "sarees"
+   },
+   "roman": "cheera",
+   "category": "clothing",
+   "note": "Long draped cloth worn by women"
+  },
+  {
+   "id": "pancha",
+   "forms": [
+    "పంచె",
+    "పంచ"
+   ],
+   "translate_as": "pancha (dhoti)",
+   "roman": "pancha",
+   "category": "clothing",
+   "note": "White cloth wrapped at the waist, worn by men"
+  },
+  {
+   "id": "langa_voni",
+   "forms": [
+    "లంగా వోణీ",
+    "లంగావోణి",
+    "లంగా ఓని",
+    "లంగాఓని",
+    "లంగా వోని"
+   ],
+   "translate_as": "langa voni (half-saree)",
+   "roman": "langa voni",
+   "category": "clothing",
+   "note": "Skirt, blouse and drape worn by girls"
+  },
+  {
+   "id": "sankranti",
+   "forms": [
+    "సంక్రాంతికి",
+    "సంక్రాంతి"
+   ],
+   "translate_as": "Sankranti",
+   "translate_forms": {
+    "సంక్రాంతికి": "for Sankranti"
+   },
+   "category": "festival",
+   "note": "January harvest festival: kites, rangoli and ariselu"
+  },
+  {
+   "id": "ugadi",
+   "forms": [
+    "ఉగాదికి",
+    "ఉగాది"
+   ],
+   "translate_as": "Ugadi",
+   "translate_forms": {
+    "ఉగాదికి": "for Ugadi"
+   },
+   "category": "festival",
+   "note": "Telugu New Year, celebrated with ugadi pachadi"
+  },
+  {
+   "id": "diwali",
+   "forms": [
+    "దీపావళికి",
+    "దీపావళి",
+    "దీపావಳికి",
+    "దీపావಳಿ"
+   ],
+   "translate_as": "Diwali",
+   "translate_forms": {
+    "దీపావళికి": "for Diwali"
+   },
+   "category": "festival",
+   "note": "Festival of lights with lamps, sweets and fireworks"
+  },
+  {
+   "id": "vinayaka_chavithi",
+   "forms": [
+    "వినాయక చవితి",
+    "వినాయకచవితి"
+   ],
+   "translate_as": "Vinayaka Chavithi",
+   "category": "festival",
+   "note": "Ganesha's birthday, with clay idols and sweets"
+  },
+  {
+   "id": "bathukamma",
+   "forms": [
+    "బతుకమ్మ"
+   ],
+   "translate_as": "Bathukamma",
+   "category": "festival",
+   "note": "Telangana flower festival celebrated by women"
+  },
+  {
+   "id": "nanna_vocative",
+   "forms": [
+    "నాన్నా,",
+    "నాన్న,",
+    "నాన్నా.",
+    "నాన్న.",
+    "నాన్నా!",
+    "నాన్న!",
+    "నాన్నా?",
+    "నాన్న?",
+    "Nanna,",
+    "Nannaa,",
+    "^నాన్నా",
+    "^నాన్న"
+   ],
+   "translate_as": "dear,",
+   "translate_forms": {
+    "^నాన్నా": "dear,",
+    "^నాన్న": "dear,",
+    "నాన్నా.": "dear.",
+    "నాన్న.": "dear.",
+    "నాన్నా!": "dear!",
+    "నాన్న!": "dear!",
+    "నాన్నా?": "dear?",
+    "నాన్న?": "dear?"
+   },
+   "roman": "Nanna,",
+   "start_known": true,
+   "category": "family",
+   "note": "'Nanna' literally means dad, but elders also use it affectionately for a son or grandson"
+  },
+  {
+   "id": "amma",
+   "forms": [
+    "అమ్మా,",
+    "అమ్మ"
+   ],
+   "translate_as": "mom",
+   "roman": "Amma",
+   "start_known": true,
+   "category": "family",
+   "note": "Mother"
+  },
+  {
+   "id": "ammamma",
+   "forms": [
+    "అమ్మమ్మ"
+   ],
+   "translate_as": "grandma",
+   "roman": "Ammamma",
+   "start_known": true,
+   "category": "family",
+   "note": "Mother's mother"
+  },
+  {
+   "id": "nanamma",
+   "forms": [
+    "నానమ్మ",
+    "బామ్మ"
+   ],
+   "translate_as": "grandma",
+   "roman": "Nanamma",
+   "start_known": true,
+   "category": "family",
+   "note": "Father's mother"
+  },
+  {
+   "id": "thatayya",
+   "forms": [
+    "తాతయ్య",
+    "తాత"
+   ],
+   "translate_as": "grandpa",
+   "roman": "Thatayya",
+   "start_known": true,
+   "category": "family",
+   "note": "Grandfather"
+  },
+  {
+   "id": "mamayya",
+   "forms": [
+    "మామయ్య"
+   ],
+   "translate_as": "uncle",
+   "roman": "Mamayya",
+   "category": "family",
+   "note": "Mother's brother"
+  },
+  {
+   "id": "attayya",
+   "forms": [
+    "అత్తయ్య"
+   ],
+   "translate_as": "aunt",
+   "roman": "Attayya",
+   "category": "family",
+   "note": "Father's sister"
+  },
+  {
+   "id": "bagunnava",
+   "forms": [
+    "బాగున్నావా",
+    "బాగున్నారా"
+   ],
+   "translate_as": "are you doing well",
+   "roman": "bagunnava",
+   "category": "phrase",
+   "note": "'Are you doing well?', the usual Telugu greeting"
+  },
+  {
+   "id": "annam_tinnava",
+   "forms": [
+    "అన్నం తిన్నావా",
+    "భోజనం చేశావా"
+   ],
+   "translate_as": "have you eaten",
+   "roman": "annam tinnava",
+   "category": "idiom",
+   "note": "'Did you eat?' is how Telugu elders say 'How are you? I care about you.'"
+  },
+  {
+   "id": "andani_draksha",
+   "forms": [
+    "అందని ద్రాక్ష పుల్లన"
+   ],
+   "category": "idiom",
+   "note": "'Grapes out of reach are sour': pretending you didn't want what you couldn't get"
+  },
+  {
+   "id": "alasyam_amrutham",
+   "forms": [
+    "ఆలస్యం అమృతం విషం"
+   ],
+   "category": "idiom",
+   "note": "'Delay turns nectar into poison': don't put off good things"
+  },
+  {
+   "id": "chettu_kinda",
+   "forms": [
+    "చెట్టు పేరు చెప్పి కాయలు అమ్ముకోవడం"
+   ],
+   "category": "idiom",
+   "note": "'Selling fruit by naming the tree': cashing in on someone else's reputation"
+  },
+  {
+   "id": "avunu",
+   "forms": [
+    "అవును",
+    "అవునా"
+   ],
+   "translate_as": "yes",
+   "translate_forms": {
+    "అవునా": "really"
+   },
+   "roman": "avunu",
+   "category": "phrase",
+   "note": "Yes"
+  },
+  {
+   "id": "sare",
+   "forms": [
+    "సరే",
+    "సరేనా"
+   ],
+   "translate_as": "okay",
+   "translate_forms": {
+    "సరేనా": "okay?"
+   },
+   "roman": "sare",
+   "category": "phrase",
+   "note": "Okay / alright"
+  },
+  {
+   "id": "jagratta",
+   "forms": [
+    "జాగ్రత్తగా ఉండు",
+    "జాగ్రత్త"
+   ],
+   "translate_as": "take care",
+   "roman": "jagratta",
+   "category": "phrase",
+   "note": "Take care; elders say it at the end of every call"
+  },
+  {
+   "id": "baaga_chaduvuko",
+   "forms": [
+    "బాగా చదువుకో",
+    "బాగా చదువు"
+   ],
+   "translate_as": "study well",
+   "roman": "baaga chaduvuko",
+   "category": "phrase",
+   "note": "Study well"
+  },
+  {
+   "id": "eppudu_vastavu",
+   "forms": [
+    "ఎప్పుడు వస్తావు",
+    "ఎప్పుడు వస్తావ్",
+    "ఎప్పుడొస్తావ్"
+   ],
+   "translate_as": "when will you come",
+   "roman": "eppudu vastavu",
+   "category": "phrase",
+   "note": "When will you come (home)?"
+  },
+  {
+   "id": "em_chestunnav",
+   "forms": [
+    "ఏం చేస్తున్నావ్",
+    "ఏం చేస్తున్నావు",
+    "ఏమి చేస్తున్నావు"
+   ],
+   "translate_as": "what are you doing",
+   "roman": "em chestunnav",
+   "category": "phrase",
+   "note": "What are you doing?"
+  },
+  {
+   "id": "illu",
+   "forms": [
+    "ఇంటికి",
+    "ఇంట్లో",
+    "ఇల్లు"
+   ],
+   "translate_as": "home",
+   "translate_forms": {
+    "ఇంటికి": "home",
+    "ఇంట్లో": "at home"
+   },
+   "roman": "illu",
+   "category": "place",
+   "note": "Home, the house",
+   "substitute": false,
+   "match_english": [
+    "home",
+    "house"
+   ]
+  },
+  {
+   "id": "neellu",
+   "forms": [
+    "నీళ్ళు",
+    "నీళ్లు",
+    "నీళ్ళ",
+    "నీళ్ల"
+   ],
+   "translate_as": "water",
+   "roman": "neellu",
+   "category": "food",
+   "note": "Water",
+   "translate_forms": {
+    "నీళ్ళ": "water",
+    "నీళ్ల": "water"
+   },
+   "substitute": false,
+   "match_english": [
+    "water"
+   ]
+  },
+  {
+   "id": "annam",
+   "forms": [
+    "అన్నం"
+   ],
+   "translate_as": "rice",
+   "roman": "annam",
+   "category": "food",
+   "note": "Cooked rice, the centre of every meal",
+   "substitute": false,
+   "match_english": [
+    "rice"
+   ]
+  },
+  {
+   "id": "bhojanam",
+   "forms": [
+    "భోజనం"
+   ],
+   "translate_as": "meal",
+   "roman": "bhojanam",
+   "category": "food",
+   "note": "A full meal",
+   "substitute": false,
+   "match_english": [
+    "meal",
+    "food"
+   ]
+  },
+  {
+   "id": "kura",
+   "forms": [
+    "కూర",
+    "కూరలు"
+   ],
+   "translate_as": "curry",
+   "roman": "kura",
+   "category": "food",
+   "note": "Vegetable or meat curry eaten with rice",
+   "substitute": false,
+   "match_english": [
+    "curry",
+    "curries"
+   ]
+  },
+  {
+   "id": "pachadi",
+   "forms": [
+    "పచ్చడి"
+   ],
+   "translate_as": "chutney",
+   "roman": "pachadi",
+   "category": "food",
+   "note": "Chutney or fresh pickle"
+  },
+  {
+   "id": "paalu",
+   "forms": [
+    "పాలు"
+   ],
+   "translate_as": "milk",
+   "roman": "paalu",
+   "category": "food",
+   "note": "Milk",
+   "substitute": false,
+   "match_english": [
+    "milk"
+   ]
+  },
+  {
+   "id": "perugu",
+   "forms": [
+    "పెరుగు"
+   ],
+   "translate_as": "yogurt",
+   "roman": "perugu",
+   "category": "food",
+   "note": "Homemade yogurt (curd)",
+   "substitute": false,
+   "match_english": [
+    "yogurt",
+    "curd"
+   ]
+  },
+  {
+   "id": "neyyi",
+   "forms": [
+    "నెయ్యి"
+   ],
+   "translate_as": "ghee",
+   "roman": "neyyi",
+   "category": "food",
+   "note": "Clarified butter",
+   "substitute": false,
+   "match_english": [
+    "ghee"
+   ]
+  },
+  {
+   "id": "mamidi",
+   "forms": [
+    "మామిడి పండ్లు",
+    "మామిడి పండు",
+    "మామిడికాయ",
+    "మామిడి"
+   ],
+   "translate_as": "mangoes",
+   "translate_forms": {
+    "మామిడి పండు": "mango",
+    "మామిడికాయ": "raw mango",
+    "మామిడి": "mango"
+   },
+   "roman": "mamidi",
+   "category": "food",
+   "note": "Mango; summer means mangoes and avakaya",
+   "substitute": false,
+   "match_english": [
+    "mangoes",
+    "mango"
+   ]
+  },
+  {
+   "id": "arati",
+   "forms": [
+    "అరటి పండ్లు",
+    "అరటి పండు",
+    "అరటిపండు"
+   ],
+   "translate_as": "bananas",
+   "translate_forms": {
+    "అరటి పండు": "banana",
+    "అరటిపండు": "banana"
+   },
+   "roman": "arati pandu",
+   "category": "food",
+   "note": "Banana",
+   "substitute": false,
+   "match_english": [
+    "bananas",
+    "banana"
+   ]
+  },
+  {
+   "id": "kobbari",
+   "forms": [
+    "కొబ్బరి బొండం",
+    "కొబ్బరి"
+   ],
+   "translate_as": "coconut",
+   "translate_forms": {
+    "కొబ్బరి బొండం": "tender coconut"
+   },
+   "roman": "kobbari",
+   "category": "food",
+   "note": "Coconut",
+   "substitute": false,
+   "match_english": [
+    "coconut"
+   ]
+  },
+  {
+   "id": "bellam",
+   "forms": [
+    "బెల్లం"
+   ],
+   "translate_as": "jaggery",
+   "roman": "bellam",
+   "category": "food",
+   "note": "Unrefined cane sugar used in sweets"
+  },
+  {
+   "id": "payasam",
+   "forms": [
+    "పాయసం"
+   ],
+   "translate_as": "payasam",
+   "roman": "payasam",
+   "category": "food",
+   "note": "Sweet milk pudding made on festivals and birthdays"
+  },
+  {
+   "id": "boorelu",
+   "forms": [
+    "బూరెలు"
+   ],
+   "translate_as": "boorelu",
+   "roman": "boorelu",
+   "category": "food",
+   "note": "Fried sweet dumplings stuffed with lentils and jaggery"
+  },
+  {
+   "id": "jantikalu",
+   "forms": [
+    "జంతికలు"
+   ],
+   "translate_as": "murukku",
+   "roman": "jantikalu",
+   "category": "food",
+   "note": "Crunchy spiral snack"
+  },
+  {
+   "id": "tiffin",
+   "forms": [
+    "టిఫిన్"
+   ],
+   "translate_as": "breakfast",
+   "roman": "tiffin",
+   "category": "food",
+   "note": "Breakfast or a light snack meal"
+  },
+  {
+   "id": "prasadam",
+   "forms": [
+    "ప్రసాదం"
+   ],
+   "translate_as": "prasadam",
+   "roman": "prasadam",
+   "category": "food",
+   "note": "Food blessed at the temple, shared with everyone"
+  },
+  {
+   "id": "akka",
+   "forms": [
+    "అక్క",
+    "అక్కా"
+   ],
+   "translate_as": "older sister",
+   "roman": "akka",
+   "start_known": true,
+   "category": "family",
+   "note": "Older sister (also any older girl cousin)",
+   "substitute": false,
+   "match_english": [
+    "older sister",
+    "elder sister",
+    "sister"
+   ]
+  },
+  {
+   "id": "annayya",
+   "forms": [
+    "అన్నయ్య",
+    "అన్నా"
+   ],
+   "translate_as": "older brother",
+   "roman": "annayya",
+   "start_known": true,
+   "category": "family",
+   "note": "Older brother (also any older boy cousin)",
+   "substitute": false,
+   "match_english": [
+    "older brother",
+    "elder brother",
+    "brother"
+   ]
+  },
+  {
+   "id": "tammudu",
+   "forms": [
+    "తమ్ముడు",
+    "తమ్ముడికి"
+   ],
+   "translate_as": "younger brother",
+   "translate_forms": {
+    "తమ్ముడికి": "to younger brother"
+   },
+   "roman": "tammudu",
+   "category": "family",
+   "note": "Younger brother",
+   "substitute": false,
+   "match_english": [
+    "younger brother",
+    "brother"
+   ]
+  },
+  {
+   "id": "chelli",
+   "forms": [
+    "చెల్లి",
+    "చెల్లెలు"
+   ],
+   "translate_as": "younger sister",
+   "roman": "chelli",
+   "category": "family",
+   "note": "Younger sister",
+   "substitute": false,
+   "match_english": [
+    "younger sister",
+    "sister"
+   ]
+  },
+  {
+   "id": "babai",
+   "forms": [
+    "బాబాయ్",
+    "బాబాయి"
+   ],
+   "translate_as": "uncle",
+   "roman": "babai",
+   "category": "family",
+   "note": "Father's younger brother"
+  },
+  {
+   "id": "pinni",
+   "forms": [
+    "పిన్ని"
+   ],
+   "translate_as": "aunt",
+   "roman": "pinni",
+   "category": "family",
+   "note": "Mother's younger sister"
+  },
+  {
+   "id": "bava",
+   "forms": [
+    "బావ"
+   ],
+   "translate_as": "bava",
+   "roman": "bava",
+   "category": "family",
+   "note": "Brother-in-law, or a cross cousin"
+  },
+  {
+   "id": "manavadu",
+   "forms": [
+    "మనవడు",
+    "మనవడా"
+   ],
+   "translate_as": "grandson",
+   "roman": "manavadu",
+   "category": "family",
+   "note": "Grandson",
+   "substitute": false,
+   "match_english": [
+    "grandson"
+   ]
+  },
+  {
+   "id": "manavaralu",
+   "forms": [
+    "మనవరాలు",
+    "మనవరాళ్ళ",
+    "మనవరాళ్ళు",
+    "మనవరాళ్లు"
+   ],
+   "translate_as": "granddaughter",
+   "roman": "manavaralu",
+   "category": "family",
+   "note": "Granddaughter",
+   "translate_forms": {
+    "మనవరాళ్ళ": "granddaughters",
+    "మనవరాళ్ళు": "granddaughters",
+    "మనవరాళ్లు": "granddaughters"
+   },
+   "substitute": false,
+   "match_english": [
+    "granddaughters",
+    "granddaughter"
+   ]
+  },
+  {
+   "id": "badi",
+   "forms": [
+    "బడికి",
+    "బడి"
+   ],
+   "translate_as": "school",
+   "translate_forms": {
+    "బడికి": "to school"
+   },
+   "roman": "badi",
+   "category": "place",
+   "note": "School",
+   "substitute": false,
+   "match_english": [
+    "school"
+   ]
+  },
+  {
+   "id": "railu",
+   "forms": [
+    "రైలులో",
+    "రైలు"
+   ],
+   "translate_as": "train",
+   "translate_forms": {
+    "రైలులో": "on the train"
+   },
+   "roman": "railu",
+   "category": "vehicle",
+   "note": "Train",
+   "substitute": false,
+   "match_english": [
+    "train"
+   ]
+  },
+  {
+   "id": "pelli",
+   "forms": [
+    "పెళ్ళికి",
+    "పెళ్లికి",
+    "పెళ్ళి",
+    "పెళ్లి"
+   ],
+   "translate_as": "wedding",
+   "translate_forms": {
+    "పెళ్ళికి": "to the wedding",
+    "పెళ్లికి": "to the wedding"
+   },
+   "roman": "pelli",
+   "category": "festival",
+   "note": "Wedding",
+   "substitute": false,
+   "match_english": [
+    "wedding",
+    "marriage"
+   ]
+  },
+  {
+   "id": "puja",
+   "forms": [
+    "పూజ"
+   ],
+   "translate_as": "puja",
+   "roman": "puja",
+   "category": "festival",
+   "note": "Prayer ritual at home or at the temple"
+  },
+  {
+   "id": "devudu",
+   "forms": [
+    "దేవుడి",
+    "దేవుడు"
+   ],
+   "translate_as": "God",
+   "roman": "devudu",
+   "category": "place",
+   "note": "God",
+   "substitute": false,
+   "match_english": [
+    "God"
+   ]
+  },
+  {
+   "id": "muggu",
+   "forms": [
+    "ముగ్గులు",
+    "ముగ్గు"
+   ],
+   "translate_as": "rangoli",
+   "roman": "muggu",
+   "category": "festival",
+   "note": "Patterns drawn at the doorstep, big at Sankranti"
+  },
+  {
+   "id": "galipatam",
+   "forms": [
+    "గాలిపటాలు",
+    "గాలిపటం",
+    "గాలిపటాల"
+   ],
+   "translate_as": "kites",
+   "translate_forms": {
+    "గాలిపటం": "kite",
+    "గాలిపటాల": "kites"
+   },
+   "roman": "galipatam",
+   "category": "festival",
+   "note": "Kites, flown at Sankranti",
+   "substitute": false,
+   "match_english": [
+    "kites",
+    "kite"
+   ]
+  },
+  {
+   "id": "pattu_cheera",
+   "forms": [
+    "పట్టు చీర",
+    "పట్టుచీర"
+   ],
+   "translate_as": "silk saree",
+   "roman": "pattu cheera",
+   "category": "clothing",
+   "note": "Silk saree for festivals and weddings"
+  },
+  {
+   "id": "gajulu",
+   "forms": [
+    "గాజులు"
+   ],
+   "translate_as": "bangles",
+   "roman": "gajulu",
+   "category": "clothing",
+   "note": "Glass or gold bangles"
+  },
+  {
+   "id": "bottu",
+   "forms": [
+    "బొట్టు"
+   ],
+   "translate_as": "bindi",
+   "roman": "bottu",
+   "category": "clothing",
+   "note": "Dot on the forehead"
+  },
+  {
+   "id": "vana",
+   "forms": [
+    "వానలు",
+    "వాన"
+   ],
+   "translate_as": "rain",
+   "translate_forms": {
+    "వానలు": "rains"
+   },
+   "roman": "vana",
+   "category": "place",
+   "note": "Rain",
+   "substitute": false,
+   "match_english": [
+    "rains",
+    "rain"
+   ]
+  },
+  {
+   "id": "enda",
+   "forms": [
+    "ఎండలు",
+    "ఎండ"
+   ],
+   "translate_as": "heat",
+   "translate_forms": {
+    "ఎండలు": "the heat"
+   },
+   "roman": "enda",
+   "category": "place",
+   "note": "Hot sun / summer heat",
+   "substitute": false,
+   "match_english": [
+    "heat",
+    "sunshine",
+    "sun"
+   ]
+  },
+  {
+   "id": "chali",
+   "forms": [
+    "చలి"
+   ],
+   "translate_as": "cold",
+   "roman": "chali",
+   "category": "place",
+   "note": "Cold weather",
+   "substitute": false,
+   "match_english": [
+    "cold"
+   ]
+  },
+  {
+   "id": "jwaram",
+   "forms": [
+    "జ్వరం"
+   ],
+   "translate_as": "fever",
+   "roman": "jwaram",
+   "category": "phrase",
+   "note": "Fever",
+   "substitute": false,
+   "match_english": [
+    "fever"
+   ]
+  },
+  {
+   "id": "mandulu",
+   "forms": [
+    "మందులు"
+   ],
+   "translate_as": "medicines",
+   "roman": "mandulu",
+   "category": "phrase",
+   "note": "Medicines, tablets",
+   "substitute": false,
+   "match_english": [
+    "medicines",
+    "medicine",
+    "medication",
+    "tablets"
+   ]
+  },
+  {
+   "id": "aavu",
+   "forms": [
+    "ఆవులు",
+    "ఆవు"
+   ],
+   "translate_as": "cow",
+   "translate_forms": {
+    "ఆవులు": "cows"
+   },
+   "roman": "aavu",
+   "category": "place",
+   "note": "Cow",
+   "substitute": false,
+   "match_english": [
+    "cows",
+    "cow"
+   ]
+  },
+  {
+   "id": "koti_vidyalu",
+   "forms": [
+    "కోటి విద్యలు కూటి కొరకే"
+   ],
+   "category": "idiom",
+   "note": "'A crore skills, all for food': whatever you learn, it's to earn a living"
+  },
+  {
+   "id": "inta_gelichi",
+   "forms": [
+    "ఇంట గెలిచి రచ్చ గెలువు",
+    "రచ్చ గెలువు"
+   ],
+   "category": "idiom",
+   "note": "'Win at home, then win outside': earn your family's respect first"
+  },
+  {
+   "id": "mokkai_vanganidi",
+   "forms": [
+    "మొక్కై వంగనిది మానై వంగునా",
+    "మానై వంగునా",
+    "మానై వంగున",
+    "మానైవంగునా",
+    "మానైవంగున",
+    "వంగనిదిమానైవంగున",
+    "మొక్కయ్యవంగనిదిమానైవంగున"
+   ],
+   "category": "idiom",
+   "note": "'What won't bend as a sapling won't bend as a tree': teach good habits while young"
+  }
+ ],
+ "en": [
+  {
+   "id": "fire",
+   "forms": [
+    "was fire",
+    "is fire",
+    "so fire"
+   ],
+   "category": "slang",
+   "note": "'Fire' means amazing or excellent"
+  },
+  {
+   "id": "no_cap",
+   "forms": [
+    "no cap"
+   ],
+   "category": "slang",
+   "note": "'No cap' means 'no lie, I'm serious'"
+  },
+  {
+   "id": "bombed",
+   "forms": [
+    "bombed"
+   ],
+   "category": "slang",
+   "note": "'Bombed' a test means did very badly"
+  },
+  {
+   "id": "im_dead",
+   "forms": [
+    "i'm dead",
+    "im dead",
+    "i'm so dead"
+   ],
+   "category": "slang",
+   "note": "Either 'that's hilarious' or 'I'm in big trouble', depending on context"
+  },
+  {
+   "id": "lowkey",
+   "forms": [
+    "lowkey"
+   ],
+   "category": "slang",
+   "note": "'Lowkey' means 'a little' or 'secretly'"
+  },
+  {
+   "id": "slay",
+   "forms": [
+    "slay",
+    "slayed"
+   ],
+   "category": "slang",
+   "note": "Did something really well"
+  }
+ ]
 }

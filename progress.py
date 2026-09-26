@@ -34,11 +34,16 @@ class Progress:
         """
         kept = []
         for entry in hits:
-            gloss, roman = entry.get("translate_as"), entry.get("roman")
-            if not gloss or not roman or not self.known(entry["id"]):
+            roman = entry.get("roman")
+            if not roman or not self.known(entry["id"]):
                 continue
-            pattern = re.compile(rf"(?<![A-Za-z]){re.escape(gloss.rstrip(','))}(?![A-Za-z])", re.IGNORECASE)
-            match = pattern.search(english)
+            # The fixed English from the substitution, or for words left to the translator, the English it may use.
+            candidates = entry.get("match_english") or [entry.get("translate_as", "")]
+            match = None
+            for gloss in sorted((g.rstrip(",") for g in candidates if g), key=len, reverse=True):
+                match = re.search(rf"(?<![A-Za-z]){re.escape(gloss)}(?![A-Za-z])", english, re.IGNORECASE)
+                if match:
+                    break
             if not match:
                 continue  # the translator rephrased it; leave the sentence as is
             telugu = roman.rstrip(",")
@@ -48,7 +53,7 @@ class Progress:
             if entry["id"].endswith("_vocative") and english[:start].lower().endswith("my "):
                 start -= 3  # "my dear" -> "Nanna", not "my Nanna"
             english = english[:start] + telugu + english[match.end():]
-            kept.append({"id": entry["id"], "telugu": telugu, "english": gloss.rstrip(",")})
+            kept.append({"id": entry["id"], "telugu": telugu, "english": match.group(0)})
         return english, kept
 
     def heard_words(self, hits):
