@@ -15,7 +15,8 @@ for lib in ("/opt/homebrew/lib/libespeak-ng.1.dylib", "/usr/local/lib/libespeak-
 
 KOKORO_MODEL = "mlx-community/Kokoro-82M-bf16"
 KOKORO_SR = 24000
-MAX_BEHIND_S = 3.0  # skip the voice (subtitle only) rather than fall further behind; one English sentence is ~2-3 s
+MAX_BEHIND_S = 3.0           # skip the voice (subtitle only) rather than fall further behind; one sentence is ~2-3 s
+MAX_BEHIND_PRIORITY_S = 5.0  # questions/requests to you are still spoken up to this far behind
 BASE_SPEED, MAX_SPEED = 1.0, 1.3  # natural pace, speeding up smoothly as lines pile up
 CATCH_UP_S = 2.0                  # queued speech at which we reach MAX_SPEED
 CLAUSE_SPLIT = r"(?<=[,;:.!?])\s+"  # generate and start playing clause by clause
@@ -36,12 +37,12 @@ class Dubber:
         """Seconds of English speech queued but not yet played."""
         return self.buffer.pending_seconds() + self.jobs.qsize() * 1.5
 
-    def say(self, text, spoken_at=None, on_start=None):
+    def say(self, text, spoken_at=None, on_start=None, priority=False):
         """Queue `text` to be spoken. Returns False (and says nothing) if the voice is too far behind."""
         if not text or not text.strip() or text.startswith("("):
             return False
         late = time.monotonic() - spoken_at if spoken_at else 0.0
-        if self.behind() + late > MAX_BEHIND_S:
+        if self.behind() + late > (MAX_BEHIND_PRIORITY_S if priority else MAX_BEHIND_S):
             return False
         self.jobs.put((text, on_start))
         return True

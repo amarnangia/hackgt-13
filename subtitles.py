@@ -22,7 +22,7 @@ from websockets.http11 import Response
 
 from muse import Translator, transcribe
 from latency import LatencyTracker
-from lexicon import Lexicon
+from lexicon import Lexicon, indic_share
 from translate_server import LocalTranslator
 
 PORT = int(os.environ.get("OVERLAY_PORT", 8765))
@@ -30,6 +30,7 @@ CHUNK_MS = 80
 SAMPLE_RATE = 48000  # AudioLoop's rate
 SENTENCE_END = re.compile(r"[.?!।]+")
 CLAUSE_END = re.compile(r"[,;]")
+NATIVE_MIN_SHARE = 0.34  # at least a third of the words in Telugu script -> translate and voice it
 MIN_CLAUSE_WORDS = 5  # Muse often joins sentences with commas; cut there once a clause is long enough to translate well
 MAX_WAIT_WORDS = 12   # run-on speech with no punctuation: translate once this many words are waiting (fewer hurt quality)
 HOLD_BACK_WORDS = 2   # ...except the newest few, which Muse may still correct
@@ -99,9 +100,11 @@ class Captioner:
         self.latency = LatencyTracker()
         self.dubber = None                    # set by listen() unless --no-voice
         self.decider = None                   # Laya, set by listen()
-        self.speak_all = False                # --speak all: voice every line, not just questions/requests
+        self.speak_all = False                # --speak all: also voice lines she said (mostly) in English
+        self.questions_only = False           # --speak questions: voice only questions/requests to you
         self.lexicon = Lexicon()
         self.lang = lang
+        self.backup = None  # Muse Spark, created if the local translator fails mid-call
         self.order_lock = threading.Lock()    # translations finish out of order; the voice must not
         self.next_to_voice, self.finished_lines = 1, {}
 
@@ -146,50 +149,76 @@ class Captioner:
         self.next_id += 1
         seg_id = self.next_id
         marks = self.latency.piece_cut(end_offset)
-        broadcast({"type": "original", "id": seg_id, "text": sentence})
+        share = indic_share(sentence)
+        # english: grandma said it in English, you understood it -> show as-is, no translation, no voice
+        # mixed:   mostly English with a Telugu word or two -> translated subtitle, no voice
+        # native:  Telugu (or mostly) -> translated subtitle + English voice
+        route = "english" if share == 0 else "mixed" if share < NATIVE_MIN_SHARE else "native"
+        broadcast({"type": "original", "id": seg_id, "text": sentence, "route": route})
 
         def work():
-            try:
-                english = self.translate(sentence)
-            except Exception as e:
-                english = f"(translation failed: {type(e).__name__})"
-            broadcast({"type": "english", "id": seg_id, "text": english})  # show it now; cards follow in ~0.15 s
+            if route == "english":
+                english = sentence
+            else:
+                try:
+                    english = self.translate(sentence)
+                except Exception as e:
+                    english = self._fallback_translate(sentence, e)
+            broadcast({"type": "english", "id": seg_id, "text": english, "route": route})  # cards follow in ~0.15 s
             row = self.latency.finished(marks, sentence, english)
+            row["route"] = route
             decision = self.decider(english) if self.decider and not english.startswith("(") else None
             broadcast({"type": "details", "id": seg_id,
                        "intent": decision["intent"] if decision else None, "cards": self._cards(sentence, decision)})
             row["laya"] = decision["seconds"] if decision else None
             with self.order_lock:
-                self.finished_lines[seg_id] = (english, marks, row, decision)
+                self.finished_lines[seg_id] = (english, marks, row, decision, route)
                 while self.next_to_voice in self.finished_lines:
                     self._voice(self.next_to_voice, *self.finished_lines.pop(self.next_to_voice))
                     self.next_to_voice += 1
 
         self.pool.submit(work)
 
+    def _fallback_translate(self, sentence, error):
+        """The local translator died mid-call (e.g. its process was stopped): use Muse Spark for this line."""
+        if isinstance(self.translate, Translator):
+            return f"(translation failed: {type(error).__name__})"
+        if self.backup is None:
+            print(f"Local translator failed ({type(error).__name__}); using Muse Spark until it's back.", flush=True)
+            self.backup = Translator(self.lang)
+        try:
+            return self.backup(sentence)
+        except Exception as e:
+            return f"(translation failed: {type(e).__name__})"
+
     def _cards(self, sentence, decision):
         """Word-list matches in what grandma said (exact), else Laya's category guess for the English line."""
         cards = [{"id": e["id"], "title": e["id"].replace("_vocative", "").replace("_", " ").title(),
                   "category": e["category"], "note": e.get("note", "")} for e in self.lexicon.find(sentence, self.lang)]
+        cards += [{"id": e["id"], "title": e["id"].replace("_", " ").title(), "category": e["category"],
+                   "note": e.get("note", "")} for e in self.lexicon.find(sentence, "en")]  # English slang she used
         if decision and decision["category"] != "none" and not any(c["category"] == decision["category"] for c in cards):
             cards.append({"id": None, "title": decision["category"].title(), "category": decision["category"], "note": ""})
         return cards
 
-    def _voice(self, seg_id, english, marks, row, decision):
-        """Speak the line (in order) if it needs the listener's attention; otherwise it stays a subtitle."""
+    def _voice(self, seg_id, english, marks, row, decision, route):
+        """Voice Telugu lines (in order). Questions/requests to you keep their place when the voice is behind."""
         def on_start():
             self.latency.voice_started(row, marks)
             broadcast({"type": "voice", "id": seg_id})
-        wanted = self.speak_all or decision is None or decision["needs_attention"]
-        voiced = bool(self.dubber and wanted and self.dubber.say(english, spoken_at=marks["spoken"], on_start=on_start))
+        asks = bool(decision and decision["needs_attention"])
+        if route != "native" and not self.speak_all:
+            voiced, why = False, "she said it in English" if route == "english" else "mostly English"
+        elif self.questions_only and not asks:
+            voiced, why = False, "statement (--speak questions)"
+        elif not self.dubber:
+            voiced, why = False, ""
+        else:
+            voiced = self.dubber.say(english, spoken_at=marks["spoken"], on_start=on_start, priority=asks)
+            why = "" if voiced else "voice was behind"
         if not voiced:
             self.latency.log_row(row)
-        if not self.dubber:
-            tag = ""
-        elif voiced:
-            tag = f"  [voice: {decision['intent'] if decision else 'all'}]"
-        else:
-            tag = "  [subtitle only: statement]" if not wanted else "  [subtitle only: voice was behind]"
+        tag = f"  [voice{': question' if asks else ''}]" if voiced else (f"  [no voice: {why}]" if why else "")
         print(f"{LatencyTracker.line(row)} {row['text']}  ->  {english}{tag}", flush=True)
 
 
@@ -255,6 +284,7 @@ async def listen(args, captioner):
     from decide import Decider
     captioner.decider = await loop.run_in_executor(None, Decider)
     captioner.speak_all = args.speak == "all"
+    captioner.questions_only = args.speak == "questions"
     if not args.no_voice:  # load before audio starts, or the first seconds of the call are lost
         print("Loading the English voice (Kokoro)...", flush=True)
         from dub import Dubber
@@ -326,8 +356,9 @@ def main():
     p.add_argument("--in", dest="inp", default="BlackHole")
     p.add_argument("--out", default=None, help='output device (default: system default); "none" = silent, with --file')
     p.add_argument("--no-voice", action="store_true", help="subtitles only, no English voice")
-    p.add_argument("--speak", choices=["attention", "all"], default="attention",
-                   help="attention = voice only questions/requests to you (Laya decides), the rest as subtitles; all = every line")
+    p.add_argument("--speak", choices=["telugu", "questions", "all"], default="telugu",
+                   help="telugu = voice what she says in Telugu, never her English (default); "
+                        "questions = only Telugu questions/requests to you (Laya decides); all = every line")
     args = p.parse_args()
 
     if args.translator == "local":

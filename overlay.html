@@ -58,7 +58,10 @@ function connect() {
       while (lines.children.length > 6) lines.lastChild.remove();
     }
     if (m.type === "original") el.querySelector(".orig").textContent = m.text;
-    if (m.type === "english") { const en = el.querySelector(".en"); en.textContent = m.text; en.classList.remove("pending"); }
+    if (m.type === "english") {
+      const en = el.querySelector(".en"); en.textContent = m.text; en.classList.remove("pending");
+      if (m.route === "english") el.querySelector(".orig").textContent = "said in English";
+    }
     if (m.type === "details") {
       const en = el.querySelector(".en");
       if (m.intent === "question" || m.intent === "request") { el.classList.add("ask"); en.prepend("❓ "); }

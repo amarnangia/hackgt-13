@@ -37,3 +37,11 @@ class Lexicon:
             if english:
                 text = pattern.sub(english, text)
         return text
+
+
+def indic_share(text):
+    """Fraction of words written in an Indian script (Muse writes English words in Latin letters)."""
+    words = re.findall(rf"[{INDIC_LETTERS}A-Za-z]+", text)
+    if not words:
+        return 0.0
+    return sum(bool(re.match(rf"[{INDIC_LETTERS}]", w)) for w in words) / len(words)

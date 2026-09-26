@@ -1,0 +1,42 @@
+[
+ {
+  "text": "హలో నాన్నా, బాగున్నావా?",
+  "lang": "te",
+  "route": "native"
+ },
+ {
+  "text": "I sent you the photos yesterday.",
+  "lang": "en",
+  "route": "english"
+ },
+ {
+  "text": "నువ్వు exam ఎప్పుడు రాస్తున్నావ్?",
+  "lang": "te",
+  "route": "native"
+ },
+ {
+  "text": "Okay okay, very good.",
+  "lang": "en",
+  "route": "english"
+ },
+ {
+  "text": "ఈ రోజు అమ్మమ్మ పులిహోర చేసింది.",
+  "lang": "te",
+  "route": "native"
+ },
+ {
+  "text": "నాకు WhatsApp లో photo పంపించు.",
+  "lang": "te",
+  "route": "native"
+ },
+ {
+  "text": "Your grandfather is fine, don't worry.",
+  "lang": "en",
+  "route": "english"
+ },
+ {
+  "text": "సంక్రాంతికి ఊరికి వస్తావా?",
+  "lang": "te",
+  "route": "native"
+ }
+]
