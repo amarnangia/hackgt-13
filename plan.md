@@ -1,9 +1,21 @@
 # Plan
 
+## Audio setup (working)
+1. `brew install --cask blackhole-2ch`. If it doesn't appear as a sound device, run `sudo killall coreaudiod` or reboot.
+2. System Settings → Sound → Output → **BlackHole 2ch**, with the Mac volume at **100%**.
+3. Make the call from **WhatsApp Web in Chrome** (web.whatsapp.com), not the WhatsApp Mac app.
+4. `python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
+5. `python audio_loop.py --out "MacBook Air Speakers"` (or your headphones' name).
+
+What we learned the hard way:
+- **The WhatsApp Mac app plays straight to the speakers** and ignores the Mac's output setting. BlackHole stays silent and there's no BlackHole option in its menu. Chrome follows the Mac's output setting, so WhatsApp Web works.
+- **When BlackHole is the output, the Mac volume slider controls what goes into BlackHole.** At 29% the call arrived at about 1% strength. Keep it at 100% and control loudness on the speaker side. `audio_loop.py` warns you if it's lower.
+- The terminal app running the script needs microphone permission. The VS Code terminal worked for us.
+
 ## Architecture
 
 ```
-WhatsApp Desktop (speaker = BlackHole 2ch)
+WhatsApp Web in Chrome (Mac output = BlackHole 2ch)
         │
         ▼
  ┌────────────────────── our app (Python) ──────────────────────┐
@@ -31,7 +43,7 @@ WhatsApp Desktop (speaker = BlackHole 2ch)
 ### Components
 | Part | Choice | Notes |
 |---|---|---|
-| Capturing call audio | [BlackHole 2ch](https://github.com/ExistentialAudio/BlackHole) (`brew install blackhole-2ch`) | Set WhatsApp's speaker to BlackHole. If the app doesn't allow it, set the Mac's system output instead. |
+| Capturing call audio | [BlackHole 2ch](https://github.com/ExistentialAudio/BlackHole) (`brew install --cask blackhole-2ch`) | Set the Mac's output to BlackHole and call from WhatsApp Web in Chrome. The WhatsApp Mac app skips BlackHole. |
 | Audio input/output | `sounddevice` (Python) | Reads BlackHole and writes to the headphones. |
 | Voice activity detection | `silero-vad` or `webrtcvad` | Cuts audio into chunks at pauses in speech. |
 | Speech-to-text | Deepgram Nova-3 (multi) or Sarvam | Has to handle Hindi mixed with English. Compare both on real audio. |
@@ -70,13 +82,13 @@ What we learned from testing (script: `tools/laya_bench.py`):
 - The "?" button on a subtitle adds to `asked` and moves the phrase back down a level.
 
 ## Risks
-1. **Audio routing** is the biggest unknown. Prove it first (step 1).
+1. ~~**Audio routing**~~ solved with WhatsApp Web, BlackHole and `audio_loop.py` (see Audio setup).
 2. **Echo:** use headphones. If our output plays through the laptop speakers, it leaks back into the call.
 3. **Delay:** expect ~1–2 s after each sentence ends. Stream every stage and show subtitles before the dubbed voice is ready.
 4. **Laya out of the box** is only okay at general questions. Keep the questions narrow. With time left over, fine-tune on ~200 labeled call sentences.
 
 ## Build order
-1. **Audio loop:** WhatsApp → BlackHole → Python → headphones, with no processing, during a real call.
+1. ✅ **Audio loop:** WhatsApp → BlackHole → Python → headphones, with no processing, during a real call (`audio_loop.py`).
 2. **Live subtitles:** voice activity detection plus speech-to-text, with Hindi text showing in the overlay.
 3. **Translation:** English subtitles.
 4. **Laya:** image cards (word list plus images) and slang cards (LLM explanation).

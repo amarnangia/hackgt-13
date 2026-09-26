@@ -4,7 +4,7 @@
 Many kids of immigrants can't comfortably talk with their grandparents and other relatives back home. The grandparents speak Hindi (or another Indian language) and the kids think in English. Calls turn into short "how are you, eat well" exchanges because both sides run out of shared words.
 
 ## The idea
-A Mac app that runs **alongside a live WhatsApp Desktop call** and fills in the language gap in real time:
+A Mac app that runs **alongside a live WhatsApp call on the laptop (WhatsApp Web in Chrome)** and fills in the language gap in real time:
 
 - **Partial live translation:** when a relative speaks, some phrases are dubbed into English (their voice is lowered and an English voice plays over it). Other phrases play in the original language, with the translation shown as a subtitle on screen.
 - **It learns what you know:** the app keeps track of words and phrases you've heard. The more often you've heard one, the less it gets translated. It goes from dubbed, to subtitled only, to left alone. Over time the call becomes more Hindi and less English, so you learn the language just by talking to family.
@@ -24,7 +24,7 @@ We tested it on an M4 MacBook Air with the English checkpoint on the Apple GPU, 
 The multilingual checkpoint was faster (~45 ms) but much less accurate, so we use the English one. Laya can't write text, so an LLM writes the explanations and a word list picks the actual image.
 
 ## Scope for HackGT
-- **In scope:** relative → you direction (Hindi/Hinglish → English), running on a Mac with WhatsApp Desktop and headphones.
+- **In scope:** relative → you direction (Hindi/Hinglish → English), running on a Mac with WhatsApp Web and headphones.
 - **Stretch:** you → relative direction (a translated Hindi voice sent through a virtual mic), more languages (Punjabi, Gujarati, Tamil), and sharing the image cards over WhatsApp screen share.
 
 See [plan.md](plan.md) for the architecture and build order.
