@@ -82,9 +82,27 @@ struct Backdrop: View {
     var body: some View {
         ZStack {
             Theme.bg
-            RadialGradient(colors: [Theme.accent.opacity(0.08), .clear], center: .top, startRadius: 0, endRadius: 520).offset(y: -140)
+            RadialGradient(colors: [Theme.accent.opacity(0.11), .clear], center: .top, startRadius: 0, endRadius: 520).offset(y: -140)
+            RadialGradient(colors: [Theme.lavender.opacity(0.10), Theme.lavenderDeep.opacity(0.04), .clear], center: .bottomLeading, startRadius: 0, endRadius: 560)
+            RadialGradient(colors: [Theme.cyan.opacity(0.05), .clear], center: UnitPoint(x: 1.1, y: 0.45), startRadius: 0, endRadius: 380)
+            Grain().opacity(0.5)
         }
         .ignoresSafeArea()
+    }
+}
+
+/// Fine film grain, so the dark isn't flat. Drawn once, not animated.
+struct Grain: View {
+    var body: some View {
+        Canvas { ctx, size in
+            var s: UInt64 = 0x9E37_79B9
+            func r() -> CGFloat { s = s &* 6364136223846793005 &+ 1442695040888963407; return CGFloat(s >> 33) / CGFloat(1 << 31) }
+            for _ in 0..<Int(size.width * size.height / 90) {
+                let x = r() * size.width, y = r() * size.height, a = r()
+                ctx.fill(Path(CGRect(x: x, y: y, width: 1, height: 1)), with: .color(.white.opacity(0.02 + 0.05 * a)))
+            }
+        }
+        .allowsHitTesting(false)
     }
 }
 

@@ -33,6 +33,13 @@ enum Theme {
     static let warm = Color(hex: 0x7ee2a8)      // "Ask her"
     static let onWarm = Color.white
     static let green = cyan                     // connected
+    /// A third, quieter accent: muted lavender, for what's in progress (words you're learning) and for depth in the
+    /// background. The greens stay the primary accents.
+    static let lavender = Color(hex: 0xb3a6d4)
+    static let lavenderDeep = Color(hex: 0x5f5680)
+    /// Card surfaces lit from above
+    static let cardTop = Color(hex: 0x202024)
+    static let cardBottom = Color(hex: 0x161618)
     static let danger = Color(hex: 0xff8a8a)
 
     static let radius: CGFloat = 16
@@ -41,6 +48,8 @@ enum Theme {
 
 enum Fonts {
     static func ui(_ size: CGFloat, _ weight: Font.Weight = .regular) -> Font { .system(size: size, weight: weight) }
+    /// Big headlines: Apple's New York serif, for a little character against the sans UI.
+    static func display(_ size: CGFloat, _ weight: Font.Weight = .medium) -> Font { .system(size: size, weight: weight, design: .serif) }
     /// Captions and translations: semibold, like the overlay's English line. (The pronunciation, `italic`, is bold.)
     static func serif(_ size: CGFloat, italic: Bool = false) -> Font { .system(size: size, weight: italic ? .bold : .semibold) }
     /// Numbers and small labels: the system font with even-width digits.
@@ -68,8 +77,20 @@ struct Panel<Content: View>: View {
         VStack(alignment: .leading, spacing: 0) { content }
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Theme.surface, in: .rect(cornerRadius: Theme.radius))
-            .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.border, lineWidth: 1))
+            .background(Card())
+    }
+}
+
+/// A raised surface: lit from above, a bright top edge fading down its sides, and a soft shadow under it.
+struct Card: View {
+    var radius: CGFloat = Theme.radius
+    var body: some View {
+        RoundedRectangle(cornerRadius: radius)
+            .fill(LinearGradient(colors: [Theme.cardTop, Theme.cardBottom], startPoint: .top, endPoint: .bottom))
+            .overlay(RoundedRectangle(cornerRadius: radius)
+                .strokeBorder(LinearGradient(colors: [.white.opacity(0.13), .white.opacity(0.04), .white.opacity(0.02)], startPoint: .top, endPoint: .bottom), lineWidth: 1))
+            .shadow(color: .black.opacity(0.5), radius: 18, y: 10)
+            .shadow(color: .black.opacity(0.25), radius: 3, y: 1)
     }
 }
 

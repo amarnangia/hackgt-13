@@ -304,8 +304,7 @@ struct PersonPicker: View {
                 row(p)
             }
         }
-        .background(Theme.surface, in: .rect(cornerRadius: Theme.radius))
-        .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.border, lineWidth: 1))
+        .background(Card())
         .clipShape(.rect(cornerRadius: Theme.radius))
     }
 
@@ -413,7 +412,7 @@ struct VoiceTab: View {
         let name = people.profileName ?? "You"
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Your voice").font(Fonts.ui(32, .medium)).tracking(-1.1).foregroundStyle(Theme.text).padding(.top, 20)
+                Text("Your voice").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.text).padding(.top, 20)
                 Text("Read the script below for about a minute. Weave then speaks your translations in your own voice, in English and in Telugu.")
                     .font(Fonts.ui(15)).foregroundStyle(Theme.text2).padding(.bottom, 8)
                 if people.family == nil {

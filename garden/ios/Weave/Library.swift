@@ -6,7 +6,7 @@ extension Stage {
     var tint: Color {
         switch self {
         case .bloom: Theme.accent
-        case .sprout: Theme.accent.opacity(0.45)
+        case .sprout: Theme.lavender
         case .seed: Theme.accent.opacity(0.14)
         }
     }
@@ -84,7 +84,7 @@ struct WordsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Words").font(Fonts.ui(32, .medium)).tracking(-1.1).foregroundStyle(Theme.text)
+                    Text("Words").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.text)
                     Text(people.dictionary.isEmpty ? "Every word from your calls." : "Your family dictionary: every word from your calls, in her voice.")
                         .font(Fonts.ui(15)).foregroundStyle(Theme.text2)
                 }
@@ -173,8 +173,7 @@ struct WordsView: View {
                 Button { open = row.word } label: { WordRow(item: row) }.buttonStyle(RowStyle())
             }
         }
-        .background(Theme.surface, in: .rect(cornerRadius: Theme.radius))
-        .overlay(RoundedRectangle(cornerRadius: Theme.radius).strokeBorder(Theme.border, lineWidth: 1))
+        .background(Card())
         .clipShape(.rect(cornerRadius: Theme.radius))
         .reveal(3)
     }
@@ -251,7 +250,7 @@ struct ProgressView_: View {
                 } else {
 
                 Grid(horizontalSpacing: 12, verticalSpacing: 12) {
-                    GridRow { stat("Known", "\(snap.totals.bloom)", "of \(snap.totals.phrases) words", accent: true); stat("Learning", "\(snap.totals.sprout)", "subtitles only") }
+                    GridRow { stat("Known", "\(snap.totals.bloom)", "of \(snap.totals.phrases) words", accent: true); stat("Learning", "\(snap.totals.sprout)", "subtitles only", tint: Theme.lavender) }
                     GridRow { stat("Hearings", "\(snap.totals.heard)", "across all calls"); stat("Streak", "\(snap.streak)", snap.streak == 1 ? "day" : "days") }
                 }
                 .reveal(1)
@@ -280,7 +279,7 @@ struct ProgressView_: View {
     private func header(_ snap: GardenSnapshot) -> some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 6) {
-                Text(people.profileName.map { "\($0)'s garden" } ?? "Your garden").font(Fonts.ui(32, .medium)).tracking(-1.1).foregroundStyle(Theme.text)
+                Text(people.profileName.map { "\($0)'s garden" } ?? "Your garden").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.text)
                 Text(snap.totals.phrases == 0 ? "A seed, for now." : "\(snap.totals.phrases) words growing · \(snap.totals.bloom) in bloom")
                     .font(Fonts.ui(15)).foregroundStyle(Theme.text2).contentTransition(.numericText())
             }
@@ -292,9 +291,9 @@ struct ProgressView_: View {
         .reveal(0)
     }
 
-    private func stat(_ label: String, _ value: String, _ sub: String, accent: Bool = false) -> some View {
+    private func stat(_ label: String, _ value: String, _ sub: String, accent: Bool = false, tint: Color? = nil) -> some View {
         Panel {
-            Eyebrow(label, color: accent ? Theme.accent : Theme.text3)
+            Eyebrow(label, color: tint ?? (accent ? Theme.accent : Theme.text3))
             Text(value).font(Fonts.ui(30, .medium)).tracking(-1).monospacedDigit().foregroundStyle(Theme.text)
                 .contentTransition(.numericText()).padding(.top, 10)
             Text(sub).font(Fonts.ui(12)).foregroundStyle(Theme.text2)

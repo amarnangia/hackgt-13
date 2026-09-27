@@ -209,7 +209,7 @@ struct GrowthPlant: View {
             let thirsty = p.thirsty && p.stageEnum != .seed
             let (core, halo, color): (CGFloat, CGFloat, Color) = thirsty ? (1.6, 5, Theme.text3)
                 : p.stageEnum == .bloom ? (2.8, 11, Theme.warm)
-                : p.stageEnum == .sprout ? (2.2, 8, Theme.cyan)
+                : p.stageEnum == .sprout ? (2.2, 8, Theme.lavender)
                 : (1.4, 5, Theme.warm.opacity(0.6))
             ctx.fill(Path(ellipseIn: CGRect(x: at.x - halo, y: at.y - halo, width: 2 * halo, height: 2 * halo)),
                      with: .radialGradient(Gradient(colors: [color.opacity(0.6 * twinkle), .clear]), center: at, startRadius: 0, endRadius: halo))
@@ -227,9 +227,10 @@ struct GrowthPlant: View {
             let y = area.midY + CGFloat(cos(t * (0.1 + s2 * 0.18) + s2 * 20)) * area.height / 2
             let blink = max(0, sin(t * (0.7 + s1) + s1 * 30))
             let r = 1.1 + s1 * 1.1
+            let tone = k % 3 == 2 ? Theme.lavender : Theme.cyan   // a few lavender ones among the green
             ctx.fill(Path(ellipseIn: CGRect(x: x - r * 3, y: y - r * 3, width: r * 6, height: r * 6)),
-                     with: .radialGradient(Gradient(colors: [Theme.cyan.opacity(0.35 * blink * g), .clear]), center: CGPoint(x: x, y: y), startRadius: 0, endRadius: r * 3))
-            ctx.fill(Path(ellipseIn: CGRect(x: x - r, y: y - r, width: 2 * r, height: 2 * r)), with: .color(Theme.cyan.opacity(0.8 * blink * g)))
+                     with: .radialGradient(Gradient(colors: [tone.opacity(0.35 * blink * g), .clear]), center: CGPoint(x: x, y: y), startRadius: 0, endRadius: r * 3))
+            ctx.fill(Path(ellipseIn: CGRect(x: x - r, y: y - r, width: 2 * r, height: 2 * r)), with: .color(tone.opacity(0.8 * blink * g)))
         }
     }
 
