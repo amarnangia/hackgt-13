@@ -3,8 +3,7 @@
 //   left      the dictionary feed (words, then "Curious?" questions), middle left
 //   float     pictures (with what they are) and meanings, top right, only as tall as there are cards
 //   captions  the translation bubble, bottom center, directly above...
-//   the line  ...a line that vibrates with the call's sound (its frequencies, from background.js/offscreen.js), or
-//             with what Weave is doing when there's no sound to read. Click it to hide or show everything. Beside it:
+//   the line  ...a line that moves with what Weave is doing (quiet, listening, translating, speaking). Click it to hide or show everything. Beside it:
 //             the words and pictures buttons, the Transcribe switch and the English / Telugu switch.
 // Each panel is panel.html (an extension page) in its own frame, so the call site's security rules can't block its
 // connection to the Weave engine on this Mac (ws://localhost:8765 by default; set "wsUrl" in chrome.storage.local

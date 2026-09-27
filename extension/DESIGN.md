@@ -86,7 +86,7 @@ Questions are lavender bubbles that open to their answer.
 ## The line
 
 This line replaces the orb. It's a 240 × 56 canvas (drawn every frame, so there's no layout at all) showing two gradient strands (cyan → blue → violet), pinned at both ends and slightly out of step, so it reads like a vibrating string.
-- **Real sound:** offscreen.js reads the captured tab's sound as 48 log-spaced bands from 80 Hz to 5 kHz, about 30 times a second. Low frequencies drive the middle of the line and high ones the ends.
+- **Real sound (removed):** it used to capture the tab's sound; Chrome mutes a captured tab, and when the replay didn't start the call went silent for the translator, so it's gone. offscreen.js read the captured tab's sound as 48 log-spaced bands from 80 Hz to 5 kHz, about 30 times a second. Low frequencies drive the middle of the line and high ones the ends.
 - **Movement:** levels rise fast and fall slowly, and the glow grows with overall loudness.
 - **No sound to read** (no capture, or the preview page): the line follows Weave's state instead. It's nearly flat when idle, ripples small and fast while translating, and moves more while someone talks or Weave speaks. When there's no engine it's a gray flat line.
 

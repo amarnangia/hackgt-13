@@ -5,8 +5,8 @@ Puts Weave on top of the call in your Chrome tab (WhatsApp Web, Instagram, or an
 
 Weave keeps the faces in the middle of the call clear, and shows English only (design notes: [DESIGN.md](DESIGN.md)):
 
-- **The line (bottom center, above the call's buttons):** vibrates with the call's sound. Turning Weave on also starts
-  listening to the tab (Chrome tab capture; the sound is played straight back, so you still hear the call). Click the
+- **The line (bottom center, above the call's buttons):** moves with what Weave is doing (listening, translating,
+  speaking). It doesn't touch the call's audio. Click the
   line to hide or show everything. Beside it: the words and pictures buttons, **Transcribe** (sends `transcribe` to
   the engine and shows whatever the engine answers in `transcribing`) and **English / Telugu** (which language you speak).
 - **Captions (right above the line):** the English, in a glass bubble while someone talks. Click an underlined word if
