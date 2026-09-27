@@ -88,7 +88,6 @@ function captionLine(id) {
 }
 // The dock sends back the language you picked (two-way calls)
 addEventListener("message", (e) => {
-  if (PART === "captions" && e.data?.source === "weave-dock" && e.data.kind === "transcribe") send({ type: "transcribe", on: !!e.data.on });
   if (PART === "captions" && e.data?.source === "weave-dock" && e.data.kind === "i_speak") { chooseLanguage(e.data.lang); cap.roles && (cap.roles.you = e.data.lang); renderCaptions(); }
 });
 
@@ -485,7 +484,6 @@ function handleCaptions(m) {
   cap.lastActivity = Date.now();
   switch (m.type) {
     case "voice": cap.voiceUntil = Date.now() + 2600; break;
-    case "transcribing": tellParent({ kind: "transcribing", on: !!m.on }); return;   // the engine says; the switch draws this
     case "speaking": cap.speaking = true; break;
     case "partial": cap.partial = m.text || ""; if (!m.text) cap.speaking = false; break;
     case "draft": cap.draft = m.text || ""; break;

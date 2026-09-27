@@ -21,7 +21,7 @@ bottom. Weave uses the edges and the space just above the call's buttons. Every 
 | Words (left) | the top-left corner, 16px in | 300px wide, as tall as its 5 word bubbles and 3 question bubbles; no box | always; the words button hides it |
 | Pictures and meanings (float) | the top-right corner, 16px in | 320px wide, as tall as its cards (at most 2), ending 330px above the bottom to clear your camera tile | while there are some; each holds 20 s (dims for the last 3) unless kept |
 | Translation bubble | bottom center, right above the orb | up to 700 × 148, fixed | while someone talks; fades 9 s after the last words |
-| The line | bottom center, 66px up (just above the call's buttons) | 240 × 56 | always; beside it the words and pictures buttons, Transcribe and English / Telugu |
+| The line | bottom center, 66px up (just above the call's buttons) | 240 × 56 | always; beside it the words and pictures buttons, and English / Telugu in two-way calls |
 
 ## Tokens
 
