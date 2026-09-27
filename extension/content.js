@@ -58,19 +58,18 @@
       .hidden iframe { opacity: 0 !important; pointer-events: none !important; }
 
       /* ---- the line and its controls, bottom center ---- */
-      .core { position: fixed; z-index: ${Z + 2}; left: 50%; width: 0; height: 56px; font: 700 13px/1 var(--font); color: var(--text);
-              -webkit-font-smoothing: antialiased; }
+      /* one row, centered as a whole: the two groups are different widths, so pinning each to the middle leaned it right */
+      .core { position: fixed; z-index: ${Z + 2}; left: 50%; transform: translateX(-50%); height: 56px; display: flex; align-items: center;
+              gap: 12px; font: 700 13px/1 var(--font); color: var(--text); -webkit-font-smoothing: antialiased; }
       /* no bar in the middle any more (the pulsing line under the captions shows what Roots is doing); the controls meet at the center */
       .line-btn { display: none; position: absolute; left: -${LINE_W / 2}px; top: 0; width: ${LINE_W}px; height: 56px; border-radius: 28px; }
       .line-btn canvas { width: 100%; height: 100%; display: block; }
       .line-btn::after { content: ""; position: absolute; top: 6px; right: 14px; width: 8px; height: 8px; border-radius: 50%; background: var(--grad);
               box-shadow: 0 0 0 2px #121212; transform: scale(0); transition: transform 320ms var(--spring); }
       .core.new .line-btn::after { transform: scale(1); }
-      .side { position: absolute; top: 8px; height: 40px; display: flex; align-items: center; gap: 8px; opacity: .55;
+      .side { height: 40px; display: flex; align-items: center; gap: 8px; opacity: .55;
               transition: opacity 220ms var(--ease-out); }
       .core:hover .side, .core:focus-within .side { opacity: 1; }
-      .side.l { right: 6px; }
-      .side.r { left: 6px; }
       .ctl { position: relative; width: 40px; height: 40px; border-radius: 20px; display: grid; place-items: center; color: var(--text-2);
               background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); box-shadow: var(--inner), var(--shadow);
               transition: color 140ms var(--ease-out), background 140ms var(--ease-out), transform 140ms var(--ease-out); }
