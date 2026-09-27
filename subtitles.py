@@ -285,7 +285,7 @@ class Captioner:
         if self.recorder:
             self.recorder.on_event(ev)
         if self.prompter:
-            self.prompter.on_event(ev)
+            self.prompter.on_event(ev, self.side or "them")
         kind = ev.get("type")
         if kind == "speechStart":
             self.partial, self.done = "", 0
@@ -541,15 +541,15 @@ class Captioner:
                         self.hub.broadcast({"type": "curious", "line": seg_id, "questions": more})
                 except Exception as e:
                     print(f"(Curious? questions failed: {type(e).__name__}: {e})", flush=True)
-            if self.prompter and route != "english" and picture is not early.get("picture"):
+            if self.prompter and route != "english" and self.side != "me" and picture is not early.get("picture"):
                 import topics
                 self.prompter.offer(topics.about(hits, picture, self.lexicon.entries.get(self.lang), asking=intent == "question"))
             row["laya"] = laya[0] if usable else None
             if self.recorder:
                 self.recorder.add_line(id=seg_id, telugu=sentence, english=english, english_full=full_english, route=route,
                                        kept=kept, intent=intent if ok else None, picture=picture, start_s=start_s, end_s=end_s)
-            if self.prompter and route != "english":
-                self.prompter.on_line(sentence, full_english, intent if ok else None, route)
+            if self.prompter:  # any language, either side: every pause is a chance to keep the conversation going
+                self.prompter.on_line(sentence, full_english, intent if ok else None, route, who=self.side or "them")
 
         def work_logged():
             try:
@@ -609,7 +609,7 @@ class Captioner:
                 words, sent["open"] = self.curious.words_early(hits, known_before, limit=limit, picture=sent["picture"])
                 if words:
                     self.hub.broadcast({"type": "curious", "line": seg_id, "questions": words})
-            if self.prompter and route != "english":
+            if self.prompter and route != "english" and self.side != "me":
                 import topics
                 self.prompter.offer(topics.about(hits, sent["picture"], self.lexicon.entries.get(self.lang), asking="?" in sentence))
         except Exception as e:  # the extras never stop the line
@@ -1030,6 +1030,7 @@ async def load_helpers(loop, args, captioner, target):
         if starter:  # a question the last call's story suggested, to open this one with
             captioner.hub.welcome.append(starter)
             captioner.hub.broadcast(starter)
+            captioner.prompter.shown(starter)
             print(f"  [to start: ask {args.caller}: {starter['roman']}  ({starter['english']})]", flush=True)
     if not args.outgoing:
         from curious import Curious
@@ -1265,6 +1266,7 @@ async def listen_two_way(args, them_args, me_args, them, me):
     indic_voice = None if error else them.translate.speak
     await load_helpers(loop, args, them, them_target)  # story page, prompts: about the person you called
     me.decider, me.pictures = them.decider, them.pictures
+    me.prompter = them.prompter  # one conversation: pauses after either of you, and what you say, count for prompts
     if them.decider:  # what you say back tells us which kept Telugu words you understood (reply.py)
         from reply import ReplyJudge, ReplyWatch
         watch = ReplyWatch(ReplyJudge(them.decider), them.progress, them.lexicon, args.lang,
