@@ -34,6 +34,8 @@ MAX_STALE_S = 10.0           # a line held back (the listener was talking) is dr
 GEN_LOCK = threading.Lock()  # --two-way runs two Dubbers; MLX generation isn't safe from two threads at once
 BASE_SPEED, MAX_SPEED = 1.0, 1.3  # Kokoro: natural pace, speeding up smoothly as lines pile up
 CATCH_UP_S = 2.0                  # queued speech at which we reach MAX_SPEED
+ELEVEN_SPEED, ELEVEN_MAX_SPEED = 0.9, 1.05  # ElevenLabs: a touch slower than its default (Telugu sounded rushed), and
+                                           # only a little faster when lines queue (it went up to 1.2)
 MAX_CLONE_SPEED = 1.12            # the cloned voice has no speed control; playing it faster also raises the pitch a
                                   # little, so it stays gentle (1.12 is ~2 semitones, still clearly her)
 CLAUSE_SPLIT = r"(?<=[,;:.!?])\s+"  # generate and start playing clause by clause
@@ -177,7 +179,7 @@ class Dubber:
                     continue  # waited too long (the listener was talking); the subtitle showed it
                 if self.eleven:  # network, not the GPU: no lock; ElevenLabs does the catch-up speed itself
                     behind = self.buffer.pending_seconds()
-                    clips = self._eleven_clips(text, lang, BASE_SPEED + (1.2 - BASE_SPEED) * min(1.0, behind / CATCH_UP_S))
+                    clips = self._eleven_clips(text, lang, ELEVEN_SPEED + (ELEVEN_MAX_SPEED - ELEVEN_SPEED) * min(1.0, behind / CATCH_UP_S))
                 elif lang != "en":
                     samples, rate = self.indic_voice(text)  # the translate server's CPU voice, no GPU lock needed
                     clips = iter([to_48k(normalize(samples.astype(np.float32) / 32768), rate)])
