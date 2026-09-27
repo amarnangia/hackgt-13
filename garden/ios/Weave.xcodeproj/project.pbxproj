@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		007CB8DA62A7A20C5D4D60C1 /* auto.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 8393FA04433BBE0B25E8E19B /* auto.jpg */; };
 		066EFFA314B6E4478E7047BC /* People.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA09DCD3A4702F4BAF83DD54 /* People.swift */; };
+		0B50ED5E3FB76BED4FE878CD /* NextCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64A66F547E73341947BB9A56 /* NextCall.swift */; };
 		100801F404358041FF508128 /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A2CFF37231C6B3F01E8B6B /* WidgetViews.swift */; };
 		1865F70CDC909CB5A2E93E57 /* GardenClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA49E9E63150F76191F55B2E /* GardenClient.swift */; };
 		1AD684A150040E4A8C816D1C /* Voice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18167CF6B5FCDD716B102695 /* Voice.swift */; };
@@ -93,6 +94,7 @@
 		4F7A7E10B09510149ED7D3EF /* Library.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Library.swift; sourceTree = "<group>"; };
 		5E80C78AB92192EB8E6EE8A9 /* Sheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sheets.swift; sourceTree = "<group>"; };
 		6265F4E61DEC63A2D3490E48 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		64A66F547E73341947BB9A56 /* NextCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NextCall.swift; sourceTree = "<group>"; };
 		684E6470AC706B79CD69A77D /* Weave.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Weave.entitlements; sourceTree = "<group>"; };
 		6AFB1B3C027FA2D5654E5BBF /* call_script.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = call_script.json; sourceTree = "<group>"; };
 		6FDD762CDED4DDE07A4E95DE /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -224,6 +226,7 @@
 				6FDD762CDED4DDE07A4E95DE /* HomeView.swift */,
 				A5A64500F6375BA3CEC5B21B /* Info.plist */,
 				4F7A7E10B09510149ED7D3EF /* Library.swift */,
+				64A66F547E73341947BB9A56 /* NextCall.swift */,
 				BA09DCD3A4702F4BAF83DD54 /* People.swift */,
 				F28BE33DB5A492CA2B6D40A2 /* SessionView.swift */,
 				2456D6508AC6B52E4F48356E /* SettingsView.swift */,
@@ -384,6 +387,7 @@
 				6BE42605EFF015BBADA3A9A7 /* HomeView.swift in Sources */,
 				317CD386896012EA5E7CBFD3 /* Library.swift in Sources */,
 				40A2585CC84434804EDA4B20 /* Models.swift in Sources */,
+				0B50ED5E3FB76BED4FE878CD /* NextCall.swift in Sources */,
 				066EFFA314B6E4478E7047BC /* People.swift in Sources */,
 				79EB066CC2889E08E964BEED /* SessionView.swift in Sources */,
 				FB5BC11F6127A4556B980964 /* SettingsView.swift in Sources */,

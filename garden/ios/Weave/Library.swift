@@ -244,6 +244,7 @@ struct ProgressView_: View {
                 GrowthPlant(plants: snap.plants, totals: snap.totals)
                     .padding(.horizontal, -20)
                     .reveal(1)
+                NextCallCard(snap: snap).reveal(2)
                 if snap.totals.phrases == 0 {
                     Text(people.source == .offline ? "Connect to Weave on your Mac in Settings." : "Your plant grows with every word you hear on your calls.")
                         .font(Fonts.ui(15)).foregroundStyle(Theme.text2).frame(maxWidth: .infinity).multilineTextAlignment(.center)
