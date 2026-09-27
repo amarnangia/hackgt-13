@@ -361,7 +361,7 @@ struct ProgressView_: View {
         let words = snap.plants.sorted { ($0.firstHeard ?? 0) < ($1.firstHeard ?? 0) }
         return Panel {
             HStack(alignment: .firstTextBaseline) {
-                Eyebrow("Your weave")
+                Eyebrow("Your words")
                 Spacer()
                 Text("\(snap.totals.bloom) of \(snap.totals.phrases) known").font(Fonts.ui(13)).monospacedDigit().foregroundStyle(Theme.text2)
             }
@@ -406,6 +406,14 @@ struct ProgressView_: View {
         }
     }
 
+    private static func inLatin(_ p: Plant?) -> String? {
+        guard let p else { return nil }
+        let clean = { (s: String?) in s?.trimmingCharacters(in: CharacterSet(charactersIn: " ,.^")) }
+        if let r = clean(p.roman), !r.isEmpty, r.unicodeScalars.allSatisfy({ !(0x0C00...0x0C7F).contains($0.value) }) { return r }
+        if let e = clean(p.english), !e.isEmpty { return e }
+        return nil
+    }
+
     private func milestones(_ snap: GardenSnapshot) -> some View {
         let events = snap.recent.filter { $0.kind != "heard" }.prefix(8)
         return Panel(padding: 0) {
@@ -421,7 +429,8 @@ struct ProgressView_: View {
                             .font(.system(size: 12, weight: .semibold)).foregroundStyle(e.kind == "bloomed" ? Theme.accent : Theme.text2)
                             .frame(width: 30, height: 30)
                             .background(e.kind == "bloomed" ? Theme.accent.opacity(0.12) : Theme.surface2, in: .rect(cornerRadius: 9))
-                        (Text(e.phrase).font(Fonts.telugu(15, .medium)).foregroundColor(Theme.text)
+                        // the word in English letters (pulihora, not పులిహోర), like the overlay; its meaning if it has no spelling
+                        (Text(Self.inLatin(snap.plant(e.phrase)) ?? e.phrase).font(Fonts.ui(15, .medium)).foregroundColor(Theme.text)
                             + Text(e.kind == "bloomed" ? "  is now known" : e.kind == "sprouted" ? "  moved to learning" : "  needs more help").font(Fonts.ui(14)).foregroundColor(Theme.text2))
                             .lineLimit(1)
                         Spacer(minLength: 8)
