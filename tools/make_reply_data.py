@@ -3,6 +3,7 @@
 # Muse Spark writes them from word-list words; words in tools/data/reply_test.jsonl are left out, so the test
 # measures words the model never trained on.
 #   python tools/make_reply_data.py [--per-word 9]     -> tools/data/reply_train.jsonl
+#   python tools/make_reply_data.py --out tools/data/reply_train_2.jsonl --seed 2   # another batch, other sentences
 import argparse
 import json
 import os
@@ -47,15 +48,17 @@ def batch(entry, per_word):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--per-word", type=int, default=9)
+    p.add_argument("--out", default=os.path.join("tools", "data", "reply_train.jsonl"))
+    p.add_argument("--seed", type=int, default=1)
     args = p.parse_args()
     test = {json.loads(line)["word"].lower() for line in open(os.path.join(HERE_DATA, "reply_test.jsonl"))}
     entries = [e for e in json.load(open(os.path.join(ROOT, "lexicon.json"), encoding="utf-8"))["te"]
                if e.get("roman") and e.get("translate_as") and e.get("category") != "idiom"
                and e["roman"].rstrip(",").lower() not in test]
-    random.Random(1).shuffle(entries)
+    random.Random(args.seed).shuffle(entries)
     with ThreadPoolExecutor(8) as pool:
         rows = [r for rs in pool.map(lambda e: batch(e, args.per_word), entries) for r in rs]
-    path = os.path.join(HERE_DATA, "reply_train.jsonl")
+    path = os.path.join(ROOT, args.out)
     with open(path, "w") as f:
         for r in rows:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")

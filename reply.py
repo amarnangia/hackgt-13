@@ -7,6 +7,8 @@
 #     what?", "who called?"), backchannels and talk about the call ("okay", "hold on"), naming it in English;
 #   - Laya for the rest, with its own small decision head trained for this question (tools/train_reply.py) on
 #     top of Laya's shared encoder, so Laya's other decisions (decide.py) are untouched.
+#   - Muse Spark, sparingly, when neither is sure and the reply says something (see SPARK_*): the check runs after the
+#     grandkid has spoken, so Spark's ~1 s doesn't hold up the call, but it's only asked a few times per call.
 # tools/check_reply.py measures it on hand-written examples with words it never trained on.
 import os
 import re
@@ -14,9 +16,15 @@ import re
 HERE = os.path.dirname(os.path.abspath(__file__))
 HEAD_PATH = os.path.join(HERE, "models", "reply_head.pt")
 LABELS = ("understood", "not_understood", "no_signal")
-# Below this confidence Laya's answer isn't used (no evidence rather than a guess). Picked on held-out training words:
-# at 0.8, 90% of what it concluded there was right; on the hand-written test, 88% (tools/check_reply.py).
-MIN_CONFIDENCE = 0.8
+# Below this confidence Laya's answer isn't used (no evidence rather than a guess). Picked on held-out training words
+# (tools/train_reply.py's validation words), for the head trained on both data batches: at 0.98, 88% of the evidence
+# it gave there was right (92 of the 226 replies the rules leave to it); at 0.8, 79%.
+MIN_CONFIDENCE = 0.98
+# Muse Spark as the tie-breaker: only for replies of at least SPARK_MIN_WORDS words that the rules and Laya both
+# left open, at most SPARK_PER_CALL times per call and SPARK_GAP_S apart.
+SPARK_MIN_WORDS = 4
+SPARK_PER_CALL = 12
+SPARK_GAP_S = 20
 QUESTION = {
     "type": "choice",
     "instructions": "Grandma's sentence kept one Telugu word. Does the grandchild's reply show they understood that word?",
@@ -83,13 +91,36 @@ def state(line, word, means, reply):
 
 
 class ReplyJudge:
-    """judge(line, word, means, reply) -> (label, confidence, how). Shares decide.Decider's Laya (and its lock)."""
+    """judge(line, word, means, reply) -> (label, confidence, how). Shares decide.Decider's Laya (and its lock).
+    `spark`: ask Muse Spark (sparingly) when the rules and Laya are both unsure."""
 
-    def __init__(self, decider, head_path=HEAD_PATH):
+    def __init__(self, decider, head_path=HEAD_PATH, spark=True):
+        import threading
         self.decider = decider
         self.agent, self.lock, self.torch = decider.agent, decider.lock, decider.torch
         self.q = self.agent._to_internal(QUESTION)
         self.head = load_head(self.agent, head_path) if head_path and os.path.exists(head_path) else None
+        self.spark_on, self.spark_used, self.spark_last = spark, 0, 0.0
+        self.spark_lock = threading.Lock()
+
+    def spark(self, line, word, means, reply):
+        """(label, 0.9) from Muse Spark, or None when it's not worth a call (short reply, budget used, too soon)."""
+        import time
+        if not self.spark_on or len(re.findall(r"[a-z']+", reply.lower())) < SPARK_MIN_WORDS:
+            return None
+        with self.spark_lock:
+            now = time.monotonic()
+            if self.spark_used >= SPARK_PER_CALL or now - self.spark_last < SPARK_GAP_S:
+                return None
+            self.spark_used, self.spark_last = self.spark_used + 1, now
+        from muse import spark_json
+        criteria = "\n".join(f"- {k}: {v}" for k, v in QUESTION["criteria"].items())
+        a = spark_json(f"{QUESTION['instructions']} The grandchild is a beginner in Telugu; the reply is live speech "
+                       f"recognition. Labels:\n{criteria}\nKey: \"label\" (one of {', '.join(LABELS)}).",
+                       f"Grandma said: {line}\nTelugu word: {word} (means: {means})\nGrandchild replied: {reply}",
+                       model="muse-spark-1.1", effort="minimal", timeout=8)
+        label = (a or {}).get("label")
+        return (label, 0.9) if label in LABELS else None
 
     def laya(self, line, word, means, reply):
         """(label, confidence) from Laya: the trained head if there is one, else Laya as shipped."""
@@ -109,9 +140,12 @@ class ReplyJudge:
         if by_rule:
             return by_rule, 1.0, "rule"
         label, conf = self.laya(line, word, means, reply)
-        if conf < MIN_CONFIDENCE:
-            return "no_signal", conf, "laya unsure"
-        return label, conf, "laya"
+        if conf >= MIN_CONFIDENCE:
+            return label, conf, "laya"
+        asked = self.spark(line, word, means, reply)
+        if asked:
+            return asked[0], asked[1], "spark"
+        return "no_signal", conf, "laya unsure"
 
 
 # ---------- the trained head: Laya's decision layers, retrained for this one question ----------

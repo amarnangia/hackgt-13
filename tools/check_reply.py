@@ -27,11 +27,13 @@ def report(name, gold, pred, seconds=None):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--wrong", action="store_true")
+    p.add_argument("--spark", action="store_true", help="also test Muse Spark as the tie-breaker (a few API calls)")
+    p.add_argument("--head", default=HEAD_PATH, help="a trained head to test (default: the one the app uses)")
     args = p.parse_args()
     rows = [json.loads(line) for line in open(os.path.join(ROOT, "tools", "data", "reply_test.jsonl"))]
     gold = [r["label"] for r in rows]
     from decide import Decider
-    judge = ReplyJudge(Decider(), head_path=None)
+    judge = ReplyJudge(Decider(), head_path=None, spark=False)
 
     by_rule = [rule(r["word"], r["reply"], r["means"]) for r in rows]
     covered = [(g, p) for g, p in zip(gold, by_rule) if p]
@@ -43,8 +45,8 @@ def main():
     report("Laya as shipped", gold, shipped, (time.monotonic() - t) / len(rows))
     report("rules, then Laya as shipped", gold, [br or s for br, s in zip(by_rule, shipped)])
 
-    if os.path.exists(HEAD_PATH):
-        judge.head = load_head(judge.agent, HEAD_PATH)
+    if os.path.exists(args.head):
+        judge.head = load_head(judge.agent, args.head)
         t = time.monotonic()
         answers = [judge.laya(r["line"], r["word"], r["means"], r["reply"]) for r in rows]
         trained = [label for label, _ in answers]
@@ -58,6 +60,27 @@ def main():
               f"{right}/{len(evidence)} = {right / len(evidence):.0%} of it right; costly: "
               f"{sum(g == 'not_understood' and c == 'understood' for g, c in zip(gold, combined))}")
         print("confusions (gold -> predicted):", dict(Counter((g, c) for g, c in zip(gold, combined) if g != c)))
+        if args.spark:
+            # The app with Muse Spark as the tie-breaker (its per-call budget lifted here, to see every reply it would
+            # be asked about; on a call it's asked at most reply.SPARK_PER_CALL times, SPARK_GAP_S apart).
+            import reply
+            reply.SPARK_PER_CALL, reply.SPARK_GAP_S = 10 ** 6, 0
+            judge.spark_on = True
+            full = []
+            for r, br, (label, conf) in zip(rows, by_rule, answers):
+                if br:
+                    full.append(br)
+                elif conf >= MIN_CONFIDENCE:
+                    full.append(label)
+                else:
+                    asked = judge.spark(r["line"], r["word"], r["means"], r["reply"])
+                    full.append(asked[0] if asked else "no_signal")
+            evidence = [(g, c) for g, c in zip(gold, full) if c != "no_signal"]
+            right = sum(g == c for g, c in evidence)
+            report("the app + Spark tie-breaker", gold, full)
+            print(f"{'':34} Spark asked about {judge.spark_used}/{len(rows)} replies; evidence from {len(evidence)}/{len(rows)}, "
+                  f"{right}/{len(evidence)} = {right / len(evidence):.0%} right")
+            combined = full
         if args.wrong:
             for r, c in zip(rows, combined):
                 if c != r["label"]:
