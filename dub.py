@@ -34,8 +34,9 @@ MAX_STALE_S = 10.0           # a line held back (the listener was talking) is dr
 GEN_LOCK = threading.Lock()  # --two-way runs two Dubbers; MLX generation isn't safe from two threads at once
 BASE_SPEED, MAX_SPEED = 1.0, 1.3  # Kokoro: natural pace, speeding up smoothly as lines pile up
 CATCH_UP_S = 2.0                  # queued speech at which we reach MAX_SPEED
-ELEVEN_SPEED, ELEVEN_MAX_SPEED = 0.9, 1.05  # ElevenLabs: a touch slower than its default (Telugu sounded rushed), and
-                                           # only a little faster when lines queue (it went up to 1.2)
+ELEVEN_SPEED, ELEVEN_MAX_SPEED = 0.85, 1.0  # ElevenLabs: a little slower than its default (it sounded rushed), and no
+                                           # faster than normal when lines queue (it went up to 1.2)
+LEAD_IN_S = 0.35  # a breath of silence before each English line, so the voice doesn't jump in the moment she stops
 MAX_CLONE_SPEED = 1.12            # the cloned voice has no speed control; playing it faster also raises the pitch a
                                   # little, so it stays gentle (1.12 is ~2 semitones, still clearly her)
 CLAUSE_SPLIT = r"(?<=[,;:.!?])\s+"  # generate and start playing clause by clause
@@ -191,6 +192,8 @@ class Dubber:
                     behind = self.buffer.pending_seconds()
                     clips = self._locked(self._kokoro_clips(
                         text, BASE_SPEED + (MAX_SPEED - BASE_SPEED) * min(1.0, behind / CATCH_UP_S)))
+                if lang == "en" and LEAD_IN_S:
+                    self.buffer.push(np.zeros(int(OUT_SR * LEAD_IN_S), dtype=np.float32))
                 for clip in clips:
                     if self.epoch != epoch:
                         break  # interrupted mid-line: the rest isn't wanted
