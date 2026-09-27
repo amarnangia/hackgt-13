@@ -282,14 +282,14 @@ const report = () => tellParent({ kind: "size", width: Math.ceil(root.scrollWidt
 
 // ---------- top: sayings (idioms, slang) and "Ask her", one at a time, top center ----------
 // A saying she uses comes down at once, big, with what it means: it explains what she's saying right now, so it doesn't
-// wait for a pause. It stays SAYING_MS (long enough to read) and the same saying isn't shown again for 5 minutes.
+// wait for a pause. It stays SAYING_MS (long enough to read), and comes back every time it's said again (demos repeat it).
 // "Ask her" waits for a real pause (2 s) before coming in and then stays up, however long the quiet lasts, until someone
 // (either of you) has been talking for 5 s: then it's done. If nobody talks for 30 s, the engine sends a fresh one
 // instead. A saying takes the spot while it's up; a waiting question comes back after.
 const SPARK = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5c.4 3.9 1.9 6.6 4.2 8 1.3.8 2.9 1.3 5.3 1.5-2.4.2-4 .7-5.3 1.5-2.3 1.4-3.8 4.1-4.2 8-.4-3.9-1.9-6.6-4.2-8C6.5 12.7 4.9 12.2 2.5 12c2.4-.2 4-.7 5.3-1.5 2.3-1.4 3.8-4.1 4.2-8z"/></svg>`;
 const QUOTE = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 17.5c0-4.6 2.4-8.2 6.2-10l.9 1.6C8.9 10.4 7.8 12 7.6 14H10v5H4v-1.5zm10 0c0-4.6 2.4-8.2 6.2-10l.9 1.6c-2.2 1.3-3.3 2.9-3.5 4.9H20v5h-6v-1.5z"/></svg>`;
 const PAUSE_MS = 2000, TALK_MS = 5000;
-const SAYING_MS = 10000, SAYING_AGAIN_MS = 300000;
+const SAYING_MS = 10000, SAYING_AGAIN_MS = 0;   // 0: the same saying shows every time it's said; 300000 held it back 5 minutes
 const TOP_KINDS = new Set(["idiom", "slang"]);   // sayings and slang go up here; everyday phrases and customs stay in the corner
 const askState = { ask: null, drawn: null, expire: 0, lastTalk: 0, talkStart: 0, shown: false, shownAt: 0, tick: 0 };
 const sayState = { saying: null, seen: new Map() };   // seen: saying key -> when it was last shown
