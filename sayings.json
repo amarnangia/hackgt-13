@@ -10150,6 +10150,55 @@
    "note": "It is named so because people use leftover flowers on the first day.",
    "category": "culture",
    "kind": "culture"
+  },
+  {
+   "id": "say_tinaga_tinaga_vemu",
+   "forms": [
+    "తినగ తినగ వేము తియ్యనుండు",
+    "తినగ తినగ వేము"
+   ],
+   "roman": "tinaga tinaga vemu tiyyanundu",
+   "literal": "Eat neem again and again and it turns sweet",
+   "translate_as": "practice makes even the hard things easy",
+   "note": "From Vemana's poems: keep at something difficult and it becomes easy.",
+   "category": "idiom",
+   "kind": "saying"
+  },
+  {
+   "id": "say_peru_goppa_ooru_dibba",
+   "forms": [
+    "పేరు గొప్ప ఊరు దిబ్బ"
+   ],
+   "roman": "peru goppa ooru dibba",
+   "literal": "Big name, the village is a rubbish heap",
+   "translate_as": "a big name with nothing behind it",
+   "note": "Said about something famous or grand-sounding that turns out to be disappointing.",
+   "category": "idiom",
+   "kind": "saying"
+  },
+  {
+   "id": "say_ee_endaku_aa_goduguu",
+   "forms": [
+    "ఏ ఎండకు ఆ గొడుగు"
+   ],
+   "roman": "ee endaku aa godugu",
+   "literal": "An umbrella for whichever sun",
+   "translate_as": "changing sides to suit the moment",
+   "note": "Said about someone who switches loyalty to whoever is useful right now.",
+   "category": "idiom",
+   "kind": "saying"
+  },
+  {
+   "id": "say_guddi_kanna_mella_melu",
+   "forms": [
+    "గుడ్డి కన్నా మెల్ల మేలు"
+   ],
+   "roman": "guddi kanna mella melu",
+   "literal": "A squint is better than blindness",
+   "translate_as": "something is better than nothing",
+   "note": "Said when you accept a partial result because it beats having nothing.",
+   "category": "idiom",
+   "kind": "saying"
   }
  ],
  "en": [

@@ -110,16 +110,33 @@ def train_head(train, val, question, labels, to_state, args):
         return run_head(model, head, b, device, h=h.to(device).float())
 
     def accuracy(cached):
+        """Share right; with --weighted, the average of each answer's share right (always "no" scores 50%)."""
         head.eval()
-        right = 0
+        right, total = torch.zeros(len(labels)), torch.zeros(len(labels))
         with torch.no_grad():
             for b, h, y in batches(cached, shuffle=False):
-                right += (forward(b, h).argmax(-1).cpu() == y).sum().item()
-        return right / len(cached)
+                ok = forward(b, h).argmax(-1).cpu() == y
+                right += torch.bincount(y[ok], minlength=len(labels)).float()
+                total += torch.bincount(y, minlength=len(labels)).float()
+        if getattr(args, "weighted", False):
+            return (right / total.clamp(min=1))[total > 0].mean().item()
+        return (right.sum() / total.sum()).item()
 
     rng = random.Random(args.seed)
     torch.manual_seed(args.seed)
-    train, val = cache(train), cache(val)
+    cache_path = getattr(args, "cache", None)
+    if cache_path and os.path.exists(cache_path):  # the encoder's output from an earlier run on the same data
+        train, val = torch.load(cache_path, weights_only=False)
+        print(f"  loaded encodings from {cache_path}")
+    else:
+        train, val = cache(train), cache(val)
+        if cache_path:
+            torch.save((train, val), cache_path)
+    weight = None
+    if getattr(args, "weighted", False):  # rarer answers count more, so always answering the common one doesn't pay
+        counts = torch.bincount(torch.tensor([y for _, _, y in train]), minlength=len(labels)).float()
+        weight = (counts.sum() / (len(labels) * counts.clamp(min=1))).to(device)
+        print(f"  class weights {weight.tolist()}")
     steps = args.epochs * -(-len(train) // args.batch)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=lr, total_steps=steps, pct_start=0.1)
     best, best_state = accuracy(val), None
@@ -128,7 +145,7 @@ def train_head(train, val, question, labels, to_state, args):
         head.train()
         start, total, n = time.monotonic(), 0.0, 0
         for b, h, y in batches(train, shuffle=True):
-            loss = torch.nn.functional.cross_entropy(forward(b, h), y.to(device))
+            loss = torch.nn.functional.cross_entropy(forward(b, h), y.to(device), weight=weight)
             opt.zero_grad()
             loss.backward()
             opt.step()

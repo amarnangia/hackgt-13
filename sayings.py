@@ -1,11 +1,14 @@
 # Finds sayings, idioms, slang and cultural references in what was said, even when speech recognition spells them a
 # little differently ("కోటి విద్యలు కోటి కొరకే" for "కోటి విద్యలు కూటి కొరకే"). Exact matching (lexicon.find) caught
 # only half of the listed sayings once they were spoken and transcribed (tools/check_idioms.py).
-#   1. candidates: fuzzy match on a sound-alike romanized form (Telugu) or lowercase words (English), so small
-#      spelling differences, merged or split words and a dropped letter still match;
-#   2. Laya confirms each candidate with its own trained decision head (tools/train_sayings.py): is this line really
-#      using that saying, or just sharing some words with it ("the dog's tail got hurt" isn't "a dog's tail stays
-#      crooked")? Laya reads romanized Telugu (its tokenizer turns Telugu script into bytes).
+#   1. matching: sayings of several words by a fuzzy match on a sound-alike romanized form (Telugu) or lowercase words
+#      (English), so small spelling differences, merged or split words and a dropped letter still match; short ones
+#      (a word or two: slang, a dish, a festival) exactly, as whole words (Telugu may add an ending: సంక్రాంతి-కి);
+#   2. no model check: we tried to have Laya confirm each match ("is this line really using that saying?",
+#      tools/train_sayings.py) and it never learned: its frozen encoder doesn't represent Telugu spelling (a linear probe
+#      on it: 57%), and on English the trained head stayed at chance as yes/no and as three options (Laya as shipped:
+#      worse than chance). The match itself is right far more often (tools/check_sayings.py, check_idioms.py).
+#      SayingJudge still uses a trained head if models/sayings_head.pt ever exists (English only).
 # The sayings come from lexicon.json (hand-made) and sayings.json (tools/make_sayings.py).
 import json
 import os
@@ -69,9 +72,18 @@ def english_words(text):
 
 # ---------- finding candidates ----------
 MIN_SOUND = 7        # shorter forms (single words) must match exactly (lexicon.find already does that)
-TE_SCORE = 76        # fuzzy score (0-100) for a Telugu candidate: loose on purpose (83% of held-out sayings
-                     # are among the top 5 candidates, vs 72% at 84); Laya's check removes the false alarms
-EN_SCORE = 90
+# Forms of fewer words must appear exactly, as whole words; longer ones may be misspelled. Telugu words are long, so
+# two are enough to tell a phrase apart ("చెవిలో పువ్వు"); in English "that's lit" fuzzily matched "that's it".
+FUZZY_WORDS = {"te": 2, "en": 3}
+TE_SCORE = 84        # fuzzy score (0-100) for a Telugu saying of 2+ words (tools/check_sayings.py, picked on validation:
+                     # 71% of held-out sayings caught, 3% of everyday lines with a wrong card; at 80: 79% and 4%)
+EN_SCORE = 88
+
+
+# Said all the time without meaning anything special; the generated slang list had them
+TOO_COMMON = {"i don't know", "idk", "oh my god", "oh my gosh", "omg", "never mind", "keep it", "okay", "ok", "for real",
+              "no way", "what's up", "thank you", "my bad", "you know", "i mean", "like", "literally", "honestly", "same",
+              "yeah", "cool", "nice", "wow", "bro", "dude", "guys", "hello", "hi", "bye", "sorry", "please", "yes", "no"}
 
 
 def load_sayings(lexicon=None):
@@ -79,13 +91,18 @@ def load_sayings(lexicon=None):
     items = {"te": [], "en": []}
     if lexicon is not None:
         for lang in ("te", "en"):
+            # (not its everyday phrases, "చిన్నప్పుడు", "take care": lexicon.find already gives those their cards)
             items[lang] += [dict(e, source="lexicon") for e in lexicon.entries.get(lang, [])
-                            if e.get("category") in ("idiom", "slang", "phrase")]
+                            if e.get("category") in ("idiom", "slang")]
     if os.path.exists(SAYINGS_PATH):
         extra = json.load(open(SAYINGS_PATH, encoding="utf-8"))
         for lang in ("te", "en"):
             have = {e["id"] for e in items[lang]}
-            items[lang] += [dict(e, source="sayings") for e in extra.get(lang, []) if e["id"] not in have]
+            key = sound if lang == "te" else english_words
+            said = {key(f) for e in items[lang] for f in e["forms"]}  # the same saying already in lexicon.json
+            items[lang] += [dict(e, source="sayings") for e in extra.get(lang, [])
+                            if e["id"] not in have and not any(english_words(f) in TOO_COMMON for f in e["forms"])
+                            and not any(key(f) in said for f in e["forms"])]
     return items
 
 
@@ -98,18 +115,25 @@ class SayingFinder:
             for e in entries:
                 for f in e.get("forms", []):
                     key = sound(f) if lang == "te" else english_words(f)
+                    spaced = " ".join(sound(w) for w in f.split()) if lang == "te" else key
                     if len(key) >= (MIN_SOUND if lang == "te" else 5):
-                        self.forms[lang].append((key, f, e))
+                        self.forms[lang].append((key, spaced, f, e))
 
     def candidates(self, text, lang, limit=5):
         from rapidfuzz import fuzz
         line = sound(text) if lang == "te" else english_words(text)
+        words = f" {english_words(text)} " if lang == "en" else " " + " ".join(sound(w) for w in text.split()) + " "
         cutoff = TE_SCORE if lang == "te" else EN_SCORE
         best = {}
-        for key, form, e in self.forms[lang]:
+        for key, spaced, form, e in self.forms[lang]:
             if len(key) > len(line) + 3:
                 continue
-            score = fuzz.partial_ratio(key, line, score_cutoff=cutoff)
+            if len(form.split()) < FUZZY_WORDS[lang]:  # short: whole words, exactly ("slaying" isn't "saying"); in Telugu
+                # the last word may carry an ending (సంక్రాంతి-కి, ఆటో-లో)
+                exact = f" {spaced} " in words if lang == "en" else f" {spaced}" in words
+                score = 100 if exact else 0
+            else:
+                score = fuzz.partial_ratio(key, line, score_cutoff=cutoff)
             if score and score > best.get(e["id"], (0,))[0]:
                 best[e["id"]] = (score, e, form)
         ranked = sorted(best.values(), key=lambda x: -x[0])[:limit]
@@ -118,24 +142,33 @@ class SayingFinder:
 
 # ---------- Laya: is the line really using it? ----------
 HEAD_PATH = os.path.join(HERE, "models", "sayings_head.pt")
-LABELS = ("yes", "no")
+LABELS = ("uses_it", "literal", "different")
+# Three concrete options, like reply.py's question: as a bare yes/no, Laya's head never learned (stayed at a coin flip).
 QUESTION = {
     "type": "choice",
-    "instructions": "Is the speaker using this saying, expression or reference, not just some of the same words?",
+    "instructions": "The speaker's line matched a saying, idiom, slang word or cultural reference. How is it used?",
     "criteria": {
-        "yes": "the line uses it (maybe misspelled by speech recognition, or only its well-known first part)",
-        "no": "the line only shares some words with it, uses them literally, or says something else",
+        "uses_it": "they use it with its special meaning (an idiom meant as an idiom, slang as slang, the thing itself)",
+        "literal": "the same words, but meant literally, not as the saying",
+        "different": "a different thing: the words only look or sound similar",
     },
 }
 MIN_CONFIDENCE = 0.5  # tools/check_sayings.py picks it
-NO_HEAD_SCORE = 95    # without the trained check, loose fuzzy matches gave a false alarm on 47% of everyday Telugu lines
 
 
-def state(lang, line, saying, roman, means):
-    """What Laya reads: Telugu romanized (its tokenizer turns Telugu script into bytes)."""
+def match_score(lang, form, text):
+    """How closely `text` contains `form` (0-100), as the fuzzy matcher sees it."""
+    from rapidfuzz import fuzz
+    key = sound if lang == "te" else english_words
+    return fuzz.partial_ratio(key(form), key(text))
+
+
+def state(lang, line, saying, roman, means, score):
+    """What Laya reads: Telugu romanized (its tokenizer turns Telugu script into bytes), and how closely the line
+    sounds like the saying (Laya can't compare spellings letter by letter itself: without this it didn't learn)."""
     if lang == "te":
-        return {"speaker said": romanize(line), "saying": roman or romanize(saying), "it means": means}
-    return {"speaker said": line, "saying": saying, "it means": means}
+        line, saying = romanize(line), roman or romanize(saying)
+    return {"speaker said": line, "saying": saying, "sounds like it": f"{round(score)} out of 100", "it means": means}
 
 
 class SayingJudge:
@@ -151,15 +184,17 @@ class SayingJudge:
 
     def probs(self, lang, text, cands):
         from reply import head_probs
-        states = [state(lang, text, form, e.get("roman", ""), meaning(e)) for e, form, _ in cands]
+        states = [state(lang, text, form, e.get("roman", ""), meaning(e), score) for e, form, score in cands]
         with self.lock:
             p = head_probs(self.agent, self.head, states, self.q)
             if self.torch.backends.mps.is_available():
                 self.torch.mps.empty_cache()
-        return [float(x[0]) for x in p]  # P(yes)
+        return [float(x[0]) for x in p]  # P(uses_it)
 
     def find(self, text, lang):
         cands = self.finder.candidates(text, lang)
-        if not cands or self.head is None:  # no trained check (models/sayings_head.pt): only near-exact matches
-            return [(e, score / 100) for e, _, score in cands if score >= NO_HEAD_SCORE]
+        # Laya checks English only: whether an idiom is meant ("break a leg!") or literal ("I broke my leg"). Its frozen
+        # encoder can't compare Telugu spellings (trained on that, it stayed at a coin flip), so Telugu goes by the match.
+        if not cands or self.head is None or lang != "en":
+            return [(e, score / 100) for e, _, score in cands]
         return [(e, p) for (e, _, _), p in zip(cands, self.probs(lang, text, cands)) if p >= MIN_CONFIDENCE]

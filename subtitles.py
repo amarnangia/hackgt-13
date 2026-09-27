@@ -653,15 +653,22 @@ class Captioner:
 
     @staticmethod
     def _with_meanings(sentence, said):
-        """The English with each idiom said word for word swapped for its meaning, so "break a leg" isn't translated
-        into Telugu as breaking a leg."""
-        from sayings import meaning
+        """The English with each idiom's meaning added after it in brackets ("break a leg (good luck, do well)"), so the
+        Telugu speaker gets the meaning, not a broken leg. (Swapping the idiom out broke the grammar: "I to stay
+        awake all night".) Only entries with a real meaning; lexicon.json's slang has just a note."""
+        spans = []
         for e, _ in said:
-            for form in sorted(e.get("forms", []), key=len, reverse=True):
-                new = re.sub(rf"\b{re.escape(form)}\b", meaning(e).rstrip("."), sentence, count=1, flags=re.IGNORECASE)
-                if new != sentence:
-                    sentence = new
-                    break
+            if e.get("translate_as"):
+                for form in e.get("forms", []):
+                    m = re.search(rf"\b{re.escape(form)}\b", sentence, flags=re.IGNORECASE)
+                    if m:
+                        spans.append((m.start(), m.end(), e["translate_as"].rstrip(".")))
+        kept = []  # the longest of overlapping matches ("pulled an all-nighter", not also "all-nighter")
+        for start, end, meaning in sorted(spans, key=lambda x: x[0] - x[1]):
+            if all(end <= s0 or start >= e0 for s0, e0, _ in kept):
+                kept.append((start, end, meaning))
+        for start, end, meaning in sorted(kept, reverse=True):
+            sentence = f"{sentence[:end]} ({meaning}){sentence[end:]}"
         return sentence
 
     def _warm_backup(self):

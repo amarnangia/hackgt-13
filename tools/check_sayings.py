@@ -48,7 +48,9 @@ def main():
     literal = [r for r in rows if r["label"] == "no" and r["id"] == r["about"]]
     daily = everyday()
 
-    finder = sayings.SayingFinder(sayings.load_sayings(Lexicon()))
+    items = sayings.load_sayings(Lexicon())
+    finder = sayings.SayingFinder(items)
+    cats = {e["id"]: e.get("category") for entries in items.values() for e in entries}
     judge = None
     if os.path.exists(args.head):
         from decide import Decider
@@ -68,10 +70,11 @@ def main():
             li = [r for r in literal if r["lang"] == lang]
             caught = sum(r["about"] in found(lang, r["line"], with_laya) for r in u)
             fooled = sum(r["about"] in found(lang, r["line"], with_laya) for r in li)
-            alarms = sum(bool(found(lang, t, with_laya)) for t in daily[lang])
+            # a cultural reference found in everyday talk ("పులిహోర చేశాను") is right, not a false alarm
+            alarms = sum(any(cats.get(i) != "culture" for i in found(lang, t, with_laya)) for t in daily[lang])
             print(f"  {name:13} {lang}: caught {caught}/{len(u)} = {caught / max(len(u), 1):.0%}   "
                   f"literal wrongly caught {fooled}/{len(li)} = {fooled / max(len(li), 1):.0%}   "
-                  f"everyday lines with a false alarm {alarms}/{len(daily[lang])} = {alarms / max(len(daily[lang]), 1):.0%}")
+                  f"everyday lines with a wrong saying card {alarms}/{len(daily[lang])} = {alarms / max(len(daily[lang]), 1):.0%}")
 
 
 if __name__ == "__main__":
