@@ -17,7 +17,7 @@ import urllib.parse
 HERE = os.path.dirname(os.path.abspath(__file__))
 CACHE_DIR = os.path.join(HERE, "images", "cache")
 HEADERS = {"User-Agent": "hackgt-call-translator/0.1 (https://github.com/amarnangia/hackgt-13)"}
-REPEAT_AFTER_S = float("inf")  # each picture once per call (one PictureFinder per call): the first time it comes up, never again
+REPEAT_AFTER_S = 0  # a picture every time its word comes up (demos say the same word again); float("inf") = once per call
 SKIP_KNOWN = False  # pictures show for words they already know too (the captions still keep those in Telugu): on every
                     # call, the first mention of pulihora gets its picture, even once they've learned it
 GENERIC = {"village_market", "rice", "curry", "wedding", "puja", "monsoon", "thali", "chai", "temple", "paddy_field"}

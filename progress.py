@@ -82,6 +82,7 @@ class Progress:
         self.understood_now = set()          # "understood" counts once per word per call: not tapping a word you
                                              # see ten times in a call isn't ten times the evidence
         self.last_heard = {}                 # id -> when it last came up in this call (monotonic)
+        self.kept_now = set()                # words kept in Telugu on this call: they stay in Telugu for the rest of it
         for wid, n in self.heard.items():    # progress.json from before this model: replay the hearings
             if wid not in self.words and wid in self.entries:
                 for _ in range(n):
@@ -180,7 +181,10 @@ class Progress:
         swaps = []  # (start, end, Telugu, id, the English it replaces), every time it comes up
         for entry in hits:
             roman = entry.get("roman")
-            if not roman or not self.known(entry["id"]):
+            # Once kept in Telugu, a word stays in Telugu for the rest of the call, even if a reply then counts against it
+            # ("ee roju" kept, a confused-sounding reply, then "today" the next time she said it). The evidence still
+            # counts; it decides the next call.
+            if not roman or not (entry["id"] in self.kept_now or self.known(entry["id"])):
                 continue
             # The fixed English from the substitution, or for words left to the translator, the English it may use.
             candidates = entry.get("match_english") or [entry.get("translate_as", "")]
@@ -204,6 +208,7 @@ class Progress:
         for begin, end_, telugu, wid, matched in sorted(swaps, reverse=True):
             english = english[:begin] + telugu + english[end_:]
             kept.insert(0, {"id": wid, "telugu": telugu, "english": matched})
+            self.kept_now.add(wid)
         return english, kept
 
     def heard_words(self, hits, kept=()):

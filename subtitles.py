@@ -716,7 +716,7 @@ class Captioner:
 
     def _picture(self, seg_id, hits, english, known_before):
         """Pop up a picture of the thing in this line the grandkid most likely doesn't know (Laya picks).
-        Once per call per picture, known words included (pictures.SKIP_KNOWN, pictures.REPEAT_AFTER_S)."""
+        Every time its word comes up, known words included (pictures.SKIP_KNOWN, pictures.REPEAT_AFTER_S)."""
         if not self.pictures or english.startswith("("):
             return None
         try:
