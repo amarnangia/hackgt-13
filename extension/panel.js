@@ -432,7 +432,8 @@ function speak(telugu, roman) {
 // ---------- float: pictures and meanings as small bubbles that spring up above the captions ----------
 // Each holds for a while and fades away; hover one to see it, click to keep it.
 const float = { items: [] };
-const MAX_ITEMS = 2, HOLD_MS = 20000;   // two cards fit above your camera tile
+// Pictures pop up, stay about 2.5 s and fade away; they can't be clicked (the call underneath gets every click).
+const MAX_ITEMS = 2, HOLD_MS = 3200, FADE_MS = 700;
 const MEANING_KINDS = new Set(["idiom", "slang", "phrase", "culture"]);
 const LABELS = { idiom: "Saying", slang: "Slang", phrase: "Phrase", culture: "Custom" };
 function addFloat(item) {
@@ -442,34 +443,27 @@ function addFloat(item) {
   const existing = float.items.find((x) => x.key === item.key);
   if (existing) { existing.at = Date.now(); return; }
   float.items.push({ ...item, at: Date.now() });
-  const loose = float.items.filter((x) => !x.pinned);
-  while (float.items.length > MAX_ITEMS && loose.length) float.items.splice(float.items.indexOf(loose.shift()), 1);
+  while (float.items.length > MAX_ITEMS) float.items.shift();
   tellParent({ kind: "attention", what: "new" });
 }
 function renderFloat() {
   const now = Date.now();
-  float.items = float.items.filter((x) => x.pinned || now - x.at < HOLD_MS);
+  float.items = float.items.filter((x) => now - x.at < HOLD_MS);
   syncList(root.querySelector(".bubs") || (root.innerHTML = `<div class="bubs"></div>`, root.querySelector(".bubs")), float.items, (x) => x.key,
     (x) => {
       const el = html("div", `bub ${x.kind}`, x.kind === "picture"
         ? `<img class="big" src="${esc(asset(x.image))}" alt=""><div class="bub-body"><b>${esc(noTe(x.name))}</b>${noTe(x.description) ? `<p>${esc(noTe(x.description))}</p>` : ""}</div>`
         : `<div class="bub-body"><span class="kind">${esc(x.label)}</span><b>${esc(x.title)}</b>${noTe(x.note) ? `<p>${esc(noTe(x.note))}</p>` : ""}</div>`);
       el.dataset.key = x.key;
-      el.title = "Click to keep it";
       return el;
     },
-    (el, x) => { el.classList.toggle("pinned", !!x.pinned); el.classList.toggle("fading", !x.pinned && now - x.at > HOLD_MS - 3000); });
+    (el, x) => { el.classList.toggle("fading", now - x.at > HOLD_MS - FADE_MS); });
   report();
   clearTimeout(float.timer);
-  const next = float.items.filter((x) => !x.pinned).map((x) => Math.min(x.at + HOLD_MS - 3000 - now, x.at + HOLD_MS - now)).filter((t) => t > 0);
+  const next = float.items.flatMap((x) => [x.at + HOLD_MS - FADE_MS - now, x.at + HOLD_MS - now]).filter((t) => t > 0);
   if (next.length) float.timer = setTimeout(renderFloat, Math.min(...next) + 30);
 }
-root.addEventListener("click", (e) => {
-  if (PART !== "float") return;
-  const el = e.target.closest("[data-key]");
-  const item = el && float.items.find((x) => x.key === el.dataset.key);
-  if (item) { item.pinned = !item.pinned; item.at = Date.now(); renderFloat(); }
-});
+
 
 // ---------- messages ----------
 function handle(m) {

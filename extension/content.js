@@ -51,7 +51,7 @@
       .left { transition: opacity 260ms var(--ease-out), transform 460ms var(--ease-sheet); }
       .left.off { opacity: 0; transform: var(--at) translate3d(-16px, 0, 0) scale(.98); pointer-events: none;
              transition: opacity 180ms var(--ease-in), transform 220ms var(--ease-in); }
-      .float { transition: opacity 260ms var(--ease-out); }
+      .float { transition: opacity 260ms var(--ease-out); pointer-events: none; }   /* pictures only show; clicks go to the call */
       .float.off { opacity: 0; pointer-events: none; }
       .captions { border-radius: 24px; transition: opacity 420ms var(--ease-out), transform 520ms var(--ease-sheet); }
       .captions.off { opacity: 0; transform: var(--at) translate3d(0, 10px, 0) scale(.98); pointer-events: none;
@@ -144,7 +144,7 @@
     const [tw, th] = size.top;
     place(frames.top, (w - (tw || 620)) / 2, M, tw || 620, th || 1);
     // top right: pictures and meanings, as tall as there are cards, above your camera tile in the bottom corner
-    const fw = Math.min(320, w - 2 * M), fh = Math.min(size.float || 1, h - M - 330);
+    const fw = Math.min(320, w - 2 * M), fh = Math.min(size.float || 1, h - 2 * M);   // never squeezed in a small call window
     place(frames.float, w - M - fw, M, fw, fh);
   }
   function load(wsUrl) {

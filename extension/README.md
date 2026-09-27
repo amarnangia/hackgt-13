@@ -13,7 +13,7 @@ Weave keeps the faces in the middle of the call clear, and shows English only (d
   you don't know it.
 - **Ask her (top center):** what to say and what it means, when the talk pauses.
 - **Words (top left):** a few words for what you're talking about, and questions; click one for the answer.
-- **Pictures and meanings (top right):** each with what it is. Click one to keep it.
+- **Pictures and meanings (top right):** each with what it is, for a couple of seconds.
 
 It connects to the Weave engine on this Mac at `ws://localhost:8765`: either `subtitles.py`, or `tools/fake_call.py`
 for a pretend call.
