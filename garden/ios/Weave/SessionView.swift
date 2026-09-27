@@ -83,6 +83,7 @@ struct Backdrop: View {
         ZStack {
             Theme.bg
             RadialGradient(colors: [Theme.accent.opacity(0.11), .clear], center: .top, startRadius: 0, endRadius: 520).offset(y: -140)
+            RadialGradient(colors: [Theme.lavender.opacity(0.13), Theme.lavenderDeep.opacity(0.05), .clear], center: .topTrailing, startRadius: 0, endRadius: 420)
             RadialGradient(colors: [Theme.lavender.opacity(0.10), Theme.lavenderDeep.opacity(0.04), .clear], center: .bottomLeading, startRadius: 0, endRadius: 560)
             RadialGradient(colors: [Theme.cyan.opacity(0.05), .clear], center: UnitPoint(x: 1.1, y: 0.45), startRadius: 0, endRadius: 380)
             Grain().opacity(0.5)

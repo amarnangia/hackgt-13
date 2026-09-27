@@ -279,9 +279,16 @@ struct ProgressView_: View {
     private func header(_ snap: GardenSnapshot) -> some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 6) {
-                Text(people.profileName.map { "\($0)'s garden" } ?? "Your garden").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.text)
-                Text(snap.totals.phrases == 0 ? "A seed, for now." : "\(snap.totals.phrases) words growing · \(snap.totals.bloom) in bloom")
-                    .font(Fonts.ui(15)).foregroundStyle(Theme.text2).contentTransition(.numericText())
+                Text("Bloom").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.text)
+                Group {
+                    if snap.totals.phrases == 0 {
+                        Text("A seed, for now.").foregroundStyle(Theme.text2)
+                    } else {
+                        Text("\(snap.totals.phrases) words growing").foregroundStyle(Theme.text2)
+                            + Text("  ·  \(snap.totals.bloom) in bloom").foregroundStyle(Theme.lavender)
+                    }
+                }
+                .font(Fonts.ui(15)).contentTransition(.numericText())
             }
             Spacer()
             Button { settings = true } label: { Avatar(text: String((people.profileName ?? "S").prefix(1)), size: 34) }
