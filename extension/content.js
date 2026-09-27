@@ -5,7 +5,7 @@
 //   captions  the translation bubble, bottom center, directly above...
 //   the line  ...a line that vibrates with the call's sound (its frequencies, from background.js/offscreen.js), or
 //             with what Weave is doing when there's no sound to read. Click it to hide or show everything. Beside it:
-//             the words and pictures buttons, and in two-way calls the English / Telugu switch.
+//             the words and pictures buttons, the Transcribe switch and the English / Telugu switch.
 // Each panel is panel.html (an extension page) in its own frame, so the call site's security rules can't block its
 // connection to the Weave engine on this Mac (ws://localhost:8765 by default; set "wsUrl" in chrome.storage.local
 // to change it). background.js runs this when you turn Weave on; running it again shows or hides the overlay.
@@ -76,11 +76,21 @@
               transition: color 140ms var(--ease-out), background 140ms var(--ease-out), transform 140ms var(--ease-out); }
       .ctl svg { width: 18px; height: 18px; }
       .ctl:hover { color: #fff; }
-      .ctl:active, .seg button:active { transform: scale(.94); }
+      .ctl:active, .sw:active, .seg button:active { transform: scale(.94); }
       .ctl.on { color: #fff; background: rgba(29,185,84,.26); box-shadow: var(--inner), inset 0 0 0 1px rgba(29,185,84,.45), var(--shadow); }
       .ctl .badge { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--grad);
               box-shadow: 0 0 0 2px rgba(18,18,20,.95); transform: scale(0); transition: transform 320ms var(--spring); }
       .ctl.new .badge { transform: scale(1); }
+      /* Transcribe: drawn from what the engine says ("transcribing"), never from the click */
+      .sw { height: 40px; padding: 0 14px 0 8px; border-radius: 20px; display: flex; align-items: center; gap: 9px; white-space: nowrap; color: var(--text-2);
+              background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); box-shadow: var(--inner), var(--shadow);
+              transition: color 160ms var(--ease-out), transform 140ms var(--ease-out); }
+      .sw .track { position: relative; width: 34px; height: 20px; border-radius: 10px; background: rgba(255,255,255,.12); transition: background 220ms var(--ease-out); }
+      .sw .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff;
+              box-shadow: 0 1px 3px rgba(0,0,0,.4); transform: translate3d(0, 0, 0); transition: transform 320ms var(--spring); }
+      .sw.on { color: #fff; }
+      .sw.on .track { background: var(--grad); }
+      .sw.on .track::after { transform: translate3d(14px, 0, 0); }
       .seg { height: 40px; display: flex; align-items: center; padding: 4px; gap: 2px; border-radius: 20px;
               background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); box-shadow: var(--inner), var(--shadow); }
       .seg button { height: 32px; padding: 0 12px; border-radius: 16px; display: flex; align-items: center; color: var(--text-2);
@@ -90,6 +100,8 @@
       .seg[hidden] { display: none; }
       .seg.guess { box-shadow: var(--inner), var(--shadow), 0 0 0 1.5px rgba(179,166,212,.55); animation: ask 2.4s ease-in-out infinite; }
       @keyframes ask { 50% { box-shadow: var(--inner), var(--shadow), 0 0 0 1.5px rgba(179,166,212,.2), 0 0 16px rgba(179,166,212,.35); } }
+      .sw.unknown { opacity: .45; }
+      .sw.unknown .track::after { transform: translate3d(7px, 0, 0); }
     </style>
     <div class="wrap">
       <iframe class="left" title="Weave: words and questions" allowtransparency="true"></iframe>
@@ -103,6 +115,7 @@
         </div>
         <button class="line-btn" title="Show or hide Weave (Alt+Shift+W)" aria-label="Show or hide Weave"><canvas></canvas></button>
         <div class="side r">
+          <button class="sw on" data-act="transcribe" role="switch" aria-checked="true"><span class="track"></span>Transcribe</button>
           <span class="seg" role="radiogroup" aria-label="I speak"><button data-lang="en">English</button><button data-lang="te">Telugu</button></span>
         </div>
       </div>
@@ -120,7 +133,7 @@
   const frames = { top: $(".top"), left: $(".left"), float: $(".float"), captions: $(".captions") };
   const buttons = { left: $('[data-panel="left"]'), float: $('[data-panel="float"]') };
   const size = { top: [0, 0], left: 0, float: 0 };
-  const ui = { shown: true, left: true, float: true, ask: false, idle: true, roles: null, lang: null, state: "off", connected: false };
+  const ui = { shown: true, left: true, float: true, ask: false, idle: true, roles: null, lang: null, transcribing: null, state: "off", connected: false };
 
   // ---- layout: placed with transforms; sizes change only when content does ----
   const M = 16, ORB_BOTTOM = 66, ORB = 56, CAP_H = 148;   // ORB_BOTTOM clears the call's own buttons
@@ -155,6 +168,12 @@
     frames.top.classList.toggle("off", !ui.ask);
     frames.left.classList.toggle("off", !ui.left || !size.left);
     frames.float.classList.toggle("off", !ui.float || !size.float);
+    // Transcribe shows only what the engine says ("transcribing"); until it has said anything, it's dimmed.
+    const sw = $(".sw");
+    sw.classList.toggle("on", ui.transcribing === true);
+    sw.classList.toggle("unknown", ui.transcribing === null);
+    sw.setAttribute("aria-checked", String(ui.transcribing === true));
+    sw.title = ui.transcribing === null ? "Waiting for the translator" : ui.transcribing ? "Transcribing the call: click to pause" : "Paused: the call isn't being transcribed. Click to resume";
     // English / Telugu only matters in two-way calls, where the engine says who it thinks speaks what ("roles").
     const seg = $(".seg");
     seg.hidden = !ui.roles;
@@ -176,6 +195,7 @@
   buttons.left.addEventListener("click", (e) => { e.stopPropagation(); setPanel("left", !ui.left); });
   buttons.float.addEventListener("click", (e) => { e.stopPropagation(); setPanel("float", !ui.float); });
   const toCaptions = (msg) => frames.captions.contentWindow?.postMessage({ source: "weave-dock", ...msg }, "*");
+  $(".sw").addEventListener("click", (e) => { e.stopPropagation(); toCaptions({ kind: "transcribe", on: !ui.transcribing }); });
   root.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", (e) => {
     e.stopPropagation();
     if (ui.roles) ui.roles = { ...ui.roles, you: b.dataset.lang, sure: true };   // the engine confirms with "roles"
@@ -245,11 +265,12 @@
       case "shown": ui.ask = !!m.shown; refresh(); break;
       case "idle": ui.idle = !!m.idle; refresh(); break;
       case "status":
-        if (!m.connected && ui.connected) { ui.roles = null; refresh(); }   // the engine went away: unknown again
+        if (!m.connected && ui.connected) { ui.transcribing = null; ui.roles = null; refresh(); }   // the engine went away: unknown again
         ui.connected = m.connected;
         setOrb(m.state || (m.connected ? "idle" : "off"));
         break;
       case "roles": ui.roles = m.roles; refresh(); break;
+      case "transcribing": ui.transcribing = !!m.on; refresh(); break;
       case "attention":
         if (m.part === "left" && !ui.left) buttons.left.classList.add("new");
         if (m.part === "float" && !ui.float) buttons.float.classList.add("new");
