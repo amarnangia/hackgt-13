@@ -60,7 +60,8 @@
       /* ---- the line and its controls, bottom center ---- */
       .core { position: fixed; z-index: ${Z + 2}; left: 50%; width: 0; height: 56px; font: 700 13px/1 var(--font); color: var(--text);
               -webkit-font-smoothing: antialiased; }
-      .line-btn { position: absolute; left: -${LINE_W / 2}px; top: 0; width: ${LINE_W}px; height: 56px; border-radius: 28px; }
+      /* no bar in the middle any more (the pulsing line under the captions shows what Roots is doing); the controls meet at the center */
+      .line-btn { display: none; position: absolute; left: -${LINE_W / 2}px; top: 0; width: ${LINE_W}px; height: 56px; border-radius: 28px; }
       .line-btn canvas { width: 100%; height: 100%; display: block; }
       .line-btn::after { content: ""; position: absolute; top: 6px; right: 14px; width: 8px; height: 8px; border-radius: 50%; background: var(--grad);
               box-shadow: 0 0 0 2px #121212; transform: scale(0); transition: transform 320ms var(--spring); }
@@ -68,8 +69,8 @@
       .side { position: absolute; top: 8px; height: 40px; display: flex; align-items: center; gap: 8px; opacity: .55;
               transition: opacity 220ms var(--ease-out); }
       .core:hover .side, .core:focus-within .side { opacity: 1; }
-      .side.l { right: ${LINE_W / 2 + 6}px; }
-      .side.r { left: ${LINE_W / 2 + 6}px; }
+      .side.l { right: 6px; }
+      .side.r { left: 6px; }
       .ctl { position: relative; width: 40px; height: 40px; border-radius: 20px; display: grid; place-items: center; color: var(--text-2);
               background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); box-shadow: var(--inner), var(--shadow);
               transition: color 140ms var(--ease-out), background 140ms var(--ease-out), transform 140ms var(--ease-out); }
@@ -251,7 +252,7 @@
     }
     g.globalAlpha = 1;
   }
-  raf = requestAnimationFrame(draw);
+  // (the bar is hidden, so its drawing loop isn't started)
 
   // ---- messages from the panels ----
   addEventListener("message", (e) => {

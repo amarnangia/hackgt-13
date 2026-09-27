@@ -17,7 +17,9 @@ import urllib.parse
 HERE = os.path.dirname(os.path.abspath(__file__))
 CACHE_DIR = os.path.join(HERE, "images", "cache")
 HEADERS = {"User-Agent": "hackgt-call-translator/0.1 (https://github.com/amarnangia/hackgt-13)"}
-REPEAT_AFTER_S = 300  # don't show the same picture again within 5 minutes
+REPEAT_AFTER_S = float("inf")  # each picture once per call (one PictureFinder per call): the first time it comes up, never again
+SKIP_KNOWN = False  # pictures show for words they already know too (the captions still keep those in Telugu): on every
+                    # call, the first mention of pulihora gets its picture, even once they've learned it
 GENERIC = {"village_market", "rice", "curry", "wedding", "puja", "monsoon", "thali", "chai", "temple", "paddy_field"}
 WHAT_IS_IT = {
     "indian_food": "an Indian dish, snack, sweet or ingredient",
@@ -120,14 +122,14 @@ class PictureFinder:
 
         Tested on 25 lines, Laya alone got 14/25: good at choosing between several things, but it often said
         "no picture" for a lone pulihora or Charminar and picked everyday words (sister, lunch). So:
-          - Indian library items are picture-worthy by construction (unless the grandkid knows the word);
+          - Indian library items are picture-worthy by construction (known words too: SKIP_KNOWN);
             American ones never pop up.
           - Web lookups only for words that aren't ordinary English (not in the system dictionary).
           - One eligible thing: show it. Several: Laya picks. Only web words: Laya decides if any need a picture.
         """
         now = time.monotonic()
-        known_items = {self.by_lexicon[e["id"]] for e in lexicon_hits if e["id"] in self.by_lexicon and known(e["id"])}
-        fresh = lambda key: now - self.shown.get(key, -1e9) > REPEAT_AFTER_S
+        known_items = {self.by_lexicon[e["id"]] for e in lexicon_hits if e["id"] in self.by_lexicon and known(e["id"])} if SKIP_KNOWN else set()
+        fresh = lambda key: key not in self.shown or now - self.shown[key] > REPEAT_AFTER_S
         library, web = [], []
         for key, label, desc in self.candidates(english, lexicon_hits):
             if not fresh(key):
@@ -159,8 +161,8 @@ class PictureFinder:
         items = []
         for e in lexicon_hits:
             iid = self.by_lexicon.get(e["id"])
-            if (iid and iid not in items and not known(e["id"]) and self.items[iid].get("region") != "us"
-                    and now - self.shown.get(iid, -1e9) > REPEAT_AFTER_S):
+            if (iid and iid not in items and not (SKIP_KNOWN and known(e["id"])) and self.items[iid].get("region") != "us"
+                    and (iid not in self.shown or now - self.shown[iid] > REPEAT_AFTER_S)):
                 items.append(iid)
         specific = [i for i in items if i not in GENERIC]
         items = specific or items
@@ -175,7 +177,7 @@ class PictureFinder:
         word in our list (mango, rice), so they don't count; other names come from the cache of American things
         (tools/prefetch_pictures.py), never a live look-up. One: show it; several: Laya picks."""
         now = time.monotonic()
-        fresh = lambda key: now - self.shown_her.get(key, -1e9) > REPEAT_AFTER_S
+        fresh = lambda key: key not in self.shown_her or now - self.shown_her[key] > REPEAT_AFTER_S
         cands, covered = [], english
         for pattern, iid in self.alias_patterns:
             it = self.items[iid]
