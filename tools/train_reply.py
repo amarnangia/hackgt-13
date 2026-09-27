@@ -35,8 +35,6 @@ def main():
     p.add_argument("--data", nargs="+", default=[os.path.join("tools", "data", f) for f in ("reply_train.jsonl", "reply_train_2.jsonl")],
                    help="training files (make_reply_data.py); held-out words are picked across all of them")
     args = p.parse_args()
-    out_path = args.out
-    lr = args.lr or {"scorer": 1e-3, "last": 3e-4, "all": 2e-4}[args.train]
 
     rows = [json.loads(line) for path in args.data for line in open(os.path.join(ROOT, path))]
     words = sorted({r["word"].lower() for r in rows})
@@ -45,7 +43,14 @@ def main():
     train = [r for r in rows if r["word"].lower() not in val_words]
     val = [r for r in rows if r["word"].lower() in val_words]
     print(f"{len(train)} training examples, {len(val)} validation ({len(val_words)} held-out words); training {args.train}")
+    train_head(train, val, QUESTION, LABELS, lambda r: state(r["line"], r["word"], r["means"], r["reply"]), args)
 
+
+def train_head(train, val, question, labels, to_state, args):
+    """Train a copy of Laya's decision layers on (to_state(row), row["label"]) rows; save the best epoch on `val`
+    to args.out. Shared with tools/train_sayings.py."""
+    out_path = args.out
+    lr = args.lr or {"scorer": 1e-3, "last": 3e-4, "all": 2e-4}[args.train]
     import laya
     agent = laya.load("convaiinnovations/laya", device="mps" if torch.backends.mps.is_available() else "cpu")
     model, device = agent.model, agent.device
@@ -66,8 +71,8 @@ def main():
     print(f"trainable weights: {sum(x.numel() for x in params) / 1e6:.1f}M, lr {lr}")
     opt = torch.optim.AdamW(params, lr=lr, weight_decay=0.01)
     sched = None  # set once we know how many batches an epoch has
-    q = agent._to_internal(QUESTION)
-    target = {lab: i for i, lab in enumerate(LABELS)}  # QUESTION's criteria are in LABELS order
+    q = agent._to_internal(question)
+    target = {lab: i for i, lab in enumerate(labels)}  # the question's criteria are in `labels` order
 
     # The encoder is frozen, so run it once per example and keep its output (on the CPU, half precision); each epoch
     # then only runs the small head, on freshly shuffled batches.
@@ -78,7 +83,7 @@ def main():
         start = time.monotonic()
         for i in range(0, len(data), args.batch):
             chunk = data[i:i + args.batch]
-            groups = [agent._encode_state(state(r["line"], r["word"], r["means"], r["reply"]), ["q"], {"q": q}) for r in chunk]
+            groups = [agent._encode_state(to_state(r), ["q"], {"q": q}) for r in chunk]
             b = collate_items(groups, agent.tok.pad_token_id)
             h = run_encoder(model, b, device).half().cpu()
             for j, (g, r) in enumerate(zip(groups, chunk)):

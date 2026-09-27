@@ -244,6 +244,7 @@ class Captioner:
         self.recorder = None                  # the family story keeper (calls.py)
         self.prompter = None                  # live "ask her" prompts (prompts.py)
         self.curious = None                   # the overlay's "Curious?" questions (curious.py), set by listen()
+        self.saying_judge = None              # sayings, idioms, slang, cultural references (sayings.py), made on first use
         self.topic, self.topic_votes = None, collections.deque(maxlen=3)  # what it's about now; (topic, votes) per line
         self.topic_lock = threading.Lock()
         self.vocab = json.load(open(os.path.join(HERE, "vocab.json"), encoding="utf-8"))["topics"]
@@ -429,6 +430,13 @@ class Captioner:
             to = None if route == "english" else "en"
         self.hub.broadcast({"type": "original", "id": seg_id, "text": sentence, "route": route, "to": to})
         to_translate = self.pronouns(sentence) if to == "en" else sentence  # in order said, so not in work()
+        to_indic = sentence
+        if to == "te":  # English idioms, slang and references for the Telugu speaker: a card, and the meaning translated
+            said = self._saying_hits(sentence, "en")
+            if said:
+                self.hub.broadcast({"type": "details", "id": seg_id, "intent": None,
+                                    "cards": [self._saying_card(e, "en") for e, _ in said]})
+                to_indic = self._with_meanings(sentence, said)
         if to:
             with self.draft_lock:
                 self.finals_waiting += 1
@@ -450,7 +458,7 @@ class Captioner:
                     if to == "en" and indic_share(sentence) == 0:  # her Telugu in English letters
                         english = self._translate_romanized(sentence, hits, model=route == "native")
                     else:
-                        english = self._translate_in_time(to_translate) if to == "en" else self._to_indic(sentence)
+                        english = self._translate_in_time(to_translate) if to == "en" else self._to_indic(to_indic)
                 finally:  # (to == "te": Telugu text, despite the name)
                     with self.draft_lock:
                         self.finals_waiting -= 1
@@ -592,6 +600,8 @@ class Captioner:
         sent = {"cards": False, "topic": False, "picture": None, "open": 0}
         try:
             cards = self._cards(sentence, hits)
+            have = {c["id"] for c in cards}
+            cards += [self._saying_card(e, self.lang) for e, _ in self._saying_hits(sentence, self.lang) if e["id"] not in have]
             if cards:
                 self.hub.broadcast({"type": "details", "id": seg_id, "intent": None, "cards": cards})
                 sent["cards"] = True
@@ -616,6 +626,40 @@ class Captioner:
             import traceback
             traceback.print_exc()
         return sent
+
+    def _saying_hits(self, text, lang):
+        """[(entry, confidence)] for sayings, idioms, slang and cultural references in `text` (sayings.py: fuzzy match,
+        confirmed by Laya's trained check). Empty until Laya is loaded."""
+        if self.decider is None:
+            return []
+        try:
+            if self.saying_judge is None:
+                import sayings
+                self.saying_judge = sayings.SayingJudge(self.decider, sayings.SayingFinder(sayings.load_sayings(self.lexicon)))
+            return self.saying_judge.find(text, lang)
+        except Exception as e:  # the extras never stop the line
+            print(f"  (sayings check failed: {type(e).__name__}: {e})", flush=True)
+            return []
+
+    @staticmethod
+    def _saying_card(e, lang):
+        from sayings import meaning
+        title = (e.get("roman") or e["forms"][0]) if lang == "te" else e["forms"][0]
+        return {"id": e["id"], "title": title.strip(" ,.^"), "category": e.get("category", "idiom"), "note": e.get("note", ""),
+                "telugu": e["forms"][0].strip(" ,.^") if lang == "te" else e.get("meaning_te", ""), "english": meaning(e)}
+
+    @staticmethod
+    def _with_meanings(sentence, said):
+        """The English with each idiom said word for word swapped for its meaning, so "break a leg" isn't translated
+        into Telugu as breaking a leg."""
+        from sayings import meaning
+        for e, _ in said:
+            for form in sorted(e.get("forms", []), key=len, reverse=True):
+                new = re.sub(rf"\b{re.escape(form)}\b", meaning(e).rstrip("."), sentence, count=1, flags=re.IGNORECASE)
+                if new != sentence:
+                    sentence = new
+                    break
+        return sentence
 
     def _warm_backup(self):
         try:

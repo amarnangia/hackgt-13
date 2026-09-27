@@ -6,6 +6,7 @@ struct Starter: Equatable, Identifiable {
     let before: String      // "Ask how she makes"
     let word: String        // Telugu, as heard: "పులిహోర"
     let gloss: String?      // "tamarind rice"
+    var roman: String? = nil // "pulihora"
     let after: String       // "."
     let symbol: String      // SF Symbol for the topic
     let topic: String       // "Food"
@@ -55,7 +56,7 @@ enum Starters {
         return picked.map { p in
             let options = templates[p.category]!
             let t = options[Int((hash(p.phrase) &+ UInt32(rotation)) % UInt32(options.count))]
-            return Starter(before: t.0, word: p.phrase, gloss: p.english, after: t.1,
+            return Starter(before: t.0, word: p.phrase, gloss: p.english, roman: p.roman.map { $0.replacingOccurrences(of: "_", with: " ") }, after: t.1,
                            symbol: symbols[p.category] ?? "bubble.left.fill", topic: topics[p.category] ?? "Words")
         }
     }
