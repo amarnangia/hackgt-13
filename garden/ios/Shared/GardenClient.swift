@@ -15,9 +15,10 @@ enum GardenClient {
     }
 
     /// Show the bundled demo garden instead of asking the server.
+    /// Demo mode is gone: everything comes from your real calls. (Kept as a constant for the code that asks.)
     static var demoMode: Bool {
-        get { defaults.bool(forKey: "demoMode") }
-        set { defaults.set(newValue, forKey: "demoMode") }
+        get { false }
+        set { defaults.removeObject(forKey: "demoMode") }
     }
 
     static var saved: GardenSnapshot? {
