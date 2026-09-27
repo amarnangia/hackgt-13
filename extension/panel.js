@@ -366,13 +366,19 @@ function rememberSaid(card) {  // words she used this call, pinned above the top
 const norm = (r) => String(r).toLowerCase().replace(/\?$/, "");
 function renderLeft() {
   if (!left.built) {
-    root.innerHTML = `<section class="dict"><div class="rows"></div></section>`;
+    root.innerHTML = `<section class="dict" hidden><header class="dict-head"><span class="kind">Words</span><b class="dict-topic"></b></header>`
+      + `<div class="rows"></div></section>`;
     left.built = true;
   }
   const said = new Set(left.said.flatMap((w) => [w.id, norm(w.roman)]));
   const words = [...left.said.map((w) => ({ ...w, said: true })),
     ...left.words.filter((w) => !said.has(w.id) && !said.has(norm(w.roman)))]
     .filter((w) => noTe(w.roman) && !TE.test(w.roman)).slice(0, MAX_WORDS);
+  const dict = root.querySelector(".dict"), topic = noTe(left.topic || "");
+  dict.hidden = !words.length;
+  const head = dict.querySelector(".dict-topic");
+  head.textContent = topic;
+  head.hidden = !topic;
   syncList(root.querySelector(".rows"), words, (w) => w.id || norm(w.roman),
     () => html("div", "w", `<b class="w-roman"></b><div class="w-en"></div>`),
     (el, w) => {

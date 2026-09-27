@@ -146,7 +146,7 @@
     core.style.bottom = `${ORB_BOTTOM}px`;
     const capY = h - ORB_BOTTOM - ORB - 12 - CAP_H;
     // top left: the dictionary, as tall as its words
-    const leftW = Math.min(300, w - 2 * M), leftH = Math.min(size.left || 1, h - 2 * M);
+    const leftW = Math.min(330, w - 2 * M), leftH = Math.min(size.left || 1, h - 2 * M);
     place(frames.left, M, M, leftW, leftH);
     const clear = M + leftH > capY - 8 ? M + leftW + 12 : M;   // keep the bubble clear of a long word list
     const capW = Math.max(Math.min(360, w - 2 * M), Math.min(720, w - 2 * clear));
