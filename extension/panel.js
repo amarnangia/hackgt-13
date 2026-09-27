@@ -487,7 +487,9 @@ function handleFloat(m) {
     }
     return renderFloat();
   }
-  if (m.type !== "picture" || !m.image || m.for === "them") return;
+  // "for": "them" pictures (an American thing the English speaker mentioned) show here too: when the Telugu speaker is
+  // the one at this laptop (--two-way --telugu-speaker me), they arrive on this page and are for whoever is watching it.
+  if (m.type !== "picture" || !m.image) return;
   // Load the picture first and only then pop it up, so it never shows as an empty dark box; the hold time starts once
   // it's on screen. If it can't load (or takes over 4 s), the card still shows what it is, without the picture.
   const item = { key: `pic:${m.id}`, kind: "picture", name: m.name, description: m.description, image: m.image, words: m.lexicon_ids || [] };
