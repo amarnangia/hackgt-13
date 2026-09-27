@@ -52,7 +52,6 @@ final class People: ObservableObject {
     @Published var source: GardenClient.Source = .offline
     @Published var calls: [CallSummary] = []
     @Published var dictionary: [String: DictEntry] = [:]
-    @Published var pendingSession: Connection?   // first run: open the call once home appears
     @Published var family: [Person]?             // everyone, from the Mac (nil: it hasn't answered)
 
     private let defaults = GardenClient.defaults
@@ -119,7 +118,11 @@ final class People: ObservableObject {
 
     /// Who's who, from the Mac: for "who are you?" and whose voice is personalized.
     func loadFamily() async {
-        if let f = await GardenClient.people() { family = f }
+        guard let f = await GardenClient.people() else { return }
+        family = f
+        // Your name reaches the Mac (and Firebase through it) even if the Mac wasn't there when you typed it.
+        if let name = profileName, !f.contains(where: { $0.id == Person.id(for: name) }),
+           let added = await GardenClient.addPerson(name) { family = added }
     }
 
     /// You, as the Mac knows you (nil until it answers or if you're new).

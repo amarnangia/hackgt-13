@@ -22,10 +22,7 @@ struct Root: View {
             if UserDefaults.standard.bool(forKey: "widgetGallery") {
                 WidgetGallery()
             } else if people.profileName == nil {
-                OnboardingView { c in
-                    people.pendingSession = c
-                    withAnimation(.easeOut(duration: 0.35)) { if people.profileName == nil { people.profileName = "Saanvi" } }
-                }
+                OnboardingView {}   // setting your name (People.becomes) is what moves on to the tabs
                 .transition(.opacity)
             } else {
                 MainTabs().transition(.opacity)

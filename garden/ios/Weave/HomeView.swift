@@ -48,124 +48,51 @@ struct WeaveMark: View {
 
 // MARK: - onboarding
 
+/// First launch: just your name. It goes to the Mac (/api/people), which adds you to the family and syncs it to
+/// Firebase for the team's other laptops (sync.py). No languages, no who-you're-calling: that's set on the Mac.
 struct OnboardingView: View {
-    var isNew = false
-    let finish: (Connection) -> Void
+    let finish: () -> Void
     @EnvironmentObject var people: People
-    @Environment(\.dismiss) private var dismiss
-    @State private var step = 0
     @State private var me = ""
-    @State private var mine = "en"
-    @State private var theirs = "te"
-    @State private var name = "Ammamma"
-    @State private var connected = false
-    @FocusState private var nameFocused: Bool
+    @FocusState private var focused: Bool
+
+    private var clean: String { me.trimmingCharacters(in: .whitespaces) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 6) {
-                ForEach(0..<5, id: \.self) { i in
-                    Capsule().fill(i <= step ? Theme.text : Theme.border2).frame(height: 3)
-                        .animation(.spring(response: 0.4, dampingFraction: 0.9), value: step)
-                }
-            }
-            .padding(.top, 20).padding(.bottom, 40)
-
-            Group {
-                switch step {
-                case 0: stepView("Who are you?", "Pick your name, or add it. Weave uses it on calls, and for your own voice.") { PersonPicker(name: $me) }
-                case 1: stepView("What language do you speak?", "Everything will reach you in this language.") { LanguageSelector(selected: $mine) }
-                case 2: stepView("Who are you talking with?", "Pick the language they speak.") { LanguageSelector(selected: $theirs, exclude: mine) }
-                case 3: stepView("What do you call them?", "The name you'd use on a call.") { nameStep }
-                default: stepView("You and \(name).", "\(Language.name(theirs)) becomes \(Language.name(mine)) for you as \(name) speaks, and the words you learn stay in \(Language.name(theirs)).") {
-                    ConnectionVisualizer(you: people.profileName ?? (me.isEmpty ? "You" : me), youLang: mine,
-                                         partner: Connection(id: name.lowercased(), name: name, lang: theirs, last: .now),
-                                         speaking: [], translating: false, connected: connected)
-                        .padding(.top, 24)
-                        .onAppear { Task { try? await Task.sleep(for: .milliseconds(250)); connected = true } }
-                }
-                }
-            }
-            .id(step)
-            .transition(.asymmetric(insertion: .opacity.combined(with: .offset(x: 24)), removal: .opacity.combined(with: .offset(x: -24))))
-
-            Spacer(minLength: 16)
-            HStack(spacing: 12) {
-                if step > 0 || isNew {
-                    Button { back() } label: {
-                        Image(systemName: "chevron.left").font(.system(size: 15, weight: .semibold)).foregroundStyle(Theme.text)
-                            .frame(width: 52, height: 52)
-                            .background(Theme.surface, in: .rect(cornerRadius: 14))
-                            .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(Theme.border2, lineWidth: 1))
-                    }
-                    .buttonStyle(Pressable())
-                }
-                Button { next() } label: {
-                    HStack(spacing: 8) {
-                        Text(step == 4 ? "Start conversation" : "Continue")
-                        if step == 4 { Image(systemName: "arrow.right").font(.system(size: 14, weight: .semibold)) }
-                    }
-                    .font(Fonts.ui(16, .medium))
-                    .foregroundStyle(step == 4 ? Theme.onAccent : Theme.bg)
+            Spacer(minLength: 40)
+            WeaveMark().frame(width: 52, height: 22).padding(.bottom, 24)
+            Text("What's your name?").font(Fonts.ui(30, .medium)).tracking(-1).foregroundStyle(Theme.text)
+            Text("It's how your family sees you in Weave.").font(Fonts.ui(15)).foregroundStyle(Theme.text2).padding(.top, 8).padding(.bottom, 28)
+            TextField("", text: $me, prompt: Text("Your name").foregroundColor(Theme.text3))
+                .font(Fonts.ui(20, .medium)).foregroundStyle(Theme.text)
+                .focused($focused)
+                .textInputAutocapitalization(.words).autocorrectionDisabled()
+                .submitLabel(.done).onSubmit(done)
+                .padding(.horizontal, 16).frame(height: 56)
+                .background(Theme.surface, in: .rect(cornerRadius: 14))
+                .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(focused ? Theme.accent.opacity(0.6) : Theme.border2, lineWidth: 1))
+                .animation(.easeOut(duration: 0.2), value: focused)
+            Spacer()
+            Button(action: done) {
+                Text("Continue").font(Fonts.ui(16, .medium)).foregroundStyle(Theme.bg)
                     .frame(maxWidth: .infinity).frame(height: 52)
-                    .background(step == 4 ? Theme.accent : Theme.text, in: .rect(cornerRadius: 14))
-                    .shadow(color: Theme.accent.opacity(step == 4 ? 0.45 : 0), radius: 18, y: 8)
-                }
-                .buttonStyle(Pressable())
-                .disabled(step == 0 && me.trimmingCharacters(in: .whitespaces).isEmpty)
-                .opacity(step == 0 && me.trimmingCharacters(in: .whitespaces).isEmpty ? 0.4 : 1)
+                    .background(Theme.text, in: .rect(cornerRadius: 14))
             }
+            .buttonStyle(Pressable())
+            .disabled(clean.isEmpty).opacity(clean.isEmpty ? 0.4 : 1)
             .padding(.bottom, 12)
         }
         .padding(.horizontal, 20)
         .background(Backdrop())
         .preferredColorScheme(.dark)
-        .onAppear { if isNew { step = 2; name = "Nanamma" } }
+        .onAppear { focused = true }
     }
 
-    private func stepView<C: View>(_ title: String, _ sub: String, @ViewBuilder content: () -> C) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text(title).font(Fonts.ui(28, .medium)).tracking(-0.9).foregroundStyle(Theme.text)
-            Text(sub).font(Fonts.ui(15)).foregroundStyle(Theme.text2).padding(.top, 8).padding(.bottom, 24)
-            content()
-        }
-    }
-
-    private var nameStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            TextField("", text: $name)
-                .font(Fonts.ui(20, .medium)).foregroundStyle(Theme.text)
-                .focused($nameFocused)
-                .padding(.horizontal, 16).frame(height: 56)
-                .background(Theme.surface, in: .rect(cornerRadius: 14))
-                .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(nameFocused ? Theme.accent.opacity(0.6) : Theme.border2, lineWidth: 1))
-                .animation(.easeOut(duration: 0.2), value: nameFocused)
-                .onAppear { nameFocused = true }
-                .submitLabel(.next).onSubmit { next() }
-            FlowChips(options: nameOptions, selected: $name)
-        }
-    }
-
-    /// The family on the Mac (not you) first, then the usual names.
-    private var nameOptions: [String] {
-        let family = (people.family ?? []).map(\.name).filter { Person.id(for: $0) != Person.id(for: people.profileName ?? me) }
-        var seen = Set<String>()
-        return Array((family + ["Ammamma", "Nanamma", "Thatayya", "Amma", "Nanna", "Pinni"]).filter { seen.insert(Person.id(for: $0)).inserted }.prefix(6))
-    }
-
-    private func next() {
-        guard step == 4 else { withAnimation(.spring(response: 0.4, dampingFraction: 0.9)) { step += 1 }; return }
-        if people.profileName == nil { people.becomes(me.trimmingCharacters(in: .whitespaces)) }
-        people.myLang = mine
-        let clean = name.trimmingCharacters(in: .whitespaces).isEmpty ? "Ammamma" : name.trimmingCharacters(in: .whitespaces)
-        let c = people.connections.first { $0.name.lowercased() == clean.lowercased() } ?? Connection(id: clean.lowercased(), name: clean, lang: theirs, last: .now)
-        people.touch(c)
-        finish(c)
-    }
-
-    private func back() {
-        if step == 0 || (isNew && step == 2) { dismiss(); return }
-        withAnimation(.spring(response: 0.4, dampingFraction: 0.9)) { step -= 1 }
+    private func done() {
+        guard !clean.isEmpty else { return }
+        people.becomes(clean)
+        finish()
     }
 }
 
