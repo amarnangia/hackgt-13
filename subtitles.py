@@ -477,6 +477,8 @@ class Captioner:
                         english = self._translate_romanized(sentence, hits, model=route == "native")
                     else:
                         english = self._translate_in_time(to_translate) if to == "en" else self._to_indic(to_indic)
+                        if to == "en" and indic_share(english) > 0:  # a short line sometimes comes back in Hindi
+                            english = self._english_again(to_translate, english)
                 finally:  # (to == "te": Telugu text, despite the name)
                     with self.draft_lock:
                         self.finals_waiting -= 1
@@ -757,6 +759,19 @@ class Captioner:
             return self.translate.to_indic(sentence)
         except Exception as e:
             return f"(translation failed: {type(e).__name__})"
+
+    def _english_again(self, sentence, wrong):
+        """The local translator answered in an Indian script ("ఎలాగున్నావు?" -> "कैसा हैं?"): ask Muse Spark instead."""
+        print(f"  (translation came back as {wrong!r}; asking Muse Spark)", flush=True)
+        if isinstance(self.translate, Translator):
+            return wrong
+        if self.backup is None:
+            self.backup = Translator(self.lang)
+        try:
+            english = self.backup(sentence)
+            return english if indic_share(english) == 0 else wrong
+        except Exception:
+            return wrong
 
     def _fallback_translate(self, sentence, error):
         """The local translator died mid-call (e.g. its process was stopped): use Muse Spark for this line."""

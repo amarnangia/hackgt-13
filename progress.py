@@ -204,6 +204,13 @@ class Progress:
                 if entry["id"].endswith("_vocative") and english[:begin].lower().endswith("my "):
                     begin -= 3  # "my dear" -> "Nanna", not "my Nanna"
                 swaps.append((begin, match.end(), telugu, entry["id"], match.group(0)))
+        # A line she said entirely in words they know ("Annam tinnava?", "Bagunnava?") would come out with no English
+        # at all, and the English voice would just read the Telugu back: those lines stay in English.
+        left = english
+        for begin, end_, *_ in sorted(swaps, reverse=True):
+            left = left[:begin] + left[end_:]
+        if swaps and not re.search(r"[A-Za-z]{2,}", left):
+            return english, []
         kept = []  # in the order they appear, which is how the overlay underlines them
         for begin, end_, telugu, wid, matched in sorted(swaps, reverse=True):
             english = english[:begin] + telugu + english[end_:]
