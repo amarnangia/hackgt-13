@@ -86,9 +86,35 @@ struct Backdrop: View {
             RadialGradient(colors: [Theme.lavender.opacity(0.13), Theme.lavenderDeep.opacity(0.05), .clear], center: .topTrailing, startRadius: 0, endRadius: 420)
             RadialGradient(colors: [Theme.lavender.opacity(0.10), Theme.lavenderDeep.opacity(0.04), .clear], center: .bottomLeading, startRadius: 0, endRadius: 560)
             RadialGradient(colors: [Theme.cyan.opacity(0.05), .clear], center: UnitPoint(x: 1.1, y: 0.45), startRadius: 0, endRadius: 380)
+            Contours()
+            RadialGradient(colors: [.clear, .black.opacity(0.35)], center: .center, startRadius: 240, endRadius: 620)   // a soft vignette
             Grain().opacity(0.5)
         }
         .ignoresSafeArea()
+    }
+}
+
+/// Faint topographic lines, like the contours of land things grow on. Drawn once, not animated.
+struct Contours: View {
+    var body: some View {
+        Canvas { ctx, size in
+            for (center, color, rings) in [(CGPoint(x: size.width * 1.05, y: size.height * 0.08), Theme.accent, 16),
+                                           (CGPoint(x: -size.width * 0.15, y: size.height * 0.92), Theme.lavender, 14)] {
+                for i in 1...rings {
+                    let r = CGFloat(i) * 38
+                    var p = Path()
+                    for k in 0...180 {
+                        let a = Double(k) / 180 * 2 * .pi
+                        let wobble = 1 + 0.07 * sin(3 * a + Double(i) * 0.6) + 0.04 * sin(5 * a - Double(i) * 0.9) + 0.02 * sin(9 * a + Double(i))
+                        let pt = CGPoint(x: center.x + CGFloat(cos(a)) * r * CGFloat(wobble), y: center.y + CGFloat(sin(a)) * r * CGFloat(wobble) * 0.8)
+                        k == 0 ? p.move(to: pt) : p.addLine(to: pt)
+                    }
+                    let fade = 1 - Double(i) / Double(rings + 2)
+                    ctx.stroke(p, with: .color(color.opacity((i % 4 == 0 ? 0.09 : 0.045) * fade)), lineWidth: i % 4 == 0 ? 0.9 : 0.6)
+                }
+            }
+        }
+        .allowsHitTesting(false)
     }
 }
 

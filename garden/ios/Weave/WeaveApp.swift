@@ -39,9 +39,10 @@ struct MainTabs: View {
 
     init() {
         let bar = UITabBarAppearance()
-        bar.configureWithOpaqueBackground()
-        bar.backgroundColor = UIColor(Theme.bg)
-        bar.shadowColor = UIColor(Theme.border)
+        bar.configureWithTransparentBackground()   // frosted: the background shows through, softly
+        bar.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
+        bar.backgroundColor = UIColor(Theme.bg).withAlphaComponent(0.55)
+        bar.shadowColor = UIColor.white.withAlphaComponent(0.08)
         for item in [bar.stackedLayoutAppearance, bar.inlineLayoutAppearance, bar.compactInlineLayoutAppearance] {
             item.normal.iconColor = UIColor(Theme.text3)
             item.normal.titleTextAttributes = [.foregroundColor: UIColor(Theme.text3)]

@@ -279,7 +279,7 @@ struct ProgressView_: View {
     private func header(_ snap: GardenSnapshot) -> some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 6) {
-                Text("Bloom").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.text)
+                Text("Weave").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.text)
                 Group {
                     if snap.totals.phrases == 0 {
                         Text("A seed, for now.").foregroundStyle(Theme.text2)
@@ -299,12 +299,17 @@ struct ProgressView_: View {
     }
 
     private func stat(_ label: String, _ value: String, _ sub: String, accent: Bool = false, tint: Color? = nil) -> some View {
-        Panel {
+        let glow = tint ?? (accent ? Theme.accent : Theme.text3)
+        return Panel {
             Eyebrow(label, color: tint ?? (accent ? Theme.accent : Theme.text3))
-            Text(value).font(Fonts.ui(30, .medium)).tracking(-1).monospacedDigit().foregroundStyle(Theme.text)
+            Text(value).font(Fonts.display(36, .medium)).monospacedDigit().foregroundStyle(Theme.text)
                 .contentTransition(.numericText()).padding(.top, 10)
             Text(sub).font(Fonts.ui(12)).foregroundStyle(Theme.text2)
         }
+        .overlay(
+            RadialGradient(colors: [glow.opacity(0.16), .clear], center: .topLeading, startRadius: 0, endRadius: 170)
+                .clipShape(RoundedRectangle(cornerRadius: Theme.radius)).allowsHitTesting(false)
+        )
     }
 
     private func chart(_ snap: GardenSnapshot) -> some View {
