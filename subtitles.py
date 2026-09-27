@@ -422,8 +422,6 @@ class Captioner:
             return
         if not redo and self.on_line:
             self.on_line(sentence)
-        self.next_id += 1
-        seg_id = self.next_id
         marks = marks or self.latency.piece_cut(end_offset)
         start_s, end_s = self.recorder.span(marks["audio_ms"]) if self.recorder else (None, None)
         share = self.telugu_share(sentence)
@@ -444,6 +442,10 @@ class Captioner:
             self.redo_lines.append((time.monotonic(), sentence, to, marks))
         else:
             to = None if route == "english" else "en"
+        # Numbered only once it's going ahead: lines are voiced in number order, so a number taken by a redo that then
+        # returned (roles switched mid-call) held back every later line on this side for the rest of the call.
+        self.next_id += 1
+        seg_id = self.next_id
         self.hub.broadcast({"type": "original", "id": seg_id, "text": sentence, "route": route, "to": to})
         to_translate = self.pronouns(sentence) if to == "en" else sentence  # in order said, so not in work()
         to_indic = sentence
