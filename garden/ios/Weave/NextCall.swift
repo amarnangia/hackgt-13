@@ -32,7 +32,6 @@ struct NextCallCard: View {
 
     /// When you last talked, as a nudge to reach out.
     private var nudge: String {
-        if snap.calls.live { return "You're on a call with \(who) now" }
         let last = latest?.date.map { $0.timeIntervalSince1970 } ?? snap.calls.last
         guard let last else { return "Give \(who) a call" }
         let days = Int((Date().timeIntervalSince1970 - last) / 86400)
