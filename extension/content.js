@@ -215,6 +215,7 @@
   canvas.width = LINE_W * dpr; canvas.height = 56 * dpr;
   const g = canvas.getContext("2d");
   function target(i, t) {
+    return 0;   // no wave: the handle stays a calm, flat line (the caption bubble's pulsing line shows activity instead)
     const live = audio.bands && t - audio.at < 400;
     if (live) {   // low frequencies in the middle of the line, higher ones toward the ends
       const k = Math.abs(i - (N - 1) / 2) / ((N - 1) / 2);

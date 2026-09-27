@@ -84,8 +84,8 @@ body[data-part="left"] section + section { margin-top: 16px; }
 .w.out, .question.out { animation: gone 180ms var(--ease-in) forwards; }
 @keyframes gone { to { opacity: 0; transform: translate3d(-10px, 0, 0) scale(.9); filter: blur(4px); } }
 .w-roman { display: block; font-family: var(--serif); font-size: 23px; font-weight: 600; letter-spacing: -.01em; line-height: 1.15; color: #fff; }
-.w-en { display: block; font-size: 13.5px; color: var(--text-2); margin-top: 3px; }
-.w.said::before { content: ""; position: absolute; left: -3px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%;
+.w-en { display: block; font-size: 16px; font-weight: 600; line-height: 1.3; color: rgba(255,255,255,.86); margin-top: 4px; }   /* the English, readable over video */
+.w.said::before { display: none; content: ""; position: absolute; left: -3px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%;
   background: var(--cyan); box-shadow: 0 0 0 2px rgba(18,18,20,.9), 0 0 12px rgba(37,211,102,.9); }   /* she said it on this call */
 .w:hover /* questions: lavender bubbles; one opens to its answer */
 .question { display: block; max-width: 100%; padding: 10px 16px 11px; border-radius: 20px; text-align: left;
@@ -123,11 +123,15 @@ body[data-part="captions"] main { position: absolute; inset: 0; display: flex; f
   padding: 10px 26px 16px; text-align: center;
   -webkit-mask-image: linear-gradient(transparent 0, #000 34px); mask-image: linear-gradient(transparent 0, #000 34px); }
 /* a thin line of the orb's light along the bottom, brighter while someone talks */
-.glow { position: absolute; left: 18%; right: 18%; bottom: 0; height: 2px; border-radius: 2px; background: var(--grad); opacity: .15;
+.glow { position: absolute; left: 18%; right: 18%; bottom: 0; height: 2px; border-radius: 2px; background: var(--grad); opacity: .35;
   filter: blur(.5px); box-shadow: 0 0 18px 2px rgba(29,185,84,.55); transition: opacity 600ms var(--ease-out); }
 body[data-state="listening"] .glow { opacity: .8; }
 body[data-state="thinking"] .glow { opacity: .5; }
 body[data-state="speaking"] .glow { opacity: 1; }
+/* the line pulses: slow and faint when quiet, quicker and brighter while someone talks or Roots speaks */
+.glow { animation: glow-pulse 2.8s ease-in-out infinite; }
+body[data-state="listening"] .glow, body[data-state="thinking"] .glow, body[data-state="speaking"] .glow { animation-duration: 1.3s; }
+@keyframes glow-pulse { 0%, 100% { transform: scaleX(.82); filter: brightness(.75); } 50% { transform: scaleX(1); filter: brightness(1.35); } }
 .stage { position: relative; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .cl { position: relative; max-width: 100%; transform-origin: 50% 100%; will-change: transform, opacity;
   transition: opacity 420ms var(--ease-out), scale 480ms var(--ease-sheet); }

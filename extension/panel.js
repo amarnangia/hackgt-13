@@ -385,8 +385,8 @@ function renderLeft() {
 // ---------- float: pictures and meanings as small bubbles that spring up above the captions ----------
 // Each holds for a while and fades away; hover one to see it, click to keep it.
 const float = { items: [] };
-// Pictures pop up, stay about 2.5 s and fade away; they can't be clicked (the call underneath gets every click).
-const MAX_ITEMS = 2, HOLD_MS = 3200, FADE_MS = 700;
+// Pictures and meanings pop up, stay about 8 s (long enough to read) and fade away; they can't be clicked (the call underneath gets every click).
+const MAX_ITEMS = 2, HOLD_MS = 9000, FADE_MS = 700;
 const MEANING_KINDS = new Set(["idiom", "slang", "phrase", "culture"]);
 const LABELS = { idiom: "Saying", slang: "Slang", phrase: "Phrase", culture: "Custom" };
 function addFloat(item) {
@@ -405,7 +405,7 @@ function renderFloat() {
   syncList(root.querySelector(".bubs") || (root.innerHTML = `<div class="bubs"></div>`, root.querySelector(".bubs")), float.items, (x) => x.key,
     (x) => {
       const el = html("div", `bub ${x.kind}`, x.kind === "picture"
-        ? `${x.image ? `<img class="big" src="${esc(asset(x.image))}" alt="">` : ""}<div class="bub-body"><b>${esc(noTe(x.name))}</b>${noTe(x.description) ? `<p>${esc(noTe(x.description))}</p>` : ""}</div>`
+        ? `${x.image ? `<img class="big" src="${esc(x.src || asset(x.image))}" alt="">` : ""}<div class="bub-body"><b>${esc(noTe(x.name))}</b>${noTe(x.description) ? `<p>${esc(noTe(x.description))}</p>` : ""}</div>`
         : `<div class="bub-body"><span class="kind">${esc(x.label)}</span><b>${esc(x.title)}</b>${noTe(x.note) ? `<p>${esc(noTe(x.note))}</p>` : ""}</div>`);
       el.dataset.key = x.key;
       return el;
@@ -492,7 +492,7 @@ function handleFloat(m) {
   if (m.type !== "picture" || !m.image) return;
   // Load the picture first and only then pop it up, so it never shows as an empty dark box; the hold time starts once
   // it's on screen. If it can't load (or takes over 4 s), the card still shows what it is, without the picture.
-  const item = { key: `pic:${m.id}`, kind: "picture", name: m.name, description: m.description, image: m.image, words: m.lexicon_ids || [] };
+  const item = { key: `pic:${m.id}`, kind: "picture", name: m.name, description: m.description, image: m.image, src: m.src || asset(m.image), words: m.lexicon_ids || [] };
   const img = new Image();
   let done = false;
   const show = (ok) => {
@@ -505,7 +505,7 @@ function handleFloat(m) {
   img.onload = () => show(img.naturalWidth > 0);
   img.onerror = () => show(false);
   setTimeout(() => show(img.complete && img.naturalWidth > 0), 4000);
-  img.src = asset(m.image);
+  img.src = item.src;   // sent inline by the engine (no fetch from this Mac), else loaded from it
 }
 
 // ---------- start ----------

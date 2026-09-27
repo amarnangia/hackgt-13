@@ -182,6 +182,21 @@ def serve_overlay(conn, request):
     ]), body)
 
 
+def inline_image(path, limit=1_500_000):
+    """A picture (images/..., from the library or the Wikipedia cache) as a data: URL, sent inside its "picture" message so
+    the overlay shows it without fetching it from this Mac: Chrome can block an extension's page from loading
+    http://localhost, which left picture cards with no picture. None if it's missing or too big (the overlay then falls
+    back to loading "image" itself)."""
+    import base64
+    file = os.path.realpath(os.path.join(HERE, path or ""))
+    if not path or not file.startswith(os.path.join(HERE, "images") + os.sep) or not os.path.isfile(file):
+        return None
+    if os.path.getsize(file) > limit:
+        return None
+    kind = mimetypes.guess_type(file)[0] or "image/jpeg"
+    return f"data:{kind};base64," + base64.b64encode(open(file, "rb").read()).decode()
+
+
 class Captioner:
     """Turns Muse's live partials into sentences and translates each one as soon as it ends.
 
@@ -720,7 +735,7 @@ class Captioner:
             print(f"Picture lookup failed: {type(e).__name__}: {e}", flush=True)
             return None
         if card:
-            self.hub.broadcast({"type": "picture", **card, "line": seg_id, "for": "them"})
+            self.hub.broadcast({"type": "picture", **card, "src": inline_image(card.get("image")), "line": seg_id, "for": "them"})
             print(f"  [picture for them: {card['name']}]", flush=True)
         return card
 
@@ -730,7 +745,7 @@ class Captioner:
                 if entry["id"] in card.get("lexicon_ids", []):
                     self.progress.observe(entry["id"], "picture")
             # "id" is the picture's own id (Weave looks it up in the library); "line" says which line it belongs to
-            self.hub.broadcast({"type": "picture", **card, "line": seg_id})
+            self.hub.broadcast({"type": "picture", **card, "src": inline_image(card.get("image")), "line": seg_id})
             print(f"  [picture: {card['name']}]", flush=True)
         return card
 

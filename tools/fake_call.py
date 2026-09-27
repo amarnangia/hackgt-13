@@ -5,6 +5,7 @@
 #   python tools/fake_call.py --fast     # shorter pauses
 # Don't run it at the same time as subtitles.py: both use port 8765.
 import argparse
+import base64
 import http
 import json
 import mimetypes
@@ -109,7 +110,7 @@ def handler(conn):
 def serve_files(conn, request):
     if request.headers.get("Upgrade", "").lower() == "websocket":
         if not origins.allowed(request.headers.get("Origin")):
-            return conn.respond(http.HTTPStatus.FORBIDDEN, "Only Weave's own pages can connect.\n")
+            return conn.respond(http.HTTPStatus.FORBIDDEN, "Only Roots' own pages can connect.\n")
         return None
     path = request.path.split("?")[0]
     file = os.path.realpath(os.path.join(ROOT, path.lstrip("/")))
@@ -154,7 +155,10 @@ def play(pause, two_way=False):
             broadcast({"type": "details", "id": n, "intent": intent, "cards": cards(telugu)})
             card = pictures.card(pic) if pic else None
             if card:
-                broadcast({"type": "picture", **card, "line": n})
+                path = os.path.join(ROOT, card["image"])  # the picture itself, inline, as subtitles.py sends it
+                src = ("data:" + (mimetypes.guess_type(path)[0] or "image/jpeg") + ";base64," + base64.b64encode(open(path, "rb").read()).decode()
+                       if os.path.isfile(path) else None)
+                broadcast({"type": "picture", **card, "src": src, "line": n})
             questions = curious.for_line(english, lexicon.find(telugu, "te"), card, intent)
             if questions:
                 broadcast({"type": "curious", "line": n, "questions": questions})
