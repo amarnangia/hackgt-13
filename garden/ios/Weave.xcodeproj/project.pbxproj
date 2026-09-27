@@ -13,6 +13,7 @@
 		1865F70CDC909CB5A2E93E57 /* GardenClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA49E9E63150F76191F55B2E /* GardenClient.swift */; };
 		1AD684A150040E4A8C816D1C /* Voice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18167CF6B5FCDD716B102695 /* Voice.swift */; };
 		24F04E9B59E44F183F598748 /* sample.json in Resources */ = {isa = PBXBuildFile; fileRef = C4F2997DAF5168400429633D /* sample.json */; };
+		2DCBDD22BD890CC73353AA00 /* GrowthPlant.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA90495EB67065F035AE6630 /* GrowthPlant.swift */; };
 		317CD386896012EA5E7CBFD3 /* Library.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7A7E10B09510149ED7D3EF /* Library.swift */; };
 		3EC4AAB4C5E5E40127FCCABA /* temple.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DE04792FF59D5F129A265691 /* temple.jpg */; };
 		40A2585CC84434804EDA4B20 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE2F89990A6D40DC02179E3 /* Models.swift */; };
@@ -118,6 +119,7 @@
 		DCF1C13224B90E8752059123 /* CallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallView.swift; sourceTree = "<group>"; };
 		DDD44163E5F4DD06C18C5343 /* village_market.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = village_market.jpg; sourceTree = "<group>"; };
 		DE04792FF59D5F129A265691 /* temple.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = temple.jpg; sourceTree = "<group>"; };
+		EA90495EB67065F035AE6630 /* GrowthPlant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrowthPlant.swift; sourceTree = "<group>"; };
 		F28BE33DB5A492CA2B6D40A2 /* SessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionView.swift; sourceTree = "<group>"; };
 		FF31E4BA926D699E444FA671 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -218,6 +220,7 @@
 				FF31E4BA926D699E444FA671 /* Assets.xcassets */,
 				DCF1C13224B90E8752059123 /* CallView.swift */,
 				C025C6466A7485D1EA6440FB /* Conversation.swift */,
+				EA90495EB67065F035AE6630 /* GrowthPlant.swift */,
 				6FDD762CDED4DDE07A4E95DE /* HomeView.swift */,
 				A5A64500F6375BA3CEC5B21B /* Info.plist */,
 				4F7A7E10B09510149ED7D3EF /* Library.swift */,
@@ -377,6 +380,7 @@
 				59AFE9F9D7D4A58DB8B40221 /* Calls.swift in Sources */,
 				8F30AB8AF0918A57669E8198 /* Conversation.swift in Sources */,
 				555A260D10302DF8A1E90F90 /* GardenClient.swift in Sources */,
+				2DCBDD22BD890CC73353AA00 /* GrowthPlant.swift in Sources */,
 				6BE42605EFF015BBADA3A9A7 /* HomeView.swift in Sources */,
 				317CD386896012EA5E7CBFD3 /* Library.swift in Sources */,
 				40A2585CC84434804EDA4B20 /* Models.swift in Sources */,

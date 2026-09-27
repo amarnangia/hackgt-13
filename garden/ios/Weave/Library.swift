@@ -235,24 +235,20 @@ struct ProgressView_: View {
     @EnvironmentObject var people: People
     @State private var picked: Date?
     @State private var open: Word?
+    @State private var settings = false
 
     var body: some View {
         let snap = people.growth ?? .empty
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
+                header(snap)
+                GrowthPlant(plants: snap.plants, totals: snap.totals)
+                    .padding(.horizontal, -20)
+                    .reveal(1)
                 if snap.totals.phrases == 0 {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Progress").font(Fonts.ui(32, .medium)).tracking(-1.1).foregroundStyle(Theme.text)
-                        Text(people.source == .offline ? "Connect to Weave on your Mac in Settings." : "Your progress starts with your first call.").font(Fonts.ui(15)).foregroundStyle(Theme.text2)
-                    }
-                    .padding(.top, 16)
+                    Text(people.source == .offline ? "Connect to Weave on your Mac in Settings." : "Your plant grows with every word you hear on your calls.")
+                        .font(Fonts.ui(15)).foregroundStyle(Theme.text2).frame(maxWidth: .infinity).multilineTextAlignment(.center)
                 } else {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Progress").font(Fonts.ui(32, .medium)).tracking(-1.1).foregroundStyle(Theme.text)
-                    Text("\(snap.totals.bloom) words you understand without help.").font(Fonts.ui(15)).foregroundStyle(Theme.text2)
-                }
-                .padding(.top, 16).padding(.bottom, 6)
-                .reveal(0)
 
                 Grid(horizontalSpacing: 12, verticalSpacing: 12) {
                     GridRow { stat("Known", "\(snap.totals.bloom)", "of \(snap.totals.phrases) words", accent: true); stat("Learning", "\(snap.totals.sprout)", "subtitles only") }
@@ -272,11 +268,28 @@ struct ProgressView_: View {
         .scrollIndicators(.hidden)
         .refreshable { await people.loadGrowth() }
         .background(Backdrop())
+        .sheet(isPresented: $settings) { SettingsView().environmentObject(people) }
         .sheet(item: $open) { w in
             WordSheet(word: w, line: nil, partnerName: people.partner.name, live: false) { people.save(w) } forget: {}
                 .environmentObject(people)
                 .presentationDetents([.large]).presentationBackground(Theme.bg2).presentationCornerRadius(24)
         }
+    }
+
+    /// Your name, what the plant is made of, and Settings.
+    private func header(_ snap: GardenSnapshot) -> some View {
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(people.profileName.map { "\($0)'s garden" } ?? "Your garden").font(Fonts.ui(32, .medium)).tracking(-1.1).foregroundStyle(Theme.text)
+                Text(snap.totals.phrases == 0 ? "A seed, for now." : "\(snap.totals.phrases) words growing · \(snap.totals.bloom) in bloom")
+                    .font(Fonts.ui(15)).foregroundStyle(Theme.text2).contentTransition(.numericText())
+            }
+            Spacer()
+            Button { settings = true } label: { Avatar(text: String((people.profileName ?? "S").prefix(1)), size: 34) }
+                .buttonStyle(Pressable()).accessibilityLabel("Settings")
+        }
+        .padding(.top, 16)
+        .reveal(0)
     }
 
     private func stat(_ label: String, _ value: String, _ sub: String, accent: Bool = false) -> some View {
