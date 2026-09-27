@@ -166,7 +166,7 @@ struct GrowthSheet: View {
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
                     Eyebrow("With \(partner) · last 14 days")
-                    Text("Your language growth").font(Fonts.ui(24, .medium)).tracking(-0.6).foregroundStyle(Theme.text)
+                    Text("Your language growth").font(Fonts.ui(24, .medium)).tracking(-0.6).foregroundStyle(Theme.lavender)
                 }
                 .reveal(0)
                 HStack(spacing: 10) {
@@ -269,7 +269,7 @@ struct SummarySheet: View {
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
                     Eyebrow("Conversation ended")
-                    Text("You and \(convo.partner.name)").font(Fonts.ui(24, .medium)).tracking(-0.6).foregroundStyle(Theme.text)
+                    Text("You and \(convo.partner.name)").font(Fonts.ui(24, .medium)).tracking(-0.6).foregroundStyle(Theme.lavender)
                 }
                 .reveal(0)
                 HStack(spacing: 10) {
@@ -323,7 +323,7 @@ struct SessionMenu: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Eyebrow("Session")
-            Text(convo.partner.name).font(Fonts.ui(24, .medium)).tracking(-0.6).foregroundStyle(Theme.text).padding(.top, 6).padding(.bottom, 10)
+            Text(convo.partner.name).font(Fonts.ui(24, .medium)).tracking(-0.6).foregroundStyle(Theme.lavender).padding(.top, 6).padding(.bottom, 10)
             row("book", "Your language growth") { growth() }
             Rectangle().fill(Theme.border).frame(height: 1)
             row(convo.mode == .live ? "dot.radiowaves.left.and.right" : "play.circle",

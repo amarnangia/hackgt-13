@@ -13,7 +13,7 @@ struct SettingsView: View {
         ScrollView {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Settings").font(Fonts.ui(24, .medium)).tracking(-0.6).foregroundStyle(Theme.text)
+                Text("Settings").font(Fonts.ui(24, .medium)).tracking(-0.6).foregroundStyle(Theme.lavender)
                 Spacer()
                 Button("Done") { dismiss() }.font(Fonts.ui(15, .medium)).foregroundStyle(Theme.accent)
             }
@@ -160,7 +160,7 @@ struct VoiceSetupView: View {
             VStack(alignment: .leading, spacing: 12) {
                 if !embedded {
                     HStack {
-                        Text("Record \(whose) voice").font(Fonts.ui(24, .medium)).tracking(-0.6).foregroundStyle(Theme.text)
+                        Text("Record \(whose) voice").font(Fonts.ui(24, .medium)).tracking(-0.6).foregroundStyle(Theme.lavender)
                         Spacer()
                         Button("Cancel") { recorder.stop(); dismiss() }.font(Fonts.ui(15, .medium)).foregroundStyle(Theme.accent)
                     }
@@ -384,7 +384,7 @@ struct SwitchPersonView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Who are you?").font(Fonts.ui(24, .medium)).tracking(-0.6).foregroundStyle(Theme.text)
+                Text("Who are you?").font(Fonts.ui(24, .medium)).tracking(-0.6).foregroundStyle(Theme.lavender)
                 Spacer()
                 Button("Done") {
                     let clean = name.trimmingCharacters(in: .whitespaces)
@@ -412,7 +412,7 @@ struct VoiceTab: View {
         let name = people.profileName ?? "You"
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
-                Text("Your voice").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.text).padding(.top, 20)
+                Text("Your voice").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.lavender).padding(.top, 20)
                 Text("Read the script below for about a minute. Weave then speaks your translations in your own voice, in English and in Telugu.")
                     .font(Fonts.ui(15)).foregroundStyle(Theme.text2).padding(.bottom, 8)
                 if people.family == nil {

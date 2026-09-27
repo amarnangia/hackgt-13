@@ -124,12 +124,13 @@ struct Avatar: View {
     let text: String
     var size: CGFloat = 44
     var presence: Bool? = nil
+    var tint: Color? = nil          // e.g. lavender for your own profile button
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            Text(text).font(.system(size: size * 0.4, weight: .medium)).foregroundStyle(Theme.text)
+            Text(text).font(.system(size: size * 0.4, weight: .medium)).foregroundStyle(tint ?? Theme.text)
                 .frame(width: size, height: size)
-                .background(LinearGradient(colors: [Theme.surface3, Theme.surface], startPoint: .top, endPoint: .bottom), in: .circle)
-                .overlay(Circle().strokeBorder(Theme.border2, lineWidth: 1))
+                .background(LinearGradient(colors: tint.map { [$0.opacity(0.22), Theme.surface] } ?? [Theme.surface3, Theme.surface], startPoint: .top, endPoint: .bottom), in: .circle)
+                .overlay(Circle().strokeBorder(tint.map { $0.opacity(0.5) } ?? Theme.border2, lineWidth: 1))
             if let presence {
                 Circle().fill(presence ? Theme.green : Theme.text3).frame(width: 10, height: 10)
                     .overlay(Circle().strokeBorder(Theme.bg, lineWidth: 2)).offset(x: 1, y: 1)

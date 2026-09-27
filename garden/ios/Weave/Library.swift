@@ -84,7 +84,7 @@ struct WordsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Words").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.text)
+                    Text("Words").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.lavender)
                     Text(people.dictionary.isEmpty ? "Every word from your calls." : "Your family dictionary: every word from your calls, in her voice.")
                         .font(Fonts.ui(15)).foregroundStyle(Theme.text2)
                 }
@@ -291,7 +291,7 @@ struct ProgressView_: View {
                 .font(Fonts.ui(15)).contentTransition(.numericText())
             }
             Spacer()
-            Button { settings = true } label: { Avatar(text: String((people.profileName ?? "S").prefix(1)), size: 34) }
+            Button { settings = true } label: { Avatar(text: String((people.profileName ?? "S").prefix(1)), size: 34, tint: Theme.lavender) }
                 .buttonStyle(Pressable()).accessibilityLabel("Settings")
         }
         .padding(.top, 16)

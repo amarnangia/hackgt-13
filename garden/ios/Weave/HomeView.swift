@@ -62,7 +62,7 @@ struct OnboardingView: View {
         VStack(alignment: .leading, spacing: 0) {
             Spacer(minLength: 40)
             WeaveMark().frame(width: 52, height: 22).padding(.bottom, 24)
-            Text("What's your name?").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.text)
+            Text("What's your name?").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.lavender)
             Text("It's how your family sees you in Weave.").font(Fonts.ui(15)).foregroundStyle(Theme.text2).padding(.top, 8).padding(.bottom, 28)
             TextField("", text: $me, prompt: Text("Your name").foregroundColor(Theme.text3))
                 .font(Fonts.ui(20, .medium)).foregroundStyle(Theme.text)

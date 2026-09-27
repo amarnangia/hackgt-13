@@ -54,7 +54,7 @@ struct CallView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 Eyebrow("\(summary.caller) · \(summary.whenLabel) · \(summary.minutes) min").padding(.top, 8).reveal(0)
-                Text(detail?.story?.title ?? summary.title).font(Fonts.ui(26, .medium)).tracking(-0.8).foregroundStyle(Theme.text)
+                Text(detail?.story?.title ?? summary.title).font(Fonts.ui(26, .medium)).tracking(-0.8).foregroundStyle(Theme.lavender)
                     .padding(.top, 8).reveal(0)
                 if let s = detail?.story?.summary ?? summary.summary, !s.isEmpty {
                     Text(s).font(Fonts.serif(18)).foregroundStyle(Theme.text).lineSpacing(3).padding(.top, 10).reveal(1)
