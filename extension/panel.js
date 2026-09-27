@@ -4,8 +4,8 @@
 //   left      curious + answer ("Curious?" questions), topic (words for the topic), details (words she said)
 //   float     picture, details (cards for sayings, slang, customs), as bubbles above the captions
 //   captions  speaking, partial, draft, original, english, details (intent), voice, warning, roles
-// Until the engine sends curious/topic messages, the left panel builds simple questions from the word cards and
-// pictures (answered from their notes) and shows starter words, so it works with today's engine.
+// Everything comes from the call: until the engine sends words (topic, details), the word panel is empty; until it
+// sends curious questions, the left panel builds simple ones from the word cards and pictures it did send.
 // Clicks go back to the engine: forget (a kept word you don't know), ask (a question), practiced (hear a word),
 // i_speak (two-way calls, from the dock's menu). Everything is drawn in place: rows keep their elements and only
 // transform and opacity animate, so nothing jumps or flickers over the call.
@@ -316,18 +316,8 @@ function handleTop(m) {
 }
 
 // ---------- left: the dictionary feed (words for the topic, the ones she said first) and "Curious?" ----------
-const GREETINGS = [  // starter words until the engine picks a topic
-  { telugu: "నమస్కారం", roman: "namaskaram", english: "hello (respectful)" },
-  { telugu: "బాగున్నారా?", roman: "bagunnara?", english: "are you well? (to an elder)" },
-  { telugu: "నేను బాగున్నాను", roman: "nenu bagunnanu", english: "I'm well" },
-  { telugu: "అన్నం తిన్నారా?", roman: "annam tinnara?", english: "have you eaten?" },
-  { telugu: "తిన్నాను", roman: "tinnanu", english: "I ate" },
-  { telugu: "అవును", roman: "avunu", english: "yes" },
-  { telugu: "సరే", roman: "sare", english: "okay" },
-  { telugu: "మళ్ళీ మాట్లాడదాం", roman: "malli matladadam", english: "let's talk again" },
-];
 const SPEAKER = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>`;
-const left = { questions: [], engineQuestions: false, topic: "Greetings", words: GREETINGS, engineTopic: false, said: [], open: null, built: false };
+const left = { questions: [], engineQuestions: false, topic: "", words: [], engineTopic: false, said: [], open: null, built: false };
 const MAX_QUESTIONS = 3, MAX_WORDS = 5, QUESTION_TTL_MS = 90000;
 const QUESTION_KINDS = new Set(["idiom", "slang", "phrase", "culture", "festival", "food", "family", "clothing"]);
 
