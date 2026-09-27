@@ -243,6 +243,7 @@ class Captioner:
         self.pictures = None                  # picture pop-ups (pictures.py), set by listen()
         self.recorder = None                  # the family story keeper (calls.py)
         self.prompter = None                  # live "ask her" prompts (prompts.py)
+        self.live = None                      # the overlay's words, from the conversation itself (vocab_live.py)
         self.curious = None                   # the overlay's "Curious?" questions (curious.py), set by listen()
         self.saying_judge = None              # sayings, idioms, slang, cultural references (sayings.py), made on first use
         self.topic, self.topic_votes = None, collections.deque(maxlen=3)  # what it's about now; (topic, votes) per line
@@ -538,7 +539,7 @@ class Captioner:
                 topic, how = topic_of(full_english, hits)
                 if topic is None and usable:
                     topic, how = timed(self.decider.topic, full_english), "laya"
-                self._follow_topic(topic)
+                self._follow_topic(topic, how=how)
             if self.curious and helps and ok:
                 try:  # a picture of something she didn't name in Telugu, and her words if they needed Laya to rank
                     more = [q for q in [self.curious.about_picture(picture, hits)] if q]
@@ -558,6 +559,8 @@ class Captioner:
                                        kept=kept, intent=intent if ok else None, picture=picture, start_s=start_s, end_s=end_s)
             if self.prompter:  # any language, either side: every pause is a chance to keep the conversation going
                 self.prompter.on_line(sentence, full_english, intent if ok else None, route, who=self.side or "them")
+            if self.live and ok:  # either side, any language: what the call is about now picks the overlay's words
+                self.live.on_line(full_english, who=self.side or "them")
 
         def work_logged():
             try:
@@ -743,10 +746,16 @@ class Captioner:
         except Exception as e:
             return f"(translation failed: {type(e).__name__})"
 
-    def _follow_topic(self, topic, strength=1):
+    def _follow_topic(self, topic, strength=1, how="words"):
         """Move the overlay's topic words once a topic has 2 votes in the last 3 lines, so they don't flicker. Her words
-        agreeing on a topic (gavvalu and ariselu; Bhogi) are 2 votes at once: the words move on that line."""
-        if not topic:
+        agreeing on a topic (gavvalu and ariselu; Bhogi) are 2 votes at once: the words move on that line.
+        Sticky: once the conversation has a real topic, it stays until her words or clear keywords point to a new one.
+        Laya's guess (it calls most short lines "greetings") only fills in before that, and the words never go back to
+        "Saying hello" once the call has moved on; filler ("wait", "then") used to flip them back."""
+        if not topic or (self.live and how != "words"):  # with live words, only her own words switch lists here
+            return
+        settled = self.topic not in (None, "greetings")
+        if (how == "laya" and settled) or (topic == "greetings" and settled):
             return
         with self.topic_lock:
             self.topic_votes.append((topic, strength))
@@ -772,7 +781,18 @@ class Captioner:
         msg = {"type": "topic", "topic": self.vocab[topic]["name"], "key": topic, "words": words}
         self.hub.current["topic"] = msg
         self.hub.broadcast(msg)
+        if self.live:
+            self.live.shown(self.vocab[topic]["name"])
         print(f"  [topic: {self.vocab[topic]['name']}]", flush=True)
+
+    def show_words(self, subject, words):
+        """Words Muse Spark picked for what the call is about now (vocab_live.py). They stay until the subject changes."""
+        with self.topic_lock:
+            self.topic, self.topic_votes = "live", collections.deque(maxlen=3)
+        msg = {"type": "topic", "topic": subject, "key": "live", "words": words}
+        self.hub.current["topic"] = msg
+        self.hub.broadcast(msg)
+        print(f"  [topic: {subject}: {', '.join(w['roman'] for w in words)}]", flush=True)
 
     def answer(self, question, caller):
         """Answer a "Curious?" question the word list can't, with Muse Spark and her last few lines as context."""
@@ -1077,9 +1097,8 @@ async def load_helpers(loop, args, captioner, target):
             captioner.prompter.shown(starter)
             print(f"  [to start: ask {args.caller}: {starter['roman']}  ({starter['english']})]", flush=True)
     if not args.outgoing:
-        from curious import Curious
-        captioner.curious = Curious(captioner.decider, captioner.progress, captioner.progress.keep_at)
-    if not args.outgoing:
+        from vocab_live import LiveVocab
+        captioner.live = LiveVocab(args.caller, captioner.show_words)
         captioner.show_topic("greetings")  # calls start with hello; the words follow the conversation from there
 
 
@@ -1310,6 +1329,7 @@ async def listen_two_way(args, them_args, me_args, them, me):
     indic_voice = None if error else them.translate.speak
     await load_helpers(loop, args, them, them_target)  # story page, prompts: about the person you called
     me.decider, me.pictures = them.decider, them.pictures
+    me.live = them.live  # what you say moves the words too (they're shown on the caller's page)
     me.prompter = them.prompter  # one conversation: pauses after either of you, and what you say, count for prompts
     if them.decider:  # what you say back tells us which kept Telugu words you understood (reply.py)
         from reply import ReplyJudge, ReplyWatch

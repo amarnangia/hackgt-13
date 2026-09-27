@@ -1,12 +1,11 @@
 // One Weave overlay panel (?part=top | left | float | captions). Each reads the engine's WebSocket (subtitles.py,
 // ws://localhost:8765 unless ?ws= says otherwise) and draws its share of the messages (see idea.md, "One standard"):
 //   top       prompt ("ask her"), shown when the talk pauses
-//   left      curious + answer ("Curious?" questions), topic (words for the topic), details (words she said)
+//   left      topic (words for what the call is about), details (words she said)
 //   float     picture, details (cards for sayings, slang, customs), as bubbles above the captions
 //   captions  speaking, partial, draft, original, english, details (intent), voice, warning, roles
-// Everything comes from the call: until the engine sends words (topic, details), the word panel is empty; until it
-// sends curious questions, the left panel builds simple ones from the word cards and pictures it did send.
-// Clicks go back to the engine: forget (a kept word you don't know), ask (a question),
+// Everything comes from the call: until the engine sends words (topic, details), the word panel is empty.
+// Clicks go back to the engine: forget (a kept word you don't know),
 // i_speak (two-way calls, from the dock's menu). Everything is drawn in place: rows keep their elements and only
 // transform and opacity animate, so nothing jumps or flickers over the call.
 const params = new URLSearchParams(location.search);
@@ -59,6 +58,18 @@ function connectYou() {
     let m; try { m = JSON.parse(e.data); } catch { return; }
     if (m.type !== "original" && m.type !== "english") return;
     handleCaptions({ ...m, id: `you:${m.id}`, you: true });
+  };
+}
+// The top pill also needs to know when *you* talk (--two-way's second page), not just her
+function hearYou() {
+  if (!YOU_URL) return;
+  let you;
+  try { you = new WebSocket(YOU_URL); } catch { setTimeout(hearYou, 5000); return; }
+  you.onclose = () => setTimeout(hearYou, 5000);
+  you.onerror = () => {};
+  you.onmessage = (e) => {
+    let m; try { m = JSON.parse(e.data); } catch { return; }
+    if (["speaking", "original"].includes(m.type) || (m.type === "partial" && m.text)) { heardTalk(); renderTop(); }
   };
 }
 function status() {
@@ -270,10 +281,10 @@ function html(tag, cls, inner = "") { const el = document.createElement(tag); el
 const report = () => tellParent({ kind: "size", width: Math.ceil(root.scrollWidth), height: Math.ceil(root.scrollHeight) });
 
 // ---------- top: "Ask her", a frosted pill that comes down when the talk pauses ----------
-// It waits for a real pause (2 s) before coming in, stays at least 5 s, and leaves once someone has been talking for
-// 1.5 s, so a quick breath between sentences doesn't make it blink. The question itself lasts 45 s, as before.
+// It waits for a real pause (2 s) before coming in and then stays up, however long the quiet lasts, until someone (either
+// of you) has been talking for 5 s: then it's done. If nobody talks for 30 s, the engine sends a fresh one instead.
 const SPARK = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5c.4 3.9 1.9 6.6 4.2 8 1.3.8 2.9 1.3 5.3 1.5-2.4.2-4 .7-5.3 1.5-2.3 1.4-3.8 4.1-4.2 8-.4-3.9-1.9-6.6-4.2-8C6.5 12.7 4.9 12.2 2.5 12c2.4-.2 4-.7 5.3-1.5 2.3-1.4 3.8-4.1 4.2-8z"/></svg>`;
-const ASK_MS = 45000, PAUSE_MS = 2000, TALK_MS = 1500, MIN_SHOWN_MS = 5000;
+const PAUSE_MS = 2000, TALK_MS = 5000;
 const askState = { ask: null, drawn: null, expire: 0, lastTalk: 0, talkStart: 0, shown: false, shownAt: 0, tick: 0 };
 function heardTalk() {
   const now = Date.now();
@@ -288,16 +299,15 @@ function renderTop() {
     root.innerHTML = `<div class="pill">
         <span class="spark">${SPARK}</span>
         <div class="pill-text"><div class="q-roman">${esc(say)}</div>${means ? `<div class="q-sub">${esc(means)}</div>` : ""}</div>
-        <div class="timer"><i style="animation-duration:${ASK_MS}ms"></i></div>
       </div>`;
     askState.drawn = a;
     report();
   }
   const talking = now - askState.lastTalk < 900;
+  if (askState.ask && askState.shown && talking && now - askState.talkStart > TALK_MS) askState.ask = null;  // they moved on
   let show = askState.shown;
   if (!askState.ask) show = false;
   else if (!askState.shown) show = !talking && (now - askState.lastTalk > PAUSE_MS || !askState.lastTalk);
-  else show = !(talking && now - askState.talkStart > TALK_MS && now - askState.shownAt > MIN_SHOWN_MS);
   if (show !== askState.shown) {
     askState.shown = show;
     if (show) askState.shownAt = now;
@@ -308,56 +318,26 @@ function renderTop() {
 }
 function handleTop(m) {
   if (["speaking", "original"].includes(m.type) || (m.type === "partial" && m.text)) heardTalk();
-  if (m.type === "prompt") {
-    askState.ask = m;
-    askState.expire = setTimeout(() => { askState.ask = null; renderTop(); }, ASK_MS);
-  }
+  if (m.type === "prompt") askState.ask = m;  // stays until someone has talked for a while, or a newer one comes
   renderTop();
 }
 
-// ---------- left: the dictionary feed (words for the topic, the ones she said first) and "Curious?" ----------
-const left = { questions: [], engineQuestions: false, topic: "", words: [], engineTopic: false, said: [], open: null, built: false };
-const MAX_QUESTIONS = 3, MAX_WORDS = 5, QUESTION_TTL_MS = 90000;
-const QUESTION_KINDS = new Set(["idiom", "slang", "phrase", "culture", "festival", "food", "family", "clothing"]);
+// ---------- left: the dictionary feed (words for the topic, the ones she said first) ----------
+const left = { topic: "", words: [], engineTopic: false, said: [], built: false };
+const MAX_WORDS = 5;
 
-function stemFor(card) {
-  const t = card.title;
-  switch (card.category) {
-    case "idiom": case "phrase": case "slang": return `What does “${t}” mean?`;
-    case "family": return `Who is “${t}”?`;
-    case "culture": return `What is “${t}”?`;
-    default: return `What is ${t}?`;
-  }
-}
-function addLocalQuestion(q) {
-  if (left.engineQuestions || TE.test(q.text)) return;
-  const same = (x) => x.id === q.id || (q.word && x.word === q.word);
-  const old = left.questions.find(same);
-  if (old && !q.replace) return;
-  if (old) { left.questions = left.questions.filter((x) => !same(x)); q.answer = old.answer || q.answer; }
-  left.questions.unshift({ ...q, at: Date.now() });
-  tellParent({ kind: "attention", what: "new" });
-  left.questions = left.questions.slice(0, MAX_QUESTIONS);
-}
 function rememberSaid(card) {  // words she used this call, pinned above the topic words (not whole proverbs)
   const key = (card.title || "").toLowerCase();
   if (!card.id || !card.telugu || card.category === "idiom" || left.said.some((w) => w.id === card.id || w.roman.toLowerCase() === key)) return;
   left.said.unshift({ id: card.id, telugu: card.telugu, roman: card.title, english: card.english || card.note || "" });
   left.said = left.said.slice(0, 4);
 }
-// New questions push the list down; while the mouse is over the panel, hold it still so a click lands where you aimed.
-let leftHeld = false, leftPending = false;
-document.addEventListener("mouseover", () => { leftHeld = true; });
-document.documentElement.addEventListener("mouseleave", () => { leftHeld = false; if (leftPending) { leftPending = false; renderLeft(); } });
 const norm = (r) => String(r).toLowerCase().replace(/\?$/, "");
-function renderLeft(force = false) {
-  if (leftHeld && !force) { leftPending = true; return; }
+function renderLeft() {
   if (!left.built) {
-    root.innerHTML = `<section class="dict"><div class="rows"></div></section><section class="cur"><div class="qs"></div></section>`;
+    root.innerHTML = `<section class="dict"><div class="rows"></div></section>`;
     left.built = true;
   }
-  const now = Date.now();
-  left.questions = left.questions.filter((q) => q.id === left.open || now - q.at < QUESTION_TTL_MS);
   const said = new Set(left.said.flatMap((w) => [w.id, norm(w.roman)]));
   const words = [...left.said.map((w) => ({ ...w, said: true })),
     ...left.words.filter((w) => !said.has(w.id) && !said.has(norm(w.roman)))]
@@ -369,41 +349,8 @@ function renderLeft(force = false) {
       el.querySelector(".w-roman").textContent = noTe(w.roman);
       el.querySelector(".w-en").textContent = noTe(w.english);
     });
-  const cur = root.querySelector(".cur");
-  const seenQ = new Set();   // "What is Bhogi?" from the picture and from the word: once
-  const questions = left.questions.filter((q) => !TE.test(q.text) && !seenQ.has(q.text.toLowerCase()) && seenQ.add(q.text.toLowerCase())).slice(0, MAX_QUESTIONS);
-  cur.hidden = !questions.length;
-  syncList(root.querySelector(".qs"), questions, (q) => q.id,
-    (q) => { const b = html("button", "question", `<div class="q"></div><div class="answer"><div></div></div>`); b.dataset.q = q.id; return b; },
-    (el, q) => {
-      el.classList.toggle("open", q.id === left.open);
-      el.querySelector(".q").textContent = q.text;
-      const a = el.querySelector(".answer > div"), inner = q.answer ? formatAnswer(q.answer) : `<span class="loading">Looking it up</span>`;
-      if (a._h !== inner) { a.innerHTML = inner; a._h = inner; }
-    });
   report();
 }
-function formatAnswer(a) {
-  const say = noTe(a.roman);
-  return `${say ? `<div class="say">${esc(say)}</div>` : ""}${esc(noTe(a.text))}`;
-}
-root.addEventListener("click", (e) => {
-  if (PART !== "left") return;
-  const q = e.target.closest(".question");
-  if (q) {
-    const item = left.questions.find((x) => x.id === q.dataset.q);
-    if (!item) return;
-    left.open = left.open === item.id ? null : item.id;
-    if (left.open && !item.asked) {
-      item.asked = true;
-      send({ type: "ask", id: item.id, word: item.word || null, text: item.text });  // the engine answers (and learns you asked)
-    }
-    renderLeft(true);
-    return;
-  }
-
-});
-
 // ---------- float: pictures and meanings as small bubbles that spring up above the captions ----------
 // Each holds for a while and fades away; hover one to see it, click to keep it.
 const float = { items: [] };
@@ -487,42 +434,13 @@ function handleCaptions(m) {
 }
 function handleLeft(m) {
   switch (m.type) {
-    case "curious":  // the engine's questions (Laya-picked), newest first
-      left.engineQuestions = true;
-      for (const q of (m.questions || []).slice().reverse()) {
-        if (left.questions.some((x) => x.id === q.id)) continue;
-        if (TE.test(q.text)) continue;
-        left.questions.unshift({ id: q.id, text: q.text, word: q.word || null, kind: q.kind, answer: q.answer || null, at: Date.now() });
-      }
-      left.questions = left.questions.slice(0, MAX_QUESTIONS);
-      tellParent({ kind: "attention", what: "new" });
-      break;
-    case "answer": {
-      const q = left.questions.find((x) => x.id === m.id);
-      if (q) q.answer = { text: m.text, telugu: m.telugu, roman: m.roman };
-      renderLeft(true);  // an answer you're waiting for shows even while the list is held still
-      return;
-    }
     case "topic":
       left.engineTopic = true;
       left.topic = m.topic || left.topic;
       left.words = m.words || left.words;
       break;
     case "details":
-      for (const c of m.cards || []) {
-        if (!c.id) continue;
-        rememberSaid(c);
-        // Questions for things worth asking about; everyday words (illu, ooru) go to the word list, and words they
-        // probably know (p >= 0.7) need no question. Pictures add their own "What is ___?".
-        if (!QUESTION_KINDS.has(c.category) || c.p >= 0.7) continue;
-        addLocalQuestion({ id: c.id, word: c.id, text: stemFor(c),
-          answer: c.note ? { text: c.note, telugu: c.telugu, roman: c.title } : null });
-      }
-      break;
-    case "picture":
-      // Pictures carry the word-list ids they show, so "What is NTR?" replaces the card's question for the same word.
-      addLocalQuestion({ id: `pic:${m.id}`, word: (m.lexicon_ids || [])[0] || null, replace: true, text: `What is ${m.name}?`,
-        answer: { text: m.description || "", roman: m.name } });
+      for (const c of m.cards || []) if (c.id) rememberSaid(c);  // sayings and idioms stay on the right (float)
       break;
     default: return;
   }
@@ -544,6 +462,7 @@ function handleFloat(m) {
 
 // ---------- start ----------
 if (PART === "captions") { renderCaptions(); connectYou(); tellParent({ kind: "lang", lang: savedLanguage() }); }
+if (PART === "top") hearYou();
 if (PART === "top") { renderTop(); new ResizeObserver(report).observe(root); }
 if (PART === "left") { renderLeft(); setInterval(renderLeft, 15000); new ResizeObserver(report).observe(root); }
 if (PART === "float") { renderFloat(); new ResizeObserver(report).observe(root); addEventListener("load", report, true); }

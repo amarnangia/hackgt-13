@@ -3,7 +3,8 @@
 # spoken and whoever spoke (--two-way also hears the grandkid):
 #   - follow-up: someone shared something (a memory, news, something they made) and paused -> a question about it;
 #   - lull: nobody has said anything for LULL_S -> something to keep it going, from what the call has been about,
-#     or a warm conversation starter if nothing has been said yet;
+#     or a warm conversation starter if nothing has been said yet; if the quiet goes on REPROMPT_S after a prompt,
+#     a different one (the overlay keeps each prompt up until someone has been talking for 5 s);
 #   - topic: something with a picture or card was just mentioned -> topics.py's question about it, ready instantly.
 # Never while someone is talking, at most one prompt every COOLDOWN_S (--prompt-every), never the same one twice,
 # and not right after someone asked a question (give them a moment to answer; a lull after that is fine).
@@ -20,6 +21,7 @@ from collections import deque
 
 PAUSE_S = 1.2      # quiet this long after Muse says she stopped (Muse already waits ~0.5 s of silence for that)
 LULL_S = 5.0       # nobody has said anything this long: offer something to keep it going
+REPROMPT_S = 30    # still nobody talking this long after a prompt: offer a different one
 COOLDOWN_S = 25    # at most one prompt this often (--prompt-every); short enough for a live demo
 MIN_LINES = 1      # one shareable line is enough
 MIN_WORDS = 5
@@ -101,7 +103,7 @@ class StoryPrompter:
                 topic = self.topic[1] if self.topic and now - self.topic[0] < TOPIC_FRESH_S else None
                 context = [(who, english) for t, who, english in self.history if now - t < CONTEXT_S]
             quiet = now - self.last_speech_end
-            lull = quiet >= LULL_S and self.spoke_since_prompt
+            lull = quiet >= LULL_S and (self.spoke_since_prompt or now - self.last_prompt >= REPROMPT_S)
             kind = "topic" if topic else "follow-up" if len(recent) >= MIN_LINES else "lull" if lull else None
             reason = ("someone's talking" if any(self.speaking.values()) else
                       "waiting for a pause" if quiet < PAUSE_S else
