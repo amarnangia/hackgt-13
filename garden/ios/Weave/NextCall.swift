@@ -30,13 +30,13 @@ struct NextCallCard: View {
         }
     }
 
-    /// When you last talked, as a nudge to reach out.
-    private var nudge: String {
+    /// When you last talked, as a nudge to reach out. Nothing if you already talked today.
+    private var nudge: String? {
         let last = latest?.date.map { $0.timeIntervalSince1970 } ?? snap.calls.last
         guard let last else { return "Give \(who) a call" }
         let days = Int((Date().timeIntervalSince1970 - last) / 86400)
         switch days {
-        case 0: return "You talked to \(who) today"
+        case 0: return nil
         case 1: return "You talked to \(who) yesterday"
         case 2...3: return "It's been \(days) days · a good time to call \(who)"
         default: return "It's been \(days) days · \(who) would love a call"
@@ -52,7 +52,7 @@ struct NextCallCard: View {
                 Spacer()
                 Image(systemName: "phone.arrow.up.right").font(.system(size: 13, weight: .semibold)).foregroundStyle(Theme.accent)
             }
-            Text(nudge).font(Fonts.ui(14)).foregroundStyle(Theme.text2).padding(.top, 8)
+            if let nudge { Text(nudge).font(Fonts.ui(14)).foregroundStyle(Theme.text2).padding(.top, 8) }
 
             if list.isEmpty {
                 Text("After your first call, ideas for the next one show up here.")
