@@ -24,6 +24,8 @@ struct CallSummary: Codable, Identifiable, Hashable {
     var page: String?
     var questions: [Question]?
     var has_audio: Bool?
+    var message_te: String?   // the story keeper's WhatsApp message in Telugu, to send her after the call
+    var message_en: String?   // what it says, in English
 
     /// calls.py writes local time to the minute ("2026-09-26T18:30"); accept seconds too.
     var date: Date? {

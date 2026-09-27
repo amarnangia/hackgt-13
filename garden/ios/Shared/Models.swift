@@ -95,9 +95,9 @@ enum Stage: String, CaseIterable, Identifiable {
     var title: String { ["bloom": "Blooming", "sprout": "Sprouting", "seed": "Seeds"][rawValue]! }
     var meaning: String {
         switch self {
-        case .seed: "Dubbed in English"
-        case .sprout: "Telugu with subtitles"
-        case .bloom: "You understand it on your own"
+        case .seed: "New: translated for you"
+        case .sprout: "Learning: still translated"
+        case .bloom: "Known: stays in Telugu"
         }
     }
 }

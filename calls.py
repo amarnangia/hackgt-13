@@ -159,17 +159,17 @@ def summarize(lines, caller):
         '"highlights" (list of up to 3 short sweet or important moments, in English), '
         '"questions" (3 questions the grandchild could ask next call, each {"english", "telugu", "roman"}: simple spoken '
         "Telugu a beginner can say, and its pronunciation in English letters), "
-        '"message_te" (a short, loving WhatsApp message in Telugu from the grandchild to the grandparent about this call).'
+        '"message_te" (a short, loving WhatsApp message in Telugu from the grandchild to the grandparent about this call), '
+        '"message_en" (what message_te says, in English, so the grandchild knows what they are sending).'
     )
     return spark_json(system, convo, model="muse-spark-1.3", effort="low", timeout=90)
 
 
 def status(entry, times_total, progress, wid):
-    """new (first time) / learning / known. Hearing a word once isn't knowing it, even though it's already kept in
-    Telugu from its second hearing; call it known once it has come up at least twice (family words start known)."""
-    if entry.get("start_known") or (times_total >= 2 and progress.known(wid)):
+    """new (first time) / learning / known: Progress.status, the same rule the app's tabs use."""
+    if entry.get("start_known"):
         return "known"
-    return "new" if times_total <= 1 else "learning"
+    return progress.status(wid, times_total)
 
 
 def words_from_call(lines, progress_before, heard_before, progress, lexicon, lang):

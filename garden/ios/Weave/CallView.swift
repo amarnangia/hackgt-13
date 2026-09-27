@@ -144,3 +144,85 @@ struct CallView: View {
         .onDisappear { voice.stop() }
     }
 }
+
+// MARK: - Message tab
+
+/// After a call, a short loving WhatsApp message in Telugu for her, written by the story keeper (calls.py
+/// "message_te"). The newest call's message comes first, with Copy and Share (WhatsApp is in the share sheet);
+/// earlier calls' messages are below. The call's English title and summary say what it's about.
+struct MessageView: View {
+    @EnvironmentObject var people: People
+    @State private var copied: String?
+
+    private var withMessage: [CallSummary] { people.calls.filter { !($0.message_te ?? "").isEmpty } }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Message").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.lavender)
+                    Text("After each call, a note in Telugu to send \(withMessage.first?.caller ?? people.partner.name), so she keeps the call too.")
+                        .font(Fonts.ui(15)).foregroundStyle(Theme.text2)
+                }
+                .padding(.top, 16)
+                .reveal(0)
+
+                if withMessage.isEmpty {
+                    Panel {
+                        Text(people.source == .offline ? "Start Roots on your Mac to see your messages."
+                             : "After your next call, a message to send her shows up here.")
+                            .font(Fonts.ui(15)).foregroundStyle(Theme.text2)
+                    }
+                    .reveal(1)
+                } else {
+                    ForEach(Array(withMessage.enumerated()), id: \.element.id) { i, call in
+                        card(call, latest: i == 0).reveal(min(i + 1, 4))
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 32)
+        }
+        .scrollIndicators(.hidden)
+        .refreshable { await people.loadGrowth() }
+        .background(Backdrop())
+    }
+
+    private func card(_ call: CallSummary, latest: Bool) -> some View {
+        let text = call.message_te ?? ""
+        return Panel(padding: 18) {
+            HStack {
+                Eyebrow(latest ? "From your last call · \(call.whenLabel)" : call.whenLabel, color: latest ? Theme.lavender : Theme.text3)
+                Spacer()
+            }
+            Text(call.title).font(Fonts.ui(15, .medium)).foregroundStyle(Theme.text).padding(.top, 6)
+            Text(text).font(Fonts.telugu(latest ? 19 : 16)).foregroundStyle(Theme.text)
+                .textSelection(.enabled).fixedSize(horizontal: false, vertical: true).padding(.top, 10)
+            if let en = call.message_en, !en.isEmpty {
+                Text(en).font(Fonts.ui(14)).foregroundStyle(Theme.text2).fixedSize(horizontal: false, vertical: true).padding(.top, 6)
+            }
+            HStack(spacing: 10) {
+                Button {
+                    UIPasteboard.general.string = text
+                    withAnimation(.easeOut(duration: 0.2)) { copied = call.id }
+                    Task { try? await Task.sleep(for: .seconds(2)); if copied == call.id { copied = nil } }
+                } label: {
+                    Label(copied == call.id ? "Copied" : "Copy", systemImage: copied == call.id ? "checkmark" : "doc.on.doc")
+                        .font(Fonts.ui(14, .medium)).foregroundStyle(Theme.onAccent)
+                        .frame(maxWidth: .infinity).frame(height: 44)
+                        .background(Theme.accent, in: .rect(cornerRadius: 12))
+                }
+                .buttonStyle(Pressable())
+                .sensoryFeedback(.success, trigger: copied == call.id)
+                ShareLink(item: text) {
+                    Label("Send", systemImage: "square.and.arrow.up")
+                        .font(Fonts.ui(14, .medium)).foregroundStyle(Theme.text)
+                        .frame(maxWidth: .infinity).frame(height: 44)
+                        .background(Theme.surface2, in: .rect(cornerRadius: 12))
+                        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Theme.border2, lineWidth: 1))
+                }
+            }
+            .padding(.top, 14)
+        }
+    }
+}

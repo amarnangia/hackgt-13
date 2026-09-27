@@ -144,7 +144,10 @@ class Garden:
 
     # --- reads (the Weave app + widget) ---
 
-    def snapshot(self, days=14):
+    def snapshot(self, days=14, stage_for=None):
+        """stage_for(plant) -> "seed" | "sprout" | "bloom" | None: the stage from the translator's learning model
+        (progress.py, which decides what stays in Telugu), so the app's plant, Progress and Words tabs all agree with the
+        captions. None, or no stage_for: the garden's own hearing count decides, as before."""
         now = time.time()
         with self._conn() as c:
             plants = [dict(r) for r in c.execute("SELECT * FROM phrases ORDER BY first_heard")]
@@ -160,7 +163,20 @@ class Garden:
             p["category"] = p["category"] or "none"
             p["stage"], p["mode"] = stage(p["growth"]), mode(p["growth"])
             p["to_next"] = (SUBTITLE_AT if p["stage"] == "seed" else BLOOM_AT) - p["growth"] if p["stage"] != "bloom" else 0
+            own = stage_for(p) if stage_for else None
+            if own:  # the learning model's answer; growth (0-8) only draws the progress bar, as the family dictionary does
+                p["stage"], p["mode"] = own, {"seed": "dub", "sprout": "subtitle", "bloom": "none"}[own]
+                p["growth"] = BLOOM_AT if own == "bloom" else min(BLOOM_AT - 1, p["heard"])
+                p["to_next"] = 0 if own == "bloom" else BLOOM_AT - p["growth"]
             p["thirsty"] = bool(p["last_asked"] and now - p["last_asked"] < 3 * 86400 and p["stage"] != "bloom")
+
+        # "became known" / "moved to learning" events come from the hearing count; with stage_for, only keep the ones the
+        # learning model agrees with now, so a word isn't "known" in one place and "learning" in another.
+        if stage_for:
+            now_stage = {p["phrase"]: p["stage"] for p in plants}
+            agrees = lambda e: (e["kind"] != "bloomed" or now_stage.get(e["phrase"]) == "bloom") and \
+                (e["kind"] != "sprouted" or now_stage.get(e["phrase"]) in ("sprout", "bloom"))
+            events, recent = [e for e in events if agrees(e)], [e for e in recent if agrees(e)]
 
         by_day = {_day(now - i * 86400): {"heard": 0, "new": 0, "bloomed": 0} for i in range(days - 1, -1, -1)}
         first = {p["phrase"]: _day(p["first_heard"]) for p in plants}

@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Weave overlay",
+  "name": "Roots overlay",
   "version": "0.1.0",
   "description": "Live English captions, questions, words and pictures on top of the call in this tab. Turn it on with the toolbar button or Alt+Shift+W.",
   "permissions": [
@@ -8,18 +8,22 @@
     "scripting",
     "storage"
   ],
+  "host_permissions": [
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "Show or hide Weave"
+    "default_title": "Show or hide Roots"
   },
   "commands": {
     "toggle-overlay": {
       "suggested_key": {
         "default": "Alt+Shift+W"
       },
-      "description": "Show or hide Weave"
+      "description": "Show or hide Roots"
     }
   },
   "web_accessible_resources": [

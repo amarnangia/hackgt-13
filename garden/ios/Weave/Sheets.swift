@@ -38,21 +38,9 @@ struct WordSheet: View {
                         Eyebrow("\(word.categoryLabel)\(word.telugu != nil ? " · Telugu" : "")")
                         Text(word.telugu ?? word.english.capitalized).font(Fonts.telugu(34, .medium)).foregroundStyle(Theme.text).padding(.top, 4)
                         if let roman = word.roman { Text(roman).font(Fonts.serif(18, italic: true)).foregroundStyle(Theme.text2) }
-                        if people.voice(for: word.key) != nil {
-                            Label("Her voice, from your call", systemImage: "waveform").font(Fonts.ui(12)).foregroundStyle(Theme.accent).padding(.top, 2)
-                        }
                     }
                     Spacer()
-                    if word.telugu != nil {
-                        Button(action: say) {
-                            Image(systemName: "speaker.wave.2").font(.system(size: 16, weight: .medium))
-                                .foregroundStyle(speaking ? Theme.accent : Theme.text)
-                                .frame(width: 46, height: 46)
-                                .overlay(Circle().strokeBorder(speaking ? Theme.accent.opacity(0.5) : Theme.border2, lineWidth: 1))
-                                .symbolEffect(.variableColor.iterative, isActive: speaking)
-                        }
-                        .buttonStyle(Pressable())
-                    }
+                    // No speaker button (the phone's built-in voice) and no "her voice" label: say() is still here, unused.
                 }
                 .padding(.top, 20)
                 .reveal(1)
@@ -183,7 +171,7 @@ struct GrowthSheet: View {
                         Text("\(Int(pct * 100))%").font(Fonts.mono(13)).foregroundStyle(Theme.text)
                     }
                     Meter(value: pct).padding(.top, 12)
-                    Text("Once you know a word, Weave stops translating it and leaves it in Telugu.")
+                    Text("Once you know a word, Roots stops translating it and leaves it in Telugu.")
                         .font(Fonts.ui(13)).foregroundStyle(Theme.text2).padding(.top, 10)
                 }
                 .reveal(2)

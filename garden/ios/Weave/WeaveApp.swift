@@ -57,6 +57,7 @@ struct MainTabs: View {
         TabView(selection: $tab) {
             ProgressView_().tag(0).tabItem { Label("Progress", systemImage: "leaf") }
             WordsView().tag(1).tabItem { Label("Words", systemImage: "character.book.closed") }
+            MessageView().tag(3).tabItem { Label("Message", systemImage: "envelope") }
             VoiceTab().tag(2).tabItem { Label("Voice", systemImage: "waveform") }
         }
         .task { await people.loadGrowth() }

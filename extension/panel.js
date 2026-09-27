@@ -151,7 +151,7 @@ function fillLine(el, l) {   // l: a caption line, or null for what's being said
 function renderCaptions() {
   const who = conn.name || "her";
   const state = orbState();
-  const statusText = !conn.on ? "Waiting for the Weave engine" : { speaking: "Speaking for you", thinking: "Translating",
+  const statusText = !conn.on ? "Waiting for the Roots engine" : { speaking: "Speaking for you", thinking: "Translating",
     listening: `${who[0].toUpperCase() + who.slice(1)} is speaking`, idle: conn.me && conn.name ? `${conn.me} ↔ ${conn.name}` : `Listening to ${who}` }[state];
   tellParent({ kind: "status", connected: conn.on, state, text: statusText });
   // Two-way calls: the "I speak" switch lives in the dock's menu
@@ -280,12 +280,19 @@ function leave(list) {   // lift out of the flow where they are (all measured fi
 function html(tag, cls, inner = "") { const el = document.createElement(tag); el.className = cls; el.innerHTML = inner; return el; }
 const report = () => tellParent({ kind: "size", width: Math.ceil(root.scrollWidth), height: Math.ceil(root.scrollHeight) });
 
-// ---------- top: "Ask her", a frosted pill that comes down when the talk pauses ----------
-// It waits for a real pause (2 s) before coming in and then stays up, however long the quiet lasts, until someone (either
-// of you) has been talking for 5 s: then it's done. If nobody talks for 30 s, the engine sends a fresh one instead.
+// ---------- top: sayings (idioms, slang) and "Ask her", one at a time, top center ----------
+// A saying she uses comes down at once, big, with what it means: it explains what she's saying right now, so it doesn't
+// wait for a pause. It stays SAYING_MS (long enough to read) and the same saying isn't shown again for 5 minutes.
+// "Ask her" waits for a real pause (2 s) before coming in and then stays up, however long the quiet lasts, until someone
+// (either of you) has been talking for 5 s: then it's done. If nobody talks for 30 s, the engine sends a fresh one
+// instead. A saying takes the spot while it's up; a waiting question comes back after.
 const SPARK = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5c.4 3.9 1.9 6.6 4.2 8 1.3.8 2.9 1.3 5.3 1.5-2.4.2-4 .7-5.3 1.5-2.3 1.4-3.8 4.1-4.2 8-.4-3.9-1.9-6.6-4.2-8C6.5 12.7 4.9 12.2 2.5 12c2.4-.2 4-.7 5.3-1.5 2.3-1.4 3.8-4.1 4.2-8z"/></svg>`;
+const QUOTE = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 17.5c0-4.6 2.4-8.2 6.2-10l.9 1.6C8.9 10.4 7.8 12 7.6 14H10v5H4v-1.5zm10 0c0-4.6 2.4-8.2 6.2-10l.9 1.6c-2.2 1.3-3.3 2.9-3.5 4.9H20v5h-6v-1.5z"/></svg>`;
 const PAUSE_MS = 2000, TALK_MS = 5000;
+const SAYING_MS = 10000, SAYING_AGAIN_MS = 300000;
+const TOP_KINDS = new Set(["idiom", "slang"]);   // sayings and slang go up here; everyday phrases and customs stay in the corner
 const askState = { ask: null, drawn: null, expire: 0, lastTalk: 0, talkStart: 0, shown: false, shownAt: 0, tick: 0 };
+const sayState = { saying: null, seen: new Map() };   // seen: saying key -> when it was last shown
 function heardTalk() {
   const now = Date.now();
   if (now - askState.lastTalk > 900) askState.talkStart = now;
@@ -293,32 +300,56 @@ function heardTalk() {
 }
 function renderTop() {
   const now = Date.now();
-  if (askState.ask && askState.ask !== askState.drawn) {
-    const a = askState.ask;
-    const say = noTe(a.roman) || noTe(a.english), means = noTe(a.roman) ? noTe(a.english) : "";
-    root.innerHTML = `<div class="pill">
-        <span class="spark">${SPARK}</span>
-        <div class="pill-text"><div class="q-roman">${esc(say)}</div>${means ? `<div class="q-sub">${esc(means)}</div>` : ""}</div>
-      </div>`;
-    askState.drawn = a;
+  const saying = sayState.saying && now - sayState.saying.at < SAYING_MS ? sayState.saying : null;
+  const want = saying || askState.ask;
+  if (want && want !== askState.drawn) {
+    if (want === saying) {
+      root.innerHTML = `<div class="pill saying">
+          <span class="spark">${QUOTE}</span>
+          <div class="pill-text"><span class="kind">${esc(saying.label)}</span><div class="s-title">${esc(saying.title)}</div>${saying.note ? `<div class="s-note">${esc(saying.note)}</div>` : ""}</div>
+          <div class="timer"><i style="animation-duration:${SAYING_MS}ms"></i></div>
+        </div>`;
+    } else {
+      const a = askState.ask;
+      const say = noTe(a.roman) || noTe(a.english), means = noTe(a.roman) ? noTe(a.english) : "";
+      root.innerHTML = `<div class="pill">
+          <span class="spark">${SPARK}</span>
+          <div class="pill-text"><div class="q-roman">${esc(say)}</div>${means ? `<div class="q-sub">${esc(means)}</div>` : ""}</div>
+        </div>`;
+    }
+    askState.drawn = want;
     report();
   }
   const talking = now - askState.lastTalk < 900;
-  if (askState.ask && askState.shown && talking && now - askState.talkStart > TALK_MS) askState.ask = null;  // they moved on
+  if (askState.ask && askState.shown && !saying && talking && now - askState.talkStart > TALK_MS) askState.ask = null;  // they moved on
   let show = askState.shown;
-  if (!askState.ask) show = false;
+  if (saying) show = true;
+  else if (!askState.ask) show = false;
   else if (!askState.shown) show = !talking && (now - askState.lastTalk > PAUSE_MS || !askState.lastTalk);
   if (show !== askState.shown) {
     askState.shown = show;
     if (show) askState.shownAt = now;
     tellParent({ kind: "shown", shown: show });
   }
+  if (!saying && sayState.saying) sayState.saying = null;
   clearInterval(askState.tick);
-  if (askState.ask) askState.tick = setInterval(renderTop, 250);
+  if (askState.ask || saying) askState.tick = setInterval(renderTop, 250);
 }
 function handleTop(m) {
   if (["speaking", "original"].includes(m.type) || (m.type === "partial" && m.text)) heardTalk();
   if (m.type === "prompt") askState.ask = m;  // stays until someone has talked for a while, or a newer one comes
+  else if (m.type === "details") {
+    const now = Date.now();
+    for (const c of m.cards || []) {   // a saying or slang she used: what it means (the first one wins)
+      if (!c.note || !TOP_KINDS.has(c.category)) continue;
+      const title = TE.test(c.title) ? noTe(c.english) : noTe(c.title);   // a saying in Telugu script goes by its English
+      const key = c.id || c.title;
+      if (!title || now - (sayState.seen.get(key) || -1e12) < SAYING_AGAIN_MS) continue;
+      sayState.seen.set(key, now);
+      sayState.saying = { key, title, label: LABELS[c.category] || "Meaning", note: noTe(c.note), at: now };
+      break;
+    }
+  }
   renderTop();
 }
 
@@ -374,7 +405,7 @@ function renderFloat() {
   syncList(root.querySelector(".bubs") || (root.innerHTML = `<div class="bubs"></div>`, root.querySelector(".bubs")), float.items, (x) => x.key,
     (x) => {
       const el = html("div", `bub ${x.kind}`, x.kind === "picture"
-        ? `<img class="big" src="${esc(asset(x.image))}" alt=""><div class="bub-body"><b>${esc(noTe(x.name))}</b>${noTe(x.description) ? `<p>${esc(noTe(x.description))}</p>` : ""}</div>`
+        ? `${x.image ? `<img class="big" src="${esc(asset(x.image))}" alt="">` : ""}<div class="bub-body"><b>${esc(noTe(x.name))}</b>${noTe(x.description) ? `<p>${esc(noTe(x.description))}</p>` : ""}</div>`
         : `<div class="bub-body"><span class="kind">${esc(x.label)}</span><b>${esc(x.title)}</b>${noTe(x.note) ? `<p>${esc(noTe(x.note))}</p>` : ""}</div>`);
       el.dataset.key = x.key;
       return el;
@@ -447,17 +478,32 @@ function handleLeft(m) {
   renderLeft();
 }
 function handleFloat(m) {
-  if (m.type === "picture" && m.image) {
-    addFloat({ key: `pic:${m.id}`, kind: "picture", name: m.name, description: m.description, image: m.image, words: m.lexicon_ids || [] });
-  } else if (m.type === "details") {
+  if (m.type === "details") {   // everyday phrases and customs: a small card here (sayings and slang go to the top center)
     for (const c of m.cards || []) {
-      if (!c.note || !MEANING_KINDS.has(c.category)) continue;
-      const title = TE.test(c.title) ? noTe(c.english) : noTe(c.title);   // a saying in Telugu script goes by its English
+      if (!c.note || !MEANING_KINDS.has(c.category) || TOP_KINDS.has(c.category)) continue;
+      const title = TE.test(c.title) ? noTe(c.english) : noTe(c.title);
       if (!title) continue;
       addFloat({ key: `card:${c.id || c.title}`, kind: "meaning", word: c.id, label: LABELS[c.category] || "Meaning", title, note: c.note });
     }
-  } else return;
-  renderFloat();
+    return renderFloat();
+  }
+  if (m.type !== "picture" || !m.image || m.for === "them") return;
+  // Load the picture first and only then pop it up, so it never shows as an empty dark box; the hold time starts once
+  // it's on screen. If it can't load (or takes over 4 s), the card still shows what it is, without the picture.
+  const item = { key: `pic:${m.id}`, kind: "picture", name: m.name, description: m.description, image: m.image, words: m.lexicon_ids || [] };
+  const img = new Image();
+  let done = false;
+  const show = (ok) => {
+    if (done) return;
+    done = true;
+    if (!ok) item.image = null;
+    addFloat(item);
+    renderFloat();
+  };
+  img.onload = () => show(img.naturalWidth > 0);
+  img.onerror = () => show(false);
+  setTimeout(() => show(img.complete && img.naturalWidth > 0), 4000);
+  img.src = asset(m.image);
 }
 
 // ---------- start ----------

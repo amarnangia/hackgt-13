@@ -63,6 +63,13 @@ body[data-part="top"] main { display: inline-block; }
 .timer { position: absolute; left: 22px; right: 22px; bottom: 6px; height: 2px; border-radius: 2px; background: rgba(255,255,255,.06); overflow: hidden; }
 .timer i { display: block; height: 100%; background: var(--grad); transform-origin: left; animation: drain linear both; }
 @keyframes drain { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+/* a saying, slang or custom she used: bigger than a question, since it has to be read while she talks */
+.pill.saying { padding: 18px 30px 20px 18px; gap: 2px 18px; align-items: start; max-width: 620px; white-space: normal; }
+.pill.saying .spark { width: 48px; height: 48px; margin-top: 2px; animation: none; }
+.pill.saying .spark svg { width: 20px; height: 20px; }
+.pill.saying .kind { margin-bottom: 8px; }
+.s-title { font-family: var(--serif); font-size: 31px; font-weight: 600; line-height: 1.15; letter-spacing: -.012em; text-wrap: balance; }
+.s-note { font-size: 19px; line-height: 1.4; color: var(--text); opacity: .86; margin-top: 8px; text-wrap: pretty; }
 
 /* ================= left: words as floating bubbles, top-left corner ================= */
 /* No box: each word is its own raised bubble that pops in when it arrives, drifts a little, and gives way to the next. */

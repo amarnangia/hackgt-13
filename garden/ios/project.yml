@@ -46,15 +46,15 @@ targets:
     info:
       path: Weave/Info.plist
       properties:
-        CFBundleDisplayName: Weave
+        CFBundleDisplayName: Roots
         UILaunchScreen:
           UIColorName: ""
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: true
           NSAllowsLocalNetworking: true
-        NSLocalNetworkUsageDescription: Weave reads your garden from the Mac running the call translator.
-        NSMicrophoneUsageDescription: Weave records you reading for a minute to make your personalized voice.
+        NSLocalNetworkUsageDescription: Roots reads your progress from the Mac running the call translator.
+        NSMicrophoneUsageDescription: Roots records you reading for a minute to make your personalized voice.
         CFBundleURLTypes:
           - CFBundleURLSchemes: [weave]
     entitlements:
@@ -77,7 +77,7 @@ targets:
     info:
       path: WeaveWidget/Info.plist
       properties:
-        CFBundleDisplayName: Weave
+        CFBundleDisplayName: Roots
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
         NSAppTransportSecurity:

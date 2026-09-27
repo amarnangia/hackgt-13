@@ -159,6 +159,17 @@ class Progress:
     def known(self, entry_id):
         return self.probability(entry_id) >= self.keep_at
 
+    def status(self, entry_id, times=None):
+        """new / learning / known: the one answer every screen shows (the story page, the family dictionary, and the
+        app's plant, Progress and Words tabs), so they never disagree. Hearing a word once isn't knowing it, even though
+        it's already kept in Telugu from its second hearing; it's known once it has come up at least twice and the
+        model says they know it (family words everyone knows start known). `times`: how often it has come up
+        (default: this model's own count)."""
+        times = self.heard.get(entry_id, 0) if times is None else times
+        if self.entries.get(entry_id, {}).get("start_known") or (times >= 2 and self.known(entry_id)):
+            return "known"
+        return "new" if times <= 1 else "learning"
+
     # ---------- what the call does ----------
     def keep_known_words(self, english, hits):
         """Swap the fixed English of each known word back to its Telugu, e.g. "tamarind rice" -> "pulihora".

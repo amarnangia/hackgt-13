@@ -102,16 +102,16 @@
       .sw.unknown .track::after { transform: translate3d(7px, 0, 0); }
     </style>
     <div class="wrap">
-      <iframe class="left" title="Weave: words and questions" allowtransparency="true"></iframe>
-      <iframe class="float off" title="Weave: pictures and meanings" allowtransparency="true"></iframe>
-      <iframe class="captions glass off" title="Weave: captions" allowtransparency="true"></iframe>
-      <iframe class="top glass off" title="Weave: ask her" allowtransparency="true"></iframe>
+      <iframe class="left" title="Roots: words and questions" allowtransparency="true"></iframe>
+      <iframe class="float off" title="Roots: pictures and meanings" allowtransparency="true"></iframe>
+      <iframe class="captions glass off" title="Roots: captions" allowtransparency="true"></iframe>
+      <iframe class="top glass off" title="Roots: ask her" allowtransparency="true"></iframe>
       <div class="core">
         <div class="side l">
           <button class="ctl on" data-panel="left" aria-label="Words and questions" title="Words and questions">${icon.words}<i class="badge"></i></button>
           <button class="ctl on" data-panel="float" aria-label="Pictures and meanings" title="Pictures and meanings">${icon.pics}<i class="badge"></i></button>
         </div>
-        <button class="line-btn" title="Show or hide Weave (Alt+Shift+W)" aria-label="Show or hide Weave"><canvas></canvas></button>
+        <button class="line-btn" title="Show or hide Roots (Alt+Shift+W)" aria-label="Show or hide Roots"><canvas></canvas></button>
         <div class="side r">
           <button class="sw on" data-act="transcribe" role="switch" aria-checked="true"><span class="track"></span>Transcribe</button>
           <span class="seg" role="radiogroup" aria-label="I speak"><button data-lang="en">English</button><button data-lang="te">Telugu</button></span>
@@ -176,7 +176,7 @@
     // (where it also says who it thinks speaks what, "roles"; while it's guessing, the switch asks you to pick).
     const seg = $(".seg");
     seg.classList.toggle("guess", !!ui.roles && !ui.roles.sure);
-    seg.title = !ui.roles ? "The language you speak (used in two-way calls)" : ui.roles.sure ? "The language you speak on this call" : "Weave is guessing which language you speak: pick yours";
+    seg.title = !ui.roles ? "The language you speak (used in two-way calls)" : ui.roles.sure ? "The language you speak on this call" : "Roots is guessing which language you speak: pick yours";
     const mine = ui.roles?.you || ui.lang;
     root.querySelectorAll("[data-lang]").forEach((b) => { const on = b.dataset.lang === mine; b.classList.toggle("on", on); b.setAttribute("aria-checked", String(on)); });
     frames.captions.classList.toggle("off", ui.idle);

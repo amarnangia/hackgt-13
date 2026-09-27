@@ -52,8 +52,8 @@ def clone(name, audio, filename="voice.m4a", content_type="audio/mp4", consent_b
     if not api_key():
         raise RuntimeError("no ELEVENLABS_API_KEY in .env")
     boundary = uuid.uuid4().hex
-    fields = [("name", f"Weave: {name}"),
-              ("description", f"{name}'s voice for Weave call translation, recorded in the Weave app"),
+    fields = [("name", f"Roots: {name}"),
+              ("description", f"{name}'s voice for Roots call translation, recorded in the Roots app"),
               ("remove_background_noise", "false")]  # a phone in a quiet room; noise removal can hurt clean audio
     parts = [f'--{boundary}\r\nContent-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode() for k, v in fields]
     parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="files"; filename="{filename}"\r\n'
@@ -137,7 +137,7 @@ if __name__ == "__main__":
     cmd, rest = (sys.argv[1], sys.argv[2:]) if len(sys.argv) > 1 else ("", [])
     if cmd == "clone" and len(rest) == 2:
         name, path = rest
-        if input(f"Does {name} agree to Weave making a copy of their voice with ElevenLabs? [y/N] ").strip().lower() != "y":
+        if input(f"Does {name} agree to Roots making a copy of their voice with ElevenLabs? [y/N] ").strip().lower() != "y":
             sys.exit("Not made.")
         audio = open(path, "rb").read()
         pid, record = clone(name, audio, os.path.basename(path), mimetypes.guess_type(path)[0] or "audio/mpeg", consent_by=name)

@@ -1,4 +1,4 @@
-# Weave: who we are, what we built, and how we demo it
+# Roots: who we are, what we built, and how we demo it
 
 Written from the code as it is today (latest commit `09a3c48`), not from older docs, some of which describe scrapped
 ideas. It covers only the **Chrome extension** (on the WhatsApp Web call) and the **iPhone app**, not the web app.
@@ -7,18 +7,18 @@ Where a number was measured, it says who measured it and where.
 ---
 
 ## 1. One-liner
-> **Weave helps kids of immigrant families actually talk to their grandparents: understand her live, get her
+> **Roots helps kids of immigrant families actually talk to their grandparents: understand her live, get her
 > telling stories, keep those stories in her voice, and need less translation every call.**
 
-Closing line: *"Most translators get better at translating. Weave gets better at knowing when not to."*
+Closing line: *"Most translators get better at translating. Roots gets better at knowing when not to."*
 
 ---
 
 ## 2. The two-paragraph pitch
 Millions of kids of immigrants call their grandparents every week, and the calls stay shallow: "Did you eat? How's
 school? Okay, bye." Not because they don't care, but because the grandkid lost the language. Translation apps keep
-you dependent forever, miss what her sayings and foods mean, and keep nothing from the call. Weave runs on the
-WhatsApp call you already make. Grandma changes nothing and installs nothing. On the grandkid's laptop, Weave turns
+you dependent forever, miss what her sayings and foods mean, and keep nothing from the call. Roots runs on the
+WhatsApp call you already make. Grandma changes nothing and installs nothing. On the grandkid's laptop, Roots turns
 her Telugu into English captions and speaks them **in her own voice**. It pops up pictures of the dishes, festivals
 and people she mentions. And when she pauses, it suggests a question to ask her *in Telugu*, like "Pulihora ela
 chestaru? Naaku nerpistara?" ("How do you make pulihora? Will you teach me?"), so she tells the story instead of the
@@ -26,7 +26,7 @@ grandkid just listening.
 
 When they hang up, the call becomes a story page for the family: the stories she told, with **clips of her real
 voice**, a family dictionary of her words in her voice, questions for next time, and a Telugu message to send her.
-Meanwhile Weave tracks how likely the grandkid is to know each of her words, using Bayesian Knowledge Tracing with
+Meanwhile Roots tracks how likely the grandkid is to know each of her words, using Bayesian Knowledge Tracing with
 forgetting between calls. Once they know a word, it stays in Telugu in the captions and the voice, so every call
 needs a little less translation. Meta's Muse hears her live and writes the questions and the story. Laya, a small
 model running on the laptop, makes the split-second decisions for every line. The iPhone app shows your language
@@ -87,7 +87,7 @@ is filtered out on purpose, because the grandkid can't read it.
 13. **Left panel, words:** words for the current topic (11 topics). The topic only changes when 2 of the last 3
     lines agree, so it doesn't flicker. Words she's used that you're still learning come first. A button plays each
     word, using the browser's built-in voice.
-14. **Controls:** a line at the bottom that moves with what Weave is doing (listening, translating, speaking), and
+14. **Controls:** a line at the bottom that moves with what Roots is doing (listening, translating, speaking), and
     buttons to hide the words or pictures.
 15. **Transcribe switch:** off means no audio goes to the cloud, nothing is recorded, and the call plays at full
     volume.
@@ -245,7 +245,7 @@ A judge told us to show a few things well, not everything. Pick **four moments**
    ```
    Wait for "Overlay: http://localhost:8765" and "listening".
 3. **Terminal 2, for the iPhone app:** `python3 -m garden`. Open the app in the Simulator, on the **Words** tab.
-4. **The call:** in Chrome, open the **WhatsApp Web** call (not the Mac app) and turn Weave on with **Option+Shift+W**.
+4. **The call:** in Chrome, open the **WhatsApp Web** call (not the Mac app) and turn Roots on with **Option+Shift+W**.
 5. **Grandma** reads one line at a time and pauses about 2 s after each.
 6. **Backup:** a screen recording of a good full run, in case the audio fails at the table.
 
@@ -255,7 +255,7 @@ A judge told us to show a few things well, not everything. Pick **four moments**
 
 **[0:00, hook, before the call]**
 > "My grandmother only really speaks Telugu. I don't. For years our calls were 'Did you eat?', 'Yes', 'Okay, bye.'
-> That's millions of families. So we built Weave."
+> That's millions of families. So we built Roots."
 
 **[0:15, Moment 1, understanding her]**
 Grandma: **నాన్నా, బాగున్నావా? అన్నం తిన్నావా?** (*Nanna, bagunnava? Annam tinnava?*)
@@ -266,10 +266,10 @@ Grandma: **నాన్నా, బాగున్నావా? అన్నం �
 Grandma: **ఈ రోజు నీ కోసం పులిహోర చేశాను.** (*Ee roju nee kosam pulihora chesanu.*, "Today I made pulihora for you.")
 *(Keep this line a statement. "Ask her" never appears right after she asks a question. Run it through
 `tools/check_decisions.py` once to confirm the picture and the prompt come up.)*
-> "Pulihora: I'd never know what that is. Weave shows me."
+> "Pulihora: I'd never know what that is. Roots shows me."
 
 Wait for the pause. **"Ask her"** comes down: *"Pulihora ela chestaru? Naaku nerpistara?"*
-> "And here's the part we care about most. Weave doesn't explain her life to me. It gives me a question to ask her,
+> "And here's the part we care about most. Roots doesn't explain her life to me. It gives me a question to ask her,
 > in Telugu."
 
 Grandkid asks it out loud. **Grandma answers with a short story** (how she learned to make it).
@@ -277,7 +277,7 @@ Grandkid asks it out loud. **Grandma answers with a short story** (how she learn
 
 **[1:40, Moment 3, a word stays in Telugu]**
 Grandma: **పులిహోర చాలా బాగా వచ్చింది.** (*Pulihora chala baaga vachindi.*)
-> "Look at the caption: *pulihora* stayed in Telugu. Weave tracks how likely I am to know each of her words, with a
+> "Look at the caption: *pulihora* stayed in Telugu. Roots tracks how likely I am to know each of her words, with a
 > learning model and forgetting between calls. Once I know a word, it stops translating it. If I don't, I click it
 > and it comes back."
 
@@ -295,7 +295,7 @@ Show the story page, then the iPhone **Words** tab: tap *pulihora* and play her 
 > time with our rules."
 
 **[2:55, close]**
-> "Most translators get better at translating. Weave gets better at knowing when not to."
+> "Most translators get better at translating. Roots gets better at knowing when not to."
 
 ---
 

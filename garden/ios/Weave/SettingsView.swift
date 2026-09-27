@@ -51,7 +51,7 @@ struct FamilyVoices: View {
     var body: some View {
         Panel {
             Eyebrow("Personalized voices")
-            Text("Record someone reading for about a minute, and Weave speaks their translations in their own voice, in English and Telugu. The Mac makes the voice with ElevenLabs.")
+            Text("Record someone reading for about a minute, and Roots speaks their translations in their own voice, in English and Telugu. The Mac makes the voice with ElevenLabs.")
                 .font(Fonts.ui(12)).foregroundStyle(Theme.text2).padding(.top, 6)
             if people.family == nil {
                 Text("Connect to the Mac to see or record voices.").font(Fonts.ui(13)).foregroundStyle(Theme.text3).padding(.top, 12)
@@ -154,14 +154,14 @@ struct VoiceSetupView: View {
                             .font(Fonts.ui(13)).foregroundStyle(Theme.danger).padding(.top, 10)
                     }
                     if recorder.denied {
-                        Text("Weave needs the microphone: Settings > Weave > Microphone.").font(Fonts.ui(13)).foregroundStyle(Theme.danger).padding(.top, 10)
+                        Text("Roots needs the microphone: Settings > Roots > Microphone.").font(Fonts.ui(13)).foregroundStyle(Theme.danger).padding(.top, 10)
                     }
                 }
                 Panel {
                     Toggle(isOn: $consent) {
                         Text(target.isYou
-                             ? "This is my voice. I agree to Weave making a copy of it with ElevenLabs to speak my translations on calls."
-                             : "\(target.name) is here and agrees to Weave making a copy of their voice with ElevenLabs to speak their translations on calls.")
+                             ? "This is my voice. I agree to Roots making a copy of it with ElevenLabs to speak my translations on calls."
+                             : "\(target.name) is here and agrees to Roots making a copy of their voice with ElevenLabs to speak their translations on calls.")
                             .font(Fonts.ui(13)).foregroundStyle(Theme.text)
                     }
                     .tint(Theme.accent)
@@ -301,7 +301,7 @@ struct PersonPicker: View {
                 Label("No personalized voice yet. Record one any time in Settings.", systemImage: "mic")
                     .foregroundStyle(Theme.text2)
             } else {
-                Label("New to Weave? We'll add \(name) to the family.", systemImage: "person.badge.plus")
+                Label("New to Roots? We'll add \(name) to the family.", systemImage: "person.badge.plus")
                     .foregroundStyle(Theme.text2)
             }
         }
@@ -311,17 +311,11 @@ struct PersonPicker: View {
     /// No answer from the Mac: probably a real phone that doesn't know the Mac's address yet.
     private var unreachable: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Couldn't reach Weave on your Mac, so type your name below, or enter the address python -m garden --lan prints.")
+            // No address field: the app reaches the Mac at the address it already has (localhost on the Simulator).
+            Text("Couldn't reach Roots on your Mac, so type your name below.")
                 .font(Fonts.ui(13)).foregroundStyle(Theme.text2)
-            HStack(spacing: 8) {
-                TextField("http://192.168.1.10:8770", text: $url)
-                    .font(Fonts.mono(14, .regular)).foregroundStyle(Theme.text)
-                    .keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled()
-                    .padding(.horizontal, 12).frame(height: 42)
-                    .background(Theme.surface2, in: .rect(cornerRadius: 10))
-                Button("Connect") { GardenClient.serverURL = url; Task { await refresh() } }
-                    .font(Fonts.ui(14, .medium)).foregroundStyle(Theme.accent)
-            }
+            Button("Try again") { Task { await refresh() } }
+                .font(Fonts.ui(14, .medium)).foregroundStyle(Theme.accent)
         }
     }
 
@@ -370,10 +364,10 @@ struct VoiceTab: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 Text("Your voice").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.lavender).padding(.top, 20)
-                Text("Read the script below for about a minute. Weave then speaks your translations in your own voice, in English and in Telugu.")
+                Text("Read the script below for about a minute. Roots then speaks your translations in your own voice, in English and in Telugu.")
                     .font(Fonts.ui(15)).foregroundStyle(Theme.text2).padding(.bottom, 8)
                 if people.family == nil {
-                    Panel { Text("Connect to Weave on your Mac (avatar → Settings) to record your voice.").font(Fonts.ui(14)).foregroundStyle(Theme.text2) }
+                    Panel { Text("Start Roots on your Mac to record your voice.").font(Fonts.ui(14)).foregroundStyle(Theme.text2) }
                 } else if people.me?.voice == true && !redo {
                     Panel {
                         Label("Your voice is ready", systemImage: "checkmark.seal.fill").font(Fonts.ui(17, .medium)).foregroundStyle(Theme.accent)

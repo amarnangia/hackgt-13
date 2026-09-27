@@ -85,7 +85,7 @@ struct WordsView: View {
             VStack(alignment: .leading, spacing: 14) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Words").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.lavender)
-                    Text(people.dictionary.isEmpty ? "Every word from your calls." : "Your family dictionary: every word from your calls, in her voice.")
+                    Text(people.dictionary.isEmpty ? "Every word from your calls." : "Your family dictionary: every word from your calls.")
                         .font(Fonts.ui(15)).foregroundStyle(Theme.text2)
                 }
                 .padding(.top, 16)
@@ -111,7 +111,7 @@ struct WordsView: View {
                                                     stage: .seed, progress: -1, times: 0, voice: people.voice(for: v.key)) })
                     }
                 } else if items.isEmpty {
-                    empty(!query.isEmpty ? "No words match “\(query)”." : people.source == .offline ? "Connect to Weave on your Mac in Settings to see your words." : "Words from your calls show up here.")
+                    empty(!query.isEmpty ? "No words match “\(query)”." : people.source == .offline ? "Start Roots on your Mac to see your words." : "Words from your calls show up here.")
                 } else {
                     list(items)
                 }
@@ -206,7 +206,7 @@ struct WordRow: View {
                     SegmentBar(filled: item.progress).frame(width: 56)
                 }
             }
-            if let v = item.voice { VoiceButton(path: v, size: 30) }
+            // No play button: item.voice (her clip) is still loaded, just not offered here.
         }
         .padding(.horizontal, 16).padding(.vertical, 12)
         .contentShape(Rectangle())
@@ -246,12 +246,12 @@ struct ProgressView_: View {
                     .reveal(1)
                 NextCallCard(snap: snap).reveal(2)
                 if snap.totals.phrases == 0 {
-                    Text(people.source == .offline ? "Connect to Weave on your Mac in Settings." : "Your plant grows with every word you hear on your calls.")
+                    Text(people.source == .offline ? "Start Roots on your Mac to see your progress." : "Your plant grows with every word you hear on your calls.")
                         .font(Fonts.ui(15)).foregroundStyle(Theme.text2).frame(maxWidth: .infinity).multilineTextAlignment(.center)
                 } else {
 
                 Grid(horizontalSpacing: 12, verticalSpacing: 12) {
-                    GridRow { stat("Known", "\(snap.totals.bloom)", "of \(snap.totals.phrases) words", accent: true); stat("Learning", "\(snap.totals.sprout)", "subtitles only", tint: Theme.lavender) }
+                    GridRow { stat("Known", "\(snap.totals.bloom)", "of \(snap.totals.phrases) words", accent: true); stat("Learning", "\(snap.totals.sprout)", "still translated", tint: Theme.lavender) }
                     GridRow { stat("Hearings", "\(snap.totals.heard)", "across all calls"); stat("Streak", "\(snap.streak)", snap.streak == 1 ? "day" : "days") }
                 }
                 .reveal(1)

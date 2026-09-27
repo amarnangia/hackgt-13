@@ -157,7 +157,7 @@ def serve_overlay(conn, request):
     if request.headers.get("Upgrade", "").lower() == "websocket":
         if not origins.allowed(request.headers.get("Origin")):  # another website trying to read the call
             print(f"(refused a connection from {request.headers.get('Origin')})", flush=True)
-            return conn.respond(http.HTTPStatus.FORBIDDEN, "Only Weave's own pages can connect.\n")
+            return conn.respond(http.HTTPStatus.FORBIDDEN, "Only Roots' own pages can connect.\n")
         return None
     path = urllib.parse.unquote(request.path.split("?")[0])
     for folder in ("images", "calls"):  # pop-up pictures; call story pages, the family dictionary and voice clips
@@ -1111,7 +1111,7 @@ async def load_voice(loop, args, captioner, audio, target, who, indic_voice=None
     person = args.me if args.outgoing else args.caller
     voice_id = people.voice_for(person) if args.voice in ("auto", "eleven") and eleven.api_key() else None
     if args.voice == "eleven" and not voice_id:
-        print(f"No ElevenLabs voice for {person} (record one in the Weave app, and put ELEVENLABS_API_KEY in .env); "
+        print(f"No ElevenLabs voice for {person} (record one in the Roots app, and put ELEVENLABS_API_KEY in .env); "
               "using the local voice.", flush=True)
     if voice_id:
         try:
@@ -1230,7 +1230,7 @@ def with_language_choice(on_message, roles):
     """The overlay's "I speak English / Telugu" switch sets the roles; everything else goes to `on_message`."""
     def handle(msg):
         if msg.get("type") == "i_speak" and msg.get("lang") in ("en", "te"):
-            roles.set("them" if msg["lang"] == "en" else "me", f"you picked {'English' if msg['lang'] == 'en' else 'Telugu'} in Weave")
+            roles.set("them" if msg["lang"] == "en" else "me", f"you picked {'English' if msg['lang'] == 'en' else 'Telugu'} in Roots")
         else:
             on_message(msg)
     return handle
@@ -1436,7 +1436,7 @@ def main():
     p.add_argument("--no-voice", action="store_true", help="subtitles only, no English voice")
     p.add_argument("--no-drafts", action="store_true", help="no live draft captions while she's mid-sentence")
     p.add_argument("--voice", choices=["auto", "eleven", "clone", "stock"], default="auto",
-                   help="auto = their personalized ElevenLabs voice if they recorded one in the Weave app, else clone; "
+                   help="auto = their personalized ElevenLabs voice if they recorded one in the Roots app, else clone; "
                         "clone = the English sounds like the caller (learned locally from ~10 s of their speech); "
                         "stock = Kokoro")
     p.add_argument("--voice-sample", help="audio of the caller to clone right away, e.g. a WhatsApp voice note (.opus/.m4a/.wav)")

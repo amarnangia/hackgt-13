@@ -72,6 +72,62 @@ def progress():
             "keep_at": tracker.keep_at, "words": words}
 
 
+STAGE_OF = {"new": "seed", "learning": "sprout", "known": "bloom"}  # progress.py's status -> the app's plant stages
+
+
+def learning(garden):
+    """The translator's learning model (progress.json), which decides which words stay in Telugu, so every screen takes
+    new / learning / known from it; plus, per word, how often it has come up (the most any of our records counted: the
+    model, the family dictionary, the garden), so the plant and the Words tab use the same count. (None, {}, {}) before
+    the first call."""
+    if not (ROOT / "progress.json").exists():
+        return None, {}, {}
+    try:
+        lexicon = Lexicon()
+        tracker = Progress(lexicon, "te", path=str(ROOT / "progress.json"))
+    except (OSError, ValueError):
+        return None, {}, {}
+    from .store import _key  # how the garden spells a phrase (its first Telugu form, see store.from_lexicon)
+    by_phrase = {_key(e["forms"][0].strip(" ,.^")): e["id"] for e in lexicon.entries.get("te", []) if e.get("forms")}
+    times = dict(tracker.heard)
+    try:
+        for wid, entry in json.load(open(CALLS_ROOT / "family_dictionary.json", encoding="utf-8")).items():
+            times[wid] = max(times.get(wid, 0), entry.get("times") or 0)
+    except (OSError, ValueError):
+        pass
+    for p in garden.snapshot()["plants"]:
+        wid = by_phrase.get(p["phrase"])
+        if wid:
+            times[wid] = max(times.get(wid, 0), p["heard"])
+    return tracker, by_phrase, times
+
+
+def garden_snapshot(garden):
+    """The garden, with each word's stage from the learning model (not the garden's own hearing count)."""
+    tracker, by_phrase, times = learning(garden)
+    if tracker is None:
+        return garden.snapshot()
+
+    def stage_for(plant):
+        wid = by_phrase.get(plant["phrase"])
+        if wid is None or wid not in tracker.entries:
+            return None  # not in the word list: the hearing count decides
+        return STAGE_OF[tracker.status(wid, times.get(wid, 0))]
+    return garden.snapshot(stage_for=stage_for)
+
+
+def family_dictionary(garden):
+    """calls/family_dictionary.json with each word's status worked out now, from the learning model, rather than as it
+    was when the last call ended (a "Didn't know it" or a few days of forgetting since then change it)."""
+    book = json.load(open(CALLS_ROOT / "family_dictionary.json", encoding="utf-8"))
+    tracker, _, times = learning(garden)
+    if tracker is not None:
+        for wid, entry in book.items():
+            if wid in tracker.entries:
+                entry["status"] = tracker.status(wid, times.get(wid, 0))
+    return book
+
+
 def calls():
     """The calls the story keeper saved, newest first, with what the home screen and call list need."""
     out = []
@@ -87,6 +143,8 @@ def calls():
             "duration_s": c.get("duration_s", 0), "title": story.get("title") or f"Call with {c.get('caller', 'Grandma')}",
             "summary": story.get("summary", ""), "stories": [s.get("title") for s in story.get("stories") or []],
             "questions": story.get("questions") or [],   # what to ask next call (Muse Spark, from this call's stories)
+            "message_te": story.get("message_te") or None,   # a WhatsApp message in Telugu to send her (the app's Message tab)
+            "message_en": story.get("message_en") or None,   # ...and what it says, in English
             "has_audio": (f.parent / "call.m4a").exists(),
             "lines": len(c.get("lines") or []), "words": len(words),
             "new_words": sum(1 for w in words if w.get("status") == "new"),
@@ -150,7 +208,9 @@ def make_handler(garden):
             elif path in ("/app", "/app/"):
                 self._send(200, (HERE / "web" / "index.html").read_bytes(), "text/html; charset=utf-8")
             elif path == "/api/garden":
-                self._send(200, garden.snapshot())
+                self._send(200, garden_snapshot(garden))
+            elif path == "/calls/family_dictionary.json" and (CALLS_ROOT / "family_dictionary.json").is_file():
+                self._send(200, json.dumps(family_dictionary(garden), ensure_ascii=False).encode(), "application/json; charset=utf-8")
             elif path == "/api/progress":
                 self._send(200, progress() or {"met": 0})
             elif path == "/api/calls":
@@ -202,7 +262,7 @@ def make_handler(garden):
 
         def do_POST(self):
             if not origins.allowed(self.headers.get("Origin")):  # another website posting to this Mac
-                return self._send(403, {"error": "only Weave's own pages can do this"})
+                return self._send(403, {"error": "only Roots' own pages can do this"})
             if self.path == "/api/forget":
                 try:
                     word = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or "{}")["id"]
@@ -279,7 +339,7 @@ def serve(garden, port=8770, lan=False):  # 8765 is subtitles.py's overlay
     # Only this laptop by default: on shared Wi-Fi (a hackathon, a cafe) anyone could otherwise open the saved calls,
     # her voice clips and the live call. --lan opens it to the network for the iPhone app, on a network you trust.
     server = ThreadingHTTPServer(("0.0.0.0" if lan else "127.0.0.1", port), make_handler(garden))
-    print(f"Weave:             http://localhost:{port}/app")
+    print(f"Roots:             http://localhost:{port}/app")
     if lan:
         print(f"phone widget URL:  http://{lan_ip()}:{port}   (open to everyone on this Wi-Fi until you stop it)")
     else:
