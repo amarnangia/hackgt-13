@@ -103,9 +103,9 @@ struct HomeView: View {
                 Button { cover = .newConnection } label: {
                     Label("Start a connection", systemImage: "plus").font(Fonts.ui(16, .semibold)).foregroundStyle(Theme.onAccent)
                         .frame(maxWidth: .infinity).frame(height: 56)
-                        .background(Theme.gradient, in: .rect(cornerRadius: 16))
+                        .background(Theme.deepGradient, in: .rect(cornerRadius: 16))
                         .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(.white.opacity(0.1), lineWidth: 1))
-                        .shadow(color: Theme.accent.opacity(0.45), radius: 20, y: 10)
+                        .shadow(color: .black.opacity(0.35), radius: 16, y: 8)
                 }
                 .buttonStyle(Pressable())
                 .padding(.top, 20)

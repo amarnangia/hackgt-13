@@ -200,8 +200,8 @@ ICONS = {"food": "🍛", "vehicle": "🛺", "place": "🛕", "clothing": "🥻",
 
 STYLE = """
 :root { --bg:#121212; --card:rgba(26,26,26,.92); --card-2:rgba(255,255,255,.04); --ink:#f4f5f7; --ink-2:#a1a1aa; --muted:#6b6b74;
-        --accent:#4f8cff; --soft:rgba(79,140,255,.14); --violet:#8b5cf6; --cyan:#22d3ee; --line:rgba(255,255,255,.06);
-        --grad:linear-gradient(135deg,#22d3ee 0%,#4f8cff 52%,#8b5cf6 100%); color-scheme:dark; }
+        --accent:#1db954; --soft:rgba(29,185,84,.14); --violet:#168d40; --cyan:#25d366; --line:rgba(255,255,255,.06);
+        --grad:linear-gradient(135deg,#25d366 0%,#1db954 52%,#168d40 100%); color-scheme:dark; }
 * { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--ink); font:500 15px/1.55 "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Telugu", system-ui, sans-serif; }
 main { max-width:860px; margin:0 auto; padding:32px 16px 64px; }
 h1 { font-size:30px; line-height:1.2; font-weight:700; letter-spacing:-.01em; margin:4px 0 8px; }
@@ -222,8 +222,8 @@ audio { height:32px; width:220px; min-width:170px; max-width:100%; color-scheme:
 table { width:100%; border-collapse:collapse; } td, th { text-align:left; padding:9px 6px; border-top:1px solid var(--line); vertical-align:top; font-size:14px; }
 tr:first-child th { border-top:0; } th { color:var(--muted); font-weight:700; font-size:11px; letter-spacing:.06em; text-transform:uppercase; }
 td.te { font-size:17px; } .new { background:var(--soft); color:var(--accent); border-radius:999px; padding:2px 8px; font-size:11px; font-weight:700; white-space:nowrap; }
-.card:has(> .q) { background:linear-gradient(160deg, rgba(139,92,246,.20), rgba(79,140,255,.10) 55%, rgba(34,211,238,.06));
-                   box-shadow:inset 0 0 0 1px rgba(139,92,246,.45), 0 24px 48px -16px rgba(0,0,0,.6); }
+.card:has(> .q) { background:linear-gradient(160deg, rgba(22,141,64,.20), rgba(29,185,84,.10) 55%, rgba(37,211,102,.06));
+                   box-shadow:inset 0 0 0 1px rgba(22,141,64,.45), 0 24px 48px -16px rgba(0,0,0,.6); }
 .q { padding:10px 0; border-top:1px solid var(--line); } .q:first-child { border-top:0; } .q .te { font-size:17px; } .q .roman { color:var(--ink); font-weight:700; font-size:16px; } .q .meta { color:var(--ink-2); }
 textarea { width:100%; min-height:110px; border-radius:12px; border:1px solid var(--line); padding:10px 12px; font:16px "Noto Sans Telugu", sans-serif; background:var(--card-2); color:var(--ink); }
 button { background:var(--grad); color:#fff; border:0; border-radius:10px; padding:8px 14px; font-size:14px; font-weight:600; cursor:pointer; margin-top:8px; }

@@ -25,7 +25,7 @@ struct WidgetGallery: View {
             .padding(.top, 60).padding(.bottom, 40)
             .frame(maxWidth: .infinity)
         }
-        .background(LinearGradient(colors: [Color(hex: 0x2b3a55), Color(hex: 0x1a1f2b)], startPoint: .top, endPoint: .bottom))
+        .background(LinearGradient(colors: [Color(hex: 0x1e3a2a), Color(hex: 0x141d18)], startPoint: .top, endPoint: .bottom))
         .ignoresSafeArea()
         .task {
             let (s, src) = await GardenClient.load(); snap = s; source = src

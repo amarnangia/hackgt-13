@@ -6,8 +6,9 @@ extension Color {
     }
 }
 
-/// The same system as the call overlay (extension/panel.css): deep grays and glass, with cool accents
-/// (cyan, electric blue, violet) only for what's active. "Ask her" is violet; connected is cyan.
+/// The same system as the call overlay (extension/panel.css): deep grays and glass, with green accents only for
+/// what's active: WhatsApp green (`cyan`), Spotify green (`accent`), dark Spotify green (`violet`); the names are
+/// the old ones. "Ask her" is light mint; connected is WhatsApp green.
 enum Theme {
     static let bg = Color(hex: 0x121212)
     static let bg2 = Color(hex: 0x161616)
@@ -19,12 +20,17 @@ enum Theme {
     static let text = Color(hex: 0xf4f5f7)
     static let text2 = Color(hex: 0xa1a1aa)
     static let text3 = Color(hex: 0x6b6b74)
-    static let accent = Color(hex: 0x4f8cff)
+    static let accent = Color(hex: 0x1db954)
     static let onAccent = Color.white
-    static let cyan = Color(hex: 0x22d3ee)
-    static let violet = Color(hex: 0x8b5cf6)
+    static let cyan = Color(hex: 0x25d366)
+    static let violet = Color(hex: 0x168d40)
     static let gradient = LinearGradient(colors: [cyan, accent, violet], startPoint: .topLeading, endPoint: .bottomTrailing)
-    static let warm = Color(hex: 0xa78bfa)      // "Ask her"
+    /// Muted deep greens for big buttons ("Start a connection"), where the bright gradient is too loud
+    static let deep = Color(hex: 0x1e3d2e)
+    static let deep2 = Color(hex: 0x264c39)
+    /// Dark green edges with Spotify green glowing through the middle
+    static let deepGradient = LinearGradient(colors: [deep, Color(hex: 0x1a7a3d), deep], startPoint: .leading, endPoint: .trailing)
+    static let warm = Color(hex: 0x7ee2a8)      // "Ask her"
     static let onWarm = Color.white
     static let green = cyan                     // connected
     static let danger = Color(hex: 0xff8a8a)

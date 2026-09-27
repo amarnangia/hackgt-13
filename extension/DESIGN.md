@@ -34,8 +34,8 @@ bottom. Weave uses the edges and the space just above the call's buttons. Every 
 | inner | `inset 0 1px 0 rgba(255,255,255,.06), inset 0 0 0 1px rgba(255,255,255,.05)` | every floating surface |
 | shadow | `0 24px 48px -16px rgba(0,0,0,.6), 0 4px 12px -4px rgba(0,0,0,.35)` | every floating surface |
 | text / text-2 / text-3 | `#f4f5f7` / `#a1a1aa` / `#6b6b74` | primary, secondary, labels |
-| cyan / blue / violet | `#22d3ee` / `#4f8cff` / `#8b5cf6` | active states only |
-| grad | `linear-gradient(135deg, #22d3ee 0%, #4f8cff 52%, #8b5cf6 100%)` | the orb, "Ask her", the main button, the chosen language |
+| cyan / blue / violet (now WhatsApp green / Spotify green / dark Spotify green) | `#25d366` / `#1db954` / `#168d40` | active states only |
+| grad | `linear-gradient(135deg, #25d366 0%, #1db954 52%, #168d40 100%)` | the orb, "Ask her", the main button, the chosen language |
 | amber | `#fbbf24` | warnings only |
 
 Type: Manrope (bundled in `fonts/`, OFL), 400–800; Telugu in Noto Sans Telugu / Kohinoor Telugu. Labels are 10.5px,

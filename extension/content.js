@@ -33,7 +33,7 @@
         --inner: inset 0 1px 0 rgba(255,255,255,.07), inset 0 0 0 1px rgba(255,255,255,.05);
         --shadow: 0 24px 48px -16px rgba(0,0,0,.65), 0 4px 12px -4px rgba(0,0,0,.4);
         --text: #f4f5f7; --text-2: #a1a1aa; --text-3: #6b6b74;
-        --grad: linear-gradient(135deg, #22d3ee 0%, #4f8cff 50%, #7c3aed 100%);
+        --grad: linear-gradient(135deg, #25d366 0%, #1db954 50%, #168d40 100%);
         --spring: cubic-bezier(.34,1.56,.64,1); --ease-out: cubic-bezier(.16,1,.3,1); --ease-sheet: cubic-bezier(.32,.72,0,1); --ease-in: cubic-bezier(.7,0,.84,0);
         --font: "Weave Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
       * { box-sizing: border-box; }
@@ -44,7 +44,7 @@
                transform: var(--at); will-change: transform, opacity; }
       .glass { border-radius: 22px; background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
                box-shadow: var(--inner), var(--shadow); }
-      .top { border-radius: 26px; box-shadow: var(--inner), 0 18px 50px -12px rgba(124,58,237,.45), var(--shadow);
+      .top { border-radius: 26px; box-shadow: var(--inner), 0 18px 50px -12px rgba(22,141,64,.45), var(--shadow);
              transition: opacity 420ms var(--ease-out), transform 560ms var(--spring); }
       .top.off { opacity: 0; transform: var(--at) translate3d(0, -18px, 0) scale(.96); pointer-events: none;
              transition: opacity 320ms var(--ease-in), transform 360ms var(--ease-in); }
@@ -77,7 +77,7 @@
       .ctl svg { width: 18px; height: 18px; }
       .ctl:hover { color: #fff; }
       .ctl:active, .sw:active, .seg button:active { transform: scale(.94); }
-      .ctl.on { color: #fff; background: rgba(79,140,255,.26); box-shadow: var(--inner), inset 0 0 0 1px rgba(79,140,255,.45), var(--shadow); }
+      .ctl.on { color: #fff; background: rgba(29,185,84,.26); box-shadow: var(--inner), inset 0 0 0 1px rgba(29,185,84,.45), var(--shadow); }
       .ctl .badge { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--grad);
               box-shadow: 0 0 0 2px rgba(18,18,20,.95); transform: scale(0); transition: transform 320ms var(--spring); }
       .ctl.new .badge { transform: scale(1); }
@@ -223,7 +223,7 @@
     g.clearRect(0, 0, W, H);
     const grad = g.createLinearGradient(0, 0, W, 0);
     if (ui.state === "off") { grad.addColorStop(0, "rgba(160,160,170,0)"); grad.addColorStop(.5, "rgba(160,160,170,.6)"); grad.addColorStop(1, "rgba(160,160,170,0)"); }
-    else { grad.addColorStop(0, "rgba(34,211,238,0)"); grad.addColorStop(.18, "#22d3ee"); grad.addColorStop(.5, "#4f8cff"); grad.addColorStop(.82, "#7c3aed"); grad.addColorStop(1, "rgba(124,58,237,0)"); }
+    else { grad.addColorStop(0, "rgba(37,211,102,0)"); grad.addColorStop(.18, "#25d366"); grad.addColorStop(.5, "#1db954"); grad.addColorStop(.82, "#168d40"); grad.addColorStop(1, "rgba(22,141,64,0)"); }
     // two strands a little out of step: it reads as a string vibrating, not a chart
     for (const [off, width, alpha, blur] of [[Math.PI * 0.6, 1.2 * dpr, 0.45, 0], [0, 2.4 * dpr, 1, 14 * dpr]]) {
       g.beginPath();
@@ -234,7 +234,7 @@
         x === 0 ? g.moveTo(x, y) : g.lineTo(x, y);
       }
       g.strokeStyle = grad; g.lineWidth = width; g.globalAlpha = alpha; g.lineCap = "round";
-      g.shadowColor = "rgba(79,140,255,.9)"; g.shadowBlur = blur * (0.4 + energy);
+      g.shadowColor = "rgba(29,185,84,.9)"; g.shadowBlur = blur * (0.4 + energy);
       g.stroke();
     }
     g.globalAlpha = 1;
