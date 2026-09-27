@@ -234,13 +234,17 @@ function syncList(box, items, keyOf, make, update) {
   const live = () => [...box.children].filter((c) => !c.classList.contains("out"));
   const before = new Map(live().map((el) => [el, el.getBoundingClientRect().top]));
   const want = new Set(items.map(keyOf));
-  for (const [k, el] of els) if (!want.has(k)) { els.delete(k); leave(el); }
+  const going = [];
+  for (const [k, el] of els) if (!want.has(k)) { els.delete(k); going.push(el); }
+  leave(going);
   items.forEach((it, i) => {
     const k = keyOf(it);
     let el = els.get(k);
     if (!el) {
       el = make(it);
       el.classList.add("in");
+      el.style.setProperty("--d", `${160 + Math.min(i, 6) * 70}ms`);   // after the old ones have gone, one after another
+      el.style.setProperty("--i", String(i));                    // and drift out of step with each other
       el.addEventListener("animationend", () => el.classList.remove("in"), { once: true });
       els.set(k, el);
     }
@@ -254,11 +258,13 @@ function syncList(box, items, keyOf, make, update) {
     if (Math.abs(d) > 1) el.animate([{ transform: `translate3d(0, ${d}px, 0)` }, { transform: "translate3d(0, 0, 0)" }], GLIDE);
   }
 }
-function leave(el) {   // lift out of the flow where it is, then fade away
-  if (!el.isConnected) return;
-  Object.assign(el.style, { position: "absolute", left: `${el.offsetLeft}px`, top: `${el.offsetTop}px`, width: `${el.offsetWidth}px` });
-  el.classList.add("out");
-  setTimeout(() => el.remove(), 320);
+function leave(list) {   // lift out of the flow where they are (all measured first, so none jump), then fade away
+  const at = list.filter((el) => el.isConnected).map((el) => [el, el.offsetLeft, el.offsetTop, el.offsetWidth]);
+  for (const [el, x, y, w] of at) {
+    Object.assign(el.style, { position: "absolute", left: `${x}px`, top: `${y}px`, width: `${w}px` });
+    el.classList.add("out");
+    setTimeout(() => el.remove(), 320);
+  }
 }
 function html(tag, cls, inner = "") { const el = document.createElement(tag); el.className = cls; el.innerHTML = inner; return el; }
 const report = () => tellParent({ kind: "size", width: Math.ceil(root.scrollWidth), height: Math.ceil(root.scrollHeight) });
@@ -376,7 +382,8 @@ function renderLeft(force = false) {
       Object.assign(el.querySelector(".hear").dataset, { hear: w.telugu, roman: w.roman, id: w.id || "" });
     });
   const cur = root.querySelector(".cur");
-  const questions = left.questions.filter((q) => !TE.test(q.text)).slice(0, MAX_QUESTIONS);
+  const seenQ = new Set();   // "What is Bhogi?" from the picture and from the word: once
+  const questions = left.questions.filter((q) => !TE.test(q.text) && !seenQ.has(q.text.toLowerCase()) && seenQ.add(q.text.toLowerCase())).slice(0, MAX_QUESTIONS);
   cur.hidden = !questions.length;
   syncList(root.querySelector(".qs"), questions, (q) => q.id,
     (q) => { const b = html("button", "question", `<div class="q"></div><div class="answer"><div></div></div>`); b.dataset.q = q.id; return b; },

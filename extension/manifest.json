@@ -30,7 +30,8 @@
         "panel.html",
         "panel.css",
         "panel.js",
-        "fonts/manrope.woff2"
+        "fonts/manrope.woff2",
+        "fonts/newsreader.woff2"
       ],
       "matches": [
         "<all_urls>"

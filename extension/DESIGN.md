@@ -18,10 +18,10 @@ bottom. Weave uses the edges and the space just above the call's buttons. Every 
 | Zone | Where | Size | When it's there |
 |---|---|---|---|
 | Ask her (top) | top center, 16px down | the pill's own width, up to 620px | after a 2 s pause in the talk; stays at least 5 s; leaves once someone has talked for 1.5 s; the question lasts 45 s |
-| Dictionary (left) | the top-left corner, 16px in | 300px wide, as tall as its 5 words and 3 questions | always; the words button hides it |
+| Words (left) | the top-left corner, 16px in | 300px wide, as tall as its 5 word bubbles and 3 question bubbles; no box | always; the words button hides it |
 | Pictures and meanings (float) | the top-right corner, 16px in | 320px wide, as tall as its cards (at most 2), ending 330px above the bottom to clear your camera tile | while there are some; each holds 20 s (dims for the last 3) unless kept |
 | Translation bubble | bottom center, right above the orb | up to 700 × 148, fixed | while someone talks; fades 9 s after the last words |
-| The line | bottom center, 92px up (clear of the call's buttons) | 240 × 56 | always; beside it the words and pictures buttons, Transcribe and English / Telugu |
+| The line | bottom center, 66px up (just above the call's buttons) | 240 × 56 | always; beside it the words and pictures buttons, Transcribe and English / Telugu |
 
 ## Tokens
 
@@ -43,6 +43,14 @@ Type: Manrope (bundled in `fonts/`, OFL), 400–800; Telugu in Noto Sans Telugu 
 
 Color by meaning: cyan = connected and "Asked you"/"Request" tags; blue = selected or open; violet = sayings and "Ask her".
 
+## Colors and type (same as the iPhone app)
+
+Greens are the primary accents (WhatsApp green `#25d366`, Spotify green `#1db954`, deep `#168d40`). Muted lavender
+`#b3a6d4` is the quiet third: question bubbles, the kind tag on meanings, the tail of the line and the "Ask her"
+border. Surfaces are raised: lit from above (`--raised`), a bright top edge and a soft shadow (`--lift`). The words
+themselves (word bubbles, the "Ask her" question, picture titles) are in Newsreader, a serif like the app's titles;
+everything else is Manrope.
+
 ## Components
 
 **Ask her (top pill).** This is a frosted glass pill (the blur is on its frame).
@@ -52,7 +60,12 @@ Color by meaning: cyan = connected and "Asked you"/"Request" tags; blue = select
 - A 2px line drains over the question's 45 seconds.
 - It comes down from 18px above with a spring (`--spring`, 560ms) and leaves upward with `--ease-in`.
 
-**Dictionary (left).** This is a frosted rail. Each word shows romanized in bold white (15px, 800), with its Telugu small and faint beside it and the English muted underneath.
+**Words (left).** Each word is its own raised bubble (no panel behind them): romanized word in the serif, English
+under it, a green dot when she said it on this call. New bubbles pop in with a spring, one after another (70ms
+apart, after the old ones have faded in 180ms), and every bubble drifts by 2px, out of step with the others.
+Questions are lavender bubbles that open to their answer.
+
+**Dictionary (left, before).** This is a frosted rail. Each word shows romanized in bold white (15px, 800), with its Telugu small and faint beside it and the English muted underneath.
 - Words she said get a gradient bar and a "she said" tag.
 - The hear button appears on hover.
 - Rows keep their elements: new ones spring in, moved ones glide (FLIP with `translate3d`), and removed ones lift out.

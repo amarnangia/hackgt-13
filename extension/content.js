@@ -42,7 +42,7 @@
       /* ---- frames: placed once, then only transform + opacity move ---- */
       iframe { position: fixed; left: 0; top: 0; z-index: ${Z}; border: 0; background: transparent; color-scheme: normal;
                transform: var(--at); will-change: transform, opacity; }
-      .glass { border-radius: 22px; background: var(--glass); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+      .glass { border-radius: 22px; background: linear-gradient(180deg, rgba(36,36,41,.7), rgba(16,16,18,.62)); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
                box-shadow: var(--inner), var(--shadow); }
       .top { border-radius: 26px; box-shadow: var(--inner), 0 18px 50px -12px rgba(22,141,64,.45), var(--shadow);
              transition: opacity 420ms var(--ease-out), transform 560ms var(--spring); }
@@ -99,7 +99,7 @@
       .seg button.on { background: var(--grad); color: #fff; }
     </style>
     <div class="wrap">
-      <iframe class="left glass" title="Weave: words and questions" allowtransparency="true"></iframe>
+      <iframe class="left" title="Weave: words and questions" allowtransparency="true"></iframe>
       <iframe class="float off" title="Weave: pictures and meanings" allowtransparency="true"></iframe>
       <iframe class="captions glass off" title="Weave: captions" allowtransparency="true"></iframe>
       <iframe class="top glass off" title="Weave: ask her" allowtransparency="true"></iframe>
@@ -131,7 +131,7 @@
   const ui = { shown: true, left: true, float: true, ask: false, idle: true, roles: null, lang: null, transcribing: true, state: "off", connected: false };
 
   // ---- layout: placed with transforms; sizes change only when content does ----
-  const M = 16, ORB_BOTTOM = 92, ORB = 56, CAP_H = 148;   // ORB_BOTTOM clears the call's own buttons
+  const M = 16, ORB_BOTTOM = 66, ORB = 56, CAP_H = 148;   // ORB_BOTTOM clears the call's own buttons
   function place(frame, x, y, w, h) {
     frame.style.width = `${Math.round(w)}px`;
     frame.style.height = `${Math.max(1, Math.round(h))}px`;
@@ -223,7 +223,7 @@
     g.clearRect(0, 0, W, H);
     const grad = g.createLinearGradient(0, 0, W, 0);
     if (ui.state === "off") { grad.addColorStop(0, "rgba(160,160,170,0)"); grad.addColorStop(.5, "rgba(160,160,170,.6)"); grad.addColorStop(1, "rgba(160,160,170,0)"); }
-    else { grad.addColorStop(0, "rgba(37,211,102,0)"); grad.addColorStop(.18, "#25d366"); grad.addColorStop(.5, "#1db954"); grad.addColorStop(.82, "#168d40"); grad.addColorStop(1, "rgba(22,141,64,0)"); }
+    else { grad.addColorStop(0, "rgba(37,211,102,0)"); grad.addColorStop(.18, "#25d366"); grad.addColorStop(.5, "#1db954"); grad.addColorStop(.82, "#b3a6d4"); grad.addColorStop(1, "rgba(179,166,212,0)"); }
     // two strands a little out of step: it reads as a string vibrating, not a chart
     for (const [off, width, alpha, blur] of [[Math.PI * 0.6, 1.2 * dpr, 0.45, 0], [0, 2.4 * dpr, 1, 14 * dpr]]) {
       g.beginPath();
