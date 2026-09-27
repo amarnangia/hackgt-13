@@ -569,7 +569,7 @@ function handleFloat(m) {
 }
 
 // ---------- start ----------
-if (PART === "captions") { renderCaptions(); connectYou(); }
+if (PART === "captions") { renderCaptions(); connectYou(); tellParent({ kind: "lang", lang: savedLanguage() }); }
 if (PART === "top") { renderTop(); new ResizeObserver(report).observe(root); }
 if (PART === "left") { renderLeft(); setInterval(renderLeft, 15000); new ResizeObserver(report).observe(root); }
 if (PART === "float") { renderFloat(); new ResizeObserver(report).observe(root); addEventListener("load", report, true); }

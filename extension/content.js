@@ -97,7 +97,6 @@
               transition: color 140ms, background 180ms var(--ease-out), transform 140ms var(--ease-out); }
       .seg button:hover { color: #fff; }
       .seg button.on { background: var(--grad); color: #fff; }
-      .seg[hidden] { display: none; }
       .seg.guess { box-shadow: var(--inner), var(--shadow), 0 0 0 1.5px rgba(179,166,212,.55); animation: ask 2.4s ease-in-out infinite; }
       @keyframes ask { 50% { box-shadow: var(--inner), var(--shadow), 0 0 0 1.5px rgba(179,166,212,.2), 0 0 16px rgba(179,166,212,.35); } }
       .sw.unknown { opacity: .45; }
@@ -174,12 +173,13 @@
     sw.classList.toggle("unknown", ui.transcribing === null);
     sw.setAttribute("aria-checked", String(ui.transcribing === true));
     sw.title = ui.transcribing === null ? "Waiting for the translator" : ui.transcribing ? "Transcribing the call: click to pause" : "Paused: the call isn't being transcribed. Click to resume";
-    // English / Telugu only matters in two-way calls, where the engine says who it thinks speaks what ("roles").
+    // English / Telugu: the language you speak. It's remembered and sent to the engine, which uses it in two-way calls
+    // (where it also says who it thinks speaks what, "roles"; while it's guessing, the switch asks you to pick).
     const seg = $(".seg");
-    seg.hidden = !ui.roles;
     seg.classList.toggle("guess", !!ui.roles && !ui.roles.sure);
-    seg.title = !ui.roles ? "" : ui.roles.sure ? "The language you speak on this call" : "Weave is guessing which language you speak: pick yours";
-    root.querySelectorAll("[data-lang]").forEach((b) => { const on = b.dataset.lang === ui.roles?.you; b.classList.toggle("on", on); b.setAttribute("aria-checked", String(on)); });
+    seg.title = !ui.roles ? "The language you speak (used in two-way calls)" : ui.roles.sure ? "The language you speak on this call" : "Weave is guessing which language you speak: pick yours";
+    const mine = ui.roles?.you || ui.lang;
+    root.querySelectorAll("[data-lang]").forEach((b) => { const on = b.dataset.lang === mine; b.classList.toggle("on", on); b.setAttribute("aria-checked", String(on)); });
     frames.captions.classList.toggle("off", ui.idle);
     core.classList.toggle("new", [buttons.left, buttons.float].some((b) => b.classList.contains("new")));
   }
@@ -198,6 +198,7 @@
   $(".sw").addEventListener("click", (e) => { e.stopPropagation(); toCaptions({ kind: "transcribe", on: !ui.transcribing }); });
   root.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", (e) => {
     e.stopPropagation();
+    ui.lang = b.dataset.lang;
     if (ui.roles) ui.roles = { ...ui.roles, you: b.dataset.lang, sure: true };   // the engine confirms with "roles"
     toCaptions({ kind: "i_speak", lang: b.dataset.lang });
     refresh();
@@ -270,6 +271,7 @@
         setOrb(m.state || (m.connected ? "idle" : "off"));
         break;
       case "roles": ui.roles = m.roles; refresh(); break;
+      case "lang": ui.lang = m.lang; refresh(); break;   // the language you picked before (kept by the captions panel)
       case "transcribing": ui.transcribing = !!m.on; refresh(); break;
       case "attention":
         if (m.part === "left" && !ui.left) buttons.left.classList.add("new");
