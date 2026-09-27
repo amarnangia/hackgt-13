@@ -97,6 +97,11 @@
               transition: color 140ms, background 180ms var(--ease-out), transform 140ms var(--ease-out); }
       .seg button:hover { color: #fff; }
       .seg button.on { background: var(--grad); color: #fff; }
+      .seg[hidden] { display: none; }
+      .seg.guess { box-shadow: var(--inner), var(--shadow), 0 0 0 1.5px rgba(179,166,212,.55); animation: ask 2.4s ease-in-out infinite; }
+      @keyframes ask { 50% { box-shadow: var(--inner), var(--shadow), 0 0 0 1.5px rgba(179,166,212,.2), 0 0 16px rgba(179,166,212,.35); } }
+      .sw.unknown { opacity: .45; }
+      .sw.unknown .track::after { transform: translate3d(7px, 0, 0); }
     </style>
     <div class="wrap">
       <iframe class="left" title="Weave: words and questions" allowtransparency="true"></iframe>
@@ -128,7 +133,7 @@
   const frames = { top: $(".top"), left: $(".left"), float: $(".float"), captions: $(".captions") };
   const buttons = { left: $('[data-panel="left"]'), float: $('[data-panel="float"]') };
   const size = { top: [0, 0], left: 0, float: 0 };
-  const ui = { shown: true, left: true, float: true, ask: false, idle: true, roles: null, lang: null, transcribing: true, state: "off", connected: false };
+  const ui = { shown: true, left: true, float: true, ask: false, idle: true, roles: null, lang: null, transcribing: null, state: "off", connected: false };
 
   // ---- layout: placed with transforms; sizes change only when content does ----
   const M = 16, ORB_BOTTOM = 66, ORB = 56, CAP_H = 148;   // ORB_BOTTOM clears the call's own buttons
@@ -163,10 +168,18 @@
     frames.top.classList.toggle("off", !ui.ask);
     frames.left.classList.toggle("off", !ui.left || !size.left);
     frames.float.classList.toggle("off", !ui.float || !size.float);
+    // Transcribe shows only what the engine says ("transcribing"); until it has said anything, it's dimmed.
     const sw = $(".sw");
-    sw.classList.toggle("on", ui.transcribing); sw.setAttribute("aria-checked", String(ui.transcribing));
-    const lang = ui.roles?.you || ui.lang;
-    root.querySelectorAll("[data-lang]").forEach((b) => { b.classList.toggle("on", b.dataset.lang === lang); b.setAttribute("aria-checked", String(b.dataset.lang === lang)); });
+    sw.classList.toggle("on", ui.transcribing === true);
+    sw.classList.toggle("unknown", ui.transcribing === null);
+    sw.setAttribute("aria-checked", String(ui.transcribing === true));
+    sw.title = ui.transcribing === null ? "Waiting for the translator" : ui.transcribing ? "Transcribing the call: click to pause" : "Paused: the call isn't being transcribed. Click to resume";
+    // English / Telugu only matters in two-way calls, where the engine says who it thinks speaks what ("roles").
+    const seg = $(".seg");
+    seg.hidden = !ui.roles;
+    seg.classList.toggle("guess", !!ui.roles && !ui.roles.sure);
+    seg.title = !ui.roles ? "" : ui.roles.sure ? "The language you speak on this call" : "Weave is guessing which language you speak: pick yours";
+    root.querySelectorAll("[data-lang]").forEach((b) => { const on = b.dataset.lang === ui.roles?.you; b.classList.toggle("on", on); b.setAttribute("aria-checked", String(on)); });
     frames.captions.classList.toggle("off", ui.idle);
     core.classList.toggle("new", [buttons.left, buttons.float].some((b) => b.classList.contains("new")));
   }
@@ -185,12 +198,10 @@
   $(".sw").addEventListener("click", (e) => { e.stopPropagation(); toCaptions({ kind: "transcribe", on: !ui.transcribing }); });
   root.querySelectorAll("[data-lang]").forEach((b) => b.addEventListener("click", (e) => {
     e.stopPropagation();
-    ui.lang = b.dataset.lang;
-    if (ui.roles) ui.roles = { ...ui.roles, you: b.dataset.lang };
+    if (ui.roles) ui.roles = { ...ui.roles, you: b.dataset.lang, sure: true };   // the engine confirms with "roles"
     toCaptions({ kind: "i_speak", lang: b.dataset.lang });
     refresh();
   }));
-  try { ui.lang = localStorage.getItem("weave-i-speak"); } catch {}
 
   // ---- the line: vibrates with the call's sound ----
   // Frequency bands arrive from offscreen.js (via background.js) about 30 times a second. Without them (no capture,
@@ -254,6 +265,7 @@
       case "shown": ui.ask = !!m.shown; refresh(); break;
       case "idle": ui.idle = !!m.idle; refresh(); break;
       case "status":
+        if (!m.connected && ui.connected) { ui.transcribing = null; ui.roles = null; refresh(); }   // the engine went away: unknown again
         ui.connected = m.connected;
         setOrb(m.state || (m.connected ? "idle" : "off"));
         break;
