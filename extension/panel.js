@@ -6,7 +6,7 @@
 //   captions  speaking, partial, draft, original, english, details (intent), voice, warning, roles
 // Everything comes from the call: until the engine sends words (topic, details), the word panel is empty; until it
 // sends curious questions, the left panel builds simple ones from the word cards and pictures it did send.
-// Clicks go back to the engine: forget (a kept word you don't know), ask (a question), practiced (hear a word),
+// Clicks go back to the engine: forget (a kept word you don't know), ask (a question),
 // i_speak (two-way calls, from the dock's menu). Everything is drawn in place: rows keep their elements and only
 // transform and opacity animate, so nothing jumps or flickers over the call.
 const params = new URLSearchParams(location.search);
@@ -316,7 +316,6 @@ function handleTop(m) {
 }
 
 // ---------- left: the dictionary feed (words for the topic, the ones she said first) and "Curious?" ----------
-const SPEAKER = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>`;
 const left = { questions: [], engineQuestions: false, topic: "", words: [], engineTopic: false, said: [], open: null, built: false };
 const MAX_QUESTIONS = 3, MAX_WORDS = 5, QUESTION_TTL_MS = 90000;
 const QUESTION_KINDS = new Set(["idiom", "slang", "phrase", "culture", "festival", "food", "family", "clothing"]);
@@ -364,12 +363,11 @@ function renderLeft(force = false) {
     ...left.words.filter((w) => !said.has(w.id) && !said.has(norm(w.roman)))]
     .filter((w) => noTe(w.roman) && !TE.test(w.roman)).slice(0, MAX_WORDS);
   syncList(root.querySelector(".rows"), words, (w) => w.id || norm(w.roman),
-    () => html("div", "w", `<b class="w-roman"></b><div class="w-en"></div><button class="hear" title="Hear it">${SPEAKER}</button>`),
+    () => html("div", "w", `<b class="w-roman"></b><div class="w-en"></div>`),
     (el, w) => {
       el.classList.toggle("said", !!w.said);
       el.querySelector(".w-roman").textContent = noTe(w.roman);
       el.querySelector(".w-en").textContent = noTe(w.english);
-      Object.assign(el.querySelector(".hear").dataset, { hear: w.telugu, roman: w.roman, id: w.id || "" });
     });
   const cur = root.querySelector(".cur");
   const seenQ = new Set();   // "What is Bhogi?" from the picture and from the word: once
@@ -403,22 +401,8 @@ root.addEventListener("click", (e) => {
     renderLeft(true);
     return;
   }
-  const hear = e.target.closest(".hear");
-  if (hear) {
-    speak(hear.dataset.hear, hear.dataset.roman);
-    if (hear.dataset.id) send({ type: "practiced", id: hear.dataset.id });
-  }
+
 });
-function speak(telugu, roman) {
-  if (!("speechSynthesis" in window)) return;
-  speechSynthesis.cancel();
-  const voice = speechSynthesis.getVoices().find((v) => v.lang && v.lang.toLowerCase().startsWith("te"));
-  const u = new SpeechSynthesisUtterance(voice ? telugu : roman);
-  if (voice) u.voice = voice;
-  u.lang = voice ? voice.lang : "en-IN";
-  u.rate = 0.85;
-  speechSynthesis.speak(u);
-}
 
 // ---------- float: pictures and meanings as small bubbles that spring up above the captions ----------
 // Each holds for a while and fades away; hover one to see it, click to keep it.

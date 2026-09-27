@@ -69,7 +69,7 @@ body[data-part="top"] main { display: inline-block; }
 body[data-part="left"] main { padding: 8px 14px 18px 8px; }
 body[data-part="left"] section + section { margin-top: 16px; }
 .rows, .qs { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 9px; }
-.w { position: relative; max-width: 100%; padding: 10px 44px 11px 16px; border-radius: 20px; background: var(--raised); box-shadow: var(--lift);
+.w { position: relative; max-width: 100%; padding: 10px 18px 11px 16px; border-radius: 20px; background: var(--raised); box-shadow: var(--lift);
   animation: drift 7s ease-in-out infinite; animation-delay: calc(var(--i, 0) * -1.4s); }
 .w.in { animation: pop 680ms var(--spring) var(--d, 0ms) both, drift 7s ease-in-out infinite; }
 @keyframes pop { from { opacity: 0; transform: translate3d(-16px, 8px, 0) scale(.7); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
@@ -80,12 +80,7 @@ body[data-part="left"] section + section { margin-top: 16px; }
 .w-en { display: block; font-size: 13.5px; color: var(--text-2); margin-top: 3px; }
 .w.said::before { content: ""; position: absolute; left: -3px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%;
   background: var(--cyan); box-shadow: 0 0 0 2px rgba(18,18,20,.9), 0 0 12px rgba(37,211,102,.9); }   /* she said it on this call */
-.hear { position: absolute; right: 9px; top: 50%; width: 30px; height: 30px; margin-top: -15px; border-radius: 50%; display: grid; place-items: center;
-  color: var(--text-2); opacity: 0; transform: scale(.85); transition: opacity 160ms var(--ease-out), transform 220ms var(--spring), background 160ms, color 160ms; }
-.w:hover .hear { opacity: 1; transform: none; }
-.hear:hover { color: #fff; background: var(--grad); box-shadow: 0 0 14px rgba(29,185,84,.55); }
-.hear svg { width: 14px; height: 14px; }
-/* questions: lavender bubbles; one opens to its answer */
+.w:hover /* questions: lavender bubbles; one opens to its answer */
 .question { display: block; max-width: 100%; padding: 10px 16px 11px; border-radius: 20px; text-align: left;
   background: linear-gradient(180deg, rgba(179,166,212,.14), rgba(20,20,24,.92) 70%); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 0 0 1px rgba(179,166,212,.22), 0 14px 30px -14px rgba(0,0,0,.8);
   transition: box-shadow 180ms var(--ease-out), transform 140ms var(--ease-out); animation: drift 8s ease-in-out infinite; animation-delay: calc(var(--i, 0) * -1.7s); }

@@ -279,7 +279,7 @@ struct ProgressView_: View {
     private func header(_ snap: GardenSnapshot) -> some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 6) {
-                Text("Weave").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.lavender)
+                Text("Roots").font(Fonts.display(34, .semibold)).tracking(-0.8).foregroundStyle(Theme.lavender)
                 Group {
                     if snap.totals.phrases == 0 {
                         Text("A seed, for now.").foregroundStyle(Theme.text2)
